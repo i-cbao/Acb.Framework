@@ -9,11 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Acb.Core" Version="1.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
   </ItemGroup>
 
 </Project>
