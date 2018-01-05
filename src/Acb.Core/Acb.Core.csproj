@@ -2,6 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Authors>icb@shay</Authors>
+    <Company>成都爱车保信息技术有限公司</Company>
+    <Product>爱车保 - 基础核心类</Product>
+    <Description>爱车保 - 基础核心类</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -5,7 +5,7 @@ using System.Data;
 
 namespace Acb.Dapper.Mysql
 {
-    public class MysqlConnectionAdapter : IDbConnectionAdapter
+    public class MySqlConnectionAdapter : IDbConnectionAdapter
     {
         public string ProviderName => "Mysql";
         public Type ConnectionType => typeof(MySqlConnection);

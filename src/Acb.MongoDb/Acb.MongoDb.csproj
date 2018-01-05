@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>爱车保 - MongoDb基础类</Product>
+    <Description>爱车保 - MongoDb基础类</Description>
+    <Authors>icb@shay</Authors>
+    <Company>成都爱车保信息技术有限公司</Company>
   </PropertyGroup>
 
   <ItemGroup>

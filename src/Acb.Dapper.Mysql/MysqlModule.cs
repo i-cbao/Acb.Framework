@@ -5,11 +5,11 @@ using Acb.Dapper.Adapters;
 namespace Acb.Dapper.Mysql
 {
     [DependsOn(typeof(CoreModule))]
-    public class MysqlModule : DModule
+    public class MySqlModule : DModule
     {
         public override void Initialize()
         {
-            DbConnectionManager.AddAdapter(new MysqlConnectionAdapter());
+            DbConnectionManager.AddAdapter(new MySqlConnectionAdapter());
             base.Initialize();
         }
     }

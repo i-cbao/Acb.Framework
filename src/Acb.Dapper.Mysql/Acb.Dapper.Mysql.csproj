@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>爱车保 - MySql基础类</Product>
+    <Description>爱车保 - MySql基础类</Description>
+    <PackageId>Acb.Dapper.MySql</PackageId>
+    <Authors>icb@shay</Authors>
+    <AssemblyName>Acb.Dapper.MySql</AssemblyName>
+    <RootNamespace>Acb.Dapper.MySql</RootNamespace>
+    <Company>成都爱车保信息技术有限公司</Company>
   </PropertyGroup>
 
   <ItemGroup>
