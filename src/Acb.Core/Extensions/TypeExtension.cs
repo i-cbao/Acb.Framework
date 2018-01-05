@@ -103,6 +103,7 @@ namespace Acb.Core.Extensions
                     return string.Empty;
                 if (!string.IsNullOrWhiteSpace(propAttr.Name))
                     return propAttr.Name;
+                namingType = namingType ?? propAttr.NamingType;
             }
             switch (namingType)
             {

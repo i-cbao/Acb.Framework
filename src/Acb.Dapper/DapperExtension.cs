@@ -79,7 +79,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static string InsertSql(this Type modelType, Func<string, string> format, string[] excepts = null)
         {
-            var tableName = modelType.Name;
+            var tableName = modelType.PropName();
             var key = $"insert_{modelType.FullName}";
             var sql = DapperCache.Get<string>(key);
             if (!string.IsNullOrWhiteSpace(sql))

@@ -98,10 +98,19 @@ namespace Acb.Dapper
         /// <returns></returns>
         private static IDbConnection Create(string connectionName)
         {
-            var config = ConfigUtils<DataBaseConfig>.Config;
-            if (config == null)
-                throw new ArgumentException("未找到database.config配置文件");
-            var connectionConfig = config.Get(connectionName);
+            var fromXml = "connectionFromXml".Config(true);
+            ConnectionConfig connectionConfig;
+            if (fromXml)
+            {
+                var config = ConfigUtils<DataBaseConfig>.Config;
+                if (config == null)
+                    throw new ArgumentException("未找到database.config配置文件");
+                connectionConfig = config.Get(connectionName);
+            }
+            else
+            {
+                connectionConfig = $"database:{connectionName}".Config<ConnectionConfig>();
+            }
             if (connectionConfig == null || string.IsNullOrWhiteSpace(connectionConfig.ConnectionString))
                 throw new ArgumentException($"未找到connectionName为{connectionName}的数据库配置");
             //DbProviderFactories.GetFactory(connectionConfig.ProviderName).CreateConnection();
