@@ -1,0 +1,16 @@
+﻿using Acb.Core;
+using Acb.Core.Modules;
+using Acb.Dapper.Adapters;
+
+namespace Acb.Dapper.PostgreSql
+{
+    [DependsOn(typeof(CoreModule))]
+    public class PostgreSqlModule : DModule
+    {
+        public override void Initialize()
+        {
+            DbConnectionManager.AddAdapter(new PostgreSqlAdapter());
+            base.Initialize();
+        }
+    }
+}
