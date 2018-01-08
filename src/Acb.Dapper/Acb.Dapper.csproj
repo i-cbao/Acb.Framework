@@ -6,7 +6,8 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - Dapper基础类</Product>
     <Description>爱车保 - Dapper基础类</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

@@ -77,7 +77,7 @@ namespace Acb.Dapper
         }
         /// <summary> 生成insert语句 </summary>
         /// <returns></returns>
-        public static string InsertSql(this Type modelType, Func<string, string> format, string[] excepts = null)
+        public static string InsertSql(this Type modelType, string[] excepts = null)
         {
             var tableName = modelType.PropName();
             var key = $"insert_{modelType.FullName}";
@@ -93,7 +93,6 @@ namespace Acb.Dapper
             var fieldSql = string.Join(",", fields.Select(t => $"[{t}]"));
             var paramSql = string.Join(",", fields.Select(t => $"@{t}"));
             sb.Append($" ({fieldSql}) VALUES ({paramSql})");
-            sql = format(sb.ToString());
             DapperCache.Set(key, sql, TimeSpan.FromHours(1));
             return sql;
         }
@@ -201,7 +200,8 @@ namespace Acb.Dapper
         public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null)
         {
             var type = typeof(T);
-            var sql = type.InsertSql(conn.FormatSql, excepts);
+            var sql = type.InsertSql(excepts);
+            sql = conn.FormatSql(sql);
             return conn.Execute(sql, model);
         }
 
@@ -213,7 +213,8 @@ namespace Acb.Dapper
         public static int BatchInsert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null)
         {
             var type = typeof(T);
-            var sql = type.InsertSql(conn.FormatSql, excepts);
+            var sql = type.InsertSql(excepts);
+            sql = conn.FormatSql(sql);
             return conn.Execute(sql, models.ToArray());
         }
 

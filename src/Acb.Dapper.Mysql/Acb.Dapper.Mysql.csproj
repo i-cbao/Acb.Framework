@@ -9,10 +9,11 @@
     <AssemblyName>Acb.Dapper.MySql</AssemblyName>
     <RootNamespace>Acb.Dapper.MySql</RootNamespace>
     <Company>成都爱车保信息技术有限公司</Company>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Dapper" Version="1.0.0" />
+    <PackageReference Include="Acb.Dapper" Version="1.0.1" />
     <PackageReference Include="MySql.Data" Version="6.10.4" />
   </ItemGroup>
 
