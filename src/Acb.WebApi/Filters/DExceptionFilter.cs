@@ -22,7 +22,7 @@ namespace Acb.WebApi.Filters
             else
             {
                 var logger = LogManager.Logger<DExceptionFilter>();
-                logger.Error(ex);
+                logger.Error(ex.Message, ex);
                 json = new DResult(false, DefaultErrorMsg, -1);
             }
             const int code = (int)HttpStatusCode.InternalServerError;
