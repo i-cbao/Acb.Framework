@@ -7,13 +7,12 @@ namespace Acb.Dapper.Domain
     public abstract class DRepository
     {
         private readonly string _defaultConnectionName;
-        private const string DefaultName = "default";
         /// <summary> 获取默认连接 </summary>
         protected IDbConnection Connection => GetConnection(_defaultConnectionName);
 
-        protected DRepository(string connectionName)
+        protected DRepository(string connectionName = null)
         {
-            _defaultConnectionName = string.IsNullOrWhiteSpace(connectionName) ? DefaultName : connectionName;
+            _defaultConnectionName = connectionName;
         }
 
         public static TRepository Instance<TRepository>()
@@ -39,7 +38,7 @@ namespace Acb.Dapper.Domain
         /// <param name="connectionName"></param>
         /// <param name="threadCache"></param>
         /// <returns></returns>
-        protected IDbConnection GetConnection(string connectionName, bool threadCache = true)
+        protected IDbConnection GetConnection(string connectionName = null, bool threadCache = true)
         {
             return ConnectionFactory.Instance.Connection(connectionName, threadCache);
         }

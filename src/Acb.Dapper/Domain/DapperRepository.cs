@@ -11,7 +11,7 @@ namespace Acb.Dapper.Domain
     {
         /// <summary> 构造 </summary>
         /// <param name="connectionName"></param>
-        public DapperRepository(string connectionName = "default") : base(connectionName)
+        public DapperRepository(string connectionName = null) : base(connectionName)
         {
         }
 
