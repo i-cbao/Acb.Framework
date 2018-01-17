@@ -39,7 +39,6 @@ namespace Acb.WebApi
                     //json序列化处理
                     opts.SerializerSettings.Converters.Add(new DateTimeConverter());
                 });
-
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
             _bootstrap.Initialize(_assembly);

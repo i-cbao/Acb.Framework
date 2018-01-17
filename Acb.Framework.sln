@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Dapper.MySql", "src\Acb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Framework", "src\Acb.Framework\Acb.Framework.csproj", "{0D2F48C8-F7A7-4B2F-BA11-290E6D368C7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Configuration", "src\Acb.Configuration\Acb.Configuration.csproj", "{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{0D2F48C8-F7A7-4B2F-BA11-290E6D368C7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D2F48C8-F7A7-4B2F-BA11-290E6D368C7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D2F48C8-F7A7-4B2F-BA11-290E6D368C7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{6626DADB-75DB-487E-A546-D017FA56E1FD} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 		{FF9B4473-A80F-41A3-8BB5-08E359A4DE49} = {5B77030F-2F00-4B20-B99B-A390D47749D9}
 		{0D2F48C8-F7A7-4B2F-BA11-290E6D368C7F} = {F1F1520A-5E3C-422D-9B10-D439124443E0}
+		{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

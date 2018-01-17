@@ -6,11 +6,15 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - PostgreSql基础类</Product>
     <Description>爱车保 - PostgreSql基础类</Description>
-    <Version>1.0.2</Version>
+    <Version>1.2.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.Dapper.PostgreSql.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Dapper" Version="1.0.1" />
+    <PackageReference Include="Acb.Dapper" Version="1.2.0" />
     <PackageReference Include="Npgsql" Version="3.2.6" />
   </ItemGroup>
 

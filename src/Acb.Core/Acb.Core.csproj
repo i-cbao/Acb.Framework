@@ -7,8 +7,18 @@
     <Company>成都爱车保信息技术有限公司</Company>
     <Product>爱车保 - 基础核心类</Product>
     <Description>爱车保 - 基础核心类</Description>
-    <Version>1.0.0</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.Core.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Config\**" />
+    <EmbeddedResource Remove="Config\**" />
+    <None Remove="Config\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.1" />

@@ -6,11 +6,15 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - WebApi基础类</Product>
     <Description>爱车保 - WebApi基础类</Description>
-    <Version>1.0.1</Version>
+    <Version>1.2.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.WebApi.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Framework" Version="1.0.0" />
+    <PackageReference Include="Acb.Framework" Version="1.2.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
   </ItemGroup>

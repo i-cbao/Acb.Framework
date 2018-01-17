@@ -31,7 +31,7 @@ namespace Acb.Redis
 
         private void SetValue(string key, object value, TimeSpan? expired = null)
         {
-            if (string.IsNullOrWhiteSpace(key) || value == null)
+            if (string.IsNullOrWhiteSpace(key))
                 return;
             key = GetKey(key);
             var db = GetDatabase();

@@ -25,10 +25,10 @@ namespace Acb.Core
                 if (context == null)
                     return DefaultIp;
                 //获取代理IP
-                context.Request.Headers.TryGetValue("HTTP_X_FORWARDED_FOR", out var userHostAddress);
+                context.Request.Headers.TryGetValue("X-Forwarded-For", out var userHostAddress);
                 if (string.IsNullOrWhiteSpace(userHostAddress))
                 {
-                    context.Request.Headers.TryGetValue("X-Forwarded-For", out userHostAddress);
+                    context.Request.Headers.TryGetValue("HTTP_X_FORWARDED_FOR", out userHostAddress);
                 }
                 if (string.IsNullOrEmpty(userHostAddress))
                 {

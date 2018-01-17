@@ -23,5 +23,14 @@ namespace Acb.Framework.Tests
                 Print(DResult.Succ(list, list.TotalCount));
             }
         }
+
+
+        [TestMethod]
+        public void UpdateTest()
+        {
+            using (var conn = ConnectionFactory.Instance.Connection("default", false))
+            {
+            }
+        }
     }
 }

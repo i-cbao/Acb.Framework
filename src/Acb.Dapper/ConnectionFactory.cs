@@ -1,6 +1,6 @@
 ﻿using Acb.Core;
-using Acb.Core.Config;
 using Acb.Core.Extensions;
+using Acb.Core.Helper;
 using Acb.Dapper.Adapters;
 using Acb.Dapper.Config;
 using System;
@@ -18,8 +18,9 @@ namespace Acb.Dapper
     /// <summary> 数据库连接管理 </summary>
     public class ConnectionFactory : IDbConnectionProvider
     {
-        /// <summary> 默认连接名 </summary>
-        public string ConnectionName => "connectionName".Config(string.Empty);
+        private const string Prefix = "dapper:";
+        private const string DefaultConfigName = "dapperDefault";
+        private const string DefaultName = "default";
 
         private static readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> ConnectionDictionary;
         private static readonly object LockObj = new object();
@@ -33,12 +34,9 @@ namespace Acb.Dapper
         {
             ConnectionDictionary = new ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>>();
             //配置文件改变时，清空缓存
-            ConfigManager.Instance.Change += name =>
+            ConfigHelper.Instance.ConfigChanged += name =>
             {
-                if (name == ConfigUtils<DataBaseConfig>.Instance.FileName)
-                {
-                    ConnectionDictionary.Clear();
-                }
+                ConnectionDictionary.Clear();
             };
         }
 
@@ -98,19 +96,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         private static IDbConnection Create(string connectionName)
         {
-            var fromXml = "connectionFromXml".Config(true);
-            ConnectionConfig connectionConfig;
-            if (fromXml)
-            {
-                var config = ConfigUtils<DataBaseConfig>.Config;
-                if (config == null)
-                    throw new ArgumentException("未找到database.config配置文件");
-                connectionConfig = config.Get(connectionName);
-            }
-            else
-            {
-                connectionConfig = $"database:{connectionName}".Config<ConnectionConfig>();
-            }
+            var connectionConfig = $"{Prefix}{connectionName}".Config<ConnectionConfig>();
             if (connectionConfig == null || string.IsNullOrWhiteSpace(connectionConfig.ConnectionString))
                 throw new ArgumentException($"未找到connectionName为{connectionName}的数据库配置");
             //DbProviderFactories.GetFactory(connectionConfig.ProviderName).CreateConnection();
@@ -132,7 +118,7 @@ namespace Acb.Dapper
             lock (LockObj)
             {
                 if (string.IsNullOrWhiteSpace(connectionName))
-                    connectionName = ConnectionName;
+                    connectionName = DefaultConfigName.Config(DefaultName);
                 if (string.IsNullOrWhiteSpace(connectionName))
                     throw new ArgumentException($"{nameof(connectionName)}不能为空");
                 if (!threadCache)

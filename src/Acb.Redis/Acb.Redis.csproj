@@ -6,10 +6,19 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - Redis基础类</Product>
     <Description>爱车保 - Redis基础类</Description>
+    <Version>1.2.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.Redis.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Core" Version="1.0.0" />
+    <Compile Remove="RedisConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Acb.Core" Version="1.2.0" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
   </ItemGroup>
 

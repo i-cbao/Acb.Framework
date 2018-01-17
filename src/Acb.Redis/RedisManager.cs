@@ -11,39 +11,37 @@ namespace Acb.Redis
     /// <summary> Redis管理器 </summary>
     public class RedisManager : IDisposable
     {
-        private const string DefaultConfigName = "redisConfigName";
-        private string _defaultName;
+        private const string Prefix = "redis:";
+        private const string DefaultConfigName = "redisDefault";
+        private const string DefaultName = "default";
         private readonly ConcurrentDictionary<string, ConnectionMultiplexer> _connections;
         private RedisManager()
         {
-            _defaultName = DefaultConfigName.Config("default");
             _connections = new ConcurrentDictionary<string, ConnectionMultiplexer>();
 
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
-                _defaultName = DefaultConfigName.Config("default");
-                if (_connections.Count > 0)
-                {
-                    _connections.Values.Foreach(t => t.Close());
-                    _connections.Clear();
-                }
+                if (_connections.Count <= 0)
+                    return;
+                _connections.Values.Foreach(t => t.Close());
+                _connections.Clear();
             };
         }
 
-        public static RedisManager Instance = Singleton<RedisManager>.Instance = (Singleton<RedisManager>.Instance = new RedisManager());
+        public static RedisManager Instance =
+            Singleton<RedisManager>.Instance = (Singleton<RedisManager>.Instance = new RedisManager());
 
-        private string GetConfigName(string configName)
+        private static string GetConfigName(string configName)
         {
-            if (string.IsNullOrWhiteSpace(configName))
-                return _defaultName;
-            return configName;
+            var defaultName = DefaultConfigName.Config(DefaultName);
+            return string.IsNullOrWhiteSpace(configName) ? defaultName : configName;
         }
 
-        private string GetConnectionString(string configName)
+        private static string GetConnectionString(string configName)
         {
-            var connectionString = $"redis:{configName}".Config(string.Empty);
+            var connectionString = $"{Prefix}{configName}".Config(string.Empty);
             if (string.IsNullOrWhiteSpace(connectionString))
-                throw new BusiException($"config:redis:{configName}配置异常");
+                throw new BusiException($"redis:{configName}配置异常");
             return connectionString;
         }
 
@@ -76,7 +74,7 @@ namespace Acb.Redis
             return GetConnection(configName, confOption).GetServer(confOption.EndPoints[endPointsIndex]);
         }
 
-        public IServer GetServer(string host, int port, string configName = null)
+        public IServer GetServer(string configName, string host, int port)
         {
             var conn = GetConnection(configName);
             return conn.GetServer(host, port);

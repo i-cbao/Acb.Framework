@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Cache;
+using Acb.Core.Extensions;
 using System.Collections.Concurrent;
 
 namespace Acb.Redis
@@ -25,7 +26,7 @@ namespace Acb.Redis
         /// <returns></returns>
         public ICache GetCache(string regionName)
         {
-            if (Caches.TryGetValue(regionName, out ICache cache))
+            if (Caches.TryGetValue(regionName, out var cache))
             {
                 return cache;
             }

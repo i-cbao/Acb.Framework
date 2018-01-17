@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Acb.Core.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
-    public class ValuesController : DController
+    public class HomeController : DController
     {
         // GET api/values
         [HttpGet]
@@ -14,10 +17,11 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet("{key}")]
+        public async Task<string> Get(string key)
         {
-            return "value";
+            var n = key.Config<string>();
+            return await Task.FromResult($"hello {n}");
         }
 
         // POST api/values

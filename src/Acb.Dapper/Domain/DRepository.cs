@@ -1,7 +1,6 @@
 ﻿using Acb.Core;
 using System;
 using System.Data;
-using System.Threading.Tasks;
 
 namespace Acb.Dapper.Domain
 {
@@ -94,28 +93,16 @@ namespace Acb.Dapper.Domain
 
         /// <summary> 更新数量 </summary>
         /// <param name="conn"></param>
-        /// <param name="table"></param>
         /// <param name="column"></param>
         /// <param name="key"></param>
         /// <param name="keyColumn"></param>
         /// <param name="count"></param>
         /// <param name="trans"></param>
         /// <returns></returns>
-        protected int UpdateCount(string table, string column, object key, string keyColumn = "id",
+        protected int Increment<T>(string column, object key, string keyColumn = "id",
             int count = 1, IDbConnection conn = null, IDbTransaction trans = null)
         {
-            return (conn ?? Connection).UpdateCount(table, column, key, keyColumn, count, trans);
-        }
-
-        /// <summary> 异步更新数量 </summary>
-        /// <param name="table"></param>
-        /// <param name="column"></param>
-        /// <param name="key"></param>
-        /// <param name="keyColumn"></param>
-        /// <param name="count"></param>
-        protected Task UpdateCountAsync(string table, string column, object key, string keyColumn = "id", int count = 1)
-        {
-            return Connection.UpdateCountAsync(table, column, key, keyColumn, count);
+            return (conn ?? Connection).Increment<T>(column, key, keyColumn, count, trans);
         }
     }
 }

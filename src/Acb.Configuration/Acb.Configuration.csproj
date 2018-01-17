@@ -4,19 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
-    <Product>爱车保 - Dapper基础类</Product>
-    <Description>爱车保 - Dapper基础类</Description>
+    <Product>爱车保 - 分布式配置</Product>
+    <Description>爱车保 - 分布式配置</Description>
     <Version>1.2.0</Version>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Acb.Dapper.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.Configuration.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Acb.Core" Version="1.2.0" />
-    <PackageReference Include="Dapper" Version="1.50.4" />
   </ItemGroup>
 
 </Project>

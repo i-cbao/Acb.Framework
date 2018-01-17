@@ -7,26 +7,35 @@ namespace Acb.Core.Helper
 {
     public class ConfigHelper
     {
-        private readonly IConfigurationRoot _config;
-        private const string ConfigPrefix = "config:";
+        private IConfigurationRoot _config;
         private const string ConfigName = "appsettings.json";
         private IDisposable _callbackRegistration;
+        private IConfigurationBuilder _builder;
 
         public event Action<object> ConfigChanged;
 
+        public IConfiguration Config => _config;
+
         private ConfigHelper()
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), ConfigName);
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory());
+            InitBuilder();
+            InitConfig();
+        }
+
+        private void InitBuilder()
+        {
+            var currentDir = Directory.GetCurrentDirectory();
+            _builder = new ConfigurationBuilder().SetBasePath(currentDir);
+            var path = Path.Combine(currentDir, ConfigName);
             if (File.Exists(path))
             {
-                _config = builder.AddJsonFile(ConfigName, false, true).Build();
+                _builder.AddJsonFile(ConfigName, false, true);
             }
-            else
-            {
-                _config = builder.Build();
-            }
+        }
+
+        private void InitConfig()
+        {
+            _config = _builder.Build();
             _callbackRegistration = _config.GetReloadToken().RegisterChangeCallback(OnConfigChanged, _config);
         }
 
@@ -51,6 +60,12 @@ namespace Acb.Core.Helper
         //    return Get(string.Empty, supressKey: key);
         //}
 
+        public void Build(Action<IConfigurationBuilder> builderAction)
+        {
+            builderAction.Invoke(_builder);
+            _config = _builder.Build();
+        }
+
         /// <summary> 配置文件读取 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="defaultValue">默认值</param>
@@ -62,14 +77,14 @@ namespace Acb.Core.Helper
         {
             if (!string.IsNullOrWhiteSpace(supressKey))
                 key = supressKey;
-            key = $"{ConfigPrefix}{key}";
             var type = typeof(T);
             if (type.IsValueType || type == typeof(string))
                 return _config.GetValue(key, defaultValue);
-
             var obj = Activator.CreateInstance<T>();
             _config.GetSection(key).Bind(obj);
             return obj;
         }
+
+        public void Reload() { _config.Reload(); }
     }
 }

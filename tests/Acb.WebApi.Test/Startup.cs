@@ -19,7 +19,6 @@ namespace Acb.WebApi.Test
 
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            
             return base.ConfigureServices(services);
         }
 

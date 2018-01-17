@@ -25,7 +25,7 @@ namespace Acb.WebApi.Filters
                 logger.Error(ex.Message, ex);
                 json = new DResult(false, DefaultErrorMsg, -1);
             }
-            const int code = (int)HttpStatusCode.InternalServerError;
+            const int code = (int)HttpStatusCode.OK;
             context.Result = new ObjectResult(json)
             {
                 StatusCode = code

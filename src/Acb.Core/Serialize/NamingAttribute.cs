@@ -5,7 +5,6 @@ namespace Acb.Core.Serialize
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false)]
     public class NamingAttribute : Attribute
     {
-
         public string Name { get; }
         public bool Ignore { get; }
 

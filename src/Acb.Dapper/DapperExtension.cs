@@ -4,12 +4,13 @@ using Acb.Dapper.Adapters;
 using Dapper;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Acb.Dapper
 {
@@ -132,40 +133,8 @@ namespace Acb.Dapper
             return PropValue<string>(model, propName);
         }
 
-        /// <summary> 更新数量 </summary>
-        /// <param name="conn"></param>
-        /// <param name="table"></param>
-        /// <param name="column"></param>
-        /// <param name="key"></param>
-        /// <param name="keyColumn"></param>
-        /// <param name="count"></param>
-        /// <param name="trans"></param>
-        /// <returns></returns>
-        public static int UpdateCount(this IDbConnection conn, string table, string column, object key, string keyColumn = "id",
-            int count = 1, IDbTransaction trans = null)
-        {
-            var sql = $"UPDATE [{table}] SET [{column}]=[{column}] + @count WHERE [{keyColumn}]=@id";
-            sql = conn.FormatSql(sql);
-            return conn.Execute(sql, new { id = key, count }, trans);
-        }
-
-        /// <summary> 异步更新数量 </summary>
-        /// <param name="conn"></param>
-        /// <param name="table"></param>
-        /// <param name="column"></param>
-        /// <param name="key"></param>
-        /// <param name="keyColumn"></param>
-        /// <param name="count"></param>
-        public static Task UpdateCountAsync(this IDbConnection conn, string table, string column, object key,
-            string keyColumn = "id", int count = 1)
-        {
-            var sql = $"UPDATE [{table}] SET [{column}]=[{column}]+@count WHERE [{keyColumn}]=@id";
-            sql = conn.FormatSql(sql);
-            return conn.ExecuteAsync(sql, new { id = key, count });
-        }
-
         /// <summary> 查询所有数据 </summary>
-        public static IEnumerable<T> Query<T>(this IDbConnection conn)
+        public static IEnumerable<T> QueryAll<T>(this IDbConnection conn)
         {
             var type = typeof(T);
             var fields = type.Fields();
@@ -196,39 +165,133 @@ namespace Acb.Dapper
         /// <param name="conn"></param>
         /// <param name="model"></param>
         /// <param name="excepts">过滤项(如：自增ID)</param>
+        /// <param name="trans"></param>
         /// <returns></returns>
-        public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null)
+        public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null, IDbTransaction trans = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
-            return conn.Execute(sql, model);
+            return conn.Execute(sql, model, trans);
         }
 
         /// <summary> 批量插入 </summary>
         /// <param name="conn"></param>
         /// <param name="models"></param>
         /// <param name="excepts"></param>
+        /// <param name="trans"></param>
         /// <returns></returns>
-        public static int BatchInsert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null)
+        public static int InsertBatch<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
-            return conn.Execute(sql, models.ToArray());
+            return conn.Execute(sql, models.ToArray(), trans);
+        }
+
+        public static int Update<T>(this IDbConnection conn, Expression<Func<T, dynamic>> propExpression, string where,
+            object param = null, IDbTransaction trans = null)
+        {
+            var tableName = typeof(T).PropName();
+            SQL sql = $"UPDATE FROM [{tableName}] SET ";
+            ReadOnlyCollection<MemberInfo> memberInfos = ((dynamic)propExpression.Body).Members;
+            if (memberInfos.Count == 0) return 0;
+            var ps = new DynamicParameters();
+            foreach (var info in memberInfos)
+            {
+                var name = info.PropName();
+                sql += $"[{name}]=@{name}";
+                //ps.Add(name,propExpression);
+                // :todo 
+            }
+
+            if (param != null)
+                ps.AddDynamicParams(param);
+            return conn.Execute(sql.ToString(), ps, trans);
         }
 
         /// <summary> 删除 </summary>
         /// <param name="conn"></param>
-        /// <param name="key"></param>
+        /// <param name="value"></param>
         /// <param name="keyColumn"></param>
+        /// <param name="trans"></param>
         /// <returns></returns>
-        public static int Delete<T>(this IDbConnection conn, object key, string keyColumn = "id")
+        public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = "id", IDbTransaction trans = null)
         {
             var tableName = typeof(T).PropName();
-            var sql = $"DELETE FROM [{tableName}] WHERE [{keyColumn}]=@key";
+            var sql = $"DELETE FROM [{tableName}] WHERE [{keyColumn}]=@value";
             sql = conn.FormatSql(sql);
-            return conn.Execute(sql, new { key });
+            return conn.Execute(sql, new { value }, trans);
+        }
+
+        /// <summary> 删除 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="where"></param>
+        /// <param name="param"></param>
+        /// <param name="trans"></param>
+        /// <returns></returns>
+        public static int DeleteWhere<T>(this IDbConnection conn, string where, object param = null, IDbTransaction trans = null)
+        {
+            var tableName = typeof(T).PropName();
+            var sql = $"DELETE FROM [{tableName}] WHERE {where}";
+            sql = conn.FormatSql(sql);
+            return conn.Execute(sql, param, trans);
+        }
+
+        public static bool Exists<T>(this IDbConnection conn, string column, object value)
+        {
+            var tableName = typeof(T).PropName();
+            var sql = $"SELECT COUNT(1) FROM [{tableName}] WHERE [{column}]=@value";
+            sql = conn.FormatSql(sql);
+            return conn.QueryFirstOrDefault<int>(sql, new { value }) > 0;
+        }
+
+        public static bool ExistsWhere<T>(this IDbConnection conn, string where = null, object param = null)
+        {
+            var tableName = typeof(T).PropName();
+            SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
+            if (!string.IsNullOrWhiteSpace(where))
+                sql += $"WHERE {where}";
+            var sqlStr = conn.FormatSql(sql.ToString());
+            return conn.QueryFirstOrDefault<int>(sqlStr, param) > 0;
+        }
+
+        public static long Min<T>(this IDbConnection conn, string column, string where = null, object param = null)
+        {
+            var tableName = typeof(T).PropName();
+            SQL sql = $"SELECT MIN([{column}]) FROM [{tableName}]";
+            if (!string.IsNullOrWhiteSpace(where))
+                sql += $"WHERE {where}";
+            var sqlStr = conn.FormatSql(sql.ToString());
+            return conn.QueryFirstOrDefault<long>(sqlStr, param);
+        }
+
+        public static long Max<T>(this IDbConnection conn, string column, string where = null, object param = null)
+        {
+            var tableName = typeof(T).PropName();
+            SQL sql = $"SELECT MAX([{column}]) FROM [{tableName}]";
+            if (!string.IsNullOrWhiteSpace(where))
+                sql += $"WHERE {where}";
+            var sqlStr = conn.FormatSql(sql.ToString());
+            return conn.QueryFirstOrDefault<long>(sqlStr);
+        }
+
+        /// <summary> 自增数据 </summary>
+        /// <param name="conn"></param>
+        /// <param name="column"></param>
+        /// <param name="key"></param>
+        /// <param name="keyColumn"></param>
+        /// <param name="count"></param>
+        /// <param name="trans"></param>
+        /// <returns></returns>
+        public static int Increment<T>(this IDbConnection conn, string column, object key, string keyColumn = "id",
+            int count = 1, IDbTransaction trans = null)
+        {
+            var tableName = typeof(T).PropName();
+            var sql = $"UPDATE [{tableName}] SET [{column}]=[{column}] + @count WHERE [{keyColumn}]=@id";
+            sql = conn.FormatSql(sql);
+            return conn.Execute(sql, new { id = key, count }, trans);
         }
     }
 }

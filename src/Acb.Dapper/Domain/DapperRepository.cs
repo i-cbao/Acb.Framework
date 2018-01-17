@@ -24,7 +24,7 @@ namespace Acb.Dapper.Domain
         /// <summary> 查询所有数据 </summary>
         public IEnumerable<T> Query()
         {
-            return Connection.Query<T>();
+            return Connection.QueryAll<T>();
         }
 
         /// <summary> 根据主键查询单条 </summary>
@@ -51,7 +51,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int BatchInsert(IEnumerable<T> models, string[] excepts = null)
         {
-            return Connection.BatchInsert(models, excepts);
+            return Connection.InsertBatch(models, excepts);
         }
 
         /// <summary> 删除 </summary>
