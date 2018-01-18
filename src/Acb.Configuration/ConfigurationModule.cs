@@ -3,8 +3,6 @@ using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Modules;
 using Microsoft.Extensions.Configuration;
-using System.IO;
-using System.Linq;
 
 namespace Acb.Configuration
 {
@@ -39,27 +37,6 @@ namespace Acb.Configuration
                 if (provider.Settings.RefreshEnable)
                     RefreshHelper.Start(provider.Settings.RefreshInterval);
             }
-
-            var configPath = "configPath".Config<string>();
-            if (!string.IsNullOrWhiteSpace(configPath))
-            {
-                configPath = Path.Combine(Directory.GetCurrentDirectory(), configPath);
-                if (Directory.Exists(configPath))
-                {
-                    var jsons = Directory.GetFiles(configPath, "*.json");
-                    if (jsons != null && jsons.Any())
-                    {
-                        helper.Build(b =>
-                        {
-                            foreach (var json in jsons)
-                            {
-                                b.AddJsonFile(json);
-                            }
-                        });
-                    }
-                }
-            }
-
             base.Initialize();
         }
 

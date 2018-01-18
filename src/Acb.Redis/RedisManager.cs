@@ -60,6 +60,11 @@ namespace Acb.Redis
 
         public IDatabase GetDatabase(string configName = null, int defaultDb = -1)
         {
+            if (defaultDb < 0)
+            {
+                defaultDb = "redisDb".Config(-1);
+            }
+
             var conn = GetConnection(configName);
             return conn.GetDatabase(defaultDb);
         }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Acb.Core.Helper
@@ -63,6 +64,13 @@ namespace Acb.Core.Helper
         public void Build(Action<IConfigurationBuilder> builderAction)
         {
             builderAction.Invoke(_builder);
+            var sources = _builder.Sources.Reverse().ToArray();
+            //倒序排列，解决读取配置时的优先级问题
+            for (var i = 0; i < sources.Length; i++)
+            {
+                _builder.Sources[i] = sources[i];
+            }
+
             _config = _builder.Build();
         }
 
