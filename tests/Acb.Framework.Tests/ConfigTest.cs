@@ -4,13 +4,12 @@ using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Dapper.Config;
 using Acb.MongoDb;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System;
 using System.Reflection;
 
 namespace Acb.Framework.Tests
 {
-    [TestClass]
     public class ConfigTest : DTest
     {
         private readonly ILogger _logger = LogManager.Logger<ConfigTest>();
@@ -18,7 +17,7 @@ namespace Acb.Framework.Tests
         {
         }
 
-        [TestMethod]
+        [Test]
         public void GetTest()
         {
             var config = "dapper:mscreen".Config<ConnectionConfig>();

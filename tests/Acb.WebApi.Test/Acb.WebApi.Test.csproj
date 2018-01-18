@@ -5,22 +5,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
-    <Folder Include="wwwroot\" />
+    <Compile Remove="wwwroot\**" />
+    <Content Remove="wwwroot\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <None Remove="wwwroot\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.WebApi" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Acb.Configuration\Acb.Configuration.csproj" />
     <ProjectReference Include="..\..\src\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
+    <ProjectReference Include="..\..\src\Acb.WebApi\Acb.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

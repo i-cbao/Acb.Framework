@@ -1,18 +1,17 @@
 ﻿using Acb.Core;
 using Acb.Dapper;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Reflection;
 
 namespace Acb.Framework.Tests
 {
-    [TestClass]
     public class DapperTest : DTest
     {
         public DapperTest() : base(Assembly.GetExecutingAssembly())
         {
         }
 
-        [TestMethod]
+        [Test]
         public void PagedTest()
         {
             //SQL insert = "insert into [mscreen_user] () values (@id,@name)";
@@ -25,7 +24,7 @@ namespace Acb.Framework.Tests
         }
 
 
-        [TestMethod]
+        [Test]
         public void UpdateTest()
         {
             using (var conn = ConnectionFactory.Instance.Connection("default", false))
