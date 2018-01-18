@@ -1,11 +1,8 @@
-﻿using Acb.Core.Helper;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Helper;
 using Acb.Core.Logging;
-using Acb.Core.Timing;
 using log4net.Appender;
 using log4net.Config;
-using log4net.Core;
-using log4net.Filter;
-using log4net.Layout;
 using log4net.Repository;
 using System.IO;
 
@@ -16,9 +13,9 @@ namespace Acb.Framework.Logging
         private const string FileName = "log4net.config";
 
         private static string ConfigPath => ConfigHelper.Instance.Get(string.Empty);
-        private static string LogSite => ConfigHelper.Instance.Get("local");
+        private static string LogSite => "site".Config("local");
 
-        private static readonly ILoggerRepository Repository = log4net.LogManager.CreateRepository(LogSite);
+        private static ILoggerRepository Repository => log4net.LogManager.CreateRepository(LogSite);
 
         /// <summary>
         /// 初始化一个<see cref="Log4NetAdapter"/>类型的新实例
@@ -33,29 +30,16 @@ namespace Acb.Framework.Logging
                 XmlConfigurator.ConfigureAndWatch(Repository, new FileInfo(configFile));
                 return;
             }
-            var appender = new RollingFileAppender
-            {
-                Name = "root",
-                File = $"_logs\\{LogSite}\\{Clock.Now:yyyyMM}\\",
-                AppendToFile = true,
-                LockingModel = new FileAppender.MinimalLock(),
-                RollingStyle = RollingFileAppender.RollingMode.Date,
-                DatePattern = "dd\".log\"",
-                StaticLogFileName = false,
-                MaxSizeRollBackups = 100,
-                MaximumFileSize = "2MB",
-                Layout = new PatternLayout("[%d{yyyy-MM-dd HH:mm:ss.fff}] %-5p %c %t %w %n%m%n")
-                //Layout = new PatternLayout("[%d [%t] %-5p %c [%x] - %m%n]")
-            };
-            appender.ClearFilters();
-            appender.AddFilter(new LevelRangeFilter
-            {
-                LevelMin = Level.Debug,
-                LevelMax = Level.Fatal
-            });
 
-            BasicConfigurator.Configure(Repository, appender);
-            appender.ActivateOptions();
+            var appenders = Log4NetDefaultConfig.Appenders;
+
+            BasicConfigurator.Configure(Repository, appenders);
+
+            appenders.Foreach(t =>
+            {
+                if (t is RollingFileAppender appender)
+                    appender.ActivateOptions();
+            });
         }
 
         protected override ILog CreateLogger(string name)
