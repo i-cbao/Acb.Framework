@@ -28,14 +28,11 @@ namespace Acb.Framework
 
         public event BuilderAction BuilderHandler;
 
-        public override void Initialize(Assembly executingAssembly = null)
+        public override void Initialize()
         {
             LoggerInit();
             CacheInit();
-
-            if (executingAssembly == null)
-                executingAssembly = Assembly.GetExecutingAssembly();
-            IocRegisters(executingAssembly);
+            IocRegisters();
             BuilderHandler?.Invoke(Builder);
             _container = Builder.Build();
             IocManager = _container.Resolve<IIocManager>();
@@ -43,11 +40,11 @@ namespace Acb.Framework
             ModulesInstaller();
         }
 
-        public override void IocRegisters(Assembly executingAssembly)
+        public override void IocRegisters()
         {
             Builder = new ContainerBuilder();
 
-            var assemblies = DAssemblyFinder.Instance.FindAll().Union(new[] { executingAssembly }).ToArray();
+            var assemblies = DAssemblyFinder.Instance.FindAll().ToArray();
             Builder.RegisterAssemblyTypes(assemblies)
                 .Where(type => typeof(ILifetimeDependency).IsAssignableFrom(type) && !type.IsAbstract)
                 .AsSelf() //自身服务，用于没有接口的类

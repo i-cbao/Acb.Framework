@@ -14,9 +14,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Framework" Version="1.2.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Configuration\Acb.Configuration.csproj" />
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\Acb.Framework\Acb.Framework.csproj" />
   </ItemGroup>
 
 </Project>

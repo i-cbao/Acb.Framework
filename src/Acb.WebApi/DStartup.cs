@@ -11,18 +11,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
-using System.Reflection;
 
 namespace Acb.WebApi
 {
-    public class DStartup
+    public abstract class DStartup
     {
-        private readonly Assembly _assembly;
         private readonly DBootstrap _bootstrap;
 
-        protected DStartup(Assembly assembly)
+        protected DStartup()
         {
-            _assembly = assembly;
             _bootstrap = DBootstrap.Instance;
         }
 
@@ -41,7 +38,7 @@ namespace Acb.WebApi
                 });
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
-            _bootstrap.Initialize(_assembly);
+            _bootstrap.Initialize();
             LogManager.AddAdapter(new ConsoleAdapter());
             return new AutofacServiceProvider(_bootstrap.Container);
         }

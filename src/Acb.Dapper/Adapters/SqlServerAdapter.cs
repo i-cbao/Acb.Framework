@@ -30,7 +30,7 @@ namespace Acb.Dapper.Adapters
             sql = sql.Replace(columns, $"ROW_NUMBER() OVER({order}) AS [paged_row],{columns}");
 
             sql =
-                $"SELECT * FROM ({sql}) [_proj] WHERE [paged_row] BETWEEN ((@pageIndex-1)*@pageSize +1) AND (@pageIndex * @pageSize);{countSql};";
+                $"SELECT * FROM ({sql}) [_proj] WHERE [paged_row] BETWEEN ((@index-1)*@pageSize +1) AND (@index * @pageSize);{countSql};";
             return sql;
         }
 

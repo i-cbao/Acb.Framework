@@ -17,13 +17,13 @@ namespace Acb.WebApi.Filters
             var ex = context.Exception.GetBaseException();
             if (ex is BusiException businessEx)
             {
-                json = new DResult(false, businessEx.Message, businessEx.Code);
+                json = DResult.Error(businessEx.Message, businessEx.Code);
             }
             else
             {
                 var logger = LogManager.Logger<DExceptionFilter>();
                 logger.Error(ex.Message, ex);
-                json = new DResult(false, DefaultErrorMsg, -1);
+                json = DResult.Error(DefaultErrorMsg);
             }
             const int code = (int)HttpStatusCode.OK;
             context.Result = new ObjectResult(json)

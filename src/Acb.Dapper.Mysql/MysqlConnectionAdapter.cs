@@ -24,7 +24,7 @@ namespace Acb.Dapper.Mysql
                 countSql = countSql.Replace($" {order}", string.Empty);
             }
             sql =
-                $"{sql} LIMIT (@pageIndex-1) * @pageSize,@pageSize;{countSql};";
+                $"{sql} LIMIT (@index-1) * @pageSize,@pageSize;{countSql};";
             return sql;
         }
 

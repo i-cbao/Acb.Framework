@@ -1,27 +1,30 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
-    [Produces("application/json")]
     [Route("api/[controller]")]
     public class HomeController : DController
     {
+        private readonly ILogger _logger = LogManager.Logger<HomeController>();
         // GET api/values
         [HttpGet]
-        public IEnumerable<string> Get()
+        public DResults<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            return Succ(new[] { "value1", "value2" }, -1);
         }
 
         // GET api/values/5
         [HttpGet("{key}")]
-        public async Task<string> Get(string key)
+        public async Task<DResult<string>> Get(string key)
         {
             var n = key.Config<string>();
-            return await Task.FromResult($"hello {n}");
+            _logger.Info(n);
+            _logger.Error(n);
+            return await Task.FromResult(Succ($"hello {n}"));
         }
 
         // POST api/values

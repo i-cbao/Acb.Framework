@@ -1,11 +1,7 @@
-﻿using log4net.Core;
-using Acb.Core.Extensions;
-using Acb.Core.Logging;
+﻿using Acb.Core.Logging;
 using Acb.Core.Serialize;
+using log4net.Core;
 using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 using ILogger = log4net.Core.ILogger;
 
 namespace Acb.Framework.Logging
@@ -16,50 +12,6 @@ namespace Acb.Framework.Logging
         public Log4NetLog(ILoggerWrapper wrapper)
         {
             _logger = wrapper.Logger;
-        }
-
-        private static LogInfo Format(string msg, Exception ex = null)
-        {
-            var result = new LogInfo
-            {
-                Message = msg,
-                File = string.Empty,
-                Method = string.Empty,
-                Detail = string.Empty
-            };
-            if (ex != null)
-            {
-                ex = ex.GetBaseException();
-                result.Detail = ex.Format();
-            }
-            var fileFrames = (new StackTrace(true).GetFrames() ?? new StackFrame[] { }).ToList();
-            //Console.WriteLine($"count:{fileFrames.Count}");
-            if (fileFrames.Any())
-            {
-                var index =
-                    fileFrames.FindIndex(t =>
-                    {
-                        var declaringType = t.GetMethod().DeclaringType;
-                        return declaringType != null && declaringType.FullName == "Acb.Core.Logging.Logger";
-                    });
-                if (index < 0) index = fileFrames.Count - 1;
-                else if (index < fileFrames.Count - 1)
-                    index++;
-                //Console.WriteLine($"index:{index}");
-                var frame = fileFrames[index];
-                if (!string.IsNullOrWhiteSpace(frame.GetFileName()))
-                {
-                    result.File =
-                        $"{frame.GetFileName()}:line({frame.GetFileLineNumber()},{frame.GetFileColumnNumber()})";
-                }
-                var method = frame.GetMethod();
-                if (method.DeclaringType != null && method.DeclaringType.MemberType == MemberTypes.NestedType)
-                    method = fileFrames.Last().GetMethod();
-                result.Method = $"{method.DeclaringType}:{method.Name}";
-            }
-            //Console.WriteLine(JsonHelper.ToJson(result));
-            result.SiteName = (log4net.GlobalContext.Properties["LogSite"] ?? string.Empty).ToString();
-            return result;
         }
 
         protected override void WriteInternal(LogLevel level, object message, Exception exception)
@@ -75,8 +27,8 @@ namespace Acb.Framework.Logging
                 else
                     str = JsonHelper.ToJson(message);
             }
-            _logger.Log(typeof(Log4NetLog), ParseLevel(level), Format(str, exception),
-                exception);
+
+            _logger.Log(typeof(Log4NetLog), ParseLevel(level), str, exception);
         }
 
         public override bool IsTraceEnabled => _logger.IsEnabledFor(Level.Trace);

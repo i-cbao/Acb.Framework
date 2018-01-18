@@ -14,9 +14,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Configuration" Version="1.2.0" />
+    <Compile Remove="Logging\DLogLayout.cs" />
+    <Compile Remove="Logging\LogInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
     <PackageReference Include="log4net" Version="2.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Configuration\Acb.Configuration.csproj" />
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Acb.Core.Timing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,37 +9,30 @@ namespace Acb.Core
     [Serializable]
     public class DResult
     {
-        public bool Status { get; set; }
+        public bool Status => Code == 0;
 
         public int Code { get; set; }
 
         public string Message { get; set; }
 
-        public DResult(bool status, string message, int code = 0)
+        public DateTime Timestamp => Clock.Now;
+
+        public DResult(string message, int code = 0)
         {
-            Status = status;
             Message = message;
             Code = code;
         }
 
-        public DResult(string message, int code = -1)
-            : this(false, message, code)
-        {
-        }
-
-        public static DResult Success
-        {
-            get { return new DResult(true, string.Empty); }
-        }
+        public static DResult Success => new DResult(string.Empty);
 
         public static DResult Error(string message, int code = -1)
         {
-            return new DResult(false, message, code);
+            return new DResult(message, code);
         }
 
         public static DResult<T> Succ<T>(T data)
         {
-            return new DResult<T>(true, data);
+            return new DResult<T>(data);
         }
 
         public static DResult<T> Error<T>(string message, int code = -1)
@@ -62,14 +56,14 @@ namespace Acb.Core
     {
         public T Data { get; set; }
 
-        public DResult(bool status, T data, int code = 0)
-            : base(status, string.Empty, code)
+        public DResult(T data)
+            : base(string.Empty)
         {
             Data = data;
         }
 
         public DResult(string message, int code = -1)
-            : base(false, message, code)
+            : base(message, code)
         {
         }
     }
@@ -79,26 +73,34 @@ namespace Acb.Core
     {
         public IEnumerable<T> Data { get; set; }
 
-        public int TotalCount { get; set; }
+        public int Total { get; set; }
 
         public DResults(string message, int code = -1)
-            : base(false, message, code)
+            : base(message, code)
         {
         }
 
         public DResults(IEnumerable<T> list)
-            : base(true, string.Empty)
+            : base(string.Empty)
         {
             var data = list as T[] ?? list.ToArray();
             Data = data;
-            TotalCount = data.Length;
+            Total = data.Length;
         }
 
-        public DResults(IEnumerable<T> list, int totalCount)
-            : base(true, string.Empty)
+        public DResults(IEnumerable<T> list, int total)
+            : base(string.Empty)
         {
             Data = list;
-            TotalCount = totalCount;
+            Total = total;
+        }
+
+        public DResults(IPagedList<T> list)
+            : base(string.Empty)
+        {
+            var data = list as T[] ?? list.ToArray();
+            Data = data;
+            Total = list.Total;
         }
     }
 }

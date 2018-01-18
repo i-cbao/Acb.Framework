@@ -23,7 +23,7 @@ namespace Acb.Dapper.PostgreSql
                 countSql = countSql.Replace($" {order}", string.Empty);
             }
             sql =
-                $"{sql} LIMIT @pageSize OFFSET (@pageIndex-1) * @pageSize;{countSql};";
+                $"{sql} LIMIT @pageSize OFFSET (@index-1) * @pageSize;{countSql};";
             return sql;
         }
 

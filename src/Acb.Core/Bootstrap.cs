@@ -6,7 +6,7 @@ namespace Acb.Core
 {
     public abstract class Bootstrap : IBootstrap
     {
-        public abstract void Initialize(Assembly executingAssembly = null);
+        public abstract void Initialize();
 
         protected bool IsDisposed;
 
@@ -14,7 +14,7 @@ namespace Acb.Core
         public IIocManager IocManager { get; protected set; }
 
         /// <summary> 注册依赖 </summary>
-        public abstract void IocRegisters(Assembly executingAssembly);
+        public abstract void IocRegisters();
 
         /// <summary> 初始化各个模块 </summary>
         public void ModulesInstaller()

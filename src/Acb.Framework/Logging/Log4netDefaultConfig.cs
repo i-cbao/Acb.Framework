@@ -1,4 +1,6 @@
-﻿using Acb.Core.Timing;
+﻿using Acb.Core;
+using Acb.Core.Domain;
+using Acb.Core.Timing;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Filter;
@@ -8,6 +10,12 @@ namespace Acb.Framework.Logging
 {
     internal class Log4NetDefaultConfig
     {
+        private static readonly ILayout NormalLayout =
+            new PatternLayout(
+                "[%property{LogSite}][%date][%r] [%thread] %-5level %logger [%message%exception]%n");
+        private static readonly ILayout ErrorLayout =
+            new PatternLayout("[%property{LogSite}][%date][%r] [%thread] %-5level %logger [%message]%n%exception%n");
+
         private static RollingFileAppender BaseAppender(string name, string file, ILayout layout)
         {
             return new RollingFileAppender
@@ -27,13 +35,13 @@ namespace Acb.Framework.Logging
 
         private static IAppender DebugAppender()
         {
-            var layout = new PatternLayout("[%date] [%thread] %-5level %{LogSite} %logger %method [%message%exception]%n");
-            var file = $"_logs\\debug_{Clock.Now:yyyyMM}\\";
-            var appender = BaseAppender("rollingFile", file, layout);
+            var file = $"_logs\\{Clock.Now:yyyyMM}\\";
+            var appender = BaseAppender("rollingFile", file, NormalLayout);
             appender.ClearFilters();
+            var minLevel = Consts.Mode == ProductMode.Production ? Level.Info : Level.Debug;
             appender.AddFilter(new LevelRangeFilter
             {
-                LevelMin = Level.Debug,
+                LevelMin = minLevel,
                 LevelMax = Level.Warn
             });
             return appender;
@@ -41,10 +49,8 @@ namespace Acb.Framework.Logging
 
         private static IAppender ErrorAppender()
         {
-            var layout = new PatternLayout("[%date] [%thread] %-5level %{LogSite} %logger %l [%message%n%exception]%n");
             var file = $"_logs\\error_{Clock.Now:yyyyMM}\\";
-            var appender = BaseAppender("errorRollingFile", file, layout);
-            appender.ClearFilters();
+            var appender = BaseAppender("errorRollingFile", file, ErrorLayout);
             appender.AddFilter(new LevelRangeFilter
             {
                 LevelMin = Level.Error,

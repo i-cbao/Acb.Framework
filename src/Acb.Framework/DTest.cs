@@ -2,7 +2,6 @@
 using Acb.Core.Serialize;
 using Acb.Framework.Logging;
 using System;
-using System.Reflection;
 
 namespace Acb.Framework
 {
@@ -10,11 +9,11 @@ namespace Acb.Framework
     {
         protected DBootstrap Bootstrap;
 
-        protected DTest(Assembly executingAssembly)
+        protected DTest()
         {
             Bootstrap = DBootstrap.Instance;
-            Bootstrap.Initialize(executingAssembly);
-            LogManager.ClearAdapter();
+            Bootstrap.Initialize();
+            //LogManager.ClearAdapter();
             LogManager.AddAdapter(new ConsoleAdapter());
         }
 

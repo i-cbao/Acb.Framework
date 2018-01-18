@@ -3,20 +3,19 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Reflection;
 
 namespace Acb.WebApi.Test
 {
     public class Startup : DStartup
     {
         public Startup(IConfiguration configuration)
-        : base(Assembly.GetExecutingAssembly())
         {
             Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
 
+        // This method gets called by the runtime. Use this method to add services to the container.
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
             return base.ConfigureServices(services);
@@ -29,6 +28,7 @@ namespace Acb.WebApi.Test
             {
                 app.UseDeveloperExceptionPage();
             }
+
             base.Configure(app, env);
         }
     }

@@ -1,17 +1,13 @@
 ﻿using Acb.Core;
 using Acb.Dapper;
-using NUnit.Framework;
-using System.Reflection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Acb.Framework.Tests
 {
+    [TestClass]
     public class DapperTest : DTest
     {
-        public DapperTest() : base(Assembly.GetExecutingAssembly())
-        {
-        }
-
-        [Test]
+        [TestMethod]
         public void PagedTest()
         {
             //SQL insert = "insert into [mscreen_user] () values (@id,@name)";
@@ -19,12 +15,12 @@ namespace Acb.Framework.Tests
             using (var conn = ConnectionFactory.Instance.Connection("default", false))
             {
                 var list = sql.PagedList<dynamic>(conn, 1, 10, new { name = "shay" });
-                Print(DResult.Succ(list, list.TotalCount));
+                Print(DResult.Succ(list, list.Total));
             }
         }
 
 
-        [Test]
+        [TestMethod]
         public void UpdateTest()
         {
             using (var conn = ConnectionFactory.Instance.Connection("default", false))

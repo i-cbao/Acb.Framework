@@ -13,54 +13,54 @@ namespace Acb.Core
         /// 
         /// </summary>
         /// <param name="queryable"></param>
-        /// <param name="pageIndex">页索引（从1开始）</param>
-        /// <param name="pageCount"></param>
-        public PagedList(IQueryable<TEntity> queryable, int pageIndex, int pageCount)
+        /// <param name="index">页索引（从1开始）</param>
+        /// <param name="size"></param>
+        public PagedList(IQueryable<TEntity> queryable, int index, int size)
         {
             var total = queryable.Count();
-            TotalCount = total;
-            TotalPages = total / pageCount;
+            Total = total;
+            Pages = total / size;
 
-            if (total % pageCount > 0)
-                TotalPages++;
+            if (total % size > 0)
+                Pages++;
 
-            PageSize = pageCount;
-            PageIndex = pageIndex;
-            AddRange(queryable.Skip((pageIndex - 1) * pageCount).Take(pageCount).ToList());
+            Size = size;
+            Index = index;
+            AddRange(queryable.Skip((index - 1) * size).Take(size).ToList());
         }
 
         /// <summary> 数据分页 </summary>
         /// <param name="list"></param>
-        /// <param name="pageIndex">页索引（从1开始）</param>
-        /// <param name="pageCount"></param>
-        public PagedList(IList<TEntity> list, int pageIndex, int pageCount)
+        /// <param name="index">页索引（从1开始）</param>
+        /// <param name="size"></param>
+        public PagedList(IList<TEntity> list, int index, int size)
         {
-            TotalCount = list.Count();
-            TotalPages = TotalCount / pageCount;
+            Total = list.Count();
+            Pages = Total / size;
 
-            if (TotalCount % pageCount > 0)
-                TotalPages++;
+            if (Total % size > 0)
+                Pages++;
 
-            PageSize = pageCount;
-            PageIndex = pageIndex;
-            AddRange(list.Skip((pageIndex - 1) * pageCount).Take(pageCount).ToList());
+            Size = size;
+            Index = index;
+            AddRange(list.Skip((index - 1) * size).Take(size).ToList());
         }
 
         /// <summary> 初始化数据 </summary>
         /// <param name="enumerable"></param>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageCount"></param>
-        /// <param name="totalCount"></param>
-        public PagedList(IEnumerable<TEntity> enumerable, int pageIndex, int pageCount, int totalCount)
+        /// <param name="index"></param>
+        /// <param name="size"></param>
+        /// <param name="total"></param>
+        public PagedList(IEnumerable<TEntity> enumerable, int index, int size, int total)
         {
-            TotalCount = totalCount;
-            TotalPages = TotalCount / pageCount;
+            Total = total;
+            Pages = Total / size;
 
-            if (TotalCount % pageCount > 0)
-                TotalPages++;
+            if (Total % size > 0)
+                Pages++;
 
-            PageSize = pageCount;
-            PageIndex = pageIndex;
+            Size = size;
+            Index = index;
             AddRange(enumerable);
         }
 
@@ -70,22 +70,22 @@ namespace Acb.Core
         /// <returns></returns>
         public PagedList<T> ConvertData<T>(IEnumerable<T> enumerable)
         {
-            return new PagedList<T>(enumerable, PageIndex, PageSize, TotalCount);
+            return new PagedList<T>(enumerable, Index, Size, Total);
         }
 
         /// <summary> 页码(从1开始) </summary>
-        public int PageIndex { set; get; }
+        public int Index { set; get; }
         /// <summary> 每页数量 </summary>
-        public int PageSize { set; get; }
+        public int Size { set; get; }
         /// <summary> 总数量 </summary>
-        public int TotalCount { set; get; }
+        public int Total { set; get; }
         /// <summary> 总页数 </summary>
-        public int TotalPages { set; get; }
+        public int Pages { set; get; }
 
         /// <summary> 是否有上一页 </summary>
-        public bool HasPrev => PageIndex > 1;
+        public bool HasPrev => Index > 1;
 
         /// <summary> 是否有下一页 </summary>
-        public bool HasNext => PageIndex < TotalPages;
+        public bool HasNext => Index < Pages;
     }
 }

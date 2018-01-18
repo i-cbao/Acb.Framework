@@ -151,7 +151,7 @@ namespace Acb.Dapper
 
             sql = conn.PagedSql(sql, columns, order);
 
-            _parameters.Add("pageIndex", page);
+            _parameters.Add("index", page);
             _parameters.Add("pageSize", size);
             _sqlBuilder.Clear();
             _sqlBuilder.Append(sql);

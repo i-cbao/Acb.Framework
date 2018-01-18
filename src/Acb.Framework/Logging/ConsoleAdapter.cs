@@ -31,18 +31,22 @@ namespace Acb.Framework.Logging
         {
             lock (LockObj)
             {
-                if (_logColors.ContainsKey(level))
-                    Console.ForegroundColor = _logColors[level];
-                if (_simpleTypes.Contains(message.GetType()))
+                if (message != null)
                 {
+                    if (_logColors.ContainsKey(level))
+                        Console.ForegroundColor = _logColors[level];
+                    if (_simpleTypes.Contains(message.GetType()))
+                    {
 
-                    Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]\t{message}");
+                        Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]\t{message}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]");
+                        Console.WriteLine(JsonHelper.ToJson(message, NamingType.CamelCase, true));
+                    }
                 }
-                else
-                {
-                    Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]");
-                    Console.WriteLine(JsonHelper.ToJson(message, NamingType.CamelCase, true));
-                }
+
                 if (exception != null)
                 {
                     Console.WriteLine(exception.Format());

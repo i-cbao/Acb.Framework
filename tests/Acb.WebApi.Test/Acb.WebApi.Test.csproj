@@ -5,22 +5,35 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\**" />
-    <Content Remove="wwwroot\**" />
-    <EmbeddedResource Remove="wwwroot\**" />
-    <None Remove="wwwroot\**" />
+    <Compile Remove="_logs\**" />
+    <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="_logs\**" />
+    <None Remove="_logs\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Acb.Configuration\Acb.Configuration.csproj" />
     <ProjectReference Include="..\..\src\Acb.Core\Acb.Core.csproj" />
-    <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.WebApi\Acb.WebApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

@@ -18,8 +18,8 @@ namespace Acb.Configuration
     public static class HttpClientHelper
     {
         internal static Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool> ReflectedDelegate;
-        private const int DEFAULT_GETACCESSTOKEN_TIMEOUT = 10000;
-        private const bool DEFAULT_VALIDATE_CERTIFICATES = true;
+        //private const int DEFAULT_GETACCESSTOKEN_TIMEOUT = 10000;
+        //private const bool DEFAULT_VALIDATE_CERTIFICATES = true;
 
         public const string NetFramework = ".NET Framework";
         public const string NetCore = ".NET Core";
