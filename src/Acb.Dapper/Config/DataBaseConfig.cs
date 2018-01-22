@@ -2,37 +2,18 @@
 
 namespace Acb.Dapper.Config
 {
-    ///// <summary> 数据库连接配置 </summary>
-    //[Serializable]
-    //public class DataBaseConfig
-    //{
-    //    public List<ConnectionConfig> Connections { get; set; }
-
-    //    public DataBaseConfig()
-    //    {
-    //        Connections = new List<ConnectionConfig>();
-    //    }
-
-    //    public ConnectionConfig Get(string name)
-    //    {
-    //        var item =
-    //            Connections.FirstOrDefault(t => string.Equals(t.Name, name, StringComparison.CurrentCultureIgnoreCase));
-    //        //if (item != null && item.IsEncrypt)
-    //        //{
-    //        //    item.ConnectionString = SecurityHelper.Decode(item.ConnectionString);
-    //        //}
-    //        return item;
-    //    }
-    //}
 
     [Serializable]
     public class ConnectionConfig
     {
+        /// <summary> 连接名称 </summary>
         public string Name { get; set; }
 
         //[XmlAttribute("is_encrypt")]
         //public bool IsEncrypt { get; set; }
+        /// <summary> 数据库驱动名称 </summary>
         public string ProviderName { get; set; } = "SqlServer";
+        /// <summary> 连接字符串 </summary>
         public string ConnectionString { get; set; }
     }
 }

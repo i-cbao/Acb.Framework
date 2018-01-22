@@ -23,6 +23,9 @@ namespace Acb.Core
             return obj.CastTo(def);
         }
 
+        /// <summary> MD5 </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
         public static string Md5(string str)
         {
             return EncryptHelper.Hash(str, EncryptHelper.HashFormat.MD532);

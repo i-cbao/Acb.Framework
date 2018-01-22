@@ -35,7 +35,7 @@ namespace Acb.Framework.Logging
 
         private static IAppender DebugAppender()
         {
-            var file = "dd\".log\"";
+            const string file = "dd\".log\"";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
             appender.ClearFilters();
             var minLevel = Consts.Mode == ProductMode.Production ? Level.Info : Level.Debug;
@@ -49,7 +49,7 @@ namespace Acb.Framework.Logging
 
         private static IAppender ErrorAppender()
         {
-            var file = "dd\"_error.log\"";
+            const string file = "dd\"_error.log\"";
             var appender = BaseAppender("errorRollingFile", file, ErrorLayout);
             appender.AddFilter(new LevelRangeFilter
             {

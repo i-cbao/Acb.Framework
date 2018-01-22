@@ -1,13 +1,15 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Modules;
-using System.Reflection;
 
 namespace Acb.Core
 {
+    /// <summary> 启动基类 </summary>
     public abstract class Bootstrap : IBootstrap
     {
+        /// <summary> 初始化 </summary>
         public abstract void Initialize();
 
+        /// <summary> 是否已释放 </summary>
         protected bool IsDisposed;
 
         /// <summary> 注入管理 </summary>
@@ -31,6 +33,7 @@ namespace Acb.Core
         /// <summary> 数据库初始化 </summary>
         public abstract void DatabaseInit();
 
+        /// <summary> 释放资源 </summary>
         public virtual void Dispose()
         {
             if (IsDisposed) return;

@@ -4,11 +4,9 @@ using Acb.Dapper.Adapters;
 using Dapper;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -189,32 +187,32 @@ namespace Acb.Dapper
             return conn.Execute(sql, models.ToArray(), trans);
         }
 
-        public static int Update<T>(this IDbConnection conn, Expression<Func<T, dynamic>> propExpression, string where,
-            object param = null, IDbTransaction trans = null)
-        {
-            var tableName = typeof(T).PropName();
-            SQL sql = $"UPDATE FROM [{tableName}] SET ";
-            ReadOnlyCollection<MemberInfo> memberInfos = ((dynamic)propExpression.Body).Members;
-            if (memberInfos.Count == 0) return 0;
-            var ps = new DynamicParameters();
-            foreach (var info in memberInfos)
-            {
-                var name = info.PropName();
-                sql += $"[{name}]=@{name}";
-                //ps.Add(name,propExpression);
-                // :todo 
-            }
+        //public static int Update<T>(this IDbConnection conn, Expression<Func<T, dynamic>> propExpression, string where,
+        //    object param = null, IDbTransaction trans = null)
+        //{
+        //    var tableName = typeof(T).PropName();
+        //    SQL sql = $"UPDATE FROM [{tableName}] SET ";
+        //    ReadOnlyCollection<MemberInfo> memberInfos = ((dynamic)propExpression.Body).Members;
+        //    if (memberInfos.Count == 0) return 0;
+        //    var ps = new DynamicParameters();
+        //    foreach (var info in memberInfos)
+        //    {
+        //        var name = info.PropName();
+        //        sql += $"[{name}]=@{name}";
+        //        //ps.Add(name,propExpression);
+        //        // :todo 
+        //    }
 
-            if (param != null)
-                ps.AddDynamicParams(param);
-            return conn.Execute(sql.ToString(), ps, trans);
-        }
+        //    if (param != null)
+        //        ps.AddDynamicParams(param);
+        //    return conn.Execute(sql.ToString(), ps, trans);
+        //}
 
-        /// <summary> 删除 </summary>
-        /// <param name="conn"></param>
-        /// <param name="value"></param>
-        /// <param name="keyColumn"></param>
-        /// <param name="trans"></param>
+        /// <summary> 删除数据 </summary>
+        /// <param name="conn">连接</param>
+        /// <param name="value">列值</param>
+        /// <param name="keyColumn">列名</param>
+        /// <param name="trans">事务</param>
         /// <returns></returns>
         public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = "id", IDbTransaction trans = null)
         {
@@ -239,6 +237,12 @@ namespace Acb.Dapper
             return conn.Execute(sql, param, trans);
         }
 
+        /// <summary> 是否存在 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="column"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public static bool Exists<T>(this IDbConnection conn, string column, object value)
         {
             var tableName = typeof(T).PropName();
@@ -247,6 +251,12 @@ namespace Acb.Dapper
             return conn.QueryFirstOrDefault<int>(sql, new { value }) > 0;
         }
 
+        /// <summary> 是否存在 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="where"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public static bool ExistsWhere<T>(this IDbConnection conn, string where = null, object param = null)
         {
             var tableName = typeof(T).PropName();
@@ -257,6 +267,13 @@ namespace Acb.Dapper
             return conn.QueryFirstOrDefault<int>(sqlStr, param) > 0;
         }
 
+        /// <summary> 最小 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="column"></param>
+        /// <param name="where"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public static long Min<T>(this IDbConnection conn, string column, string where = null, object param = null)
         {
             var tableName = typeof(T).PropName();
@@ -267,6 +284,13 @@ namespace Acb.Dapper
             return conn.QueryFirstOrDefault<long>(sqlStr, param);
         }
 
+        /// <summary> 最大 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="column"></param>
+        /// <param name="where"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
         public static long Max<T>(this IDbConnection conn, string column, string where = null, object param = null)
         {
             var tableName = typeof(T).PropName();

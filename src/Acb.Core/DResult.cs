@@ -17,14 +17,21 @@ namespace Acb.Core
 
         public DateTime Timestamp => Clock.Now;
 
+        public DResult() : this(string.Empty) { }
+
         public DResult(string message, int code = 0)
         {
             Message = message;
             Code = code;
         }
 
+        /// <summary> 成功 </summary>
         public static DResult Success => new DResult(string.Empty);
 
+        /// <summary> 错误的结果 </summary>
+        /// <param name="message"></param>
+        /// <param name="code"></param>
+        /// <returns></returns>
         public static DResult Error(string message, int code = -1)
         {
             return new DResult(message, code);
@@ -56,6 +63,7 @@ namespace Acb.Core
     {
         public T Data { get; set; }
 
+        public DResult() : this(default(T)) { }
         public DResult(T data)
             : base(string.Empty)
         {
@@ -71,9 +79,13 @@ namespace Acb.Core
     [Serializable]
     public class DResults<T> : DResult
     {
+        /// <summary> 数据集合 </summary>
         public IEnumerable<T> Data { get; set; }
-
+        /// <summary> 总数 </summary>
         public int Total { get; set; }
+
+        /// <summary> 默认构造函数 </summary>
+        public DResults() : this(string.Empty) { }
 
         public DResults(string message, int code = -1)
             : base(message, code)
