@@ -10,6 +10,7 @@
     <RootNamespace>Acb.Dapper.MySql</RootNamespace>
     <Company>成都爱车保信息技术有限公司</Company>
     <Version>1.2.2</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -17,8 +18,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Dapper" Version="1.2.0" />
     <PackageReference Include="MySql.Data" Version="6.10.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
   </ItemGroup>
 
 </Project>

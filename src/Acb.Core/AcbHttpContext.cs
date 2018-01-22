@@ -12,11 +12,10 @@ namespace Acb.Core
         private static IHttpContextAccessor _accessor;
         private const string DefaultIp = "127.0.0.1";
 
+        /// <summary> 当前请求上下文 </summary>
         public static HttpContext Current => _accessor?.HttpContext;
 
-        /// <summary>
-        /// 客户端IP
-        /// </summary>
+        /// <summary> 客户端IP </summary>
         public static string RemoteIpAddress
         {
             get
@@ -48,9 +47,7 @@ namespace Acb.Core
                 return userHostAddress;
             }
         }
-        /// <summary>
-        /// 本地IP
-        /// </summary>
+        /// <summary> 本地IP </summary>
         public static string LocalIpAddress
         {
             get
@@ -58,33 +55,22 @@ namespace Acb.Core
                 return Current == null ? DefaultIp : Current.Connection.LocalIpAddress.ToString();
             }
         }
-        /// <summary>
-        /// 请求类型
-        /// </summary>
+        /// <summary> 请求类型 </summary>
         public static string RequestType => Current.Request.Method;
 
-        /// <summary>
-        /// 表单
-        /// </summary>
+        /// <summary> 表单 </summary>
         public static IFormCollection Form => Current.Request.Form;
-        /// <summary>
-        /// 请求体
-        /// </summary>
+
+        /// <summary> 请求体 </summary>
         public static Stream Body => Current.Request.Body;
 
-        /// <summary>
-        /// 用户代理
-        /// </summary>
+        /// <summary> 用户代理 </summary>
         public static string UserAgent => Current.Request.Headers["User-Agent"];
 
-        /// <summary>
-        /// 内容类型
-        /// </summary>
+        /// <summary> 内容类型 </summary>
         public static string ContentType => Current.Request.ContentType;
 
-        /// <summary>
-        /// 参数
-        /// </summary>
+        /// <summary> 参数 </summary>
         public static string QueryString => Current.Request.QueryString.ToString();
 
         /// <summary> 配置HttpContext </summary>
@@ -94,9 +80,7 @@ namespace Acb.Core
             _accessor = accessor;
         }
 
-        /// <summary>
-        /// 获取客户端IP
-        /// </summary>
+        /// <summary> 获取客户端IP </summary>
         public static string ClientIp => RemoteIpAddress;
     }
 }

@@ -7,6 +7,7 @@
     <Authors>icb@shay</Authors>
     <Company>成都爱车保信息技术有限公司</Company>
     <Version>1.2.2</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -14,9 +15,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Core" Version="1.2.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.5.0" />
     <PackageReference Include="MongoDB.Driver.GridFS" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,6 +7,7 @@
     <Product>爱车保 - Redis基础类</Product>
     <Description>爱车保 - Redis基础类</Description>
     <Version>1.2.2</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -18,8 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Acb.Core" Version="1.2.0" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
   </ItemGroup>
 
 </Project>
