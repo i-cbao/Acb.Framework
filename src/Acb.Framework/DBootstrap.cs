@@ -1,12 +1,10 @@
-﻿using Autofac;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Cache;
 using Acb.Core.Dependency;
 using Acb.Core.Logging;
 using Acb.Framework.Logging;
-using System;
+using Autofac;
 using System.Linq;
-using System.Reflection;
 
 namespace Acb.Framework
 {

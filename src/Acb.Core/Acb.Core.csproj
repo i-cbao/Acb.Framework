@@ -7,7 +7,11 @@
     <Company>成都爱车保信息技术有限公司</Company>
     <Product>爱车保 - 基础核心类</Product>
     <Description>爱车保 - 基础核心类</Description>
-    <Version>1.2.0</Version>
+    <Version>1.2.2</Version>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>http://192.168.0.110:8080/tfs/DefaultCollection/icb/_git/Acb.Framework</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Copyright />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -27,6 +31,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="2.0.4" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
   </ItemGroup>
 
 </Project>

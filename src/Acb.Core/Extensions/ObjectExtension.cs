@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Dynamic;
@@ -56,9 +55,9 @@ namespace Acb.Core.Extensions
                     return obj;
                 if (conversionType.IsEnum)
                 {
-                    if (obj is string)
-                        return Enum.Parse(conversionType, obj as string);
-                    return Enum.ToObject(conversionType, obj);
+                    return obj is string s
+                        ? Enum.Parse(conversionType, s)
+                        : Enum.ToObject(conversionType, obj);
                 }
                 if (!conversionType.IsInterface && conversionType.IsGenericType)
                 {
@@ -66,13 +65,16 @@ namespace Acb.Core.Extensions
                     var innerValue = CastTo(obj, innerType);
                     return Activator.CreateInstance(conversionType, innerValue);
                 }
-                if (obj is string && conversionType == typeof(Guid))
-                    return new Guid(obj as string);
-                if (obj is string && conversionType == typeof(Version))
-                    return new Version(obj as string);
-                if (!(obj is IConvertible))
-                    return obj;
-                return Convert.ChangeType(obj, conversionType);
+
+                switch (obj)
+                {
+                    case string _ when conversionType == typeof(Guid):
+                        return new Guid(obj as string);
+                    case string _ when conversionType == typeof(Version):
+                        return new Version(obj as string);
+                }
+
+                return !(obj is IConvertible) ? obj : Convert.ChangeType(obj, conversionType);
             }
             catch
             {
@@ -93,7 +95,7 @@ namespace Acb.Core.Extensions
                 var val = property.GetValue(value);
                 if (property.PropertyType.FullName.StartsWith("<>f__AnonymousType"))
                 {
-                    dynamic dval = val.ToDynamic();
+                    var dval = val.ToDynamic();
                     expando.Add(property.Name, dval);
                 }
                 else

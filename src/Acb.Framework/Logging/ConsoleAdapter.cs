@@ -4,13 +4,11 @@ using Acb.Core.Serialize;
 using Acb.Core.Timing;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Acb.Framework.Logging
 {
     public class ConsoleLog : LogBase
     {
-        private readonly Type[] _simpleTypes = { typeof(string), typeof(int), typeof(double), typeof(float), typeof(decimal), typeof(byte), typeof(long) };
         private static readonly object LockObj = new object();
 
         private readonly Dictionary<LogLevel, ConsoleColor> _logColors = new Dictionary<LogLevel, ConsoleColor>
@@ -35,7 +33,7 @@ namespace Acb.Framework.Logging
                 {
                     if (_logColors.ContainsKey(level))
                         Console.ForegroundColor = _logColors[level];
-                    if (_simpleTypes.Contains(message.GetType()))
+                    if (message.GetType().IsSimpleType())
                     {
 
                         Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]\t{message}");

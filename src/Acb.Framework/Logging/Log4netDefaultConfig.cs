@@ -12,20 +12,20 @@ namespace Acb.Framework.Logging
     {
         private static readonly ILayout NormalLayout =
             new PatternLayout(
-                "[%property{LogSite}][%date][%r] [%thread] %-5level %logger [%message%exception]%n");
+                "#%property{LogSite}#%date#%r#%thread#%-5level#%logger#%message#%exception#%n");
         private static readonly ILayout ErrorLayout =
-            new PatternLayout("[%property{LogSite}][%date][%r] [%thread] %-5level %logger [%message]%n%exception%n");
+            new PatternLayout("#%property{LogSite}#%date#%r#%thread#%-5level#%logger#%message#%exception#%n");
 
         private static RollingFileAppender BaseAppender(string name, string file, ILayout layout)
         {
             return new RollingFileAppender
             {
                 Name = name,
-                File = file,
+                File = $"_logs\\{Clock.Now:yyyyMM}\\",
                 AppendToFile = true,
                 LockingModel = new FileAppender.MinimalLock(),
                 RollingStyle = RollingFileAppender.RollingMode.Date,
-                DatePattern = "dd\".log\"",
+                DatePattern = file,
                 StaticLogFileName = false,
                 MaxSizeRollBackups = 100,
                 MaximumFileSize = "2MB",
@@ -35,7 +35,7 @@ namespace Acb.Framework.Logging
 
         private static IAppender DebugAppender()
         {
-            var file = $"_logs\\{Clock.Now:yyyyMM}\\";
+            var file = "dd\".log\"";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
             appender.ClearFilters();
             var minLevel = Consts.Mode == ProductMode.Production ? Level.Info : Level.Debug;
@@ -49,7 +49,7 @@ namespace Acb.Framework.Logging
 
         private static IAppender ErrorAppender()
         {
-            var file = $"_logs\\error_{Clock.Now:yyyyMM}\\";
+            var file = "dd\"_error.log\"";
             var appender = BaseAppender("errorRollingFile", file, ErrorLayout);
             appender.AddFilter(new LevelRangeFilter
             {

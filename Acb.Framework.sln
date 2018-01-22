@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Configuration", "src\Ac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Framework.Tests", "tests\Acb.Framework.Tests\Acb.Framework.Tests.csproj", "{B522CC19-0CA3-4B4F-8FD0-2686E375A028}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.WebApi.Test", "tests\Acb.WebApi.Test\Acb.WebApi.Test.csproj", "{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.WebApi.Test", "tests\Acb.WebApi.Test\Acb.WebApi.Test.csproj", "{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -94,7 +94,7 @@ namespace Acb.Core.Extensions
         /// <returns></returns>
         public static void Foreach(this int instance, Action<int> action)
         {
-            for (int i = 0; i < instance; i++)
+            for (var i = 0; i < instance; i++)
             {
                 action(i);
             }
@@ -108,7 +108,7 @@ namespace Acb.Core.Extensions
         /// <typeparam name="T"></typeparam>
         public static void Foreach<T>(this IEnumerable<T> instance, Action<T> action)
         {
-            foreach (T item in instance)
+            foreach (var item in instance)
             {
                 action(item);
             }
@@ -217,8 +217,7 @@ namespace Acb.Core.Extensions
         private static void SortByDependenciesVisited<T>(T item, Func<T, IEnumerable<T>> getDependencies,
             ICollection<T> sorted, IDictionary<T, bool> visitDict)
         {
-            bool visited;
-            if (visitDict.TryGetValue(item, out visited))
+            if (visitDict.TryGetValue(item, out var visited))
             {
                 if (visited)
                 {

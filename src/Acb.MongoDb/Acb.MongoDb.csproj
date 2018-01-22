@@ -6,7 +6,7 @@
     <Description>爱车保 - MongoDb基础类</Description>
     <Authors>icb@shay</Authors>
     <Company>成都爱车保信息技术有限公司</Company>
-    <Version>1.2.0</Version>
+    <Version>1.2.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

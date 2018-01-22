@@ -5,6 +5,7 @@ using Acb.Core.Modules;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace Acb.Core
 {
@@ -14,7 +15,7 @@ namespace Acb.Core
         public override void Initialize()
         {
             CurrentIocManager.IocManager = IocManager;
-
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             var configPath = "configPath".Config<string>();
             if (!string.IsNullOrWhiteSpace(configPath))
             {

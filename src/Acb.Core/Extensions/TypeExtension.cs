@@ -13,6 +13,28 @@ namespace Acb.Core.Extensions
     /// </summary>
     public static class TypeExtension
     {
+        private static readonly List<Type> SimpleTypes = new List<Type>
+        {
+            typeof(byte),
+            typeof(sbyte),
+            typeof(short),
+            typeof(ushort),
+            typeof(int),
+            typeof(uint),
+            typeof(long),
+            typeof(ulong),
+            typeof(float),
+            typeof(double),
+            typeof(decimal),
+            typeof(bool),
+            typeof(string),
+            typeof(char),
+            typeof(Guid),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(byte[])
+        };
+
         /// <summary>
         /// 判断类型是否为Nullable类型
         /// </summary>
@@ -43,6 +65,19 @@ namespace Acb.Core.Extensions
             if (!IsNullableType(type)) return type;
             var nullableConverter = new NullableConverter(type);
             return nullableConverter.UnderlyingType;
+        }
+
+        /// <summary> 是否是简单类型 </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsSimpleType(this Type type)
+        {
+            var actualType = type;
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                actualType = type.GetGenericArguments()[0];
+            }
+            return SimpleTypes.Contains(actualType);
         }
 
         /// <summary>
@@ -94,6 +129,10 @@ namespace Acb.Core.Extensions
             return memberInfo.GetCustomAttributes(typeof(T), inherit).Cast<T>().ToArray();
         }
 
+        /// <summary> 属性名(Naming属性) </summary>
+        /// <param name="item"></param>
+        /// <param name="namingType"></param>
+        /// <returns></returns>
         public static string PropName(this MemberInfo item, NamingType? namingType = null)
         {
             var propAttr = item.GetCustomAttribute<NamingAttribute>(true);
@@ -116,9 +155,7 @@ namespace Acb.Core.Extensions
             }
         }
 
-        /// <summary>
-        /// 判断类型是否为集合类型
-        /// </summary>
+        /// <summary> 判断类型是否为集合类型 </summary>
         /// <param name="type">要处理的类型</param>
         /// <returns>是返回True，不是返回False</returns>
         public static bool IsEnumerable(this Type type)
@@ -126,9 +163,7 @@ namespace Acb.Core.Extensions
             return type != typeof(string) && typeof(IEnumerable).IsAssignableFrom(type);
         }
 
-        /// <summary>
-        /// 判断当前泛型类型是否可由指定类型的实例填充
-        /// </summary>
+        /// <summary> 判断当前泛型类型是否可由指定类型的实例填充 </summary>
         /// <param name="genericType">泛型类型</param>
         /// <param name="type">指定类型</param>
         /// <returns></returns>

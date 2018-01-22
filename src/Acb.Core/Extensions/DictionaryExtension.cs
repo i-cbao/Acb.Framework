@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Acb.Core.Serialize;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Acb.Core.Serialize;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -14,9 +14,7 @@ namespace Acb.Core.Extensions
 {
     public static class DictionaryExtension
     {
-        /// <summary>
-        /// 添加或更新
-        /// </summary>
+        /// <summary> 添加或更新 </summary>
         /// <param name="dict"></param>
         /// <param name="key"></param>
         /// <param name="value"></param>
@@ -34,9 +32,7 @@ namespace Acb.Core.Extensions
             }
         }
 
-        /// <summary>
-        /// 获取值
-        /// </summary>
+        /// <summary> 获取值 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="dict"></param>
         /// <param name="key"></param>
@@ -44,16 +40,14 @@ namespace Acb.Core.Extensions
         /// <returns></returns>
         public static T GetValue<T>(this IDictionary<string, object> dict, string key, T def = default(T))
         {
-            if (dict.TryGetValue(key, out object value) && value != null)
+            if (dict.TryGetValue(key, out var value) && value != null)
             {
                 return value.CastTo(def);
             }
             return def;
         }
 
-        /// <summary>
-        /// Url格式
-        /// </summary>
+        /// <summary> Url格式 </summary>
         /// <param name="dict"></param>
         /// <param name="encode"></param>
         /// <returns></returns>
@@ -62,15 +56,13 @@ namespace Acb.Core.Extensions
             var sb = new StringBuilder();
             foreach (var item in dict)
             {
-                string value = item.Value.ToString();
+                var value = item.Value.ToString();
                 sb.AppendFormat("{0}={1}&", item.Key, encode ? value.UrlEncode() : value);
             }
             return sb.ToString().TrimEnd('&');
         }
 
-        /// <summary>
-        /// 将Url格式数据转换为字典
-        /// </summary>
+        /// <summary> 将Url格式数据转换为字典 </summary>
         /// <param name="url">url数据</param>
         /// <param name="decode">是否需要url解码</param>
         /// <returns></returns>
@@ -102,9 +94,7 @@ namespace Acb.Core.Extensions
             }
         }
 
-        /// <summary>
-        /// 将网关数据转成Xml格式数据
-        /// </summary>
+        /// <summary> 将网关数据转成Xml格式数据 </summary>
         /// <returns></returns>
         public static string ToXml(this IDictionary<string, object> dict)
         {
@@ -117,25 +107,18 @@ namespace Acb.Core.Extensions
             sb.Append("<xml>");
             foreach (var item in dict)
             {
-                if (item.Value is string)
-                {
-                    sb.AppendFormat("<{0}><![CDATA[{1}]]></{0}>", item.Key, item.Value);
-
-                }
-                else
-                {
-                    sb.AppendFormat("<{0}>{1}</{0}>", item.Key, item.Value);
-                }
+                sb.AppendFormat(item.Value is string ? "<{0}><![CDATA[{1}]]></{0}>" : "<{0}>{1}</{0}>", item.Key,
+                    item.Value);
             }
             sb.Append("</xml>");
 
             return sb.ToString();
         }
 
-        /// <summary>
-        /// 将Xml格式数据转换为字典
-        /// </summary>
+        /// <summary> 将Xml格式数据转换为字典 </summary>
+        /// <param name="dict"></param>
         /// <param name="xml">Xml数据</param>
+        /// <param name="clear">是否清空之前的字典数据</param>
         /// <returns></returns>
         public static void FromXml(this IDictionary<string, object> dict, string xml, bool clear = true)
         {
@@ -156,9 +139,7 @@ namespace Acb.Core.Extensions
             }
         }
 
-        /// <summary>
-        /// 将键值对转换为字典
-        /// </summary>
+        /// <summary> 将键值对转换为字典 </summary>
         /// <param name="dict"></param>
         /// <param name="collection"></param>
         public static void FromNameValueCollection(this IDictionary<string, object> dict, NameValueCollection collection)
@@ -169,9 +150,8 @@ namespace Acb.Core.Extensions
             }
         }
 
-        /// <summary>
-        /// 转换为表单数据
-        /// </summary>
+        /// <summary> 转换为表单数据 </summary>
+        /// <param name="dict"></param>
         /// <param name="url">请求地址</param>
         /// <returns></returns>
         public static string ToForm(this IDictionary<string, object> dict, string url)
@@ -192,19 +172,18 @@ namespace Acb.Core.Extensions
             return html.ToString();
         }
 
-        /// <summary>
-        /// 转成Json格式数据
-        /// </summary>
+        /// <summary> 转成Json格式数据 </summary>
+        /// <param name="dict"></param>
         /// <returns></returns>
         public static string ToJson(this IDictionary<string, object> dict)
         {
             return JsonConvert.SerializeObject(dict);
         }
 
-        /// <summary>
-        /// 将Json格式数据转成网关数据
-        /// </summary>
+        /// <summary> 将Json格式数据转成网关数据 </summary>
+        /// <param name="dict"></param>
         /// <param name="json">json数据</param>
+        /// <param name="clear">是否清空之前的数据</param>
         /// <returns></returns>
         public static void FromJson(this IDictionary<string, object> dict, string json, bool clear = true)
         {
@@ -221,10 +200,9 @@ namespace Acb.Core.Extensions
             }
         }
 
-        /// <summary>
-        /// 将网关参数转为类型
-        /// </summary>
+        /// <summary> 将网关参数转为类型 </summary>
         /// <typeparam name="T">类型</typeparam>
+        /// <param name="dict"></param>
         /// <param name="namingType">字符串策略</param>
         /// <returns></returns>
         public static T ToObject<T>(this IDictionary<string, object> dict, NamingType? namingType = null)
@@ -241,7 +219,7 @@ namespace Acb.Core.Extensions
 
             foreach (var item in properties)
             {
-                string key = item.PropName(namingType);
+                var key = item.PropName(namingType);
                 if (string.IsNullOrWhiteSpace(key))
                     continue;
                 var value = dict.GetValue<string>(key);
@@ -251,7 +229,7 @@ namespace Acb.Core.Extensions
                 }
             }
 
-            return (T)obj;
+            return obj.CastTo<T>();
         }
     }
 }

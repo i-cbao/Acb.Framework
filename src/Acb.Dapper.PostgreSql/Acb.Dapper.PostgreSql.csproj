@@ -6,7 +6,7 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - PostgreSql基础类</Product>
     <Description>爱车保 - PostgreSql基础类</Description>
-    <Version>1.2.0</Version>
+    <Version>1.2.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
