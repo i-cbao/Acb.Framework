@@ -1,5 +1,7 @@
 ﻿using Acb.Core;
 using Acb.Dapper;
+using Acb.Dapper.Domain;
+using Acb.Framework.Tests.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Acb.Framework.Tests
@@ -7,6 +9,13 @@ namespace Acb.Framework.Tests
     [TestClass]
     public class DapperTest : DTest
     {
+        private readonly AreaRepository _areaRepository;
+
+        public DapperTest()
+        {
+            _areaRepository = DRepository.Instance<AreaRepository>();
+        }
+
         [TestMethod]
         public void PagedTest()
         {
@@ -21,11 +30,10 @@ namespace Acb.Framework.Tests
 
 
         [TestMethod]
-        public void UpdateTest()
+        public void QueryTest()
         {
-            using (var conn = ConnectionFactory.Instance.Connection("default", false))
-            {
-            }
+            var model = _areaRepository.Get("110108");
+            Print(model);
         }
     }
 }

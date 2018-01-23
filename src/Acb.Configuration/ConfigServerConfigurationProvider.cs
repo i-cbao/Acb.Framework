@@ -339,7 +339,7 @@ namespace Acb.Configuration
                 }
                 catch (Exception e)
                 {
-                    Logger?.Error("Config Server exception, property: {0}={1}", kvp.Key, kvp.Value.GetType(), e);
+                    Logger?.Error($"Config Server exception, property: {kvp.Key}={kvp.Value.GetType()}", e);
                 }
             }
         }
