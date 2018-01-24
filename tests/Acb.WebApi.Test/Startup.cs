@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Acb.Payment;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ namespace Acb.WebApi.Test
         // This method gets called by the runtime. Use this method to add services to the container.
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddPayment();
             return base.ConfigureServices(services);
         }
 
@@ -28,7 +30,6 @@ namespace Acb.WebApi.Test
             {
                 app.UseDeveloperExceptionPage();
             }
-
             base.Configure(app, env);
         }
     }

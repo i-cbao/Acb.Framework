@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
     <ProjectReference Include="..\..\src\Acb.Configuration\Acb.Configuration.csproj" />
     <ProjectReference Include="..\..\src\Acb.Core\Acb.Core.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Payment\Acb.Payment.csproj" />
     <ProjectReference Include="..\..\src\Acb.WebApi\Acb.WebApi.csproj" />
   </ItemGroup>
 
