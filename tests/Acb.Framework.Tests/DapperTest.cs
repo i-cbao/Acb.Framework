@@ -43,5 +43,18 @@ namespace Acb.Framework.Tests
             var model = await _areaRepository.Get("110108");
             Print(model);
         }
+
+        [TestMethod]
+        public void UpdateTest()
+        {
+            using (var conn = ConnectionFactory.Instance.Connection(threadCache: false))
+            {
+                var result = conn.Update(new TAreas
+                {
+                    CityCode = "",
+                    CityName = ""
+                }, new[] { nameof(TAreas.CityName) });
+            }
+        }
     }
 }

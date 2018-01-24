@@ -13,6 +13,7 @@ using System.Text;
 
 namespace Acb.Dapper
 {
+    /// <summary> 主键属性 </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public class KeyAttribute : Attribute
     {
@@ -29,8 +30,8 @@ namespace Acb.Dapper
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> InsertCache =
             new ConcurrentDictionary<RuntimeTypeHandle, string>();
 
-        private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> KeyCache =
-            new ConcurrentDictionary<RuntimeTypeHandle, string>();
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, KeyValuePair<string, string>> KeyCache =
+            new ConcurrentDictionary<RuntimeTypeHandle, KeyValuePair<string, string>>();
 
         private static List<PropertyInfo> Props(Type modelType)
         {
@@ -41,7 +42,7 @@ namespace Acb.Dapper
             return props.ToList();
         }
 
-        private static string GetKeyName(Type modelType)
+        private static KeyValuePair<string, string> GetKey(Type modelType)
         {
             const string id = "id";
             if (KeyCache.TryGetValue(modelType.TypeHandle, out var key))
@@ -56,13 +57,29 @@ namespace Acb.Dapper
                     string.Equals(p.PropName(), id, StringComparison.CurrentCultureIgnoreCase));
             }
 
-            key = keyProp?.PropName(naming) ?? id;
+            key = new KeyValuePair<string, string>(keyProp?.Name ?? id, keyProp?.PropName(naming) ?? id);
             KeyCache.TryAdd(modelType.TypeHandle, key);
             return key;
         }
 
+        private static Type GetInnerType<T>()
+        {
+            var type = typeof(T);
+
+            if (type.IsArray)
+            {
+                type = type.GetElementType();
+            }
+            else if (type.IsGenericType)
+            {
+                type = type.GetGenericArguments()[0];
+            }
+
+            return type;
+        }
+
         /// <summary> 查询到DataSet </summary>
-        /// <param name="cnn"></param>
+        /// <param name="conn"></param>
         /// <param name="sql"></param>
         /// <param name="formatVariable"></param>
         /// <param name="param"></param>
@@ -70,14 +87,15 @@ namespace Acb.Dapper
         /// <param name="commandTimeout"></param>
         /// <param name="commandType"></param>
         /// <returns></returns>
-        public static DataSet QueryDataSet(this IDbConnection cnn, string sql, Func<string, string> formatVariable,
+        public static DataSet QueryDataSet(this IDbConnection conn, string sql, Func<string, string> formatVariable,
             object param = null, IDbDataAdapter adapter = null, int? commandTimeout = null,
             CommandType? commandType = null)
         {
             var ds = new DataSet();
-            var wasClosed = cnn.State == ConnectionState.Closed;
-            if (wasClosed) cnn.Open();
-            var command = cnn.CreateCommand();
+            var wasClosed = conn.State == ConnectionState.Closed;
+            if (wasClosed)
+                conn.Open();
+            var command = conn.CreateCommand();
             if (commandType.HasValue)
                 command.CommandType = commandType.Value;
             if (commandTimeout.HasValue)
@@ -101,14 +119,14 @@ namespace Acb.Dapper
             adapter = adapter ?? new SqlDataAdapter();
             adapter.SelectCommand = command;
             adapter.Fill(ds);
-            if (wasClosed) cnn.Close();
+            if (wasClosed) conn.Close();
             return ds;
         }
 
         /// <summary> 字段列表 </summary>
         /// <param name="modelType"></param>
         /// <returns></returns>
-        public static IDictionary<string, string> Fields(this Type modelType)
+        public static IDictionary<string, string> TypeProperties(this Type modelType)
         {
             if (FieldsCache.TryGetValue(modelType.TypeHandle, out var dict))
                 return dict;
@@ -130,7 +148,7 @@ namespace Acb.Dapper
             var sb = new StringBuilder();
             sb.Append($"INSERT INTO [{tableName}]");
 
-            var fields = Fields(modelType);
+            var fields = TypeProperties(modelType);
             if (excepts != null && excepts.Any())
                 fields = fields.Where(t => !excepts.Contains(t.Key)).ToDictionary(k => k.Key, v => v.Value);
             var fieldSql = string.Join(",", fields.Select(t => $"[{t.Value}]"));
@@ -180,9 +198,8 @@ namespace Acb.Dapper
         private static string QueryAllSql<T>()
         {
             var type = typeof(T);
-            var fields = type.Fields();
             var tableName = type.PropName();
-            var columns = string.Join(",", fields.Select(t => $"[{t.Value}] AS [{t.Key}]"));
+            var columns = type.Columns();
             var sql = $"SELECT {columns} FROM [{tableName}]";
             return sql;
         }
@@ -200,10 +217,9 @@ namespace Acb.Dapper
         private static string QueryByIdSql<T>(string keyColumn = null)
         {
             var type = typeof(T);
-            var fields = type.Fields();
             var tableName = type.PropName();
-            var columns = string.Join(",", fields.Select(t => $"[{t.Value}] as [{t.Key}]"));
-            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var columns = type.Columns();
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKey(type).Value : keyColumn;
             var sql = $"SELECT {columns} FROM [{tableName}] WHERE [{keyName}]=@id";
             return sql;
         }
@@ -226,13 +242,14 @@ namespace Acb.Dapper
         /// <param name="model"></param>
         /// <param name="excepts">过滤项(如：自增ID)</param>
         /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null, IDbTransaction trans = null)
+        public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null, IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
-            return conn.Execute(sql, model, trans);
+            return conn.Execute(sql, model, trans, commandTimeout);
         }
 
         /// <summary> 批量插入 </summary>
@@ -240,42 +257,58 @@ namespace Acb.Dapper
         /// <param name="models"></param>
         /// <param name="excepts"></param>
         /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static int Insert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null)
+        public static int Insert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
-            return conn.Execute(sql, models.ToArray(), trans);
+            return conn.Execute(sql, models.ToArray(), trans, commandTimeout);
         }
 
-        //public static int Update<T>(this IDbConnection conn, Expression<Func<T, dynamic>> propExpression, string where,
-        //    object param = null, IDbTransaction trans = null)
-        //{
-        //    var tableName = typeof(T).PropName();
-        //    SQL sql = $"UPDATE FROM [{tableName}] SET ";
-        //    ReadOnlyCollection<MemberInfo> memberInfos = ((dynamic)propExpression.Body).Members;
-        //    if (memberInfos.Count == 0) return 0;
-        //    var ps = new DynamicParameters();
-        //    foreach (var info in memberInfos)
-        //    {
-        //        var name = info.PropName();
-        //        sql += $"[{name}]=@{name}";
-        //        //ps.Add(name,propExpression);
-        //        // :todo 
-        //    }
+        #region Update
+        private static string UpdateSql<T>(string[] updateProps = null)
+        {
+            var type = GetInnerType<T>();
+            var tableName = type.PropName();
+            var props = type.TypeProperties();
+            var key = GetKey(type);
+            var sb = new StringBuilder();
+            sb.Append($"UPDATE [{tableName}] SET ");
+            foreach (var prop in props)
+            {
+                if (prop.Key == key.Key || updateProps != null && !updateProps.Contains(prop.Key))
+                    continue;
+                sb.Append($"[{prop.Value}]=@{prop.Key}");
+            }
 
-        //    if (param != null)
-        //        ps.AddDynamicParams(param);
-        //    return conn.Execute(sql.ToString(), ps, trans);
-        //}
+            sb.Append($" WHERE [{key.Value}]=@{key.Key}");
+            return sb.ToString();
+        }
+
+        /// <summary> 更新数据 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="entityToUpdate">待更新实体</param>
+        /// <param name="updateProps">更新属性</param>
+        /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
+        /// <returns></returns>
+        public static int Update<T>(this IDbConnection conn, T entityToUpdate, string[] updateProps = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
+        {
+            var sql = UpdateSql<T>(updateProps);
+            return conn.Execute(sql, entityToUpdate, trans, commandTimeout);
+        }
+        #endregion
 
         #region Delete
         private static string DeleteSql<T>(string keyColumn = null)
         {
             var type = typeof(T);
             var tableName = type.PropName();
-            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKey(type).Value : keyColumn;
             var sql = $"DELETE FROM [{tableName}] WHERE [{keyName}]=@value";
             return sql;
         }
@@ -306,7 +339,7 @@ namespace Acb.Dapper
             var sql = $"DELETE FROM [{tableName}] WHERE {where}";
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, param, trans);
-        } 
+        }
         #endregion
 
         /// <summary> 是否存在 </summary>
@@ -386,10 +419,64 @@ namespace Acb.Dapper
         {
             var type = typeof(T);
             var tableName = type.PropName();
-            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKey(type).Value : keyColumn;
             var sql = $"UPDATE [{tableName}] SET [{column}]=[{column}] + @count WHERE [{keyName}]=@id";
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, new { id = key, count }, trans);
+        }
+
+        /// <summary> 获取所有列名(as) </summary>
+        /// <param name="modelType"></param>
+        /// <param name="excepts"></param>
+        /// <returns></returns>
+        public static string Columns(this Type modelType, string[] excepts = null)
+        {
+            var props = modelType.TypeProperties();
+            var sb = new StringBuilder();
+            foreach (var prop in props)
+            {
+                if (excepts != null && excepts.Contains(prop.Key))
+                    continue;
+                if (prop.Key.Equals(prop.Value, StringComparison.CurrentCultureIgnoreCase))
+                    sb.AppendFormat("[{0}],", prop.Key);
+                else
+                    sb.AppendFormat("[{0}] AS [{1}],", prop.Value, prop.Key);
+            }
+            return sb.ToString().TrimEnd(',');
+        }
+
+        /// <summary> 转换DataTable </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="data"></param>
+        /// <param name="headerFormat"></param>
+        /// <param name="tableName"></param>
+        /// <param name="excepts"></param>
+        /// <returns></returns>
+        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null, string tableName = null, string[] excepts = null)
+        {
+            var type = GetInnerType<T>();
+            tableName = string.IsNullOrWhiteSpace(tableName) ? type.PropName() : tableName;
+            var dt = new DataTable(tableName);
+            var props = Props(type);
+            if (excepts != null && excepts.Any())
+                props = props.Where(t => !excepts.Contains(t.Name)).ToList();
+            foreach (var prop in props)
+            {
+                var key = headerFormat?.Invoke(prop.Name) ?? prop.Name;
+                dt.Columns.Add(key, prop.PropertyType);
+            }
+
+            foreach (var item in data)
+            {
+                var values = new List<object>();
+                foreach (var prop in props)
+                {
+                    values.Add(prop.GetValue(item));
+                }
+                dt.Rows.Add(values.ToArray());
+            }
+
+            return dt;
         }
     }
 }

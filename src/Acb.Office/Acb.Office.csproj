@@ -4,18 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
-    <Product>爱车保 - Dapper基础类</Product>
-    <Description>爱车保 - Dapper基础类</Description>
-    <Version>1.2.3</Version>
+    <Product>爱车保 - Office组件辅助类</Product>
+    <Description>爱车保 - Office组件辅助类</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Acb.Dapper.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.Office.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.4" />
+    <PackageReference Include="DotNetCore.NPOI" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>

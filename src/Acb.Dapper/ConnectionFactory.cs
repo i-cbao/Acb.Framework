@@ -22,7 +22,7 @@ namespace Acb.Dapper
         private const string DefaultConfigName = "dapperDefault";
         private const string DefaultName = "default";
 
-        private static readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> ConnectionDictionary;
+        private static readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> ConnectionCache;
         private static readonly object LockObj = new object();
         private int _removeCount;
         private int _cacheCount;
@@ -32,11 +32,11 @@ namespace Acb.Dapper
 
         static ConnectionFactory()
         {
-            ConnectionDictionary = new ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>>();
+            ConnectionCache = new ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>>();
             //配置文件改变时，清空缓存
             ConfigHelper.Instance.ConfigChanged += name =>
             {
-                ConnectionDictionary.Clear();
+                ConnectionCache.Clear();
             };
         }
 
@@ -53,7 +53,7 @@ namespace Acb.Dapper
         {
             _clearCount++;
             ClearDict();
-            if (ConnectionDictionary.Count == 0)
+            if (ConnectionCache.Count == 0)
             {
                 _clearTimerRun = false;
                 _clearTimer.Stop();
@@ -70,11 +70,11 @@ namespace Acb.Dapper
         /// <summary> 清理失效的线程级缓存 </summary>
         private void ClearDict()
         {
-            if (ConnectionDictionary.Count == 0)
+            if (ConnectionCache.Count == 0)
                 return;
-            foreach (var key in ConnectionDictionary.Keys)
+            foreach (var key in ConnectionCache.Keys)
             {
-                if (!ConnectionDictionary.TryGetValue(key, out var connDict))
+                if (!ConnectionCache.TryGetValue(key, out var connDict))
                     continue;
                 foreach (var name in connDict.Keys)
                 {
@@ -87,7 +87,7 @@ namespace Acb.Dapper
                     }
                 }
                 if (connDict.Count == 0)
-                    ConnectionDictionary.TryRemove(key, out connDict);
+                    ConnectionCache.TryRemove(key, out connDict);
             }
         }
 
@@ -125,10 +125,10 @@ namespace Acb.Dapper
                     return Create(connectionName);
                 var connectionKey = Thread.CurrentThread;
 
-                if (!ConnectionDictionary.TryGetValue(connectionKey, out var connDict))
+                if (!ConnectionCache.TryGetValue(connectionKey, out var connDict))
                 {
                     connDict = new Dictionary<string, ConnectionStruct>();
-                    if (!ConnectionDictionary.TryAdd(connectionKey, connDict))
+                    if (!ConnectionCache.TryAdd(connectionKey, connDict))
                     {
                         throw new Exception("Can not set db connection!");
                     }
@@ -160,7 +160,7 @@ namespace Acb.Dapper
         }
 
         /// <summary> 缓存总数/// </summary>
-        public int Count => ConnectionDictionary.Sum(t => t.Value.Count);
+        public int Count => ConnectionCache.Sum(t => t.Value.Count);
 
         /// <summary> 连接缓存信息 </summary>
         /// <returns></returns>
@@ -172,7 +172,7 @@ namespace Acb.Dapper
             sb.AppendLine($"工作集内存：{proc.WorkingSet64 / 1024.0}kb");
             sb.AppendLine($"最大内存：{proc.PeakWorkingSet64 / 1024.0}kb");
             sb.AppendLine($"线程数：{proc.Threads.Count}");
-            foreach (var connectionStruct in ConnectionDictionary)
+            foreach (var connectionStruct in ConnectionCache)
             {
                 foreach (var item in connectionStruct.Value)
                 {

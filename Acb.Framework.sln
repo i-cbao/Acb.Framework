@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Framework.Tests", "test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.WebApi.Test", "tests\Acb.WebApi.Test\Acb.WebApi.Test.csproj", "{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Office", "src\Acb.Office\Acb.Office.csproj", "{A55C570C-A1C8-419B-A6A1-A15736FE4268}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A55C570C-A1C8-419B-A6A1-A15736FE4268}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A55C570C-A1C8-419B-A6A1-A15736FE4268}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A55C570C-A1C8-419B-A6A1-A15736FE4268}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A55C570C-A1C8-419B-A6A1-A15736FE4268}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +105,7 @@ Global
 		{1FC8EF95-5C58-4FE8-9828-89A2F0B0E351} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 		{B522CC19-0CA3-4B4F-8FD0-2686E375A028} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
 		{D5D4E9E1-95D3-40C3-8DE6-9012B4F3FAFE} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
+		{A55C570C-A1C8-419B-A6A1-A15736FE4268} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

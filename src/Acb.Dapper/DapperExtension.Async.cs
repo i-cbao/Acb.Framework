@@ -58,6 +58,21 @@ namespace Acb.Dapper
             return await conn.ExecuteAsync(sql, models.ToArray(), trans);
         }
 
+        /// <summary> 更新数据 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="entityToUpdate">待更新实体</param>
+        /// <param name="updateProps">更新属性</param>
+        /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
+        /// <returns></returns>
+        public static async Task<int> UpdateAsync<T>(this IDbConnection conn, T entityToUpdate, string[] updateProps = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
+        {
+            var sql = UpdateSql<T>(updateProps);
+            return await conn.ExecuteAsync(sql, entityToUpdate, trans, commandTimeout);
+        }
+
         /// <summary> 删除数据 </summary>
         /// <param name="conn">连接</param>
         /// <param name="value">列值</param>
@@ -163,7 +178,7 @@ namespace Acb.Dapper
         {
             var type = typeof(T);
             var tableName = type.PropName();
-            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKey(type).Value : keyColumn;
             var sql = $"UPDATE [{tableName}] SET [{column}]=[{column}] + @count WHERE [{keyName}]=@id";
             sql = conn.FormatSql(sql);
             return await conn.ExecuteAsync(sql, new { id = key, count }, trans);

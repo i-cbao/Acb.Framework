@@ -3,6 +3,7 @@ using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -21,6 +22,7 @@ namespace Acb.WebApi.Test.Controllers
         [HttpGet("{key}")]
         public async Task<DResult<string>> Get(string key)
         {
+            Response.Clear();
             var n = key.Config<string>();
             _logger.Info(n);
             _logger.Error(n);
