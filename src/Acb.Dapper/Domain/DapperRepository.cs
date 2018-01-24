@@ -31,7 +31,7 @@ namespace Acb.Dapper.Domain
         /// <param name="key"></param>
         /// <param name="keyColumn"></param>
         /// <returns></returns>
-        public T QueryById(object key, string keyColumn = "id")
+        public T QueryById(object key, string keyColumn = null)
         {
             return Connection.QueryById<T>(key, keyColumn);
         }
@@ -49,16 +49,16 @@ namespace Acb.Dapper.Domain
         /// <param name="models"></param>
         /// <param name="excepts"></param>
         /// <returns></returns>
-        public int BatchInsert(IEnumerable<T> models, string[] excepts = null)
+        public int Insert(IEnumerable<T> models, string[] excepts = null)
         {
-            return Connection.InsertBatch(models, excepts);
+            return Connection.Insert(models, excepts);
         }
 
         /// <summary> 删除 </summary>
         /// <param name="key"></param>
         /// <param name="keyColumn"></param>
         /// <returns></returns>
-        public int Delete(object key, string keyColumn = "id")
+        public int Delete(object key, string keyColumn = null)
         {
             return Connection.Delete<T>(key, keyColumn);
         }

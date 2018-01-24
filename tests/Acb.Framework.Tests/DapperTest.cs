@@ -3,6 +3,7 @@ using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Framework.Tests.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
 {
@@ -30,9 +31,16 @@ namespace Acb.Framework.Tests
 
 
         [TestMethod]
-        public void QueryTest()
+        public async Task QueryTest()
         {
-            var model = _areaRepository.Get("110108");
+            //var sql = string.Empty;
+            //var result = CodeTimer.Time("sql test", 20000, () =>
+            //{
+            //    sql = typeof(TAreas).InsertSql(new[] { nameof(TAreas.CityCode) });
+            //}, 10);
+            //Print(result.ToString());
+            //Print(sql);
+            var model = await _areaRepository.Get("110108");
             Print(model);
         }
     }

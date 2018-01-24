@@ -2,14 +2,15 @@
 using Acb.Core.Serialize;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
+using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests.Repositories
 {
-    [Naming(NamingType.UrlCase)]
+    [Naming(NamingType.UrlCase, Name = "t_areas")]
     internal class TAreas : IEntity
     {
         /// <summary>城市编码</summary>
-
+        [Key]
         public string CityCode { get; set; }
         /// <summary>城市名字</summary>
 
@@ -24,9 +25,9 @@ namespace Acb.Framework.Tests.Repositories
 
     internal class AreaRepository : DapperRepository<TAreas>
     {
-        public TAreas Get(string code)
+        public async Task<TAreas> Get(string code)
         {
-            return Connection.QueryById<TAreas>(code, "city_code");
+            return await Connection.QueryByIdAsync<TAreas>(code);
         }
     }
 }

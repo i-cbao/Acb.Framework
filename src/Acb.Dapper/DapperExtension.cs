@@ -1,8 +1,9 @@
-﻿using Acb.Core.Cache;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Serialize;
 using Acb.Dapper.Adapters;
 using Dapper;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -12,10 +13,53 @@ using System.Text;
 
 namespace Acb.Dapper
 {
-    /// <summary> Dapper自定义扩展 </summary>
-    public static class DapperExtension
+    [AttributeUsage(AttributeTargets.Property)]
+    public class KeyAttribute : Attribute
     {
-        private static readonly ICache DapperCache = CacheManager.GetCacher(nameof(DapperExtension));
+    }
+
+    /// <summary> Dapper自定义扩展 </summary>
+    public static partial class DapperExtension
+    {
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypePropsCache =
+            new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, IDictionary<string, string>> FieldsCache =
+            new ConcurrentDictionary<RuntimeTypeHandle, IDictionary<string, string>>();
+
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> InsertCache =
+            new ConcurrentDictionary<RuntimeTypeHandle, string>();
+
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> KeyCache =
+            new ConcurrentDictionary<RuntimeTypeHandle, string>();
+
+        private static List<PropertyInfo> Props(Type modelType)
+        {
+            if (TypePropsCache.TryGetValue(modelType.TypeHandle, out var props))
+                return props.ToList();
+            props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+            TypePropsCache.TryAdd(modelType.TypeHandle, props);
+            return props.ToList();
+        }
+
+        private static string GetKeyName(Type modelType)
+        {
+            const string id = "id";
+            if (KeyCache.TryGetValue(modelType.TypeHandle, out var key))
+                return key;
+            var props = Props(modelType);
+            var attr = modelType.GetCustomAttribute<NamingAttribute>();
+            var naming = attr?.NamingType;
+            var keyProp = props.FirstOrDefault(p => p.GetCustomAttribute<KeyAttribute>() != null);
+            if (keyProp == null)
+            {
+                keyProp = props.FirstOrDefault(p =>
+                    string.Equals(p.PropName(), id, StringComparison.CurrentCultureIgnoreCase));
+            }
+
+            key = keyProp?.PropName(naming) ?? id;
+            KeyCache.TryAdd(modelType.TypeHandle, key);
+            return key;
+        }
 
         /// <summary> 查询到DataSet </summary>
         /// <param name="cnn"></param>
@@ -64,35 +108,36 @@ namespace Acb.Dapper
         /// <summary> 字段列表 </summary>
         /// <param name="modelType"></param>
         /// <returns></returns>
-        public static string[] Fields(this Type modelType)
+        public static IDictionary<string, string> Fields(this Type modelType)
         {
-            var key = $"fields_{modelType.FullName}";
-            var fields = DapperCache.Get<string[]>(key);
-            if (fields != null && fields.Any()) return fields;
-            var props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
-            fields = props.Select(t => t.PropName()).ToArray();
-            DapperCache.Set(key, fields, TimeSpan.FromHours(2));
+            if (FieldsCache.TryGetValue(modelType.TypeHandle, out var dict))
+                return dict;
+            var attr = modelType.GetCustomAttribute<NamingAttribute>();
+            var naming = attr?.NamingType;
+            var props = Props(modelType);
+            var fields = props.ToDictionary(k => k.Name, v => v.PropName(naming));
+            FieldsCache.TryAdd(modelType.TypeHandle, fields);
             return fields;
         }
         /// <summary> 生成insert语句 </summary>
         /// <returns></returns>
         public static string InsertSql(this Type modelType, string[] excepts = null)
         {
-            var tableName = modelType.PropName();
-            var key = $"insert_{modelType.FullName}";
-            var sql = DapperCache.Get<string>(key);
-            if (!string.IsNullOrWhiteSpace(sql))
+            if (InsertCache.TryGetValue(modelType.TypeHandle, out var sql))
                 return sql;
+
+            var tableName = modelType.PropName();
             var sb = new StringBuilder();
             sb.Append($"INSERT INTO [{tableName}]");
 
             var fields = Fields(modelType);
             if (excepts != null && excepts.Any())
-                fields = fields.Except(excepts).ToArray();
-            var fieldSql = string.Join(",", fields.Select(t => $"[{t}]"));
-            var paramSql = string.Join(",", fields.Select(t => $"@{t}"));
+                fields = fields.Where(t => !excepts.Contains(t.Key)).ToDictionary(k => k.Key, v => v.Value);
+            var fieldSql = string.Join(",", fields.Select(t => $"[{t.Value}]"));
+            var paramSql = string.Join(",", fields.Select(t => $"@{t.Key}"));
             sb.Append($" ({fieldSql}) VALUES ({paramSql})");
-            DapperCache.Set(key, sql, TimeSpan.FromHours(1));
+            sql = sb.ToString();
+            InsertCache.TryAdd(modelType.TypeHandle, sql);
             return sql;
         }
 
@@ -131,16 +176,36 @@ namespace Acb.Dapper
             return PropValue<string>(model, propName);
         }
 
-        /// <summary> 查询所有数据 </summary>
-        public static IEnumerable<T> QueryAll<T>(this IDbConnection conn)
+        #region QueryAll
+        private static string QueryAllSql<T>()
         {
             var type = typeof(T);
             var fields = type.Fields();
             var tableName = type.PropName();
-            var columns = string.Join(",", fields.Select(t => $"[{t}]"));
+            var columns = string.Join(",", fields.Select(t => $"[{t.Value}] AS [{t.Key}]"));
             var sql = $"SELECT {columns} FROM [{tableName}]";
+            return sql;
+        }
+
+        /// <summary> 查询所有数据 </summary>
+        public static IEnumerable<T> QueryAll<T>(this IDbConnection conn)
+        {
+            var sql = QueryAllSql<T>();
             sql = conn.FormatSql(sql);
             return conn.Query<T>(sql);
+        }
+        #endregion
+
+        #region QueryById
+        private static string QueryByIdSql<T>(string keyColumn = null)
+        {
+            var type = typeof(T);
+            var fields = type.Fields();
+            var tableName = type.PropName();
+            var columns = string.Join(",", fields.Select(t => $"[{t.Value}] as [{t.Key}]"));
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var sql = $"SELECT {columns} FROM [{tableName}] WHERE [{keyName}]=@id";
+            return sql;
         }
 
         /// <summary> 根据主键查询单条 </summary>
@@ -148,16 +213,13 @@ namespace Acb.Dapper
         /// <param name="key"></param>
         /// <param name="keyColumn"></param>
         /// <returns></returns>
-        public static T QueryById<T>(this IDbConnection conn, object key, string keyColumn = "id")
+        public static T QueryById<T>(this IDbConnection conn, object key, string keyColumn = null)
         {
-            var type = typeof(T);
-            var fields = type.Fields();
-            var tableName = type.PropName();
-            var columns = string.Join(",", fields.Select(t => $"[{t}]"));
-            var sql = $"SELECT {columns} FROM [{tableName}] WHERE [{keyColumn}]=@id";
+            var sql = QueryByIdSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
             return conn.QueryFirstOrDefault<T>(sql, new { id = key });
         }
+        #endregion
 
         /// <summary> 插入单条数据,不支持有自增列 </summary>
         /// <param name="conn"></param>
@@ -179,7 +241,7 @@ namespace Acb.Dapper
         /// <param name="excepts"></param>
         /// <param name="trans"></param>
         /// <returns></returns>
-        public static int InsertBatch<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null)
+        public static int Insert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
@@ -208,16 +270,25 @@ namespace Acb.Dapper
         //    return conn.Execute(sql.ToString(), ps, trans);
         //}
 
+        #region Delete
+        private static string DeleteSql<T>(string keyColumn = null)
+        {
+            var type = typeof(T);
+            var tableName = type.PropName();
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var sql = $"DELETE FROM [{tableName}] WHERE [{keyName}]=@value";
+            return sql;
+        }
+
         /// <summary> 删除数据 </summary>
         /// <param name="conn">连接</param>
         /// <param name="value">列值</param>
         /// <param name="keyColumn">列名</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = "id", IDbTransaction trans = null)
+        public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = null, IDbTransaction trans = null)
         {
-            var tableName = typeof(T).PropName();
-            var sql = $"DELETE FROM [{tableName}] WHERE [{keyColumn}]=@value";
+            var sql = DeleteSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, new { value }, trans);
         }
@@ -235,7 +306,8 @@ namespace Acb.Dapper
             var sql = $"DELETE FROM [{tableName}] WHERE {where}";
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, param, trans);
-        }
+        } 
+        #endregion
 
         /// <summary> 是否存在 </summary>
         /// <typeparam name="T"></typeparam>
@@ -309,11 +381,13 @@ namespace Acb.Dapper
         /// <param name="count"></param>
         /// <param name="trans"></param>
         /// <returns></returns>
-        public static int Increment<T>(this IDbConnection conn, string column, object key, string keyColumn = "id",
+        public static int Increment<T>(this IDbConnection conn, string column, object key, string keyColumn = null,
             int count = 1, IDbTransaction trans = null)
         {
-            var tableName = typeof(T).PropName();
-            var sql = $"UPDATE [{tableName}] SET [{column}]=[{column}] + @count WHERE [{keyColumn}]=@id";
+            var type = typeof(T);
+            var tableName = type.PropName();
+            var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKeyName(type) : keyColumn;
+            var sql = $"UPDATE [{tableName}] SET [{column}]=[{column}] + @count WHERE [{keyName}]=@id";
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, new { id = key, count }, trans);
         }
