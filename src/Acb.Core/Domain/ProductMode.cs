@@ -13,6 +13,6 @@
         Ready,
 
         /// <summary> 正式 </summary>
-        Production
+        Prod
     }
 }

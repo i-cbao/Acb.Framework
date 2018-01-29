@@ -9,28 +9,20 @@ using System.Threading.Tasks;
 
 namespace Acb.Payment
 {
-    /// <summary>
-    /// 支付网关数据
-    /// </summary>
+    /// <summary> 支付网关数据 </summary>
     public class GatewayData
     {
         private readonly SortedDictionary<string, object> _values;
 
-        /// <summary>
-        /// 原始数据
-        /// </summary>
+        /// <summary> 原始数据 </summary>
         public string OriginalData { get; private set; }
-        /// <summary>
-        /// 构造函数
-        /// </summary>
+        /// <summary> 构造函数 </summary>
         public GatewayData()
         {
             _values = new SortedDictionary<string, object>();
         }
 
-        /// <summary>
-        /// 构造函数
-        /// </summary>
+        /// <summary> 构造函数 </summary>
         /// <param name="comparer">排序策略</param>
         public GatewayData(IComparer<string> comparer)
         {

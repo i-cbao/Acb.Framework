@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.IO;
 
 namespace Acb.WebApi.Test
 {
-    public class Startup : DStartup
+    public class Startup :
+        DStartup
     {
         public Startup(IConfiguration configuration)
         {
@@ -20,6 +23,20 @@ namespace Acb.WebApi.Test
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddPayment();
+            services.AddSwaggerGen(option =>
+            {
+                option.SwaggerDoc("help", new Info
+                {
+                    Title = "Api Help Page",
+                    Version = "v1.0"
+                });
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                var files = Directory.GetFiles(dir, "*.xml", SearchOption.TopDirectoryOnly);
+                foreach (var file in files)
+                {
+                    option.IncludeXmlComments(file);
+                }
+            });
             return base.ConfigureServices(services);
         }
 
@@ -30,6 +47,13 @@ namespace Acb.WebApi.Test
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint(
+                    "/swagger/help/swagger.json", "Fiver.Api Help Endpoint");
+            });
             base.Configure(app, env);
         }
     }

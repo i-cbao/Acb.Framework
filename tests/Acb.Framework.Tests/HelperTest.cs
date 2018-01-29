@@ -1,4 +1,6 @@
+using Acb.Core;
 using Acb.Core.Extensions;
+using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
@@ -41,6 +43,20 @@ namespace Acb.Framework.Tests
                 stream.Close();
                 fs.Flush();
             }
+        }
+
+        [TestMethod]
+        public async Task HttpTest()
+        {
+            const string uri = "/market/query/life?t=1";
+            var helper = new RestHelper("http://220.167.101.61:8300");
+            var html = await helper.GetAsync<DResult<dynamic>>(uri, new
+            {
+                cityCode = "510100"
+            });
+            //var xx = JsonConvert.SerializeObject(html.Data.xianXing);
+            //if (html.Data.xianxing != null)
+            Print(html.Data.xianxing);
         }
     }
 }

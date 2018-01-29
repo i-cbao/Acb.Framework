@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -19,10 +20,15 @@ namespace Acb.Core.Reflection
             _dllPredicate = dllPredicate;
         }
 
+        private static IEnumerable<Assembly> _allAssemblies;
+
+        /// <inheritdoc />
         /// <summary> 查找所有程序集 </summary>
         /// <returns></returns>
         public IEnumerable<Assembly> FindAll()
         {
+            if (_allAssemblies != null && _allAssemblies.Any())
+                return _allAssemblies;
             var asses = new List<Assembly>();
             var dps = DependencyContext.Default;
             var libs = dps.CompileLibraries.Where(t => _dllPredicate.Invoke(t.Name));
@@ -37,20 +43,23 @@ namespace Acb.Core.Reflection
                 catch { }
             }
 
-            //var path = AppDomain.CurrentDomain.RelativeSearchPath;
-            //if (!Directory.Exists(path))
-            //    path = AppDomain.CurrentDomain.BaseDirectory;
+            var path = AppDomain.CurrentDomain.RelativeSearchPath;
+            if (!Directory.Exists(path))
+                path = AppDomain.CurrentDomain.BaseDirectory;
 
-            //var asses =
-            //    Directory.GetFiles(path, "*.dll")
-            //        .Where(p =>
-            //        {
-            //            var fileName = Path.GetFileName(p);
-            //            return _dllPredicate?.Invoke(fileName) ?? true;
-            //        })
-            //        .Select(Assembly.LoadFrom)
-            //        .ToArray();
-            return _defaultPredicate != null ? asses.Where(_defaultPredicate) : asses;
+            var dllAsses =
+                Directory.GetFiles(path, "*.dll")
+                    .Where(p =>
+                    {
+                        var fileName = Path.GetFileName(p);
+                        return _dllPredicate?.Invoke(fileName) ?? true;
+                    })
+                    .Select(Assembly.LoadFrom)
+                    .ToArray();
+            asses = asses.Union(dllAsses).ToList();
+
+            _allAssemblies = _defaultPredicate != null ? asses.Where(_defaultPredicate) : asses;
+            return _allAssemblies;
         }
 
         /// <summary> 查找程序集 </summary>

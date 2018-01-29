@@ -37,5 +37,11 @@ namespace Acb.Core
             }
             base.Initialize();
         }
+
+        public override void Shutdown()
+        {
+            HttpHelper.Instance.Dispose();
+            base.Shutdown();
+        }
     }
 }

@@ -20,6 +20,9 @@ namespace Acb.Payment
             _list = new List<DGateway>();
         }
 
+        /// <summary> 添加支付网关 </summary>
+        /// <param name="gateway"></param>
+        /// <returns></returns>
         public bool Add(DGateway gateway)
         {
             if (gateway != null)
@@ -38,15 +41,24 @@ namespace Acb.Payment
             return false;
         }
 
-        public DGateway Get<T>()
+        /// <inheritdoc />
+        /// <summary> 获取支付网关 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Get<T>() where T : DGateway
         {
-            var current = _list.Where(g => g is T).FirstOrDefault();
+            var current = _list.FirstOrDefault(g => g is T);
             if (current == null)
                 throw new BusiException("找不到支付网关");
-            return current;
+            return (T)current;
         }
 
-        public DGateway Get<T>(TradeType tradeType)
+        /// <inheritdoc />
+        /// <summary> 获取支付网关 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="tradeType"></param>
+        /// <returns></returns>
+        public T Get<T>(TradeType tradeType) where T : DGateway
         {
             var gatewayList = _list
                 .Where(a => a is T && a.TradeType == tradeType)
@@ -54,16 +66,16 @@ namespace Acb.Payment
 
             var gateway = gatewayList.Count > 0 ? gatewayList[0] : Get<T>();
             gateway.TradeType = tradeType;
-            return gateway;
+            return (T)gateway;
         }
 
-        /// <summary>
-        /// 指定AppId是否存在
-        /// </summary>
+        /// <summary> 指定AppId是否存在 </summary>
         /// <param name="appId">appId</param>
         /// <returns></returns>
         private bool Exist(string appId) => _list.Any(a => a.Merchant.AppId == appId);
 
+        /// <summary> 支付网关列表 </summary>
+        /// <returns></returns>
         public ICollection<DGateway> GetList()
         {
             return _list;

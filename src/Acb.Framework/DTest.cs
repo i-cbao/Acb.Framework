@@ -22,11 +22,15 @@ namespace Acb.Framework
         }
 
         /// <summary> 打印数据 </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="result"></param>
-        protected void Print<T>(T result)
+        protected void Print(object result)
         {
-            var type = typeof(T);
+            if (result == null)
+            {
+                Console.WriteLine("NULL");
+                return;
+            }
+            var type = result.GetType();
             if (type.IsSimpleType())
                 Console.WriteLine(result);
             else

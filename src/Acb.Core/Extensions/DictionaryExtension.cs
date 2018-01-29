@@ -231,5 +231,25 @@ namespace Acb.Core.Extensions
 
             return obj.CastTo<T>();
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static IDictionary<string, object> ToDictionary(this object source)
+        {
+            if (source == null)
+                return new Dictionary<string, object>();
+            var type = source.GetType();
+            var dict = new Dictionary<string, object>();
+            if (type.IsValueType)
+                return dict;
+            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            foreach (var prop in props)
+            {
+                dict.Add(prop.Name, prop.GetValue(source, null));
+            }
+            return dict;
+        }
     }
 }

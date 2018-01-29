@@ -38,7 +38,7 @@ namespace Acb.Framework.Logging
             const string file = "dd\".log\"";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
             appender.ClearFilters();
-            var minLevel = Consts.Mode == ProductMode.Production ? Level.Info : Level.Debug;
+            var minLevel = Consts.Mode == ProductMode.Prod ? Level.Info : Level.Debug;
             appender.AddFilter(new LevelRangeFilter
             {
                 LevelMin = minLevel,

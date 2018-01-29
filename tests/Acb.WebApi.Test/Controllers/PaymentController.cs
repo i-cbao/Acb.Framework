@@ -2,6 +2,7 @@
 using Acb.Core.Serialize;
 using Acb.Core.Timing;
 using Acb.Payment.Enum;
+using Acb.Payment.Gateways.Alipay;
 using Acb.Payment.Interfaces;
 using Acb.Payment.Notify;
 using Acb.Payment.Notify.Events;
@@ -22,10 +23,15 @@ namespace Acb.WebApi.Test.Controllers
             _gateways = gateways;
         }
 
+        /// <summary>
+        /// 支付宝                 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [HttpGet, Route("alipay")]
         public IActionResult Alipay(TradeType type = TradeType.Web)
         {
-            var order = new Payment.Gateways.Alipay.Order
+            var order = new Order
             {
                 Amount = 0.01,
                 OutTradeNo = _outTradeNo,
@@ -45,13 +51,17 @@ namespace Acb.WebApi.Test.Controllers
                 //}
             };
 
-            var gateway = _gateways.Get<Payment.Gateways.Alipay.AlipayGateway>(type);
+            var gateway = _gateways.Get<AlipayGateway>(type);
+            //(gateway as AlipayGateway).BuildRefund(new DataAction());
 
             //gateway.PaymentFailed += Gateway_BarcodePaymentFailed;
             var result = gateway.Payment(order);
             return Content(result);
         }
 
+        /// <summary> 微信支付 </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [HttpGet, Route("micropay")]
         public IActionResult MicroPay(TradeType type = TradeType.Wap)
         {
@@ -81,6 +91,9 @@ namespace Acb.WebApi.Test.Controllers
             return Content(gateway.Payment(order));
         }
 
+        /// <summary> 支付通知 </summary>
+        /// <returns></returns>
+        [HttpGet, HttpPost]
         public async Task Notify()
         {
             // 订阅支付通知事件

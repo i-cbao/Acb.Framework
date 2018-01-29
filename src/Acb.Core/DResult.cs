@@ -14,8 +14,12 @@ namespace Acb.Core
         public int Code { get; set; }
 
         public string Message { get; set; }
-
-        public DateTime Timestamp => Clock.Now;
+        private DateTime _timestamp;
+        public DateTime Timestamp
+        {
+            get => _timestamp == DateTime.MinValue ? Clock.Now : _timestamp;
+            set => _timestamp = value;
+        }
 
         public DResult() : this(string.Empty) { }
 

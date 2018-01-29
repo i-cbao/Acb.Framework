@@ -18,7 +18,7 @@ namespace Acb.Payment.Interfaces
         /// </summary>
         /// <typeparam name="T">网关类型</typeparam>
         /// <returns></returns>
-        DGateway Get<T>();
+        T Get<T>() where T : DGateway;
 
         /// <summary>
         /// 通过交易类型获取网关
@@ -26,7 +26,7 @@ namespace Acb.Payment.Interfaces
         /// <typeparam name="T">网关类型</typeparam>
         /// <param name="tradeType">网关交易类型</param>
         /// <returns></returns>
-        DGateway Get<T>(TradeType tradeType);
+        T Get<T>(TradeType tradeType) where T : DGateway;
 
         /// <summary>
         /// 获取网关列表

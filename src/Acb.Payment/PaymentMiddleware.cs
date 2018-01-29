@@ -6,9 +6,7 @@ namespace Acb.Payment
 {
     public static class PaymentMiddleware
     {
-        /// <summary>
-        /// 添加ICanPay
-        /// </summary>
+        /// <summary> 添加ICanPay </summary>
         /// <param name="services"></param>
         public static void AddPayment(this IServiceCollection services)
         {
