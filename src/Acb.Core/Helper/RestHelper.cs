@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
 using Newtonsoft.Json;
@@ -12,11 +13,17 @@ namespace Acb.Core.Helper
     public class RestHelper
     {
         private readonly string _baseUri;
+        private const string Prefix = "sites:";
         private readonly ILogger _logger = LogManager.Logger<RestHelper>();
 
         public RestHelper(string baseUri)
         {
             _baseUri = baseUri;
+        }
+
+        public RestHelper(Enum siteEnum)
+        {
+            _baseUri = $"{Prefix}{siteEnum.ToString().ToLower()}".Config<string>();
         }
 
         /// <summary> 请求接口 </summary>
@@ -30,9 +37,11 @@ namespace Acb.Core.Helper
         public async Task<string> RequestAsync(string api, object paras = null, object data = null,
             HttpMethod method = null, object headers = null, HttpContent content = null)
         {
-            var uri = new Uri(new Uri(_baseUri), api);
+            if (string.IsNullOrWhiteSpace(api))
+                throw new BusiException("接口api不能为空");
+            var url = string.Concat(_baseUri?.TrimEnd('/') ?? string.Empty, "/", api.TrimStart('/'));
 
-            var resp = await HttpHelper.Instance.RequestAsync(method ?? HttpMethod.Get, uri.AbsoluteUri, paras, data,
+            var resp = await HttpHelper.Instance.RequestAsync(method ?? HttpMethod.Get, url, paras, data,
                 headers, content);
             if (resp.StatusCode != HttpStatusCode.OK)
                 throw new BusiException("接口请求异常");
