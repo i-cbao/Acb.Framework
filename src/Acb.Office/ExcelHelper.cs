@@ -22,21 +22,7 @@ namespace Acb.Office
         public static ICellStyle GetCellStyle(IWorkbook wb, XlsStyle str)
         {
             var cellStyle = wb.CreateCellStyle();
-            //定义几种字体  
-            //也可以一种字体，写一些公共属性，然后在下面需要时加特殊的  
-            var heaerFont = wb.CreateFont();
-            heaerFont.FontHeightInPoints = 12;
-            heaerFont.Boldweight = 600;
-            heaerFont.FontName = "微软雅黑";
 
-            var font = wb.CreateFont();
-            font.FontHeightInPoints = 10;
-            font.FontName = "微软雅黑";
-
-            var fontcolorblue = wb.CreateFont();
-            fontcolorblue.Color = HSSFColor.Black.Index;
-            fontcolorblue.IsItalic = true; //下划线  
-            fontcolorblue.FontName = "微软雅黑";
             //边框  
             cellStyle.BorderBottom =
                 cellStyle.BorderLeft = cellStyle.BorderRight = cellStyle.BorderTop = BorderStyle.Thin;
@@ -69,30 +55,39 @@ namespace Acb.Office
                     cellStyle.FillForegroundColor = 41;
                     cellStyle.FillPattern = FillPattern.SolidForeground;
                     cellStyle.Alignment = HorizontalAlignment.Center;
+
+                    var heaerFont = wb.CreateFont();
+                    heaerFont.FontHeightInPoints = 12;
+                    heaerFont.Boldweight = 600;
+                    heaerFont.FontName = "微软雅黑";
                     cellStyle.SetFont(heaerFont);
                     break;
                 case XlsStyle.DateTime:
                     IDataFormat datastyle = wb.CreateDataFormat();
 
                     cellStyle.DataFormat = datastyle.GetFormat("yyyy/mm/dd");
-                    cellStyle.SetFont(font);
+                    cellStyle.SetFont(SetCellNormalFont(wb));
                     break;
                 case XlsStyle.Number:
                     cellStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00");
-                    cellStyle.SetFont(font);
+                    cellStyle.SetFont(SetCellNormalFont(wb));
                     break;
                 case XlsStyle.Money:
                     IDataFormat format = wb.CreateDataFormat();
                     cellStyle.DataFormat = format.GetFormat("￥#,##0");
-                    cellStyle.SetFont(font);
+                    cellStyle.SetFont(SetCellNormalFont(wb));
                     break;
                 case XlsStyle.Url:
+                    var fontcolorblue = wb.CreateFont();
+                    fontcolorblue.Color = HSSFColor.Black.Index;
+                    fontcolorblue.IsItalic = true; //下划线  
+                    fontcolorblue.FontName = "微软雅黑";
                     fontcolorblue.Underline = FontUnderlineType.Single;
                     cellStyle.SetFont(fontcolorblue);
                     break;
                 case XlsStyle.Percent:
                     cellStyle.DataFormat = HSSFDataFormat.GetBuiltinFormat("0.00%");
-                    cellStyle.SetFont(font);
+                    cellStyle.SetFont(SetCellNormalFont(wb));
                     break;
                 //case XlsStyle.中文大写:
                 //    IDataFormat format1 = wb.CreateDataFormat();
@@ -104,14 +99,31 @@ namespace Acb.Office
                 //    cellStyle.SetFont(font);
                 //    break;
                 case XlsStyle.Default:
-                    cellStyle.SetFont(font);
+                    cellStyle.SetFont(SetCellNormalFont(wb));
                     break;
             }
             return cellStyle;
         }
 
+        /// <summary>
+        /// 设置基本字体格式
+        /// </summary>
+        /// <param name="wb"></param>
+        /// <returns></returns>
+        public static IFont SetCellNormalFont(IWorkbook wb)
+        {
+            var font = wb.CreateFont();
+            font.FontHeightInPoints = 10;
+            font.FontName = "微软雅黑";
+            return font;
+        }
         #region 创建Excel
 
+        /// <summary>
+        /// 是否数值类型
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private static bool IsNumber(object value)
         {
             if (value == null) return false;
@@ -135,10 +147,11 @@ namespace Acb.Office
             var index = 0;
             foreach (DataTable tb in dataSet.Tables)
             {
-                index++;
-                var colLength = tb.Columns.Count;
+                var colLength = tb.Columns.Count;   //列
                 if (colLength == 0)
                     continue;
+
+                index++;
                 var sheet =
                     wb.CreateSheet((string.IsNullOrWhiteSpace(tb.TableName) || tb.TableName.StartsWith("Table"))
                         ? $"sheet{index}"
@@ -154,14 +167,15 @@ namespace Acb.Office
                     cell.SetCellValue(column.ColumnName);
                 }
 
+                //数据
                 for (var i = 0; i < tb.Rows.Count; i++)
                 {
                     row = sheet.CreateRow(i + 1);
                     var cellItems = tb.Rows[i].ItemArray;
-                    for (var j = 0; j < colLength; j++)
+
+                    var eachColLength = Math.Min(colLength, cellItems.Length);
+                    for (var j = 0; j < eachColLength; j++)
                     {
-                        if (cellItems.Length <= j)
-                            break;
                         var value = cellItems[j];
                         if (IsNumber(value))
                         {
@@ -180,6 +194,7 @@ namespace Acb.Office
             }
             return wb;
         }
+
 
         public static async Task<IWorkbook> CreateAsync(DataSet dataSet)
         {
@@ -201,7 +216,7 @@ namespace Acb.Office
             {
                 wb.Write(ms);
                 wb.Close();
-                return streamAction.Invoke(ms);
+                return streamAction(ms);
             }
         }
 
@@ -209,8 +224,7 @@ namespace Acb.Office
         {
             Create(dataSet, ms =>
             {
-                streamAction.Invoke(ms);
-                return true;
+                streamAction(ms);
             });
         }
 
