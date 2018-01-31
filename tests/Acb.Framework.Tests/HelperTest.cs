@@ -45,18 +45,26 @@ namespace Acb.Framework.Tests
             }
         }
 
+        public enum Site
+        {
+            User,
+            Story,
+            Payment,
+            Market
+        }
+
         [TestMethod]
         public async Task HttpTest()
         {
-            const string uri = "/market/query/life?t=1";
-            var helper = new RestHelper("http://220.167.101.61:8300");
+            const string uri = "/query/life?t=1";
+            var helper = new RestHelper(Site.Market);
             var html = await helper.GetAsync<DResult<dynamic>>(uri, new
             {
                 cityCode = "510100"
             });
             //var xx = JsonConvert.SerializeObject(html.Data.xianXing);
             //if (html.Data.xianxing != null)
-            Print(html.Data.xianxing);
+            Print(html.Data.xianXing);
         }
     }
 }
