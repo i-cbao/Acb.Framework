@@ -11,9 +11,11 @@ namespace Acb.Payment.Gateways.Alipay
     /// <summary>
     /// 支付宝网关
     /// </summary>
-    public sealed class AlipayGateway : DGateway, IPaymentApp, IPaymentUrl, IPaymentForm, IActionQuery, IActionCancel, IActionRefund
+    public sealed class AlipayGateway : DGateway, IPaymentApp, IPaymentUrl, IPaymentForm, IActionQuery, IActionCancel,
+        IActionRefund
     {
         #region 私有字段
+
 #if DEBUG
         private const string GATEWAYURL = "https://openapi.alipaydev.com/gateway.do?charset=UTF-8";
 #else
@@ -38,6 +40,7 @@ namespace Acb.Payment.Gateways.Alipay
         #endregion
 
         #region 属性
+
         public override string GatewayUrl { get; set; } = GATEWAYURL;
 
         public new Merchant Merchant => _merchant;
@@ -56,12 +59,14 @@ namespace Acb.Payment.Gateways.Alipay
 
         protected internal override string[] NotifyVerifyParameter => new string[]
         {
-            Constant.APP_ID,Constant.NOTIFY_TYPE, Constant.NOTIFY_ID,
+            Constant.APP_ID, Constant.NOTIFY_TYPE, Constant.NOTIFY_ID,
             Constant.NOTIFY_TIME, Constant.SIGN, Constant.SIGN_TYPE
         };
+
         #endregion
 
         #region 私有方法
+
         /// <summary>
         /// 生成签名
         /// </summary>
@@ -110,7 +115,8 @@ namespace Acb.Payment.Gateways.Alipay
             GatewayData.Remove(Constant.SIGN);
             GatewayData.Remove(Constant.SIGN_TYPE);
 
-            return EncryptHelper.RsaVerifySign(GatewayData.ToUrl(false), Notify.Sign, Merchant.AlipayPublicKey, signType: "RSA2");
+            return EncryptHelper.RsaVerifySign(GatewayData.ToUrl(false), Notify.Sign, Merchant.AlipayPublicKey,
+                signType: "RSA2");
         }
 
         /// <summary>
@@ -152,10 +158,7 @@ namespace Acb.Payment.Gateways.Alipay
         private void Commit(string type)
         {
             string result = null;
-            Task.Run(async () =>
-                {
-                    result = await Helper.HttpHelper.PostAsync(GatewayUrl, GatewayData.ToUrl());
-                })
+            Task.Run(async () => { result = await Helper.HttpHelper.PostAsync(GatewayUrl, GatewayData.ToUrl()); })
                 .GetAwaiter()
                 .GetResult();
 
@@ -201,6 +204,7 @@ namespace Acb.Payment.Gateways.Alipay
         }
 
         #region App支付
+
         public string BuildAppPayment()
         {
             InitAppPayment();
@@ -219,6 +223,7 @@ namespace Acb.Payment.Gateways.Alipay
         #endregion
 
         #region Web支付
+
         public string BuildFormPayment()
         {
             InitFormPayment();
@@ -232,9 +237,11 @@ namespace Acb.Payment.Gateways.Alipay
             Order.ProductCode = Constant.FAST_INSTANT_TRADE_PAY;
             InitOrderParameter();
         }
+
         #endregion
 
         #region Wap支付
+
         public string BuildUrlPayment()
         {
             InitUrlPayment();
@@ -248,9 +255,11 @@ namespace Acb.Payment.Gateways.Alipay
             Order.ProductCode = Constant.QUICK_WAP_WAY;
             InitOrderParameter();
         }
+
         #endregion
 
         #region 退款
+
         public IDataNotify BuildRefund(IDataAction dataAction)
         {
             InitRefund(dataAction);
@@ -264,9 +273,11 @@ namespace Acb.Payment.Gateways.Alipay
         {
             InitActionParameter(ActionType.Refund, dataAction);
         }
+
         #endregion
 
         #region 查询
+
         public IDataNotify BuildQuery(IDataAction dataAction)
         {
             InitQuery(dataAction);
@@ -280,12 +291,14 @@ namespace Acb.Payment.Gateways.Alipay
         {
             InitActionParameter(ActionType.Query, dataAction);
         }
+
         #endregion
 
         #region 取消支付
+
         public IDataNotify BuildCancel(IDataAction dataAction)
         {
-            InitQuery(dataAction);
+            InitCancel(dataAction);
 
             Commit(Constant.ALIPAY_TRADE_CANCEL_RESPONSE);
 
@@ -296,6 +309,7 @@ namespace Acb.Payment.Gateways.Alipay
         {
             InitActionParameter(ActionType.Cancel, dataAction);
         }
+
         #endregion
     }
 }

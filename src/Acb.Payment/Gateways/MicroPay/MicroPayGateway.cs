@@ -3,6 +3,7 @@ using Acb.Core.Exceptions;
 using Acb.Core.Helper;
 using Acb.Core.Serialize;
 using Acb.Core.Timing;
+using Acb.Payment.Enum;
 using Acb.Payment.Interfaces;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ using HttpHelper = Acb.Payment.Helper.HttpHelper;
 
 namespace Acb.Payment.Gateways.MicroPay
 {
-    public class MicroPayGateway : DGateway, IPaymentApp, IPaymentUrl, IPaymentScan, IPaymentPublic
+    public class MicroPayGateway : DGateway, IPaymentApp, IPaymentUrl, IPaymentScan, IPaymentPublic, IActionRefund
     {
         #region 私有字段
 
@@ -200,6 +201,20 @@ namespace Acb.Payment.Gateways.MicroPay
             return false;
         }
 
+        /// <summary>
+        /// 初始化辅助参数
+        /// </summary>
+        /// <param name="actionType">辅助类型</param>
+        /// <param name="dataAction">辅助参数</param>
+        private void InitActionParameter(ActionType actionType, IDataAction dataAction)
+        {
+            dataAction.Validate(actionType);
+            Merchant.NonceStr = IdentityHelper.Guid32;
+            GatewayData.Add(Merchant, NamingType.UrlCase);
+            GatewayData.Add(dataAction, NamingType.UrlCase);
+            GatewayData.Add(Constant.SIGN, BuildSign());
+        }
+
         #endregion
 
         #region App支付
@@ -302,5 +317,20 @@ namespace Acb.Payment.Gateways.MicroPay
         #endregion
 
 
+        #region 退款
+        public IDataNotify BuildRefund(IDataAction dataAction)
+        {
+            InitRefund(dataAction);
+            Commit(true);
+            return Notify;
+        }
+
+        public void InitRefund(IDataAction dataAction)
+        {
+            GatewayUrl = REFUNDGATEWAYURL;
+            InitActionParameter(ActionType.Refund, dataAction);
+        }
+
+        #endregion
     }
 }

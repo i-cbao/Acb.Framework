@@ -8,7 +8,7 @@ namespace Acb.Dapper.Mysql
 {
     public class MySqlConnectionAdapter : IDbConnectionAdapter
     {
-        public string ProviderName => "Mysql";
+        public string ProviderName => "MySql";
         public Type ConnectionType => typeof(MySqlConnection);
 
         public string FormatSql(string sql)

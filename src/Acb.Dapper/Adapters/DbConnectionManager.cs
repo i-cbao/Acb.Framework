@@ -8,7 +8,7 @@ namespace Acb.Dapper.Adapters
     public static class DbConnectionManager
     {
         private static readonly ConcurrentDictionary<string, IDbConnectionAdapter> Adapters;
-        private static ILogger Logger;
+        private static readonly ILogger Logger;
 
         static DbConnectionManager()
         {
@@ -21,9 +21,12 @@ namespace Acb.Dapper.Adapters
         /// <param name="adapter"></param>
         public static void AddAdapter(IDbConnectionAdapter adapter)
         {
-            if (Adapters.ContainsKey(adapter.ProviderName))
+            if (adapter == null || string.IsNullOrWhiteSpace(adapter.ProviderName))
                 return;
-            Adapters.TryAdd(adapter.ProviderName, adapter);
+            var key = adapter.ProviderName.ToLower();
+            if (Adapters.ContainsKey(key))
+                return;
+            Adapters.TryAdd(key, adapter);
         }
 
         /// <summary> 创建数据库适配器 </summary>
@@ -31,8 +34,8 @@ namespace Acb.Dapper.Adapters
         /// <returns></returns>
         public static IDbConnectionAdapter Create(string providerName = null)
         {
-            providerName = string.IsNullOrWhiteSpace(providerName) ? SqlServerAdapter.Name : providerName;
-            if (Adapters.TryGetValue(providerName, out var adapter))
+            var key = string.IsNullOrWhiteSpace(providerName) ? SqlServerAdapter.Name : providerName;
+            if (Adapters.TryGetValue(key?.ToLower(), out var adapter))
                 return adapter;
             throw new BusiException($"不支持的DbProvider：{providerName}");
         }
@@ -45,12 +48,11 @@ namespace Acb.Dapper.Adapters
         {
             foreach (var adapter in Adapters.Values)
             {
-                if (adapter.ConnectionType == conn.GetType())
-                {
-                    sql = adapter.FormatSql(sql);
-                    Logger.Debug(sql);
-                    return sql;
-                }
+                if (adapter.ConnectionType != conn.GetType())
+                    continue;
+                sql = adapter.FormatSql(sql);
+                Logger.Debug(sql);
+                return sql;
             }
             return sql;
         }
