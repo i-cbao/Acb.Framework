@@ -151,8 +151,8 @@ namespace Acb.Dapper
 
             sql = conn.PagedSql(sql, columns, order);
 
-            _parameters.Add("index", page);
-            _parameters.Add("pageSize", size);
+            _parameters.Add("skip", (page - 1) * size);
+            _parameters.Add("size", size);
             _sqlBuilder.Clear();
             _sqlBuilder.Append(sql);
         }
@@ -205,7 +205,8 @@ namespace Acb.Dapper
             Paged(page, size, conn);
             if (param != null)
                 _parameters.AddDynamicParams(param);
-            using (var muli = conn.QueryMultiple(ToString(), _parameters))
+            var sql = ToString();
+            using (var muli = conn.QueryMultiple(sql, _parameters))
             {
                 var list = muli.Read<T>();
                 var count = muli.ReadFirstOrDefault<int>();

@@ -25,7 +25,7 @@ namespace Acb.WebApi
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services
+            var mvcBuilder = services
                 .AddMvc(options =>
                 {
                     //自定义异常捕获
@@ -36,6 +36,7 @@ namespace Acb.WebApi
                     //json序列化处理
                     opts.SerializerSettings.Converters.Add(new DateTimeConverter());
                 });
+
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
             _bootstrap.Initialize();

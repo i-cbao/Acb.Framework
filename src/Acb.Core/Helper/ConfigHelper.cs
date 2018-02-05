@@ -13,8 +13,10 @@ namespace Acb.Core.Helper
         private IDisposable _callbackRegistration;
         private IConfigurationBuilder _builder;
 
+        /// <summary> 配置文件变更事件 </summary>
         public event Action<object> ConfigChanged;
 
+        /// <summary> 当前配置 </summary>
         public IConfiguration Config => _config;
 
         private ConfigHelper()
@@ -47,20 +49,12 @@ namespace Acb.Core.Helper
             _callbackRegistration = _config.GetReloadToken().RegisterChangeCallback(OnConfigChanged, state);
         }
 
+        /// <summary> 单例 </summary>
         public static ConfigHelper Instance =
             Singleton<ConfigHelper>.Instance ?? (Singleton<ConfigHelper>.Instance = new ConfigHelper());
 
-
-        ///// <summary>
-        ///// 得到AppSettings中的配置字符串信息
-        ///// </summary>
-        ///// <param name="key"></param>
-        ///// <returns></returns>
-        //public string Get(string key)
-        //{
-        //    return Get(string.Empty, supressKey: key);
-        //}
-
+        /// <summary> 构建配置 </summary>
+        /// <param name="builderAction"></param>
         public void Build(Action<IConfigurationBuilder> builderAction)
         {
             builderAction.Invoke(_builder);
@@ -93,6 +87,7 @@ namespace Acb.Core.Helper
             return obj;
         }
 
+        /// <summary> 重新加载配置 </summary>
         public void Reload() { _config.Reload(); }
     }
 }

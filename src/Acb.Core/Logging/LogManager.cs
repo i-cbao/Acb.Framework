@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Extensions;
+using Acb.Core.Helper;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,26 +10,28 @@ namespace Acb.Core.Logging
     /// <summary> 日志管理器 </summary>
     public static class LogManager
     {
+        private const string ConfigLevel = "logLevel";
+
         private static readonly ConcurrentDictionary<string, Logger> LoggerDictionary;
-        //private const string MessageFormat = "Method:{1}({2}) {3}:{4}{0}Msg:{5}{0}";
-        private static readonly object LockObj = new object();
 
         /// <summary> 日志适配器集合 </summary>
         private static readonly ConcurrentDictionary<ILoggerAdapter, LogLevel> LoggerAdapters;
 
         private static LogLevel _logLevel;
-        private static readonly bool CanSetLevel = true;
 
         /// <summary> 静态构造 </summary>
         static LogManager()
         {
             LoggerDictionary = new ConcurrentDictionary<string, Logger>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
-            var level = "LogLevel".Config(string.Empty);
-            if (string.IsNullOrWhiteSpace(level))
-                return;
-            _logLevel = level.CastTo(LogLevel.Off);
-            CanSetLevel = false;
+            _logLevel = ConfigLevel.Config(LogLevel.Off);
+            ConfigHelper.Instance.ConfigChanged += obj =>
+            {
+                var logLevel = ConfigLevel.Config(LogLevel.Off);
+                if (_logLevel == logLevel)
+                    return;
+                SetLevel(logLevel);
+            };
         }
 
         /// <summary> 是否启用日志级别 </summary>
@@ -36,6 +39,8 @@ namespace Acb.Core.Logging
         /// <returns></returns>
         private static bool IsEnableLevel(LogLevel level)
         {
+            if (_logLevel == LogLevel.All) return true;
+            if (_logLevel == LogLevel.Off) return false;
             return level >= _logLevel;
         }
 
@@ -47,7 +52,7 @@ namespace Acb.Core.Logging
             {
                 return;
             }
-            LoggerAdapters.TryAdd(adapter, LogLevel.All);
+            LoggerAdapters.TryAdd(adapter, _logLevel);
         }
 
         /// <summary> 添加适配器 </summary>
@@ -55,6 +60,9 @@ namespace Acb.Core.Logging
         /// <param name="level">日志等级(可多位与)</param>
         public static void AddAdapter(ILoggerAdapter adapter, LogLevel level)
         {
+            if (!IsEnableLevel(level))
+                level = _logLevel;
+
             if (LoggerAdapters.ContainsKey(adapter))
             {
                 LoggerAdapters[adapter] = level;
@@ -77,8 +85,7 @@ namespace Acb.Core.Logging
             var adapters = LoggerAdapters.Where(t => t.Key.GetType() == adapterType).ToList();
             if (!adapters.Any())
                 return;
-            LogLevel level;
-            adapters.Foreach(t => LoggerAdapters.TryRemove(t.Key, out level));
+            adapters.Foreach(t => LoggerAdapters.TryRemove(t.Key, out _));
         }
 
         /// <summary> 清空适配器 </summary>
@@ -94,8 +101,7 @@ namespace Acb.Core.Logging
         /// <returns></returns>
         public static Logger Logger(string name)
         {
-            Logger logger;
-            if (LoggerDictionary.TryGetValue(name, out logger))
+            if (LoggerDictionary.TryGetValue(name, out var logger))
             {
                 return logger;
             }
@@ -128,9 +134,12 @@ namespace Acb.Core.Logging
         /// <param name="level"></param>
         public static void SetLevel(LogLevel level)
         {
-            if (!CanSetLevel)
-                return;
             _logLevel = level;
+            foreach (var adapter in LoggerAdapters)
+            {
+                if (!IsEnableLevel(adapter.Value))
+                    LoggerAdapters[adapter.Key] = _logLevel;
+            }
         }
 
         internal static IEnumerable<ILog> GetAdapters(string name, LogLevel level)

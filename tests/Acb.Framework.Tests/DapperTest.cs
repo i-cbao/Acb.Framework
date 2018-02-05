@@ -20,15 +20,13 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void PagedTest()
         {
-            //SQL insert = "insert into [mscreen_user] () values (@id,@name)";
-            SQL sql = "select * from [mscreen_user] where [Name]=@name";
+            const string sql = "select * from [t_areas] where [parent_code]=@code";
             using (var conn = ConnectionFactory.Instance.Connection("default", false))
             {
-                var list = sql.PagedList<dynamic>(conn, 1, 10, new { name = "shay" });
+                var list = conn.PagedList<dynamic>(sql, 2, 6, new { code = "510100" });
                 Print(DResult.Succ(list, list.Total));
             }
         }
-
 
         [TestMethod]
         public async Task QueryTest()

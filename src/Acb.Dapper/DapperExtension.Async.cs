@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Dapper.Adapters;
 using Dapper;
 using System.Collections.Generic;
@@ -28,6 +29,20 @@ namespace Acb.Dapper
             var sql = QueryByIdSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
             return await conn.QueryFirstOrDefaultAsync<T>(sql, new { id = key });
+        }
+
+        /// <summary> 分页异步 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="sql"></param>
+        /// <param name="page"></param>
+        /// <param name="size"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static async Task<IPagedList<T>> PagedListAsync<T>(this IDbConnection conn, string sql, int page,
+            int size, object param = null)
+        {
+            return await Task.FromResult(PagedList<T>(conn, sql, page, size, param));
         }
 
         /// <summary> 插入单条数据,不支持有自增列 </summary>

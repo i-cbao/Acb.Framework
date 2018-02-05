@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Core.Serialize;
 using Acb.Dapper.Adapters;
 using Dapper;
@@ -22,8 +23,9 @@ namespace Acb.Dapper
     /// <summary> Dapper自定义扩展 </summary>
     public static partial class DapperExtension
     {
+        #region 私有属性
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypePropsCache =
-            new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
+           new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IDictionary<string, string>> FieldsCache =
             new ConcurrentDictionary<RuntimeTypeHandle, IDictionary<string, string>>();
 
@@ -32,7 +34,9 @@ namespace Acb.Dapper
 
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, KeyValuePair<string, string>> KeyCache =
             new ConcurrentDictionary<RuntimeTypeHandle, KeyValuePair<string, string>>();
+        #endregion
 
+        #region 私有方法
         private static List<PropertyInfo> Props(Type modelType)
         {
             if (TypePropsCache.TryGetValue(modelType.TypeHandle, out var props))
@@ -77,6 +81,7 @@ namespace Acb.Dapper
 
             return type;
         }
+        #endregion
 
         /// <summary> 查询到DataSet </summary>
         /// <param name="conn"></param>
@@ -194,7 +199,7 @@ namespace Acb.Dapper
             return PropValue<string>(model, propName);
         }
 
-        #region QueryAll
+        #region Query
         private static string QueryAllSql<T>()
         {
             var type = typeof(T);
@@ -204,16 +209,6 @@ namespace Acb.Dapper
             return sql;
         }
 
-        /// <summary> 查询所有数据 </summary>
-        public static IEnumerable<T> QueryAll<T>(this IDbConnection conn)
-        {
-            var sql = QueryAllSql<T>();
-            sql = conn.FormatSql(sql);
-            return conn.Query<T>(sql);
-        }
-        #endregion
-
-        #region QueryById
         private static string QueryByIdSql<T>(string keyColumn = null)
         {
             var type = typeof(T);
@@ -222,6 +217,14 @@ namespace Acb.Dapper
             var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKey(type).Value : keyColumn;
             var sql = $"SELECT {columns} FROM [{tableName}] WHERE [{keyName}]=@id";
             return sql;
+        }
+
+        /// <summary> 查询所有数据 </summary>
+        public static IEnumerable<T> QueryAll<T>(this IDbConnection conn)
+        {
+            var sql = QueryAllSql<T>();
+            sql = conn.FormatSql(sql);
+            return conn.Query<T>(sql);
         }
 
         /// <summary> 根据主键查询单条 </summary>
@@ -235,8 +238,25 @@ namespace Acb.Dapper
             sql = conn.FormatSql(sql);
             return conn.QueryFirstOrDefault<T>(sql, new { id = key });
         }
+
+        /// <summary> 分页 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="sql"></param>
+        /// <param name="page"></param>
+        /// <param name="size"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static IPagedList<T> PagedList<T>(this IDbConnection conn, string sql, int page, int size,
+            object param = null)
+        {
+            SQL pageSql = sql;
+            return pageSql.PagedList<T>(conn, page, size, param);
+        }
+
         #endregion
 
+        #region Insert
         /// <summary> 插入单条数据,不支持有自增列 </summary>
         /// <param name="conn"></param>
         /// <param name="model"></param>
@@ -266,6 +286,7 @@ namespace Acb.Dapper
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, models.ToArray(), trans, commandTimeout);
         }
+        #endregion
 
         #region Update
         private static string UpdateSql<T>(string[] updateProps = null)
@@ -342,6 +363,7 @@ namespace Acb.Dapper
         }
         #endregion
 
+        #region Common
         /// <summary> 是否存在 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="conn"></param>
@@ -478,5 +500,6 @@ namespace Acb.Dapper
 
             return dt;
         }
+        #endregion
     }
 }
