@@ -25,13 +25,7 @@ namespace Acb.Core.Logging
             LoggerDictionary = new ConcurrentDictionary<string, Logger>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
             _logLevel = ConfigLevel.Config(LogLevel.Off);
-            ConfigHelper.Instance.ConfigChanged += obj =>
-            {
-                var logLevel = ConfigLevel.Config(LogLevel.Off);
-                if (_logLevel == logLevel)
-                    return;
-                SetLevel(logLevel);
-            };
+            ConfigHelper.Instance.ConfigChanged += obj => { SetLevel(); };
         }
 
         /// <summary> 是否启用日志级别 </summary>
@@ -132,9 +126,12 @@ namespace Acb.Core.Logging
 
         /// <summary> 设置日志等级 </summary>
         /// <param name="level"></param>
-        public static void SetLevel(LogLevel level)
+        public static void SetLevel(LogLevel? level = null)
         {
-            _logLevel = level;
+            level = level ?? ConfigLevel.Config(LogLevel.Off);
+            if (_logLevel == level)
+                return;
+            _logLevel = level.Value;
             foreach (var adapter in LoggerAdapters)
             {
                 if (!IsEnableLevel(adapter.Value))

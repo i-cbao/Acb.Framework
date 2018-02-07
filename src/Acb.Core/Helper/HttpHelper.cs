@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Acb.Core.Helper
     public class HttpHelper : IDisposable
     {
         private static readonly HttpClient Client = new HttpClient();
+        private static readonly ILogger Logger = LogManager.Logger<HttpHelper>();
 
         private static readonly IDictionary<string, string> DefaultHeaders = new Dictionary<string, string>
         {
@@ -71,6 +73,8 @@ namespace Acb.Core.Helper
 
             if (content != null)
                 req.Content = content;
+            var formData = data == null ? string.Empty : "->" + data.ToDictionary().ToUrl(false);
+            Logger.Info($"HttpHelper：[{method}]{url}{formData}");
             return await Client.SendAsync(req);
         }
 

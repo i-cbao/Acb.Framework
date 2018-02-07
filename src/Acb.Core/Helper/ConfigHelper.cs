@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Acb.Core.Logging;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Linq;
@@ -66,6 +67,7 @@ namespace Acb.Core.Helper
             }
 
             _config = _builder.Build();
+            LogManager.SetLevel();
         }
 
         /// <summary> 配置文件读取 </summary>

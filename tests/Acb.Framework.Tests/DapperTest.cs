@@ -2,6 +2,7 @@
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Framework.Tests.Repositories;
+using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
@@ -11,19 +12,36 @@ namespace Acb.Framework.Tests
     public class DapperTest : DTest
     {
         private readonly AreaRepository _areaRepository;
+        private readonly MapperConfiguration _config;
+
+        public class AreaDto
+        {
+            public string city_code { get; set; }
+            public string city_name { get; set; }
+            public string parent_code { get; set; }
+            public int deep { get; set; }
+        }
 
         public DapperTest()
         {
             _areaRepository = DRepository.Instance<AreaRepository>();
+            Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMissingTypeMaps = true;
+            });
         }
 
         [TestMethod]
         public void PagedTest()
         {
-            const string sql = "select * from [t_areas] where [parent_code]=@code";
+            var columns = typeof(TAreas).Columns(includes: new[] { nameof(TAreas.CityName) });
+            var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
             using (var conn = ConnectionFactory.Instance.Connection("default", false))
             {
-                var list = conn.PagedList<dynamic>(sql, 2, 6, new { code = "510100" });
+                var list = conn.PagedList<TAreas>(sql, 2, 6, new { code = "510100" });
+                //var mapper = _config.CreateMapper();
+                //var dtos = Mapper.Map<PagedList<TAreas>>(list);
+                //Print(dtos);
                 Print(DResult.Succ(list, list.Total));
             }
         }

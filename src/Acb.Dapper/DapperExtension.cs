@@ -142,6 +142,30 @@ namespace Acb.Dapper
             FieldsCache.TryAdd(modelType.TypeHandle, fields);
             return fields;
         }
+
+        /// <summary> 获取所有列名(as) </summary>
+        /// <param name="modelType"></param>
+        /// <param name="excepts">排除的字段</param>
+        /// <param name="includes">包含的字段</param>
+        /// <returns></returns>
+        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null)
+        {
+            var props = modelType.TypeProperties();
+            var sb = new StringBuilder();
+            foreach (var prop in props)
+            {
+                if (excepts != null && excepts.Contains(prop.Key))
+                    continue;
+                if (includes != null && !includes.Contains(prop.Key))
+                    continue;
+                if (prop.Key.Equals(prop.Value, StringComparison.CurrentCultureIgnoreCase))
+                    sb.AppendFormat("[{0}],", prop.Key);
+                else
+                    sb.AppendFormat("[{0}] AS [{1}],", prop.Value, prop.Key);
+            }
+            return sb.ToString().TrimEnd(',');
+        }
+
         /// <summary> 生成insert语句 </summary>
         /// <returns></returns>
         public static string InsertSql(this Type modelType, string[] excepts = null)
@@ -447,25 +471,7 @@ namespace Acb.Dapper
             return conn.Execute(sql, new { id = key, count }, trans);
         }
 
-        /// <summary> 获取所有列名(as) </summary>
-        /// <param name="modelType"></param>
-        /// <param name="excepts"></param>
-        /// <returns></returns>
-        public static string Columns(this Type modelType, string[] excepts = null)
-        {
-            var props = modelType.TypeProperties();
-            var sb = new StringBuilder();
-            foreach (var prop in props)
-            {
-                if (excepts != null && excepts.Contains(prop.Key))
-                    continue;
-                if (prop.Key.Equals(prop.Value, StringComparison.CurrentCultureIgnoreCase))
-                    sb.AppendFormat("[{0}],", prop.Key);
-                else
-                    sb.AppendFormat("[{0}] AS [{1}],", prop.Value, prop.Key);
-            }
-            return sb.ToString().TrimEnd(',');
-        }
+
 
         /// <summary> 转换DataTable </summary>
         /// <typeparam name="T"></typeparam>

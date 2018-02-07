@@ -57,14 +57,14 @@ namespace Acb.Framework.Tests
         public async Task HttpTest()
         {
             const string uri = "/query/life?t=1";
-            var helper = new RestHelper(Site.Market);
-            var html = await helper.GetAsync<DResult<dynamic>>(uri, new
+            var helper = new RestHelper(Site.Market, 1);
+            var result = await helper.GetAsync<DResult<dynamic>>(uri, new
             {
                 cityCode = "510100"
             });
             //var xx = JsonConvert.SerializeObject(html.Data.xianXing);
             //if (html.Data.xianxing != null)
-            Print(html.Data.xianXing);
+            Print(result);
         }
     }
 }
