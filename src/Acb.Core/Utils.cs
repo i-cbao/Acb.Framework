@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -139,13 +140,13 @@ namespace Acb.Core
 
         /// <summary> 获取原始Url </summary>
         /// <returns></returns>
-        public static string RawUrl()
+        public static string RawUrl(HttpRequest request = null)
         {
-            if (AcbHttpContext.Current == null)
+            if (request == null && AcbHttpContext.Current == null)
                 return string.Empty;
             try
             {
-                var request = AcbHttpContext.Current.Request;
+                request = request ?? AcbHttpContext.Current.Request;
                 return $"{request.Scheme}://{request.Host}{request.Path.Value}{request.QueryString.Value}";
             }
             catch

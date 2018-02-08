@@ -66,5 +66,14 @@ namespace Acb.Framework.Tests
             //if (html.Data.xianxing != null)
             Print(result);
         }
+
+        [TestMethod]
+        public async Task RestHelperTest()
+        {
+            const string uri = "/api/home/logLevel";
+            var helper = new RestHelper("http://localhost:61487");
+            var result = await helper.GetAsync<DResult<dynamic>>(uri);
+            Print(result);
+        }
     }
 }

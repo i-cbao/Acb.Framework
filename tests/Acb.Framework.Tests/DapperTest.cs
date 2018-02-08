@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using Acb.Core.Domain.Entities;
+using Acb.Dapper.Adapters;
 
 namespace Acb.Framework.Tests
 {

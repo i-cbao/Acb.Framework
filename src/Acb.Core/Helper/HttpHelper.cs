@@ -46,7 +46,7 @@ namespace Acb.Core.Helper
         /// <param name="content"></param>
         /// <returns></returns>
         public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string url, object param = null,
-            object data = null, object headers = null, HttpContent content = null)
+            object data = null, IDictionary<string, string> headers = null, HttpContent content = null)
         {
             if (param != null)
             {
@@ -59,10 +59,9 @@ namespace Acb.Core.Helper
             var req = new HttpRequestMessage(method, uri);
             if (headers != null)
             {
-                var dict = headers.ToDictionary();
-                foreach (var key in dict)
+                foreach (var key in headers)
                 {
-                    req.Headers.Add(key.Key, key.Value?.ToString());
+                    req.Headers.Add(key.Key, key.Value);
                 }
             }
 

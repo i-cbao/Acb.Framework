@@ -1,9 +1,10 @@
 ﻿using Acb.Core;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
+using Acb.WebApi.Filters;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -19,7 +20,7 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{key}")]
+        [HttpGet("{key}"), AppTicket]
         public async Task<DResult<string>> Get(string key)
         {
             Response.Clear();

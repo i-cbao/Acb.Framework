@@ -73,6 +73,8 @@ namespace Acb.Core
         /// <summary> 参数 </summary>
         public static string QueryString => Current.Request.QueryString.ToString();
 
+        public static string RawUrl => Utils.RawUrl();
+
         /// <summary> 配置HttpContext </summary>
         /// <param name="accessor"></param>
         public static void Configure(IHttpContextAccessor accessor)

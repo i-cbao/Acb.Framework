@@ -4,6 +4,7 @@ using Acb.Core.Logging;
 using Acb.Core.Timing;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace Acb.Core.Helper
     {
         private readonly string _baseUri;
         private const string Prefix = "sites:";
+        private const string TicketKeyConfig = "ticketKey";
         private readonly int _retryCount;
         private readonly ILogger _logger = LogManager.Logger<RestHelper>();
 
@@ -25,15 +27,22 @@ namespace Acb.Core.Helper
         {
             _baseUri = baseUri;
             _retryCount = retry;
+
         }
 
         /// <summary> 构造函数 </summary>
         /// <param name="siteEnum"></param>
         /// <param name="retry">重试次数</param>
-        public RestHelper(Enum siteEnum, int retry = 3)
+        public RestHelper(Enum siteEnum, int retry = 3) : this(
+            $"{Prefix}{siteEnum.ToString().ToLower()}".Config<string>(), retry)
         {
-            _baseUri = $"{Prefix}{siteEnum.ToString().ToLower()}".Config<string>();
-            _retryCount = retry;
+        }
+
+        private static string GetTicket()
+        {
+            var key = TicketKeyConfig.Config<string>();
+            var timestamp = Clock.Now.ToTimestamp();
+            return $"{timestamp}{EncryptHelper.Hash($"{key}{timestamp}", EncryptHelper.HashFormat.MD532).ToLower()}";
         }
 
         /// <summary> 请求接口 </summary>
@@ -45,7 +54,7 @@ namespace Acb.Core.Helper
         /// <param name="content"></param>
         /// <returns></returns>
         public async Task<string> RequestAsync(string api, object paras = null, object data = null,
-            HttpMethod method = null, object headers = null, HttpContent content = null)
+            HttpMethod method = null, IDictionary<string, string> headers = null, HttpContent content = null)
         {
             var current = 0;
             if (string.IsNullOrWhiteSpace(api))
@@ -57,6 +66,9 @@ namespace Acb.Core.Helper
                 url += paras.ToDictionary().ToUrl();
             }
 
+            headers = headers ?? new Dictionary<string, string>();
+
+            headers.Add("App-Ticket", GetTicket());
             while (current < _retryCount)
             {
                 try
@@ -88,7 +100,7 @@ namespace Acb.Core.Helper
         /// <param name="content"></param>
         /// <returns></returns>
         public async Task<T> RequestAsync<T>(string api, object paras = null, object data = null,
-            HttpMethod method = null, object headers = null, HttpContent content = null)
+            HttpMethod method = null, IDictionary<string, string> headers = null, HttpContent content = null)
             where T : DResult, new()
         {
             try
@@ -123,7 +135,7 @@ namespace Acb.Core.Helper
         /// <param name="content"></param>
         /// <returns></returns>
         public async Task<DResult<T>> ResultAsync<T>(string api, object paras = null, object data = null,
-            HttpMethod method = null, object headers = null, HttpContent content = null)
+            HttpMethod method = null, IDictionary<string, string> headers = null, HttpContent content = null)
         {
             return await RequestAsync<DResult<T>>(api, paras, data, method, headers, content);
         }
@@ -137,23 +149,23 @@ namespace Acb.Core.Helper
         /// <param name="content"></param>
         /// <returns></returns>
         public async Task<DResult> ResultAsync(string api, object paras = null, object data = null,
-            HttpMethod method = null, object headers = null, HttpContent content = null)
+            HttpMethod method = null, IDictionary<string, string> headers = null, HttpContent content = null)
         {
             return await RequestAsync<DResult>(api, paras, data, method, headers, content);
         }
 
-        public async Task<T> GetAsync<T>(string api, object paras = null, object headers = null)
+        public async Task<T> GetAsync<T>(string api, object paras = null, IDictionary<string, string> headers = null)
             where T : DResult, new() => await RequestAsync<T>(api, paras, null, HttpMethod.Get, headers);
 
         public async Task<T> PostAsync<T>(string api, object data = null, object paras = null,
-            object headers = null, HttpContent content = null)
+            IDictionary<string, string> headers = null, HttpContent content = null)
             where T : DResult, new() => await RequestAsync<T>(api, paras, data, HttpMethod.Post, headers, content);
 
         public async Task<T> PutAsync<T>(string api, object data = null, object paras = null,
-            object headers = null, HttpContent content = null)
+            IDictionary<string, string> headers = null, HttpContent content = null)
             where T : DResult, new() => await RequestAsync<T>(api, paras, data, HttpMethod.Put, headers, content);
 
-        public async Task<T> DeleteAsync<T>(string api, object paras = null, object headers = null)
+        public async Task<T> DeleteAsync<T>(string api, object paras = null, IDictionary<string, string> headers = null)
             where T : DResult, new() => await RequestAsync<T>(api, paras, null, HttpMethod.Delete, headers);
     }
 }

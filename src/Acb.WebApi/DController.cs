@@ -9,6 +9,7 @@ using System.IO;
 namespace Acb.WebApi
 {
     [ValidateModel]
+    [ActionTiming]
     public abstract class DController : Controller
     {
         protected HttpContext Current => AcbHttpContext.Current;

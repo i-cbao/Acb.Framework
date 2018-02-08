@@ -25,7 +25,7 @@ namespace Acb.WebApi
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            var mvcBuilder = services
+            services
                 .AddMvc(options =>
                 {
                     //自定义异常捕获

@@ -24,7 +24,7 @@ namespace Acb.Core.Logging
         {
             LoggerDictionary = new ConcurrentDictionary<string, Logger>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
-            _logLevel = ConfigLevel.Config(LogLevel.Off);
+            SetLevel();
             ConfigHelper.Instance.ConfigChanged += obj => { SetLevel(); };
         }
 
@@ -128,13 +128,13 @@ namespace Acb.Core.Logging
         /// <param name="level"></param>
         public static void SetLevel(LogLevel? level = null)
         {
-            level = level ?? ConfigLevel.Config(LogLevel.Off);
+            level = level ?? ConfigLevel.Config(LogLevel.Info);
             if (_logLevel == level)
                 return;
             _logLevel = level.Value;
             foreach (var adapter in LoggerAdapters)
             {
-                if (!IsEnableLevel(adapter.Value))
+                if (adapter.Value == LogLevel.Off || !IsEnableLevel(adapter.Value))
                     LoggerAdapters[adapter.Key] = _logLevel;
             }
         }
