@@ -5,6 +5,7 @@ using Acb.Framework.Tests.Repositories;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using Acb.Core.Domain.Entities;
 
 namespace Acb.Framework.Tests
 {
@@ -34,7 +35,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void PagedTest()
         {
-            var columns = typeof(TAreas).Columns(includes: new[] { nameof(TAreas.CityName) });
+            var columns = typeof(TAreas).Columns();
             var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
             using (var conn = ConnectionFactory.Instance.Connection("default", false))
             {

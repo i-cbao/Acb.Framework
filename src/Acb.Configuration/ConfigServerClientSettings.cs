@@ -178,7 +178,7 @@ namespace Acb.Configuration
         /// <summary> 开启刷新 </summary>
         public virtual bool RefreshEnable { get; set; }
 
-        /// <summary> 刷新周期 </summary>
+        /// <summary> 刷新周期(秒) </summary>
         public virtual int RefreshInterval { get; set; }
 
         internal string GetRawUri()

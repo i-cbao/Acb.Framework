@@ -4,6 +4,7 @@ using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Dapper.Config;
 using Acb.MongoDb;
+using log4net.Appender;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
@@ -38,6 +39,13 @@ namespace Acb.Framework.Tests
             var name = "name".Config<string>();
             Print(name);
             _logger.Fatal(name);
+        }
+
+        [TestMethod]
+        public void Log4NetConfigTest()
+        {
+            var config = "log4net:debug".Config<RollingFileAppender>();
+            Print(config);
         }
     }
 }

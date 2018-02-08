@@ -44,7 +44,7 @@ namespace Acb.Core.Helper
             return new Guid(secuentialGuid);
         }
 
-        public static string Guid32 => Guid.NewGuid().ToString("N");
+        public static string Guid32 => NewSequentialGuid().ToString("N");
 
         public static string Guid16
         {

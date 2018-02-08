@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Acb.Framework.Tests.Repositories
 {
     [Naming(NamingType.UrlCase, Name = "t_areas")]
-    internal class TAreas : IEntity
+    internal class TAreas : BaseEntity<string>
     {
         /// <summary>城市编码</summary>
         [Key]

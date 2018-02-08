@@ -41,7 +41,7 @@ namespace Acb.Dapper
         {
             if (TypePropsCache.TryGetValue(modelType.TypeHandle, out var props))
                 return props.ToList();
-            props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+            props = modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
             TypePropsCache.TryAdd(modelType.TypeHandle, props);
             return props.ToList();
         }

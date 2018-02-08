@@ -10,6 +10,7 @@ namespace Acb.Framework.Logging
 {
     internal class Log4NetDefaultConfig
     {
+        private const string Prefix = "log4net:";
         private static readonly ILayout NormalLayout =
             new PatternLayout(
                 "#%property{LogSite}#%date#%r#%thread#%-5level#%logger#%message#%exception#%n");
@@ -37,6 +38,7 @@ namespace Acb.Framework.Logging
         {
             const string file = "dd\".log\"";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
+
             appender.ClearFilters();
             var minLevel = Consts.Mode == ProductMode.Prod ? Level.Info : Level.Debug;
             appender.AddFilter(new LevelRangeFilter
