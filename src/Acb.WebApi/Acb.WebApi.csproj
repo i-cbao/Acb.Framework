@@ -6,7 +6,7 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - WebApi基础类</Product>
     <Description>爱车保 - WebApi基础类</Description>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
