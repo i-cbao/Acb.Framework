@@ -4,7 +4,7 @@
     {
         public int Code { get; }
 
-        public DException(string message, int code = ErrorCode.SystemError)
+        public DException(string message, int code = ErrorCodes.DefaultCode)
             : base(message)
         {
             Code = code;

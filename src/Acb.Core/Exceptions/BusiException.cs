@@ -6,7 +6,7 @@
         /// <summary> 构造函数 </summary>
         /// <param name="message"></param>
         /// <param name="code"></param>
-        public BusiException(string message, int code = ErrorCode.SystemError)
+        public BusiException(string message, int code = ErrorCodes.DefaultCode)
             : base(message, code)
         {
         }

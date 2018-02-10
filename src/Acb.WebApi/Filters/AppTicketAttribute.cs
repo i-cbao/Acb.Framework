@@ -27,7 +27,7 @@ namespace Acb.WebApi.Filters
 
             if (!ValidTicket(actionContext.HttpContext.Request))
             {
-                throw new BusiException("非法请求", 10001);
+                throw ErrorCodes.ClientError.CodeException<ErrorCodes>();
             }
         }
 
@@ -48,7 +48,7 @@ namespace Acb.WebApi.Filters
                     return true;
                 var timestamp = ticket.ToString().Substring(0, 10).CastTo(0L);
                 if (DateTimeHelper.FromTimestamp(timestamp).AddMinutes(5) < Clock.Now)
-                    throw new BusiException("请求已过期", 10002);
+                    throw ErrorCodes.ClientTimeoutError.CodeException<ErrorCodes>();
                 // 规则 App-Ticket=时间戳秒 + Md532(key + 时间戳秒).ToLower()
                 var ticketKey = TicketKeyConfig.Config<string>();
                 var value = timestamp + EncryptHelper.Hash($"{ticketKey}{timestamp}", EncryptHelper.HashFormat.MD532).ToLower();

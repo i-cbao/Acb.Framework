@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace Acb.Redis
 {
+    /// <summary> 缓存实现类 </summary>
     public class RedisCache : BaseCache
     {
         private readonly string _region;

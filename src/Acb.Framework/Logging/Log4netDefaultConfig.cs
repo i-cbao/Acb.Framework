@@ -11,11 +11,13 @@ namespace Acb.Framework.Logging
     internal class Log4NetDefaultConfig
     {
         private const string Prefix = "log4net:";
+
         private static readonly ILayout NormalLayout =
             new PatternLayout(
-                "#%property{LogSite}#%date#%r#%thread#%-5level#%logger#%message#%exception#%n");
+                "%date[%property{LogSite}] %r %thread %-5level %logger %message %exception%n");
+
         private static readonly ILayout ErrorLayout =
-            new PatternLayout("#%property{LogSite}#%date#%r#%thread#%-5level#%logger#%message#%exception#%n");
+            new PatternLayout("%date[%property{LogSite}] %r %thread %-5level %logger %message %exception%n");
 
         private static RollingFileAppender BaseAppender(string name, string file, ILayout layout)
         {
@@ -38,8 +40,8 @@ namespace Acb.Framework.Logging
         {
             const string file = "dd\".log\"";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
-
             appender.ClearFilters();
+
             var minLevel = Consts.Mode == ProductMode.Prod ? Level.Info : Level.Debug;
             appender.AddFilter(new LevelRangeFilter
             {

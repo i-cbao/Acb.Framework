@@ -1,5 +1,4 @@
 ﻿using Acb.Core.Cache;
-using Acb.Core.Extensions;
 using System.Collections.Concurrent;
 
 namespace Acb.Redis

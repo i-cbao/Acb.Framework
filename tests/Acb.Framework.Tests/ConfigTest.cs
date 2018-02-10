@@ -44,7 +44,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Log4NetConfigTest()
         {
-            var config = "log4net:debug".Config<RollingFileAppender>();
+            var config = "log".Config<RollingFileAppender>();
             Print(config);
         }
     }

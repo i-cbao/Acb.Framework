@@ -7,10 +7,11 @@ using System.Net;
 
 namespace Acb.WebApi.Filters
 {
+    /// <summary> 默认的异常处理 </summary>
     public class DExceptionFilter : IExceptionFilter
     {
-        private const string DefaultErrorMsg = "服务器心情不好， 请稍后重试~";
-
+        /// <summary> 异常处理 </summary>
+        /// <param name="context"></param>
         public void OnException(ExceptionContext context)
         {
             DResult json;
@@ -23,7 +24,7 @@ namespace Acb.WebApi.Filters
             {
                 var logger = LogManager.Logger<DExceptionFilter>();
                 logger.Error(ex.Message, ex);
-                json = DResult.Error(DefaultErrorMsg);
+                json = ErrorCodes.SystemError.CodeResult<ErrorCodes>();
             }
             const int code = (int)HttpStatusCode.OK;
             context.Result = new ObjectResult(json)

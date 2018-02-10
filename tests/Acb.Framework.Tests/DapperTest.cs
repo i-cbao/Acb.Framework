@@ -5,8 +5,6 @@ using Acb.Framework.Tests.Repositories;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
-using Acb.Core.Domain.Entities;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Framework.Tests
 {
@@ -14,7 +12,6 @@ namespace Acb.Framework.Tests
     public class DapperTest : DTest
     {
         private readonly AreaRepository _areaRepository;
-        private readonly MapperConfiguration _config;
 
         public class AreaDto
         {

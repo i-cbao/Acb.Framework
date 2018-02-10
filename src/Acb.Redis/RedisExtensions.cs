@@ -5,6 +5,7 @@ using System;
 
 namespace Acb.Redis
 {
+    /// <summary> Redis扩展 </summary>
     public static class RedisExtensions
     {
         #region 私有方法
@@ -52,17 +53,32 @@ namespace Acb.Redis
         }
         #endregion
 
+        /// <summary> 获取缓存 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="database"></param>
+        /// <param name="key">缓存键</param>
+        /// <returns></returns>
         public static T Get<T>(this IDatabase database, string key)
         {
             var value = database.StringGet(key);
             return Deserialize<T>(value);
         }
 
+        /// <summary> 获取缓存 </summary>
+        /// <param name="database"></param>
+        /// <param name="key">缓存键</param>
+        /// <returns></returns>
         public static object Get(this IDatabase database, string key)
         {
             return database.Get<object>(key);
         }
 
+        /// <summary> 设置缓存 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="database"></param>
+        /// <param name="key">缓存键</param>
+        /// <param name="value">缓存值</param>
+        /// <param name="expired">过期时间</param>
         public static void Set<T>(this IDatabase database, string key, T value, TimeSpan? expired = null)
         {
             database.StringSet(key, Serialize(value), expired);
