@@ -5,6 +5,7 @@ using Acb.WebApi.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Acb.WebApi.Test.ViewModels;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -17,6 +18,12 @@ namespace Acb.WebApi.Test.Controllers
         public DResults<string> Get()
         {
             return Succ(new[] { "value1", "value2" }, -1);
+        }
+
+        [HttpGet("test")]
+        public DResult<string> Test(VHomeInput input)
+        {
+            return DResult.Succ(input.Code);
         }
 
         // GET api/values/5

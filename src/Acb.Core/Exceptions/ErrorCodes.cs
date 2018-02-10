@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 
 namespace Acb.Core.Exceptions
@@ -38,6 +39,8 @@ namespace Acb.Core.Exceptions
     {
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IDictionary<int, string>> ErrorCodesCache =
             new ConcurrentDictionary<RuntimeTypeHandle, IDictionary<int, string>>();
+
+        private static readonly Type ErrorType = typeof(ErrorCodes);
 
         /// <summary> 获取错误码对应的错误信息 </summary>
         /// <param name="code"></param>
@@ -79,18 +82,28 @@ namespace Acb.Core.Exceptions
         /// <returns></returns>
         public static IDictionary<int, string> Codes(this Type type)
         {
-            if (ErrorCodesCache.ContainsKey(type.TypeHandle) && ErrorCodesCache.TryGetValue(type.TypeHandle, out var codes))
+            if (type != ErrorType && !type.IsSubclassOf(ErrorType))
+                return new Dictionary<int, string>();
+            var key = type.TypeHandle;
+            if (ErrorCodesCache.ContainsKey(key) && ErrorCodesCache.TryGetValue(type.TypeHandle, out var codes))
                 return codes;
             codes = new Dictionary<int, string>();
-            var fields = type.GetProperties(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance);
             foreach (var field in fields)
             {
                 var message = field.GetCustomAttribute<DescriptionAttribute>()?.Description ?? field.Name;
                 codes.Add(field.GetRawConstantValue().CastTo<int>(), message);
             }
 
-            ErrorCodesCache.TryAdd(type.TypeHandle, codes);
-            return codes;
+            while (type != null && type != ErrorType)
+            {
+                type = type.BaseType;
+                type.Codes().Foreach(t => codes.Add(t.Key, t.Value));
+            }
+
+            var orderCodes = codes.OrderBy(t => t.Key).ToDictionary(k => k.Key, v => v.Value);
+            ErrorCodesCache.TryAdd(key, orderCodes);
+            return orderCodes;
         }
     }
 }

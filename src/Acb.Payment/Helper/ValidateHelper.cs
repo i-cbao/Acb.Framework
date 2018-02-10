@@ -19,7 +19,7 @@ namespace Acb.Payment.Helper
 
             if (!isValid)
             {
-                throw new BusiException(results[0].ErrorMessage, 20001);
+                throw new BusiException(results[0].ErrorMessage, ErrorCodes.ParamaterError);
             }
         }
     }

@@ -10,8 +10,10 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void CodesTest()
         {
-            var codes = typeof(UserErroCodes).Codes();
+            var codes = typeof(DTest).Codes();
             Print(codes);
+            var result = UserErroCodes.UserError.CodeResult<UserErroCodes>();
+            Print(result);
         }
     }
 }
