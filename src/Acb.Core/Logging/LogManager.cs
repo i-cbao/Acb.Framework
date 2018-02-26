@@ -29,13 +29,15 @@ namespace Acb.Core.Logging
         }
 
         /// <summary> 是否启用日志级别 </summary>
-        /// <param name="level"></param>
+        /// <param name="level">日志等级</param>
+        /// <param name="targetLevel">当前日志等级</param>
         /// <returns></returns>
-        private static bool IsEnableLevel(LogLevel level)
+        private static bool IsEnableLevel(LogLevel level, LogLevel? targetLevel = null)
         {
-            if (_logLevel == LogLevel.All) return true;
-            if (_logLevel == LogLevel.Off) return false;
-            return level >= _logLevel;
+            targetLevel = targetLevel ?? _logLevel;
+            if (targetLevel == LogLevel.All) return true;
+            if (targetLevel == LogLevel.Off) return false;
+            return level >= targetLevel;
         }
 
         /// <summary> 添加适配器 </summary>
@@ -139,16 +141,17 @@ namespace Acb.Core.Logging
             }
         }
 
-        internal static IEnumerable<ILog> GetAdapters(string name, LogLevel level)
+        internal static IEnumerable<ILog> GetLogs(string name, LogLevel level)
         {
-            return LoggerAdapters.Where(t => (t.Value & level) > 0).Select(t => t.Key.GetLogger(name));
+            return LoggerAdapters.Where(t => IsEnableLevel(level, t.Value)).Select(t => t.Key.GetLogger(name)).ToList();
         }
 
         internal static void EachAdapter(this string loggerName, LogLevel level, Action<ILog> action)
         {
             if (string.IsNullOrWhiteSpace(loggerName) || !IsEnableLevel(level))
                 return;
-            foreach (var log in GetAdapters(loggerName, level))
+            var logs = GetLogs(loggerName, level);
+            foreach (var log in logs)
             {
                 log.LoggerName = loggerName;
                 action(log);

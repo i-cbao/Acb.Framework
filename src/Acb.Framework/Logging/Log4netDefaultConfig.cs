@@ -1,23 +1,26 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
+using Acb.Core.Extensions;
 using Acb.Core.Timing;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Filter;
 using log4net.Layout;
+using System.Net;
+using System.Text;
 
 namespace Acb.Framework.Logging
 {
     internal class Log4NetDefaultConfig
     {
-        private const string Prefix = "log4net:";
+        private const string TcpLoggerConfigName = "tcpLogger";
 
         private static readonly ILayout NormalLayout =
             new PatternLayout(
-                "%date[%property{LogSite}] %r %thread %-5level %logger %message %exception%n");
+                "%date [%-5level] [%property{LogSite}] %r %thread %logger %message %exception%n");
 
         private static readonly ILayout ErrorLayout =
-            new PatternLayout("%date[%property{LogSite}] %r %thread %-5level %logger %message %exception%n");
+            new PatternLayout("%date [%-5level] [%property{LogSite}] %r %thread %logger %message %n%exception%n");
 
         private static RollingFileAppender BaseAppender(string name, string file, ILayout layout)
         {
@@ -36,7 +39,7 @@ namespace Acb.Framework.Logging
             };
         }
 
-        private static IAppender DebugAppender()
+        internal static IAppender DebugAppender()
         {
             const string file = "dd\".log\"";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
@@ -48,10 +51,11 @@ namespace Acb.Framework.Logging
                 LevelMin = minLevel,
                 LevelMax = Level.Warn
             });
+            appender.ActivateOptions();
             return appender;
         }
 
-        private static IAppender ErrorAppender()
+        internal static IAppender ErrorAppender()
         {
             const string file = "dd\"_error.log\"";
             var appender = BaseAppender("errorRollingFile", file, ErrorLayout);
@@ -60,7 +64,29 @@ namespace Acb.Framework.Logging
                 LevelMin = Level.Error,
                 LevelMax = Level.Fatal
             });
+            appender.ActivateOptions();
             return appender;
+        }
+
+        internal static IAppender TcpAppender()
+        {
+            var tcp = TcpLoggerConfigName.Config<TcpLoggerConfig>();
+            if (tcp == null || string.IsNullOrWhiteSpace(tcp.Address) || tcp.Port <= 0)
+                return null;
+            var tcpAppender = new TcpAppender
+            {
+                Encoding = Encoding.UTF8,
+                RemoteAddress = IPAddress.Parse(tcp.Address),
+                RemotePort = tcp.Port,
+                Layout = string.IsNullOrWhiteSpace(tcp.Layout) ? ErrorLayout : new PatternLayout(tcp.Layout)
+            };
+            tcpAppender.AddFilter(new LevelRangeFilter
+            {
+                LevelMin = Level.Error,
+                LevelMax = Level.Fatal
+            });
+            tcpAppender.ActivateOptions();
+            return tcpAppender;
         }
 
         public static IAppender[] Appenders => new[] { DebugAppender(), ErrorAppender() };

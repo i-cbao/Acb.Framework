@@ -27,7 +27,7 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{key}"), AppTicket]
+        [HttpGet("{key}")]
         public async Task<DResult<string>> Get(string key)
         {
             Response.Clear();

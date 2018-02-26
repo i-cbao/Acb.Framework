@@ -10,6 +10,7 @@ namespace Acb.WebApi.Filters
     /// <summary> 默认的异常处理 </summary>
     public class DExceptionFilter : IExceptionFilter
     {
+        private readonly ILogger _logger = LogManager.Logger<DExceptionFilter>();
         /// <summary> 异常处理 </summary>
         /// <param name="context"></param>
         public void OnException(ExceptionContext context)
@@ -22,8 +23,7 @@ namespace Acb.WebApi.Filters
             }
             else
             {
-                var logger = LogManager.Logger<DExceptionFilter>();
-                logger.Error(ex.Message, ex);
+                _logger.Error(ex.Message, ex);
                 json = ErrorCodes.SystemError.CodeResult<ErrorCodes>();
             }
             const int code = (int)HttpStatusCode.OK;

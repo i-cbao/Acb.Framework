@@ -1,4 +1,5 @@
 ﻿using Acb.Payment;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -54,6 +55,7 @@ namespace Acb.WebApi.Test
                 options.SwaggerEndpoint(
                     "/swagger/help/swagger.json", "Fiver.Api Help Endpoint");
             });
+            Mapper.Initialize(cfg => cfg.CreateMissingTypeMaps = true);
             base.Configure(app, env);
         }
     }
