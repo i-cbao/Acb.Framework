@@ -388,6 +388,37 @@ namespace Acb.Dapper
         #endregion
 
         #region Common
+
+        /// <summary> 统计总数 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="column"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static long Count<T>(this IDbConnection conn, string column, object value)
+        {
+            var tableName = typeof(T).PropName();
+            var sql = $"SELECT COUNT(1) FROM [{tableName}] WHERE [{column}]=@value";
+            sql = conn.FormatSql(sql);
+            return conn.QueryFirstOrDefault<long>(sql, new { value });
+        }
+
+        /// <summary> 统计总数 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="where"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static long CountWhere<T>(this IDbConnection conn, string where = null, object param = null)
+        {
+            var tableName = typeof(T).PropName();
+            SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
+            if (!string.IsNullOrWhiteSpace(where))
+                sql += $"WHERE {where}";
+            var sqlStr = conn.FormatSql(sql.ToString());
+            return conn.QueryFirstOrDefault<long>(sqlStr, param);
+        }
+
         /// <summary> 是否存在 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="conn"></param>
@@ -396,10 +427,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static bool Exists<T>(this IDbConnection conn, string column, object value)
         {
-            var tableName = typeof(T).PropName();
-            var sql = $"SELECT COUNT(1) FROM [{tableName}] WHERE [{column}]=@value";
-            sql = conn.FormatSql(sql);
-            return conn.QueryFirstOrDefault<int>(sql, new { value }) > 0;
+            return conn.Count<T>(column, value) > 0;
         }
 
         /// <summary> 是否存在 </summary>
@@ -410,12 +438,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static bool ExistsWhere<T>(this IDbConnection conn, string where = null, object param = null)
         {
-            var tableName = typeof(T).PropName();
-            SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
-            if (!string.IsNullOrWhiteSpace(where))
-                sql += $"WHERE {where}";
-            var sqlStr = conn.FormatSql(sql.ToString());
-            return conn.QueryFirstOrDefault<int>(sqlStr, param) > 0;
+            return conn.CountWhere<T>(where, param) > 0;
         }
 
         /// <summary> 最小 </summary>

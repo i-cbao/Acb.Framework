@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
+    
     [Route("api/demo")]
     public class DemoController : DController
     {
@@ -19,8 +20,8 @@ namespace Acb.WebApi.Test.Controllers
             _demoService = demoService;
         }
 
-        [HttpGet(""), AppTicket]
-        public async Task<DResult<VDemo>> Hello(VDemoInput input)
+        [HttpGet(""),HttpPost("")]//, AppTicket]
+        public async Task<DResult<VDemo>> Hello([FromBody]VDemoInput input)
         {
             var inputDto = Mapper.Map<DemoInputDto>(input);
             var dto = _demoService.Hello(inputDto);

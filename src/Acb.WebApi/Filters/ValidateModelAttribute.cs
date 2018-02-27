@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Exceptions;
+using Acb.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Acb.WebApi.Filters
     public class ValidateModelAttribute : ActionFilterAttribute
     {
         private readonly bool _validation;
+        private readonly ILogger _logger = LogManager.Logger<ValidateModelAttribute>();
 
         /// <summary> 构造函数 </summary>
         /// <param name="validation"></param>
@@ -28,6 +30,19 @@ namespace Acb.WebApi.Filters
             if (errordict.Key == null)
                 return;
             var value = errordict.Value.Errors[0].ErrorMessage;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                var ex = errordict.Value.Errors[0].Exception;
+                if (ex is BusiException exception)
+                {
+                    value = exception.Message;
+                }
+                else
+                {
+                    _logger.Error(ex.Message, ex);
+                    value = $"参数{errordict.Key}验证失败";
+                }
+            }
             context.Result = new JsonResult(DResult.Error(value, ErrorCodes.ParamaterError));
             base.OnActionExecuting(context);
         }

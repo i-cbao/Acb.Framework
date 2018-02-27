@@ -116,6 +116,36 @@ namespace Acb.Dapper
             return await conn.ExecuteAsync(sql, param, trans);
         }
 
+        /// <summary> 统计数量 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="column"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static async Task<long> CountAsync<T>(this IDbConnection conn, string column, object value)
+        {
+            var tableName = typeof(T).PropName();
+            var sql = $"SELECT COUNT(1) FROM [{tableName}] WHERE [{column}]=@value";
+            sql = conn.FormatSql(sql);
+            return await conn.QueryFirstOrDefaultAsync<long>(sql, new { value });
+        }
+
+        /// <summary> 统计数量 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
+        /// <param name="where"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static async Task<long> CountWhereAsync<T>(this IDbConnection conn, string where = null, object param = null)
+        {
+            var tableName = typeof(T).PropName();
+            SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
+            if (!string.IsNullOrWhiteSpace(where))
+                sql += $"WHERE {where}";
+            var sqlStr = conn.FormatSql(sql.ToString());
+            return await conn.QueryFirstOrDefaultAsync<long>(sqlStr, param);
+        }
+
         /// <summary> 是否存在 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="conn"></param>
@@ -124,10 +154,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static async Task<bool> ExistsAsync<T>(this IDbConnection conn, string column, object value)
         {
-            var tableName = typeof(T).PropName();
-            var sql = $"SELECT COUNT(1) FROM [{tableName}] WHERE [{column}]=@value";
-            sql = conn.FormatSql(sql);
-            return await conn.QueryFirstOrDefaultAsync<int>(sql, new { value }) > 0;
+            return await conn.CountAsync<T>(column, value) > 0;
         }
 
         /// <summary> 是否存在 </summary>
@@ -138,12 +165,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static async Task<bool> ExistsWhereAsync<T>(this IDbConnection conn, string where = null, object param = null)
         {
-            var tableName = typeof(T).PropName();
-            SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
-            if (!string.IsNullOrWhiteSpace(where))
-                sql += $"WHERE {where}";
-            var sqlStr = conn.FormatSql(sql.ToString());
-            return await conn.QueryFirstOrDefaultAsync<int>(sqlStr, param) > 0;
+            return await conn.CountWhereAsync<T>(where, param) > 0;
         }
 
         /// <summary> 最小 </summary>

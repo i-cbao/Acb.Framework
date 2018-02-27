@@ -1,4 +1,5 @@
-﻿using Acb.Demo.Contracts.Enums;
+﻿using System;
+using Acb.Demo.Contracts.Enums;
 
 namespace Acb.Demo.Contracts.Dtos
 {
@@ -6,5 +7,6 @@ namespace Acb.Demo.Contracts.Dtos
     {
         public DemoEnums Demo { get; set; }
         public string Name { get; set; }
+        public DateTime Time { get; set; }
     }
 }

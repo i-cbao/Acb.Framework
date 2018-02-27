@@ -1,12 +1,17 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 
 namespace Acb.Core.Timing
 {
     public class DateTimeConverter : DateTimeConverterBase
     {
+        /// <summary> 写操作 </summary>
+        /// <param name="writer"></param>
+        /// <param name="value"></param>
+        /// <param name="serializer"></param>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             if (value == null)
@@ -29,15 +34,24 @@ namespace Acb.Core.Timing
             writer.WriteValue(timestamp);
         }
 
+        /// <summary> 读操作 </summary>
+        /// <param name="reader"></param>
+        /// <param name="objectType"></param>
+        /// <param name="existingValue"></param>
+        /// <param name="serializer"></param>
+        /// <returns></returns>
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (!(objectType == typeof(DateTime)) && !(objectType == typeof(DateTimeOffset)) &&
                 (!(objectType == typeof(DateTime?)) && !(objectType == typeof(DateTimeOffset?))))
-                throw new JsonSerializationException("不是日期格式 .");
-            var timestamp = (long?)reader.Value ?? 0;
-            if (timestamp == 0 && objectType.IsNullableType())
+                throw new BusiException("时间格式异常");
+            var timestamp = reader.Value.CastTo<long?>(null);//(long?)reader.Value ?? 0;
+            if (timestamp.HasValue)
+                return DateTimeHelper.FromMillisecondTimestamp(timestamp.Value);
+            if (objectType.IsNullableType())
                 return null;
-            return DateTimeHelper.FromMillisecondTimestamp(timestamp);
+            throw new BusiException("时间格式异常");
+
         }
     }
 }

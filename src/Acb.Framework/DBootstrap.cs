@@ -10,6 +10,7 @@ namespace Acb.Framework
 {
     public class DBootstrap : Bootstrap
     {
+        private bool _init;
         protected DBootstrap() { }
 
         public static DBootstrap Instance
@@ -28,6 +29,8 @@ namespace Acb.Framework
 
         public override void Initialize()
         {
+            if (_init) return;
+            _init = true;
             LoggerInit();
             CacheInit();
             IocRegisters();
