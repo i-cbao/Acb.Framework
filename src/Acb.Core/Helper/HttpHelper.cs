@@ -27,10 +27,10 @@ namespace Acb.Core.Helper
 
         private HttpHelper()
         {
-            foreach (var header in DefaultHeaders)
-            {
-                Client.DefaultRequestHeaders.Add(header.Key, header.Value);
-            }
+            //foreach (var header in DefaultHeaders)
+            //{
+            //    Client.DefaultRequestHeaders.Add(header.Key, header.Value);
+            //}
         }
 
         /// <summary> 单例 </summary>
