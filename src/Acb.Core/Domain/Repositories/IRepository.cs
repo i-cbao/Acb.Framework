@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Acb.Core.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Acb.Core.Domain.Entities;
 
 namespace Acb.Core.Domain.Repositories
 {
@@ -16,7 +16,7 @@ namespace Acb.Core.Domain.Repositories
     {
         IUnitOfWork UnitOfWork { get; }
 
-        IQueryable<TEntity> Table { get; }
+        IQueryable<TEntity> GetAll();
 
         TKey Insert(TEntity entity);
 

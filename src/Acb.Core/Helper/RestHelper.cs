@@ -16,7 +16,6 @@ namespace Acb.Core.Helper
     {
         private readonly string _baseUri;
         private const string Prefix = "sites:";
-        private const string TicketKeyConfig = "ticketKey";
         private readonly int _retryCount;
         private readonly ILogger _logger = LogManager.Logger<RestHelper>();
 
@@ -30,6 +29,7 @@ namespace Acb.Core.Helper
 
         }
 
+        /// <inheritdoc />
         /// <summary> 构造函数 </summary>
         /// <param name="siteEnum"></param>
         /// <param name="retry">重试次数</param>
@@ -40,7 +40,7 @@ namespace Acb.Core.Helper
 
         private static string GetTicket()
         {
-            var key = TicketKeyConfig.Config<string>();
+            var key = Consts.AppTicketKey.Config<string>();
             var timestamp = Clock.Now.ToTimestamp();
             return $"{timestamp}{EncryptHelper.Hash($"{key}{timestamp}", EncryptHelper.HashFormat.MD532).ToLower()}";
         }

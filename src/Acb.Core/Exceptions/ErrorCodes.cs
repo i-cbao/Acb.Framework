@@ -32,6 +32,14 @@ namespace Acb.Core.Exceptions
         /// <summary> 调用受限 </summary>
         [Description("该请求已超时")]
         public const int ClientTimeoutError = 10004;
+
+        /// <summary> 需要客户端令牌 </summary>
+        [Description("登录令牌无效")]
+        public const int NeedTicket = 10005;
+
+        /// <summary> 客户端令牌已失效 </summary>
+        [Description("登录令牌已失效")]
+        public const int InvalidTicket = 10006;
     }
 
     /// <summary> 错误码扩展 </summary>
@@ -41,6 +49,14 @@ namespace Acb.Core.Exceptions
             new ConcurrentDictionary<RuntimeTypeHandle, IDictionary<int, string>>();
 
         private static readonly Type ErrorType = typeof(ErrorCodes);
+
+        /// <summary> 获取错误码对应的错误信息 </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static string Message(this int code)
+        {
+            return code.Message<ErrorCodes>();
+        }
 
         /// <summary> 获取错误码对应的错误信息 </summary>
         /// <param name="code"></param>
@@ -60,6 +76,14 @@ namespace Acb.Core.Exceptions
             return DResult.Error(code.Message<T>(), code);
         }
 
+        /// <summary> 错误编码对应DResult </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static DResult CodeResult(this int code)
+        {
+            return code.CodeResult<ErrorCodes>();
+        }
+
         /// <summary> 错误编码对应的Exception </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="code"></param>
@@ -69,12 +93,27 @@ namespace Acb.Core.Exceptions
             return new BusiException(code.Message<T>(), code);
         }
 
+        /// <summary> 错误编码对应的Exception </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public static BusiException CodeException(this int code)
+        {
+            return code.CodeException<ErrorCodes>();
+        }
+
         /// <summary> 获取错误码 </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IDictionary<int, string> Codes<T>() where T : ErrorCodes
         {
             return typeof(T).Codes();
+        }
+
+        /// <summary> 获取错误码 </summary>
+        /// <returns></returns>
+        public static IDictionary<int, string> Codes()
+        {
+            return typeof(ErrorCodes).Codes();
         }
 
         /// <summary> 获取错误码 </summary>

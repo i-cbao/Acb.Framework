@@ -34,7 +34,19 @@ namespace Acb.Framework
             if (type.IsSimpleType())
                 Console.WriteLine(result);
             else
-                Console.WriteLine(JsonHelper.ToJson(result, NamingType.CamelCase, true));
+            {
+                string json;
+                try
+                {
+                    json = JsonHelper.ToJson(result, NamingType.CamelCase, true);
+                }
+                catch
+                {
+                    json = result.ToString();
+                }
+
+                Console.WriteLine(json);
+            }
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿using Acb.Core;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
-using Acb.WebApi.Filters;
+using Acb.WebApi.Test.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
-using Acb.WebApi.Test.ViewModels;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -33,7 +33,7 @@ namespace Acb.WebApi.Test.Controllers
             Response.Clear();
             var n = key.Config<string>();
             _logger.Info(n);
-            _logger.Error(n);
+            _logger.Error(n, new Exception("ex test"));
             return await Task.FromResult(Succ($"hello {n}"));
         }
 

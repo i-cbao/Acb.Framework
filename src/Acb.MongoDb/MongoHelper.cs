@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Domain.Entities;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -41,7 +42,14 @@ namespace Acb.MongoDb
             return client;
         }
 
+        public static string GetName<T>()
+        {
+            return string.Format("{0}_{1}", Prefix, typeof(T).Name.ToUrlCase());
+        }
+
         public IMongoDatabase Database => Client().GetDatabase(_database);
+
+        public IMongoDatabase GetDatabase(string database) => Client().GetDatabase(database);
 
         private IGridFSBucket _gridFs;
         public IGridFSBucket GridFs
@@ -57,14 +65,22 @@ namespace Acb.MongoDb
         {
             if (string.IsNullOrWhiteSpace(collection))
             {
-                collection = string.Format("{0}.{1}", Prefix, typeof(T).Name.ToLower());
+                collection = GetName<T>();
             }
             return Database.GetCollection<T>(collection);
         }
 
         /// <summary> 获取Mongo集合 </summary>
         /// <returns></returns>
-        public IMongoCollection<BsonDocument> Collection(string collection)
+        public IMongoCollection<BsonDocument> BsonCollection<T>()
+        {
+            var collection = GetName<T>();
+            return BsonCollection(collection);
+        }
+
+        /// <summary> 获取Mongo集合 </summary>
+        /// <returns></returns>
+        public IMongoCollection<BsonDocument> BsonCollection(string collection)
         {
             if (string.IsNullOrWhiteSpace(collection))
             {

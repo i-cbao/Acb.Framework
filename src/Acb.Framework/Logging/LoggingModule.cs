@@ -11,7 +11,8 @@ namespace Acb.Framework.Logging
         private static void SetTcpAddpend()
         {
             var tcpAppender = Log4NetDefaultConfig.TcpAppender();
-            if (tcpAppender == null) return;
+            if (tcpAppender == null)
+                return;
             LogManager.RemoveAdapter(typeof(TcpAppender));
             LogManager.AddAdapter(new TcpLogAdapter(tcpAppender));
         }

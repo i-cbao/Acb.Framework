@@ -19,9 +19,10 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            var md5 = "shay".Md5();
-            _logger.Info(md5);
-            Assert.AreEqual(md5.Length, 32);
+            Print("15120222222?" == "");
+            //var md5 = "shay".Md5();
+            //_logger.Info(md5);
+            //Assert.AreEqual(md5.Length, 32);
         }
 
         [TestMethod]

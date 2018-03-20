@@ -12,5 +12,7 @@ namespace Acb.Core
         /// <summary> 产品模式 </summary>
         public static ProductMode Mode => "mode".Config(ProductMode.Dev);
 
+        /// <summary> Ticket配置键 </summary>
+        public const string AppTicketKey = "ticketKey";
     }
 }
