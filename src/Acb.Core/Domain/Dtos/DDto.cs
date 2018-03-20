@@ -1,7 +1,7 @@
-﻿using Acb.Core.Serialize;
-using System;
+﻿using System;
+using Acb.Core.Serialize;
 
-namespace Acb.Core.Domain
+namespace Acb.Core.Domain.Dtos
 {
     public interface IDto { }
 
