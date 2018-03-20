@@ -153,7 +153,7 @@ namespace Acb.Office
 
                 index++;
                 var sheet =
-                    wb.CreateSheet((string.IsNullOrWhiteSpace(tb.TableName) || tb.TableName.StartsWith("GetAll"))
+                    wb.CreateSheet((string.IsNullOrWhiteSpace(tb.TableName) || tb.TableName.StartsWith("Table"))
                         ? $"sheet{index}"
                         : tb.TableName);
                 //表头
