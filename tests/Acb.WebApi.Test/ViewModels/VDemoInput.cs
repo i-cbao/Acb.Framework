@@ -1,10 +1,11 @@
 ﻿using Acb.Demo.Contracts.Enums;
+using Acb.WebApi.ViewModels;
 using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Acb.WebApi.Test.ViewModels
 {
-    public class VDemoInput
+    public class VDemoInput : VPageAndTimeInput
     {
         /// <summary> Demo </summary>
         [Required(ErrorMessage = "must demo")]

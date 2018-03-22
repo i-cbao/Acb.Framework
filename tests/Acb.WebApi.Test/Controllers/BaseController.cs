@@ -16,6 +16,7 @@ namespace Acb.WebApi.Test.Controllers
 
         /// <summary> 认证缓存 </summary>
         protected ICache AuthorizeCache => CacheManager.GetCacher("user", CacheLevel.Both, 2);
+
         /// <summary> 身份验证 </summary>
         /// <param name="context"></param>
         public override void AuthorizeValidate(HttpContext context)

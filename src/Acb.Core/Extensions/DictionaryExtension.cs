@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Serialize;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -12,6 +13,7 @@ using System.Xml;
 
 namespace Acb.Core.Extensions
 {
+    /// <summary> 字典类扩展 </summary>
     public static class DictionaryExtension
     {
         /// <summary> 添加或更新 </summary>
@@ -56,15 +58,17 @@ namespace Acb.Core.Extensions
             var sb = new StringBuilder();
             foreach (var item in dict)
             {
-                var value = item.Value.ToString();
+                var value = item.Value?.ToString() ?? string.Empty;
                 sb.AppendFormat("{0}={1}&", item.Key, encode ? value.UrlEncode() : value);
             }
             return sb.ToString().TrimEnd('&');
         }
 
         /// <summary> 将Url格式数据转换为字典 </summary>
+        /// <param name="dict"></param>
         /// <param name="url">url数据</param>
         /// <param name="decode">是否需要url解码</param>
+        /// <param name="clear"></param>
         /// <returns></returns>
         public static void FromUrl(this IDictionary<string, object> dict, string url, bool decode = true, bool clear = true)
         {
@@ -231,9 +235,8 @@ namespace Acb.Core.Extensions
 
             return obj.CastTo<T>();
         }
-        /// <summary>
-        /// 
-        /// </summary>
+
+        /// <summary> 字典化对象 </summary>
         /// <param name="source"></param>
         /// <returns></returns>
         public static IDictionary<string, object> ToDictionary(this object source)
@@ -250,6 +253,21 @@ namespace Acb.Core.Extensions
                 dict.Add(prop.Name, prop.GetValue(source, null));
             }
             return dict;
+        }
+
+        /// <summary> 字典化对象 </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static IDictionary<string, object> FromForm(this IFormCollection source)
+        {
+            if (source == null || !source.Keys.Any())
+                return new Dictionary<string, object>();
+            return source.Keys.ToDictionary(k => k.ToString(), v =>
+            {
+                if (source.TryGetValue(v, out var value))
+                    return (object)value;
+                return null;
+            });
         }
     }
 }

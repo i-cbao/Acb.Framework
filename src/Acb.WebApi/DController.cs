@@ -19,6 +19,7 @@ namespace Acb.WebApi
         /// <summary> 从body中读取对象 </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+        [NonAction]
         protected T FromBody<T>()
         {
             if (Current == null) return default(T);
@@ -33,6 +34,7 @@ namespace Acb.WebApi
 
         /// <summary> 身份验证 </summary>
         /// <param name="context"></param>
+        [NonAction]
         public virtual void AuthorizeValidate(HttpContext context) { }
 
         #region Results

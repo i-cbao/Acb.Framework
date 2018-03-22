@@ -10,7 +10,7 @@ namespace Acb.Demo.Business
             return new DemoDto
             {
                 Demo = dto.Demo,
-                Name = dto.Name,
+                Name = dto.Name + ",Success",
                 Time = dto.Time
             };
         }

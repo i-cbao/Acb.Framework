@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.DispatchProxy" Version="4.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\Acb.Redis\Acb.Redis.csproj" />
+  </ItemGroup>
+
+</Project>

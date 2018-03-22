@@ -2,6 +2,7 @@
 {
     public enum DemoEnums
     {
-        Demo
+        Demo,
+        Test
     }
 }

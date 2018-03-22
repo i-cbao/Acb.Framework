@@ -5,13 +5,12 @@ using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 实例 </summary>
     [Route("api/[controller]")]
-    public class DemoController : BaseController
+    public class DemoController : DController
     {
         private readonly IDemoService _demoService;
 
@@ -20,18 +19,11 @@ namespace Acb.WebApi.Test.Controllers
             _demoService = demoService;
         }
 
-        [HttpGet(""), HttpPost("")]//, AppTicket]
-        public DResult Hello(VDemoInput input)
+        [HttpPost("hello")]//, AppTicket]
+        public DemoDto Hello([FromBody]VDemoInput input)
         {
             var inputDto = Mapper.Map<DemoInputDto>(input);
-            var dto = _demoService.Hello(inputDto);
-            var model = Mapper.Map<VDemo>(dto);
-            var result = DResult.Succ(new
-            {
-                demo = model,
-                client = Client
-            });
-            return result;
+            return _demoService.Hello(inputDto);
         }
 
         [HttpGet("token"), AllowAnonymous]
@@ -44,8 +36,8 @@ namespace Acb.WebApi.Test.Controllers
                 Role = 999
             };
             var token = ticket.Ticket();
-            var cacheKey = $"ticket:{ticket.Id}";
-            AuthorizeCache.Set(cacheKey, ticket.Ticket, TimeSpan.FromMinutes(30));
+            //var cacheKey = $"ticket:{ticket.Id}";
+            //AuthorizeCache.Set(cacheKey, ticket.Ticket, TimeSpan.FromMinutes(30));
             return DResult.Succ(token);
         }
     }

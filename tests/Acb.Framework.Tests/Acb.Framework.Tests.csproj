@@ -20,9 +20,11 @@
     <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
+    <ProjectReference Include="..\..\src\Acb.MicroService.Client\Acb.MicroService.Client.csproj" />
     <ProjectReference Include="..\..\src\Acb.MongoDb\Acb.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Acb.Office\Acb.Office.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
+    <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

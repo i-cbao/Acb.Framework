@@ -37,11 +37,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Office", "src\Acb.Offic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Payment", "src\Acb.Payment\Acb.Payment.csproj", "{4340E862-59F1-43BC-9C5E-96064B192A16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.EntityFramework", "src\Acb.EntityFramework\Acb.EntityFramework.csproj", "{610441E7-5F27-47CB-8319-C5A6E7314F2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.EntityFramework", "src\Acb.EntityFramework\Acb.EntityFramework.csproj", "{610441E7-5F27-47CB-8319-C5A6E7314F2B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Demo.Business", "tests\Acb.Demo.Business\Acb.Demo.Business.csproj", "{585977FC-8E93-4C4A-B0B2-61B02A39F66C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Demo.Contracts", "tests\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj", "{1A4466A5-C01B-4ACB-9C87-F7D5FD0447A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.MicroService.Client", "src\Acb.MicroService.Client\Acb.MicroService.Client.csproj", "{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.MicroService", "src\Acb.MicroService\Acb.MicroService.csproj", "{100312CC-F49B-4632-BA7D-F6D8537A3A7E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +117,14 @@ Global
 		{1A4466A5-C01B-4ACB-9C87-F7D5FD0447A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A4466A5-C01B-4ACB-9C87-F7D5FD0447A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A4466A5-C01B-4ACB-9C87-F7D5FD0447A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{100312CC-F49B-4632-BA7D-F6D8537A3A7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{100312CC-F49B-4632-BA7D-F6D8537A3A7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{100312CC-F49B-4632-BA7D-F6D8537A3A7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{100312CC-F49B-4632-BA7D-F6D8537A3A7E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -134,6 +146,8 @@ Global
 		{610441E7-5F27-47CB-8319-C5A6E7314F2B} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 		{585977FC-8E93-4C4A-B0B2-61B02A39F66C} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
 		{1A4466A5-C01B-4ACB-9C87-F7D5FD0447A6} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
+		{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271} = {F1F1520A-5E3C-422D-9B10-D439124443E0}
+		{100312CC-F49B-4632-BA7D-F6D8537A3A7E} = {F1F1520A-5E3C-422D-9B10-D439124443E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

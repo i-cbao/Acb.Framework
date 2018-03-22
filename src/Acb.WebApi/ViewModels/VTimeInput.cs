@@ -7,7 +7,12 @@ namespace Acb.WebApi.ViewModels
 {
     public class VTimeInput : ITimeInput, IValidatableObject
     {
+        /// <inheritdoc />
+        /// <summary> 开始时间（大于等于） </summary>   
         public DateTime? Begin { get; set; }
+
+        /// <inheritdoc />
+        /// <summary> 截止时间（小于） </summary>
         public DateTime? End { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

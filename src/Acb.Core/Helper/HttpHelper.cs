@@ -77,6 +77,33 @@ namespace Acb.Core.Helper
             return await Client.SendAsync(req);
         }
 
+        /// <summary> Get方法 </summary>
+        /// <param name="url"></param>
+        /// <param name="param"></param>
+        /// <param name="data"></param>
+        /// <param name="headers"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public async Task<dynamic> GetAsync(string url, object param = null, object data = null,
+            IDictionary<string, string> headers = null, HttpContent content = null)
+        {
+            return await RequestAsync(HttpMethod.Get, url, param, data, headers, content);
+        }
+
+        /// <summary> Post方法 </summary>
+        /// <param name="url"></param>
+        /// <param name="param"></param>
+        /// <param name="data"></param>
+        /// <param name="headers"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public async Task<dynamic> PostAsync(string url, object param = null, object data = null,
+            IDictionary<string, string> headers = null, HttpContent content = null)
+        {
+            return await RequestAsync(HttpMethod.Post, url, param, data, headers, content);
+        }
+
+        /// <inheritdoc />
         /// <summary> 释放资源 </summary>
         public void Dispose()
         {

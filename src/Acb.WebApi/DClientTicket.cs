@@ -37,9 +37,9 @@ namespace Acb.WebApi
             set => _timestamp = value;
         }
 
-        public ClientTicket()
+        public virtual string GenerateTicket()
         {
-            Ticket = JsonHelper.ToJson(this).Md5();
+            return JsonHelper.ToJson(this).Md5();
         }
     }
 
@@ -74,8 +74,10 @@ namespace Acb.WebApi
         /// <summary> 获取凭证 </summary>
         /// <param name="ticket"></param>
         /// <returns></returns>
-        public static string Ticket(this IClientTicket ticket)
+        public static string Ticket(this ClientTicket ticket)
         {
+            ticket.Ticket = ticket.GenerateTicket();
+
             var json = JsonHelper.ToJson(ticket);
             return EncryptHelper.SymmetricEncrypt($"{ticket.Ticket}_{json}", EncryptHelper.SymmetricFormat.DES,
                 TicketEncodeKey, TicketEncodeIv);
