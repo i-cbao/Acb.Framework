@@ -27,7 +27,8 @@ namespace Acb.MicroService
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
             _bootstrap.Initialize();
-            MicroServiceRegister.Regist("localhost", 5000);
+
+            MicroServiceRegister.Regist();
             LogManager.AddAdapter(new ConsoleAdapter());
             return new AutofacServiceProvider(_bootstrap.Container);
         }

@@ -1,10 +1,12 @@
 ﻿using Acb.Core;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
+using Acb.MicroService.Client;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -14,16 +16,22 @@ namespace Acb.WebApi.Test.Controllers
     {
         private readonly IDemoService _demoService;
 
-        public DemoController(IDemoService demoService)
+        public DemoController()
         {
-            _demoService = demoService;
+            _demoService = ProxyService.Proxy<IDemoService>();
         }
 
-        [HttpPost("hello")]//, AppTicket]
-        public DemoDto Hello([FromBody]VDemoInput input)
+        /// <summary>
+        /// Demo测试接口
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpGet("hello")]//, AppTicket]
+        public DResult<DemoDto> Hello(VDemoInput input)
         {
             var inputDto = Mapper.Map<DemoInputDto>(input);
-            return _demoService.Hello(inputDto);
+            var dto = _demoService.Hello(inputDto);
+            return DResult.Succ(dto);
         }
 
         [HttpGet("token"), AllowAnonymous]
