@@ -28,7 +28,7 @@ namespace Acb.MicroService
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
             _bootstrap.Initialize();
 
-            MicroServiceRegister.Regist();
+            MicroServiceRegister.Instance.Regist();
             LogManager.AddAdapter(new ConsoleAdapter());
             return new AutofacServiceProvider(_bootstrap.Container);
         }

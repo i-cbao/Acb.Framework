@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Redis;
 using Newtonsoft.Json;
@@ -18,6 +19,16 @@ namespace Acb.MicroService.Client
         private const string MicroSreviceKey = "micro_service";
         private const string RegistCenterKey = MicroSreviceKey + ":center";
 
+        private string RedisKey
+        {
+            get
+            {
+                var key = "micro_service:redisKey".Config<string>();
+                return string.IsNullOrWhiteSpace(key) ? RegistCenterKey : key;
+            }
+        }
+
+
         /// <summary> 接口类型 </summary>
         private readonly Type _type;
 
@@ -31,7 +42,7 @@ namespace Acb.MicroService.Client
         private string GetTypeService()
         {
             var redis = RedisManager.Instance.GetDatabase();
-            var url = redis.SetRandomMember($"{RegistCenterKey}:{_type.FullName}");
+            var url = redis.SetRandomMember($"{RedisKey}:{_type.FullName}");
             if (string.IsNullOrWhiteSpace(url))
                 throw new BusiException($"{_type.FullName},没有可用的服务");
             return url;

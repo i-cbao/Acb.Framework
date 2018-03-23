@@ -16,7 +16,7 @@ namespace Acb.MicroService
                 host.Run();
             }
             DBootstrap.Instance.Dispose();
-            MicroServiceRegister.UnRegist();
+            MicroServiceRegister.Instance.UnRegist();
         }
     }
 }
