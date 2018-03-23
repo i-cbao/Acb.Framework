@@ -1,21 +1,47 @@
 ﻿using Acb.Core.Extensions;
-using Acb.MicroService.Client;
 using Acb.Redis;
-using StackExchange.Redis;
-using System.Linq;
+using System.Reflection;
 
 namespace Acb.MicroService
 {
-    public class MicroServiceRegister
+    /// <summary> 微服务注册 </summary>
+    internal class MicroServiceRegister
     {
+        private const string MicroSreviceKey = "micro_service";
+        private const string RegistCenterKey = MicroSreviceKey + ":center";
+
+        private static string TypeUrl(MemberInfo type)
+        {
+            var config = MicroSreviceKey.Config<MicroServiceConfig>();
+            return $"http://{config.Host}:{config.Port}/{type.Name}/";
+        }
+
+        /// <summary> 注册 </summary>
         public static void Regist()
         {
             var list = MicroServiceRouter.GetServices();
-            var redis = RedisManager.Instance.GetDatabase(defaultDb: 2);
-            var ip = "service_host".Config<string>();
-            var port = "service_port".Config<int>();
-            redis.HashSet(Constants.RegistCenterKey,
-                list.Select(t => new HashEntry(t.FullName, $"http://{ip}:{port}/")).ToArray());
+            if (list == null || list.IsNullOrEmpty())
+                return;
+
+
+            var redis = RedisManager.Instance.GetDatabase();
+            foreach (var type in list)
+            {
+                redis.SetAdd($"{RegistCenterKey}:{type.FullName}", TypeUrl(type));
+            }
+        }
+
+        /// <summary> 取消注册 </summary>
+        public static void UnRegist()
+        {
+            var list = MicroServiceRouter.GetServices();
+            if (list == null || list.IsNullOrEmpty())
+                return;
+            var redis = RedisManager.Instance.GetDatabase();
+            foreach (var type in list)
+            {
+                redis.SetRemove($"{RegistCenterKey}:{type.FullName}", TypeUrl(type));
+            }
         }
     }
 }

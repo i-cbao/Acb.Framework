@@ -1,8 +1,6 @@
-﻿using Acb.Core.Extensions;
-using Acb.Core.Logging;
-using Microsoft.AspNetCore.Http;
+﻿using Acb.Core.Logging;
 using System;
-using System.Linq;
+using System.IO;
 
 namespace Acb.Core.Exceptions
 {
@@ -16,11 +14,6 @@ namespace Acb.Core.Exceptions
 
         /// <summary> 业务异常事件 </summary>
         public static event Action<BusiException> OnBusiException;
-
-        private static string ParseParams(IFormCollection nvc)
-        {
-            return nvc.FromForm().ToUrl();
-        }
 
         private class LogErrorMsg
         {
@@ -38,7 +31,8 @@ namespace Acb.Core.Exceptions
 
         /// <summary> 异常处理 </summary>
         /// <param name="exception"></param>
-        public static DResult Handler(Exception exception)
+        /// <param name="requestBody"></param>
+        public static DResult Handler(Exception exception, string requestBody = null)
         {
             DResult result = null;
             var ex = exception.GetBaseException();
@@ -60,9 +54,22 @@ namespace Acb.Core.Exceptions
                     if (AcbHttpContext.Current != null)
                     {
                         msg.Url = AcbHttpContext.RawUrl;
-                        if (AcbHttpContext.Form.Any())
+                        if (string.IsNullOrWhiteSpace(requestBody))
                         {
-                            msg.Form = ParseParams(AcbHttpContext.Form);
+                            var input = AcbHttpContext.Body;
+                            if (input.CanSeek)
+                                input.Seek(0, SeekOrigin.Begin);
+                            if (input.CanRead)
+                            {
+                                using (var stream = new StreamReader(input))
+                                {
+                                    msg.Form = stream.ReadToEnd();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            msg.Form = requestBody;
                         }
                     }
 

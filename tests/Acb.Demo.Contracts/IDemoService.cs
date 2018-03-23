@@ -6,6 +6,6 @@ namespace Acb.Demo.Contracts
 {
     public interface IDemoService : IDependency, IMicroService
     {
-        DemoDto Hello(DemoInputDto dto);
+        DemoDto Hello(string id, DemoInputDto dto);
     }
 }

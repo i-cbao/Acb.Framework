@@ -1,19 +1,24 @@
 ﻿using Acb.Core;
 using Acb.Core.Dependency;
+using Acb.Core.Exceptions;
 using Acb.Core.Reflection;
 using Acb.Core.Serialize;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Acb.MicroService
 {
+    /// <summary> 微服务路由 </summary>
     public class MicroServiceRouter : IRouter
     {
         private static List<Type> _services;
@@ -41,28 +46,67 @@ namespace Acb.MicroService
             if (type == null)
                 return Task.CompletedTask;
             var instance = CurrentIocManager.Resolve(type);
-            var m = instance.GetType().GetMethod(method, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            var m = instance.GetType()
+                .GetMethod(method, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
             if (m == null)
                 return Task.CompletedTask;
-            context.Handler = async ctx =>
+            context.Handler = async ctx => await Runner(ctx, instance, m);
+
+            return Task.CompletedTask;
+        }
+
+        private static async Task Runner(HttpContext ctx, object instance, MethodBase m)
+        {
+            string requestBody = null;
+            try
             {
                 var input = ctx.Request.Body;
-                string html;
                 using (var stream = new StreamReader(input))
                 {
-                    html = stream.ReadToEnd();
+                    requestBody = stream.ReadToEnd();
                 }
 
-                var arg = JsonConvert.DeserializeObject(html, m.GetParameters()[0].ParameterType);
+                var args = new List<object>();
+                JArray list = null;
+                if (!string.IsNullOrWhiteSpace(requestBody))
+                    list = JsonConvert.DeserializeObject<JArray>(requestBody);
+                if (list != null && list.Any())
+                {
+                    var i = 0;
+                    foreach (var parameter in m.GetParameters())
+                    {
+                        var parameterType = parameter.ParameterType;
+                        //var value = list[i];
+                        //var arg = parameterType.IsSimpleType()
+                        //    ? value
+                        //    : JsonConvert.DeserializeObject(JsonHelper.ToJson(value), parameter.ParameterType);
+                        var arg = list[i].ToObject(parameterType);
+                        args.Add(arg);
 
-                var result = m.Invoke(instance, new[] { arg });
+                        if (++i >= list.Count)
+                            break;
+                    }
+                }
+
+                var result = m.Invoke(instance, args.ToArray());
 
                 var response = ctx.Response;
                 response.ContentType = "application/json";
-                var bytes = Encoding.ASCII.GetBytes(JsonHelper.ToJson(result));
+                var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(result));
                 await response.Body.WriteAsync(bytes, 0, bytes.Length);
-            };
-            return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                var result = ExceptionHandler.Handler(ex, requestBody);
+                if (result == null)
+                    return;
+                const int code = (int)HttpStatusCode.InternalServerError;
+                var response = ctx.Response;
+                response.ContentType = "application/json";
+                response.StatusCode = code;
+                var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(result));
+                await response.Body.WriteAsync(bytes, 0, bytes.Length);
+            }
         }
 
         public VirtualPathData GetVirtualPath(VirtualPathContext context)

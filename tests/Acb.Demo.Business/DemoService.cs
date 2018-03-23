@@ -5,10 +5,11 @@ namespace Acb.Demo.Business
 {
     public class DemoService : IDemoService
     {
-        public DemoDto Hello(DemoInputDto dto)
+        public DemoDto Hello(string id, DemoInputDto dto)
         {
             return new DemoDto
             {
+                Id = id,
                 Demo = dto.Demo,
                 Name = dto.Name + ",Success",
                 Time = dto.Time

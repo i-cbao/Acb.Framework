@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Helper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.MicroService.Client;
@@ -6,7 +7,6 @@ using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -18,6 +18,7 @@ namespace Acb.WebApi.Test.Controllers
 
         public DemoController()
         {
+            //sendCom
             _demoService = ProxyService.Proxy<IDemoService>();
         }
 
@@ -30,7 +31,7 @@ namespace Acb.WebApi.Test.Controllers
         public DResult<DemoDto> Hello(VDemoInput input)
         {
             var inputDto = Mapper.Map<DemoInputDto>(input);
-            var dto = _demoService.Hello(inputDto);
+            var dto = _demoService.Hello(IdentityHelper.Guid32, inputDto);
             return DResult.Succ(dto);
         }
 

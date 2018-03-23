@@ -12,11 +12,11 @@ using System;
 
 namespace Acb.MicroService
 {
-    public class Startup
+    public class MicroServiceStartup
     {
         private readonly DBootstrap _bootstrap;
 
-        public Startup()
+        public MicroServiceStartup()
         {
             _bootstrap = DBootstrap.Instance;
         }
@@ -36,10 +36,6 @@ namespace Acb.MicroService
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
             var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc(routes => { routes.Routes.Add(new MicroServiceRouter()); });

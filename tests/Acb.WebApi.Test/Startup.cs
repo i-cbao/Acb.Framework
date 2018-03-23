@@ -38,6 +38,7 @@ namespace Acb.WebApi.Test
                     option.IncludeXmlComments(file);
                 }
             });
+            
             return base.ConfigureServices(services);
         }
 
