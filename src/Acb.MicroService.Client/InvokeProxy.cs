@@ -14,7 +14,7 @@ namespace Acb.MicroService.Client
     /// <inheritdoc />
     /// <summary> 代理调用 </summary>
     /// <typeparam name="T"></typeparam>
-    internal class InvokeProxy<T> : DispatchProxy where T : IMicroService
+    public class InvokeProxy<T> : DispatchProxy where T : IMicroService
     {
         private const string MicroSreviceKey = "micro_service";
         private const string RegistCenterKey = MicroSreviceKey + ":center";
@@ -62,7 +62,8 @@ namespace Acb.MicroService.Client
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var html = resp.Content.ReadAsStringAsync().Result;
-                return JsonConvert.DeserializeObject(html, targetMethod.ReturnType);
+                var type = targetMethod.ReturnType;
+                return JsonConvert.DeserializeObject(html, type);
             }
             else
             {

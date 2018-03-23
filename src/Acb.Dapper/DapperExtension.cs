@@ -271,7 +271,7 @@ namespace Acb.Dapper
         /// <param name="size"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static IPagedList<T> PagedList<T>(this IDbConnection conn, string sql, int page, int size,
+        public static PagedList<T> PagedList<T>(this IDbConnection conn, string sql, int page, int size,
             object param = null)
         {
             SQL pageSql = sql;

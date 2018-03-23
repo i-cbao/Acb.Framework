@@ -70,22 +70,20 @@ namespace Acb.MicroService
                 JArray list = null;
                 if (!string.IsNullOrWhiteSpace(requestBody))
                     list = JsonConvert.DeserializeObject<JArray>(requestBody);
-                if (list != null && list.Any())
+                var i = 0;
+                foreach (var parameter in m.GetParameters())
                 {
-                    var i = 0;
-                    foreach (var parameter in m.GetParameters())
+                    if (list != null && list.Count > i)
                     {
                         var parameterType = parameter.ParameterType;
-                        //var value = list[i];
-                        //var arg = parameterType.IsSimpleType()
-                        //    ? value
-                        //    : JsonConvert.DeserializeObject(JsonHelper.ToJson(value), parameter.ParameterType);
                         var arg = list[i].ToObject(parameterType);
                         args.Add(arg);
-
-                        if (++i >= list.Count)
-                            break;
                     }
+                    else
+                    {
+                        args.Add(parameter.DefaultValue);
+                    }
+                    i++;
                 }
 
                 var result = m.Invoke(instance, args.ToArray());

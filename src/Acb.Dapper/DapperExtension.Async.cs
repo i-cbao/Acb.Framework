@@ -39,7 +39,7 @@ namespace Acb.Dapper
         /// <param name="size"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<IPagedList<T>> PagedListAsync<T>(this IDbConnection conn, string sql, int page,
+        public static async Task<PagedList<T>> PagedListAsync<T>(this IDbConnection conn, string sql, int page,
             int size, object param = null)
         {
             return await Task.FromResult(PagedList<T>(conn, sql, page, size, param));

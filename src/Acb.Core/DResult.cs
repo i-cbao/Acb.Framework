@@ -56,6 +56,11 @@ namespace Acb.Core
             return count < 0 ? new DResults<T>(data) : new DResults<T>(data, count);
         }
 
+        public static DResults<T> Succ<T>(PagedList<T> data)
+        {
+            return new DResults<T>(data);
+        }
+
         public static DResults<T> Errors<T>(string message, int code = -1)
         {
             return new DResults<T>(message, code);
@@ -111,12 +116,11 @@ namespace Acb.Core
             Total = total;
         }
 
-        public DResults(IPagedList<T> list)
+        public DResults(PagedList<T> list)
             : base(string.Empty)
         {
-            var data = list as T[] ?? list.ToArray();
-            Data = data;
-            Total = list.Total;
+            Data = list?.List ?? new T[] { };
+            Total = list?.Total ?? 0;
         }
     }
 }

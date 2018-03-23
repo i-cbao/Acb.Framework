@@ -4,6 +4,7 @@ using Acb.Dapper.Adapters;
 using Dapper;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -198,7 +199,7 @@ namespace Acb.Dapper
         /// <param name="conn"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public IPagedList<T> PagedList<T>(IDbConnection conn, int page, int size, object param = null)
+        public PagedList<T> PagedList<T>(IDbConnection conn, int page, int size, object param = null)
         {
             if (!IsSelect())
                 return new PagedList<T>();
@@ -210,7 +211,7 @@ namespace Acb.Dapper
             {
                 var list = muli.Read<T>();
                 var count = muli.ReadFirstOrDefault<int>();
-                return new PagedList<T>(list, page, size, count);
+                return new PagedList<T>(list.ToArray(), page, size, count);
             }
         }
 
