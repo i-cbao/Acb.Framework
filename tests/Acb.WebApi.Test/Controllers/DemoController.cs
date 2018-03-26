@@ -3,13 +3,10 @@ using Acb.Core.Helper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.MicroService.Client;
-using Acb.Sword.Contracts;
-using Acb.Sword.Contracts.Dtos;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -36,17 +33,6 @@ namespace Acb.WebApi.Test.Controllers
             var inputDto = Mapper.Map<DemoInputDto>(input);
             var dto = _demoService.Hello(IdentityHelper.Guid32, inputDto);
             return DResult.Succ(dto);
-        }
-
-        /// <summary> 店铺列表 </summary>
-        /// <returns></returns>
-        [HttpGet("list"), AllowAnonymous]
-        public DResults<ShopDto> List()
-        {
-            var shopService = ProxyService.Proxy<IShopService>();
-
-            var dtos = shopService.ShopList(new ShopListInput());
-            return DResult.Succ(dtos.List, dtos.Total);
         }
 
         [HttpGet("token"), AllowAnonymous]

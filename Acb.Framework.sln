@@ -45,9 +45,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Demo.Contracts", "tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.MicroService.Client", "src\Acb.MicroService.Client\Acb.MicroService.Client.csproj", "{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Demo.MicroService", "tests\Acb.Demo.MicroService\Acb.Demo.MicroService.csproj", "{FFF63D19-2E80-4590-8144-77D372F23D8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Demo.MicroService", "tests\Acb.Demo.MicroService\Acb.Demo.MicroService.csproj", "{FFF63D19-2E80-4590-8144-77D372F23D8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.MicroService", "src\Acb.MicroService\Acb.MicroService.csproj", "{30274903-6701-4C29-BBAB-CCFDF98BFFF6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.MicroService", "src\Acb.MicroService\Acb.MicroService.csproj", "{30274903-6701-4C29-BBAB-CCFDF98BFFF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.AutoMapper", "src\Acb.AutoMapper\Acb.AutoMapper.csproj", "{072C5261-DEFD-4335-AE2D-73EA9BE1F086}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.MicroService.Host", "src\Acb.MicroService.Host\Acb.MicroService.Host.csproj", "{B1E0893D-BA72-455A-9AF4-DE75C448BF45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +135,14 @@ Global
 		{30274903-6701-4C29-BBAB-CCFDF98BFFF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30274903-6701-4C29-BBAB-CCFDF98BFFF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30274903-6701-4C29-BBAB-CCFDF98BFFF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{072C5261-DEFD-4335-AE2D-73EA9BE1F086}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{072C5261-DEFD-4335-AE2D-73EA9BE1F086}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{072C5261-DEFD-4335-AE2D-73EA9BE1F086}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{072C5261-DEFD-4335-AE2D-73EA9BE1F086}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1E0893D-BA72-455A-9AF4-DE75C448BF45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1E0893D-BA72-455A-9AF4-DE75C448BF45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1E0893D-BA72-455A-9AF4-DE75C448BF45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1E0893D-BA72-455A-9AF4-DE75C448BF45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -155,6 +167,8 @@ Global
 		{E68F6EA7-FDC5-475E-8C06-A5AC4BEAB271} = {F1F1520A-5E3C-422D-9B10-D439124443E0}
 		{FFF63D19-2E80-4590-8144-77D372F23D8A} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
 		{30274903-6701-4C29-BBAB-CCFDF98BFFF6} = {F1F1520A-5E3C-422D-9B10-D439124443E0}
+		{072C5261-DEFD-4335-AE2D-73EA9BE1F086} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
+		{B1E0893D-BA72-455A-9AF4-DE75C448BF45} = {F1F1520A-5E3C-422D-9B10-D439124443E0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

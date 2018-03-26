@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Company>成都爱车保信息技术有限公司</Company>
+    <Authors>icb@shay</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Product>爱车保 - AutoMapper扩展类</Product>
+    <Description>爱车保 - AutoMapper扩展类</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="6.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
+  </ItemGroup>
+
+</Project>
