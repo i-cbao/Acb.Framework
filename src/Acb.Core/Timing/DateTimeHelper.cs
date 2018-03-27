@@ -2,44 +2,51 @@
 
 namespace Acb.Core.Timing
 {
+    /// <summary> 时间戳类型 </summary>
+    public enum TimestampType : byte
+    {
+        /// <summary> 秒 </summary>
+        Second,
+        /// <summary> 毫秒 </summary>
+        MilliSecond
+    }
+
+    /// <summary> 时间辅助类 </summary>
     public static class DateTimeHelper
     {
+        /// <summary> 起始时间 </summary>
         public static DateTime ZoneTime = new DateTime(1970, 1, 1);
 
-        /// <summary>
-        /// 转换成时间戳
-        /// </summary>
+        /// <summary> 转换成时间戳 </summary>
+        /// <param name="dateTime">需要转换的时间</param>
+        /// <param name="kind">转换的时间类型（默认为UTC）</param>
+        /// <param name="type">时间戳类型</param>
+        /// <returns>时间戳</returns>
+        public static long ToTimestamp(this DateTime dateTime, DateTimeKind kind = DateTimeKind.Utc, TimestampType type = TimestampType.Second)
+        {
+            switch (kind)
+            {
+                case DateTimeKind.Utc:
+                    dateTime = dateTime.ToUniversalTime();
+                    break;
+                case DateTimeKind.Local:
+                    dateTime = dateTime.ToLocalTime();
+                    break;
+            }
+
+            var timespan = dateTime.ToUniversalTime() - ZoneTime;
+            if (type == TimestampType.Second)
+                return (long)timespan.TotalSeconds;
+            return (long)timespan.TotalMilliseconds;
+        }
+
+        /// <summary> 转换成时间戳(毫秒) </summary>
         /// <param name="dateTime">需要转换的时间</param>
         /// <param name="kind">转换的时间类型（默认为UTC）</param>
         /// <returns>时间戳</returns>
-        public static long ToTimestamp(this DateTime dateTime, DateTimeKind kind = DateTimeKind.Utc)
-        {
-            switch (kind)
-            {
-                case DateTimeKind.Utc:
-                    dateTime = dateTime.ToUniversalTime();
-                    break;
-                case DateTimeKind.Local:
-                    dateTime = dateTime.ToLocalTime();
-                    break;
-            }
-
-            return (long)(dateTime.ToUniversalTime() - ZoneTime).TotalSeconds;
-        }
-
         public static long ToMillisecondsTimestamp(this DateTime dateTime, DateTimeKind kind = DateTimeKind.Utc)
         {
-            switch (kind)
-            {
-                case DateTimeKind.Utc:
-                    dateTime = dateTime.ToUniversalTime();
-                    break;
-                case DateTimeKind.Local:
-                    dateTime = dateTime.ToLocalTime();
-                    break;
-            }
-
-            return (long)(dateTime.ToUniversalTime() - ZoneTime).TotalMilliseconds;
+            return dateTime.ToTimestamp(kind, TimestampType.MilliSecond);
         }
 
         /// <summary>
@@ -47,7 +54,7 @@ namespace Acb.Core.Timing
         /// </summary>
         /// <param name="timestamp">时间戳</param>
         /// <returns></returns>
-        public static DateTime FromTimestamp(long timestamp)
+        public static DateTime FromTimestamp(this long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(new TimeSpan(timestamp * TimeSpan.TicksPerSecond)).ToLocalTime();
         }
@@ -57,7 +64,7 @@ namespace Acb.Core.Timing
         /// </summary>
         /// <param name="timestamp">时间戳</param>
         /// <returns></returns>
-        public static DateTime FromMillisecondTimestamp(long timestamp)
+        public static DateTime FromMillisecondTimestamp(this long timestamp)
         {
             return new DateTime(1970, 1, 1).Add(new TimeSpan(timestamp * TimeSpan.TicksPerMillisecond)).ToLocalTime();
         }

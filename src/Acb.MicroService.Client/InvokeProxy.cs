@@ -23,7 +23,7 @@ namespace Acb.MicroService.Client
         {
             get
             {
-                var key = "micro_service:redisKey".Config<string>();
+                var key = $"{MicroSreviceKey}:redisKey".Config<string>();
                 return string.IsNullOrWhiteSpace(key) ? RegistCenterKey : key;
             }
         }
@@ -42,10 +42,11 @@ namespace Acb.MicroService.Client
         private string GetTypeService()
         {
             var redis = RedisManager.Instance.GetDatabase();
-            var url = redis.SetRandomMember($"{RedisKey}:{_type.FullName}");
+            var assemblyKey = _type.Assembly.AssemblyKey();
+            var url = redis.SetRandomMember($"{RedisKey}:{assemblyKey}");
             if (string.IsNullOrWhiteSpace(url))
                 throw new BusiException($"{_type.FullName},没有可用的服务");
-            return url;
+            return $"{url}{_type.Name}/";
         }
 
         /// <inheritdoc />

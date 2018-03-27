@@ -2,7 +2,6 @@
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Redis;
-using System.Reflection;
 
 namespace Acb.MicroService
 {
@@ -30,34 +29,35 @@ namespace Acb.MicroService
                                                            new MicroServiceRegister());
 
 
-        private string TypeUrl(MemberInfo type)
+        private string ServiceUrl()
         {
-            return $"http://{_config.Host}:{_config.Port}/{type.Name}/";
+            return $"http://{_config.Host}:{_config.Port}/";
         }
 
-        /// <summary> 注册 </summary>
+        /// <summary> 注册微服务 </summary>
         public void Regist()
         {
-            var list = MicroServiceRouter.GetServices();
+            MicroServiceRouter.InitServices();
+            var list = MicroServiceRouter.ServiceAssemblies;
             if (list == null || list.IsNullOrEmpty())
                 return;
             var redis = RedisManager.Instance.GetDatabase();
             foreach (var type in list)
             {
-                redis.SetAdd($"{RedisKey}:{type.FullName}", TypeUrl(type));
+                redis.SetAdd($"{RedisKey}:{type}", ServiceUrl());
             }
         }
 
         /// <summary> 取消注册 </summary>
         public void UnRegist()
         {
-            var list = MicroServiceRouter.GetServices();
+            var list = MicroServiceRouter.ServiceAssemblies;
             if (list == null || list.IsNullOrEmpty())
                 return;
             var redis = RedisManager.Instance.GetDatabase();
             foreach (var type in list)
             {
-                redis.SetRemove($"{RedisKey}:{type.FullName}", TypeUrl(type));
+                redis.SetRemove($"{RedisKey}:{type}", ServiceUrl());
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Acb.Core;
 using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Reflection;
 using Acb.Core.Serialize;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,36 +23,67 @@ namespace Acb.MicroService
     /// <summary> 微服务路由 </summary>
     public class MicroServiceRouter : IRouter
     {
-        private static List<Type> _services;
+        private static readonly ConcurrentDictionary<string, MethodInfo>
+            Methods = new ConcurrentDictionary<string, MethodInfo>();
 
-        public static List<Type> GetServices()
+        internal static readonly HashSet<string> ServiceAssemblies = new HashSet<string>();
+
+        /// <summary> 初始化服务 </summary>
+        internal static void InitServices()
         {
-            if (_services != null)
-                return _services;
-            _services = CurrentIocManager.Resolve<ITypeFinder>()
+            var services = CurrentIocManager.Resolve<ITypeFinder>()
                 .Find(t => typeof(IMicroService).IsAssignableFrom(t) && t.IsInterface && t != typeof(IMicroService))
                 .ToList();
-            return _services;
+            foreach (var service in services)
+            {
+                var assKey = service.Assembly.AssemblyKey();
+                if (!ServiceAssemblies.Contains(assKey))
+                    ServiceAssemblies.Add(assKey);
+                var methods = service.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                foreach (var method in methods)
+                {
+                    Methods.TryAdd($"{service.Name}/{method.Name}".ToLower(), method);
+                }
+            }
         }
 
+        private static async Task WriteJsonAsync(HttpContext ctx, object data, int code = (int)HttpStatusCode.OK)
+        {
+            var response = ctx.Response;
+            response.StatusCode = code;
+            response.ContentType = "application/json";
+            var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(data));
+            await response.Body.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        /// <summary> 路由处理 </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public Task RouteAsync(RouteContext context)
         {
             var requestedUrl = context.HttpContext.Request.Path.Value.Trim('/');
-            var arrs = requestedUrl.Split('/');
-            if (arrs == null || arrs.Length != 2)
+            if (string.IsNullOrWhiteSpace(requestedUrl))
+            {
+                context.Handler = async ctx => await WriteJsonAsync(ctx, Methods.Keys);
                 return Task.CompletedTask;
-            var service = arrs[0];
-            var method = arrs[1];
-            var type = GetServices().FirstOrDefault(t =>
-                string.Equals(t.Name, service, StringComparison.CurrentCultureIgnoreCase));
-            if (type == null)
+            }
+
+            requestedUrl = requestedUrl.ToLower();
+            //健康状态
+            if (requestedUrl == "healthy")
+            {
+                context.Handler = async ctx => await ctx.Response.WriteAsync("ok");
                 return Task.CompletedTask;
-            var instance = CurrentIocManager.Resolve(type);
-            var m = instance.GetType()
-                .GetMethod(method, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-            if (m == null)
+            }
+
+            if (!Methods.TryGetValue(requestedUrl, out var method))
+            {
+                context.Handler = async ctx =>
+                    await WriteJsonAsync(ctx, DResult.Error($"{requestedUrl} not found"), (int)HttpStatusCode.NotFound);
                 return Task.CompletedTask;
-            context.Handler = async ctx => await Runner(ctx, instance, m);
+            }
+            var instance = CurrentIocManager.Resolve(method.DeclaringType);
+            context.Handler = async ctx => await Runner(ctx, instance, method);
 
             return Task.CompletedTask;
         }
@@ -76,8 +109,16 @@ namespace Acb.MicroService
                     if (list != null && list.Count > i)
                     {
                         var parameterType = parameter.ParameterType;
-                        var arg = list[i].ToObject(parameterType);
-                        args.Add(arg);
+                        if (parameterType.IsSimpleType())
+                        {
+
+                            args.Add(list[i].Value<string>()?.CastTo(parameterType));
+                        }
+                        else
+                        {
+                            var arg = list[i].ToObject(parameterType);
+                            args.Add(arg);
+                        }
                     }
                     else
                     {
@@ -87,26 +128,20 @@ namespace Acb.MicroService
                 }
 
                 var result = m.Invoke(instance, args.ToArray());
-
-                var response = ctx.Response;
-                response.ContentType = "application/json";
-                var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(result));
-                await response.Body.WriteAsync(bytes, 0, bytes.Length);
+                await WriteJsonAsync(ctx, result);
             }
             catch (Exception ex)
             {
                 var result = ExceptionHandler.Handler(ex, requestBody);
                 if (result == null)
                     return;
-                const int code = (int)HttpStatusCode.InternalServerError;
-                var response = ctx.Response;
-                response.ContentType = "application/json";
-                response.StatusCode = code;
-                var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(result));
-                await response.Body.WriteAsync(bytes, 0, bytes.Length);
+                await WriteJsonAsync(ctx, result, (int)HttpStatusCode.InternalServerError);
             }
         }
 
+        /// <summary> 获取虚拟路径 </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public VirtualPathData GetVirtualPath(VirtualPathContext context)
         {
             return null;

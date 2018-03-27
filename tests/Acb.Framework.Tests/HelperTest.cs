@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -19,7 +20,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            Print("15120222222?" == "");
+            Print(Clock.Now.ToTimestamp());
             //var md5 = "shay".Md5();
             //_logger.Info(md5);
             //Assert.AreEqual(md5.Length, 32);

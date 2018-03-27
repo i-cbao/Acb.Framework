@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using System;
+using Microsoft.AspNetCore.Routing;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Acb.MicroService
 {
@@ -21,6 +24,9 @@ namespace Acb.MicroService
             _bootstrap = DBootstrap.Instance;
         }
 
+        /// <summary> 配置服务 </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
@@ -34,11 +40,19 @@ namespace Acb.MicroService
         }
 
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        /// <summary> 配置应用 </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        /// <param name="loggerFactory"></param>
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddConsole((p, l) => l >= LogLevel.Warning);
             var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
-            app.UseMvc(routes => { routes.Routes.Add(new MicroServiceRouter()); });
+            app.UseMvc(routes =>
+            {
+                routes.Routes.Add(new MicroServiceRouter());
+            });
         }
     }
 }

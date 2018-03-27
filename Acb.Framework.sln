@@ -49,9 +49,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Demo.MicroService", "te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.MicroService", "src\Acb.MicroService\Acb.MicroService.csproj", "{30274903-6701-4C29-BBAB-CCFDF98BFFF6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.AutoMapper", "src\Acb.AutoMapper\Acb.AutoMapper.csproj", "{072C5261-DEFD-4335-AE2D-73EA9BE1F086}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.AutoMapper", "src\Acb.AutoMapper\Acb.AutoMapper.csproj", "{072C5261-DEFD-4335-AE2D-73EA9BE1F086}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.MicroService.Host", "src\Acb.MicroService.Host\Acb.MicroService.Host.csproj", "{B1E0893D-BA72-455A-9AF4-DE75C448BF45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.MicroService.Host", "src\Acb.MicroService.Host\Acb.MicroService.Host.csproj", "{B1E0893D-BA72-455A-9AF4-DE75C448BF45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -72,7 +72,7 @@ namespace Acb.Core.Helper
 
             if (content != null)
                 req.Content = content;
-            var formData = data == null ? string.Empty : "->" + data.ToDictionary().ToUrl(false);
+            var formData = data == null ? string.Empty : "->" + JsonHelper.ToJson(data);
             Logger.Info($"HttpHelper：[{method}]{url}{formData}");
             return await Client.SendAsync(req);
         }

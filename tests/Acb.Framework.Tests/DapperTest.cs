@@ -41,7 +41,7 @@ namespace Acb.Framework.Tests
                 //var mapper = _config.CreateMapper();
                 //var dtos = Mapper.Map<PagedList<TAreas>>(list);
                 //Print(dtos);
-                Print(DResult.Succ(list, list.Total));
+                Print(DResult.Succ(list));
             }
         }
 
