@@ -80,10 +80,10 @@ namespace Acb.Framework.Logging
                 RemotePort = tcp.Port,
                 Layout = string.IsNullOrWhiteSpace(tcp.Layout) ? ErrorLayout : new PatternLayout(tcp.Layout)
             };
+            var level = Log4NetLog.ParseLevel(tcp.Level);
             tcpAppender.AddFilter(new LevelRangeFilter
             {
-                LevelMin = Level.Error,
-                LevelMax = Level.Fatal
+                LevelMin = level
             });
             tcpAppender.ActivateOptions();
             return tcpAppender;

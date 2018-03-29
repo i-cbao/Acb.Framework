@@ -1,14 +1,16 @@
 using Acb.Core;
-using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
+using Acb.Core.Timing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -119,6 +121,41 @@ namespace Acb.Framework.Tests
             //    string.Format(uri, Clock.Now.ToTimestamp()), headers: headers, content: data);
             //var html = await resp.Content.ReadAsStringAsync();
             //Print(html);
+        }
+
+        [TestMethod]
+        public async Task CspTest()
+        {
+            var htmlCollection = new BlockingCollection<string>();
+            var client = new HttpClient();
+            var urls = new ConcurrentQueue<string>(new[]
+            {
+                "https://www.github.com",
+                "http://www.baidu.com",
+                "https://www.cnblogs.com/",
+                "http://www.csdn.net"
+            });
+            //produce
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var tasks = urls.Select(async url =>
+                    {
+                        var html = await client.GetStringAsync(url);
+                        htmlCollection.Add(html);
+                    }).ToArray();
+                    await Task.WhenAll(tasks);
+                    htmlCollection.CompleteAdding();
+                });
+            }
+            //consume
+            {
+                foreach (var html in htmlCollection.GetConsumingEnumerable())
+                {
+                    var title = RegexHelper.Match(html, "<title>(.+)</title>", RegexOptions.IgnoreCase);
+                    Console.WriteLine(title);
+                }
+            }
         }
     }
 }

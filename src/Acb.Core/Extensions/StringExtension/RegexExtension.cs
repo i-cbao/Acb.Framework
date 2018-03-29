@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Acb.Core.Extensions
 {
+    /// <summary> 正则相关扩展 </summary>
     public static class RegexExtension
     {
         public static Regex ToRegex(this string c, RegexOptions opts)
@@ -98,25 +99,68 @@ namespace Acb.Core.Extensions
             return c.Replace(parent, replaceMent, RegexOptions.Compiled);
         }
 
-        //常用正则
+        /// <summary> 是否是邮箱 </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static bool IsEmail(this string c)
         {
             return RegexHelper.IsEmail(c);
         }
 
+        /// <summary> 是否是IP </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static bool IsIp(this string c)
         {
             return RegexHelper.IsIp(c);
         }
 
+        /// <summary> 判断是否是url </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static bool IsUrl(this string c)
         {
             return RegexHelper.IsUrl(c);
         }
 
+        /// <summary> 是否是手机号码 </summary>
+        /// <param name="c"></param>
+        /// <returns></returns>
         public static bool IsMobile(this string c)
         {
             return RegexHelper.IsMobile(c);
+        }
+
+        /// <summary> 是否是浮点字符 </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsFloat(this string str)
+        {
+            return RegexHelper.IsFloat(str);
+        }
+
+        /// <summary> 是否是身份证号码 </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsIdCardNo(string str)
+        {
+            return RegexHelper.IsIdCardNo(str);
+        }
+
+        /// <summary> 是否是车牌号 </summary>
+        /// <param name="plateNumber"></param>
+        /// <returns></returns>
+        public static bool IsPlateNumber(string plateNumber)
+        {
+            return RegexHelper.IsPlateNumber(plateNumber);
+        }
+
+        /// <summary> 车架号校验 </summary>
+        /// <param name="vinNumber"></param>
+        /// <returns></returns>
+        public static bool IsVinNumber(string vinNumber)
+        {
+            return RegexHelper.IsVinNumber(vinNumber);
         }
     }
 }

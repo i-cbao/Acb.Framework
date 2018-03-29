@@ -126,8 +126,7 @@ namespace Acb.Core.Helper
         /// <returns></returns>
         public DirtyNode Add(char newChar)
         {
-            DirtyNode item;
-            if (Nodes.TryGetValue(newChar, out item))
+            if (Nodes.TryGetValue(newChar, out var item))
             {
                 return item;
             }

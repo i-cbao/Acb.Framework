@@ -5,7 +5,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
-    <Version>1.3.5</Version>
+    <Version>1.3.6</Version>
     <Product>爱车保 - 微服务框架服务提供者</Product>
     <Description>爱车保 - 微服务框架服务提供者</Description>
   </PropertyGroup>

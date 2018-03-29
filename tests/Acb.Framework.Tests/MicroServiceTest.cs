@@ -1,5 +1,8 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Logging;
+using Acb.Core.Tests;
 using Acb.Core.Timing;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
@@ -14,24 +17,41 @@ namespace Acb.Framework.Tests
     [TestClass]
     public class MicroServiceTest : DTest
     {
-        //private readonly IMarketContract _marketContract;
+        private readonly IDemoService _demoService;
 
-        //public MicroServiceTest()
-        //{
-        //    _marketContract = ProxyService.Proxy<IMarketContract>();
-        //}
+        public MicroServiceTest()
+        {
+            _demoService = ProxyService.Proxy<IDemoService>();
+            LogManager.SetLevel(LogLevel.Off);
+            //_demoService = CurrentIocManager.Resolve<IDemoService>();
+        }
 
         [TestMethod]
         public void Test()
         {
-            var demo = ProxyService.Proxy<IDemoService>();
-            var word = demo.Hello(IdentityHelper.Guid32, new DemoInputDto
+            var proxy = ProxyService.Proxy<IDemoService>();
+            var result = CodeTimer.Time("micro", 2000, () =>
             {
-                Demo = DemoEnums.Test,
-                Name = "shay001",
-                Time = Clock.Now
-            });
-            Print(word);
+                var word = proxy.Hello(IdentityHelper.Guid32, new DemoInputDto
+                {
+                    Demo = DemoEnums.Test,
+                    Name = "shay" + IdentityHelper.Guid16,
+                    Time = Clock.Now
+                });
+                //Print(word);
+            }, 10);
+            Print(result.ToString());
+            result = CodeTimer.Time("local", 2000, () =>
+            {
+                var word = _demoService.Hello(IdentityHelper.Guid32, new DemoInputDto
+                {
+                    Demo = DemoEnums.Test,
+                    Name = "shay" + IdentityHelper.Guid16,
+                    Time = Clock.Now
+                });
+                //Print(word);
+            }, 10);
+            Print(result.ToString());
         }
 
         [TestMethod]

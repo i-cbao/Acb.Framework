@@ -111,7 +111,6 @@ namespace Acb.MicroService
                         var parameterType = parameter.ParameterType;
                         if (parameterType.IsSimpleType())
                         {
-
                             args.Add(list[i].Value<string>()?.CastTo(parameterType));
                         }
                         else

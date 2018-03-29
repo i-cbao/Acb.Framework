@@ -43,7 +43,10 @@ namespace Acb.Framework.Logging
 
         public override bool IsFatalEnabled => _logger.IsEnabledFor(Level.Fatal);
 
-        private static Level ParseLevel(LogLevel level)
+        /// <summary> 日志等级转换 </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        public static Level ParseLevel(LogLevel level)
         {
             switch (level)
             {

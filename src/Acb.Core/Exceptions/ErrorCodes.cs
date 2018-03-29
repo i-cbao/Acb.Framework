@@ -40,6 +40,10 @@ namespace Acb.Core.Exceptions
         /// <summary> 客户端令牌已失效 </summary>
         [Description("登录令牌已失效")]
         public const int InvalidTicket = 10006;
+
+        /// <summary> 没有可用的服务 </summary>
+        [Description("没有可用的服务")]
+        public const int NoService = 10007;
     }
 
     /// <summary> 错误码扩展 </summary>

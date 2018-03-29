@@ -27,15 +27,27 @@ namespace Acb.Core.Helper
 
         private HttpHelper()
         {
-            //foreach (var header in DefaultHeaders)
-            //{
-            //    Client.DefaultRequestHeaders.Add(header.Key, header.Value);
-            //}
+            lock (Client)
+            {
+                foreach (var header in DefaultHeaders)
+                {
+                    Client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                }
+
+                Client.Timeout = TimeSpan.FromSeconds(65);
+            }
         }
 
         /// <summary> 单例 </summary>
         public static HttpHelper Instance =>
             Singleton<HttpHelper>.Instance ?? (Singleton<HttpHelper>.Instance = new HttpHelper());
+
+        /// <summary> 设置超时时间 </summary>
+        /// <param name="timeout"></param>
+        public void Timeout(TimeSpan timeout)
+        {
+            Client.Timeout = timeout;
+        }
 
         /// <summary> 请求 </summary>
         /// <param name="method"></param>
