@@ -27,7 +27,7 @@ namespace Acb.Framework.Logging
             return new RollingFileAppender
             {
                 Name = name,
-                File = $"_logs\\{Clock.Now:yyyyMM}\\",
+                File = $"_logs/{Clock.Now:yyyyMM}/",
                 AppendToFile = true,
                 LockingModel = new FileAppender.MinimalLock(),
                 RollingStyle = RollingFileAppender.RollingMode.Date,

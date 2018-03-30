@@ -85,8 +85,14 @@ namespace Acb.MicroService.Client
                     throw ErrorCodes.NoService.CodeException();
                 service = services.RandomSort().First();
                 var url = string.Concat(service, targetMethod.Name);
+                var remoteIp = AcbHttpContext.RemoteIpAddress;
+                var headers = new Dictionary<string, string>
+                {
+                    {"X-Forwarded-For", remoteIp},
+                    {"X-Real-IP", remoteIp}
+                };
                 //http请求
-                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, url, data: args).Result;
+                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, url, data: args, headers: headers).Result;
             });
 
             //if (!services.Any())
