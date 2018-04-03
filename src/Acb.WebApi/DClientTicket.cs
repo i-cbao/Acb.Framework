@@ -90,15 +90,15 @@ namespace Acb.WebApi
         {
             if (string.IsNullOrWhiteSpace(ticket))
                 return default(TTicket);
-            var str = EncryptHelper.SymmetricDecrypt(ticket, EncryptHelper.SymmetricFormat.DES, TicketEncodeKey,
-                TicketEncodeIv);
-            if (string.IsNullOrWhiteSpace(str))
-                return default(TTicket);
-            var list = str.Split('_');
-            if (list.Length != 2)
-                return default(TTicket);
             try
             {
+                var str = EncryptHelper.SymmetricDecrypt(ticket, EncryptHelper.SymmetricFormat.DES, TicketEncodeKey,
+                    TicketEncodeIv);
+                if (string.IsNullOrWhiteSpace(str))
+                    return default(TTicket);
+                var list = str.Split('_');
+                if (list.Length != 2)
+                    return default(TTicket);
                 var client = JsonHelper.Json<TTicket>(list[1]);
                 return !string.Equals(list[0], client.Ticket, StringComparison.CurrentCultureIgnoreCase)
                     ? default(TTicket)

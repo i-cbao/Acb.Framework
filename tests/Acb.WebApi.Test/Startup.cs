@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
+using Acb.Core;
+using Acb.MicroService.Client;
 
 namespace Acb.WebApi.Test
 {
@@ -38,7 +42,6 @@ namespace Acb.WebApi.Test
                     option.IncludeXmlComments(file);
                 }
             });
-            
             return base.ConfigureServices(services);
         }
 
@@ -49,6 +52,12 @@ namespace Acb.WebApi.Test
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "docs")),
+                RequestPath = "/docs"
+            });
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>

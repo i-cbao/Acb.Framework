@@ -61,7 +61,7 @@ namespace Acb.WebApi.ViewModels
 
             var timestamp = Sign.Substring(0, 13).CastTo(0L);
             //有效期验证 2分钟有效期
-            if (DateTime.Now > timestamp.FromTimestamp().AddMinutes(2))
+            if (DateTime.Now > timestamp.FromMillisecondTimestamp().AddMinutes(2))
             {
                 results.Add(new ValidationResult("请求已失效"));
                 return results;

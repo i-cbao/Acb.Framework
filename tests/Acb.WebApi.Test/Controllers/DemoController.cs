@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Acb.WebApi.Test.Controllers
 {
-    /// <summary> 实例 </summary>
+    /// <summary> 实例接口 </summary>
     [Route("api/[controller]")]
     public class DemoController : DController
     {

@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Cache;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
@@ -23,6 +24,7 @@ namespace Acb.MicroService.Client
         private const string MicroSreviceKey = "micro_service";
         private const string RegistCenterKey = MicroSreviceKey + ":center";
         private readonly ILogger _logger = LogManager.Logger(typeof(ProxyService));
+        private readonly ICache _serviceCache;
 
         private string RedisKey
         {
@@ -42,13 +44,21 @@ namespace Acb.MicroService.Client
         public InvokeProxy()
         {
             _type = typeof(T);
+            _serviceCache = CacheManager.GetCacher(typeof(InvokeProxy<>));
         }
 
         private List<string> GetTypeService()
         {
-            var redis = RedisManager.Instance.GetDatabase();
             var assemblyKey = _type.Assembly.AssemblyKey();
-            var urls = redis.SetMembers($"{RedisKey}:{assemblyKey}");
+            var urls = _serviceCache.Get<string[]>(assemblyKey);
+            if (urls == null)
+            {
+                var redis = RedisManager.Instance.GetDatabase();
+                var list = redis.SetMembers($"{RedisKey}:{assemblyKey}");
+                urls = list.Select(t => t.ToString()).ToArray();
+                _serviceCache.Set(assemblyKey, urls, TimeSpan.FromMinutes(5));
+            }
+
             if (urls == null || !urls.Any())
                 throw new BusiException($"{_type.FullName},没有可用的服务");
             return urls.Select(url => $"{url}{_type.Name}/").ToList();
@@ -77,6 +87,7 @@ namespace Acb.MicroService.Client
                     : $"{service}:retry,{count},{result.Result.StatusCode}");
                 services.Remove(service);
             });
+
             var policy = Policy.Wrap(retry, breaker);
 
             var resp = policy.Execute(() =>
@@ -89,7 +100,8 @@ namespace Acb.MicroService.Client
                 var headers = new Dictionary<string, string>
                 {
                     {"X-Forwarded-For", remoteIp},
-                    {"X-Real-IP", remoteIp}
+                    {"X-Real-IP", remoteIp},
+                    {"User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent}
                 };
                 //http请求
                 return HttpHelper.Instance.RequestAsync(HttpMethod.Post, url, data: args, headers: headers).Result;

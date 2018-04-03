@@ -47,7 +47,7 @@ namespace Acb.WebApi.Filters
                     string.Equals(commonTicket, ticket, StringComparison.CurrentCultureIgnoreCase))
                     return true;
                 var timestamp = ticket.ToString().Substring(0, 10).CastTo(0L);
-                if (DateTimeHelper.FromTimestamp(timestamp).AddMinutes(5) < Clock.Now)
+                if (timestamp.FromTimestamp().AddMinutes(5) < Clock.Now)
                     throw ErrorCodes.ClientTimeoutError.CodeException<ErrorCodes>();
                 // 规则 App-Ticket=时间戳秒 + Md532(key + 时间戳秒).ToLower()
                 var ticketKey = Consts.AppTicketKey.Config<string>();

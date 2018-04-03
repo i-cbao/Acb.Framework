@@ -22,7 +22,8 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            Print(Clock.Now.ToTimestamp());
+            Print(Utils.GetSpellCode("±±¾©"));
+            //Print(Clock.Now.ToTimestamp());
             //var md5 = "shay".Md5();
             //_logger.Info(md5);
             //Assert.AreEqual(md5.Length, 32);
