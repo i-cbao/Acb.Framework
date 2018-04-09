@@ -6,7 +6,7 @@
     <Description>爱车保 - MongoDb基础类</Description>
     <Authors>icb@shay</Authors>
     <Company>成都爱车保信息技术有限公司</Company>
-    <Version>1.3.2</Version>
+    <Version>1.3.3</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

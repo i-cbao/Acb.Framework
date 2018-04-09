@@ -3,7 +3,8 @@ using System.Reflection;
 
 namespace Acb.MicroService.Client
 {
-    public class ProxyService
+    /// <summary> 代理服务 </summary>
+    public static class ProxyService
     {
         /// <summary> 生成代理 </summary>
         /// <typeparam name="T"></typeparam>

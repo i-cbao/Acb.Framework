@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Acb.Payment
 {
+    /// <summary> 支付中间件 </summary>
     public static class PaymentMiddleware
     {
         /// <summary> 添加ICanPay </summary>

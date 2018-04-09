@@ -1,16 +1,15 @@
-﻿using Acb.Payment;
+﻿using Acb.Demo.Contracts;
+using Acb.MicroService.Client;
+using Acb.Payment;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
-using Acb.Core;
-using Acb.MicroService.Client;
 
 namespace Acb.WebApi.Test
 {
@@ -28,6 +27,7 @@ namespace Acb.WebApi.Test
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddPayment();
+            services.AddTransient(sp => ProxyService.Proxy<IDemoService>());
             services.AddSwaggerGen(option =>
             {
                 option.SwaggerDoc("help", new Info

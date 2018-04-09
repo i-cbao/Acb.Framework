@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
-using Microsoft.AspNetCore.Routing;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Acb.MicroService
