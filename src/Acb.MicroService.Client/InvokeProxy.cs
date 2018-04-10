@@ -1,10 +1,10 @@
 ﻿using Acb.Core;
-using Acb.Core.Cache;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
-using Acb.Redis;
+using Acb.MicroService.Client.ServiceFind;
+using Acb.MicroService.Client.ServiceFinder;
 using Newtonsoft.Json;
 using Polly;
 using System;
@@ -21,19 +21,8 @@ namespace Acb.MicroService.Client
     /// <typeparam name="T"></typeparam>
     public class InvokeProxy<T> : DispatchProxy where T : IMicroService
     {
-        private const string MicroSreviceKey = "micro_service";
-        private const string RegistCenterKey = MicroSreviceKey + ":center";
         private readonly ILogger _logger = LogManager.Logger(typeof(ProxyService));
-        private readonly ICache _serviceCache;
-
-        private string RedisKey
-        {
-            get
-            {
-                var key = $"{MicroSreviceKey}:redisKey".Config<string>();
-                return string.IsNullOrWhiteSpace(key) ? RegistCenterKey : key;
-            }
-        }
+        private readonly MicroServiceConfig _config;
 
 
         /// <summary> 接口类型 </summary>
@@ -44,20 +33,26 @@ namespace Acb.MicroService.Client
         public InvokeProxy()
         {
             _type = typeof(T);
-            _serviceCache = CacheManager.GetCacher(typeof(InvokeProxy<>));
+            _config = Constans.MicroSreviceKey.Config<MicroServiceConfig>();
+        }
+
+        private IServiceFinder GetServiceFinder()
+        {
+            switch (_config.Register)
+            {
+                case RegisterType.Consul:
+                    return new ConsulServiceFinder();
+                case RegisterType.Redis:
+                    return new RedisServiceFinder();
+                default:
+                    return new RedisServiceFinder();
+            }
         }
 
         private List<string> GetTypeService()
         {
-            var assemblyKey = _type.Assembly.AssemblyKey();
-            var urls = _serviceCache.Get<string[]>(assemblyKey);
-            if (urls == null)
-            {
-                var redis = RedisManager.Instance.GetDatabase();
-                var list = redis.SetMembers($"{RedisKey}:{assemblyKey}");
-                urls = list.Select(t => t.ToString()).ToArray();
-                _serviceCache.Set(assemblyKey, urls, TimeSpan.FromMinutes(5));
-            }
+            var finder = GetServiceFinder();
+            var urls = finder.Find(_type.Assembly, _config);
 
             if (urls == null || !urls.Any())
                 throw new BusiException($"{_type.FullName},没有可用的服务");

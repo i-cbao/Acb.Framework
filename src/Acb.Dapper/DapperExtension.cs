@@ -147,8 +147,9 @@ namespace Acb.Dapper
         /// <param name="modelType"></param>
         /// <param name="excepts">排除的字段</param>
         /// <param name="includes">包含的字段</param>
+        /// <param name="tableAlias"></param>
         /// <returns></returns>
-        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null)
+        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null, string tableAlias = null)
         {
             var props = modelType.TypeProperties();
             var sb = new StringBuilder();
@@ -159,9 +160,14 @@ namespace Acb.Dapper
                 if (includes != null && !includes.Contains(prop.Key))
                     continue;
                 if (prop.Key.Equals(prop.Value, StringComparison.CurrentCultureIgnoreCase))
-                    sb.AppendFormat("[{0}],", prop.Key);
+                    sb.AppendFormat(
+                        string.IsNullOrWhiteSpace(tableAlias) ? "[{0}]," : string.Concat(tableAlias, ".[{0}],"),
+                        prop.Key);
                 else
-                    sb.AppendFormat("[{0}] AS [{1}],", prop.Value, prop.Key);
+                    sb.AppendFormat(
+                        string.IsNullOrWhiteSpace(tableAlias)
+                            ? "[{0}] AS [{1}],"
+                            : string.Concat(tableAlias, ".[{0}] AS [{1}],"), prop.Value, prop.Key);
             }
             return sb.ToString().TrimEnd(',');
         }

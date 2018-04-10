@@ -1,64 +1,57 @@
-﻿using Acb.Core;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
-using Acb.Redis;
+using Acb.MicroService.Register;
 
 namespace Acb.MicroService
 {
     /// <summary> 微服务注册 </summary>
     internal class MicroServiceRegister
     {
-        private const string MicroSreviceKey = "micro_service";
-        private const string RegistCenterKey = MicroSreviceKey + ":center";
-        private MicroServiceConfig _config;
-        private string RedisKey => string.IsNullOrWhiteSpace(_config.RedisKey) ? RegistCenterKey : _config.RedisKey;
+        public const string MicroSreviceKey = "micro_service";
+        private static MicroServiceConfig _config;
+        private static IRegister _register;
 
-        private MicroServiceRegister()
+        static MicroServiceRegister()
         {
             _config = MicroSreviceKey.Config<MicroServiceConfig>();
+            _register = GetRegister();
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
-                UnRegist();
+                Deregist();
                 _config = MicroSreviceKey.Config<MicroServiceConfig>();
+                _register = GetRegister();
                 Regist();
             };
         }
 
-        public static MicroServiceRegister Instance => Singleton<MicroServiceRegister>.Instance ??
-                                                       (Singleton<MicroServiceRegister>.Instance =
-                                                           new MicroServiceRegister());
-
-
-        private string ServiceUrl()
+        private static IRegister GetRegister()
         {
-            return $"http://{_config.Host}:{_config.Port}/";
+            switch (_config.Register)
+            {
+                case RegisterType.Consul:
+                    return new ConsulRegister();
+                case RegisterType.Redis:
+                    return new RedisRegister();
+                default:
+                    return new RedisRegister();
+            }
         }
 
+
         /// <summary> 注册微服务 </summary>
-        public void Regist()
+        public static void Regist()
         {
             MicroServiceRouter.InitServices();
-            var list = MicroServiceRouter.ServiceAssemblies;
-            if (list == null || list.IsNullOrEmpty())
+            var asses = MicroServiceRouter.ServiceAssemblies;
+            if (asses == null || asses.IsNullOrEmpty())
                 return;
-            var redis = RedisManager.Instance.GetDatabase();
-            foreach (var type in list)
-            {
-                redis.SetAdd($"{RedisKey}:{type}", ServiceUrl());
-            }
+            _register.Regist(asses, _config);
         }
 
         /// <summary> 取消注册 </summary>
-        public void UnRegist()
+        public static void Deregist()
         {
-            var list = MicroServiceRouter.ServiceAssemblies;
-            if (list == null || list.IsNullOrEmpty())
-                return;
-            var redis = RedisManager.Instance.GetDatabase();
-            foreach (var type in list)
-            {
-                redis.SetRemove($"{RedisKey}:{type}", ServiceUrl());
-            }
+            _register.Deregist();
         }
     }
 }

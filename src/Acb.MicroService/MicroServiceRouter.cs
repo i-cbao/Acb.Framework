@@ -26,7 +26,7 @@ namespace Acb.MicroService
         private static readonly ConcurrentDictionary<string, MethodInfo>
             Methods = new ConcurrentDictionary<string, MethodInfo>();
 
-        internal static readonly HashSet<string> ServiceAssemblies = new HashSet<string>();
+        internal static readonly HashSet<Assembly> ServiceAssemblies = new HashSet<Assembly>();
 
         /// <summary> 初始化服务 </summary>
         internal static void InitServices()
@@ -36,9 +36,8 @@ namespace Acb.MicroService
                 .ToList();
             foreach (var service in services)
             {
-                var assKey = service.Assembly.AssemblyKey();
-                if (!ServiceAssemblies.Contains(assKey))
-                    ServiceAssemblies.Add(assKey);
+                if (!ServiceAssemblies.Contains(service.Assembly))
+                    ServiceAssemblies.Add(service.Assembly);
                 var methods = service.GetMethods(BindingFlags.Public | BindingFlags.Instance);
                 foreach (var method in methods)
                 {

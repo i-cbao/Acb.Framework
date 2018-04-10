@@ -1,4 +1,4 @@
-﻿namespace Acb.MicroService
+﻿namespace Acb.MicroService.Client
 {
     internal enum RegisterType
     {
@@ -11,10 +11,5 @@
         public RegisterType Register { get; set; }
         public string RedisKey { get; set; }
         public string ConsulServer { get; set; }
-        public bool ConsulCheck { get; set; }
-        public int Consulinterval { get; set; } = 30;
-        public int DeregisterAfter { get; set; } = 180;
-        public string Host { get; set; }
-        public int Port { get; set; }
     }
 }
