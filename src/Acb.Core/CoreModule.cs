@@ -12,6 +12,7 @@ namespace Acb.Core
     /// <summary> 初始化模块 </summary>
     public class CoreModule : DModule
     {
+        /// <summary> 初始化 </summary>
         public override void Initialize()
         {
             CurrentIocManager.IocManager = IocManager;

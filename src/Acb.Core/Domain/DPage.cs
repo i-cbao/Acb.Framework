@@ -6,7 +6,9 @@ namespace Acb.Core.Domain
     {
         private const int MaxPage = 1000;
         private const int MaxSize = 500;
+        /// <summary> 页码 </summary>
         public int Page { get; private set; }
+        /// <summary> 每页数量 </summary>
         public int Size { get; private set; }
 
         private DPage(int page = 0, int size = 15)
