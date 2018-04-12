@@ -1,7 +1,7 @@
 using Acb.Core;
 using Acb.Core.Helper;
+using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
-using Acb.Core.Timing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
@@ -22,7 +22,8 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            Print(Utils.GetSpellCode("北京"));
+            Print(IdentityHelper.Guid16);
+            //Print(Utils.GetSpellCode("北京"));
             //Print(Clock.Now.ToTimestamp());
             //var md5 = "shay".Md5();
             //_logger.Info(md5);
@@ -64,7 +65,7 @@ namespace Acb.Framework.Tests
         public async Task HttpTest()
         {
             const string uri = "/query/life?t=1";
-            var helper = new RestHelper(Site.Market, 1);
+            var helper = new RestHelper(Site.Market);
             var result = await helper.GetAsync<DResult<dynamic>>(uri, new
             {
                 cityCode = "510100"

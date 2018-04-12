@@ -52,14 +52,16 @@ namespace Acb.Core.Extensions
         /// <summary> Url格式 </summary>
         /// <param name="dict"></param>
         /// <param name="encode"></param>
+        /// <param name="encoding"></param>
         /// <returns></returns>
-        public static string ToUrl(this IDictionary<string, object> dict, bool encode = true)
+        public static string ToUrl(this IDictionary<string, object> dict, bool encode = true, Encoding encoding = null)
         {
             var sb = new StringBuilder();
+            encoding = encoding ?? Encoding.UTF8;
             foreach (var item in dict)
             {
                 var value = item.Value?.ToString() ?? string.Empty;
-                sb.AppendFormat("{0}={1}&", item.Key, encode ? value.UrlEncode() : value);
+                sb.AppendFormat("{0}={1}&", item.Key, encode ? value.UrlEncode(encoding) : value);
             }
             return sb.ToString().TrimEnd('&');
         }
@@ -244,6 +246,11 @@ namespace Acb.Core.Extensions
             if (source == null)
                 return new Dictionary<string, object>();
             var type = source.GetType();
+            if (type == typeof(IDictionary<string, object>) || type == typeof(Dictionary<string, object>))
+                return (IDictionary<string, object>)source;
+            var dictTypes = new[] { typeof(IDictionary<string, string>), typeof(Dictionary<string, string>) };
+            if (type.In(dictTypes))
+                return ((IDictionary<string, string>)source).ToDictionary(k => k.Key, v => (object)v.Value);
             var dict = new Dictionary<string, object>();
             if (type.IsValueType)
                 return dict;

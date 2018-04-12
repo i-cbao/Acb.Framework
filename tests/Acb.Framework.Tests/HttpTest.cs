@@ -1,7 +1,5 @@
-﻿using Acb.Core.Helper;
-using Acb.Core.Tests;
+﻿using Acb.Core.Helper.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
@@ -9,7 +7,7 @@ namespace Acb.Framework.Tests
     [TestClass]
     public class HttpTest : DTest
     {
-        private static async Task<HttpResponseMessage> GetData()
+        private static async Task<dynamic> GetData()
         {
             const string url = "http://open.i-cbao.com/sys/feedback-list";
             var data = new
@@ -26,18 +24,20 @@ namespace Acb.Framework.Tests
                 index = 1,
                 size = 13
             };
-            return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, url, data: data);
+            var rest = new RestHelper();
+            return await rest.PostAsync(url, data);
         }
 
         [TestMethod]
         public void TaskTest()
         {
-            var result = CodeTimer.Time("test", 200, () =>
-            {
-                var resp = GetData().Result;
-                var html = resp.Content.ReadAsStringAsync().Result;
-            }, 10);
-            Print(result.ToString());
+            //var result = CodeTimer.Time("test", 10, () =>
+            //{
+            //    var resp = GetData().Result;
+            //    var html = resp.Content.ReadAsStringAsync().Result;
+            //}, 2);
+            //Print(result.ToString());
+            Print(GetData().Result);
         }
     }
 }

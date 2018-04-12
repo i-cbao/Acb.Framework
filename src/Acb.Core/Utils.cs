@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using HttpRequest = Microsoft.AspNetCore.Http.HttpRequest;
 
 namespace Acb.Core
 {

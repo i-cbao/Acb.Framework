@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Acb.Core.Helper.Http;
 
 namespace Acb.Core
 {

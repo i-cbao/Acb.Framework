@@ -1,7 +1,7 @@
 ﻿using Acb.Core;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
-using Acb.Core.Helper;
+using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.MicroService.Client.ServiceFind;
 using Acb.MicroService.Client.ServiceFinder;
@@ -99,7 +99,11 @@ namespace Acb.MicroService.Client
                     {"User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent}
                 };
                 //http请求
-                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, url, data: args, headers: headers).Result;
+                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
+                {
+                    Data = args,
+                    Headers = headers
+                }).Result;
             });
 
             //if (!services.Any())
