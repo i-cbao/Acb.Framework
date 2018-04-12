@@ -1,5 +1,7 @@
 ﻿using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Acb.Demo.Business
 {
@@ -14,6 +16,11 @@ namespace Acb.Demo.Business
                 Name = dto.Name + ",Success",
                 Time = dto.Time
             };
+        }
+
+        public string[] List(List<string> ids)
+        {
+            return ids?.ToArray() ?? new string[] { };
         }
     }
 }

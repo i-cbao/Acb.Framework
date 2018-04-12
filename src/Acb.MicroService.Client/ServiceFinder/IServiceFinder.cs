@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Acb.MicroService.Client.ServiceFind
+namespace Acb.MicroService.Client.ServiceFinder
 {
     internal interface IServiceFinder
     {

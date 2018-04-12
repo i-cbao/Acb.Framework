@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Consul;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,8 @@ namespace Acb.MicroService.Register
 {
     internal class ConsulRegister : IRegister
     {
+        
+
         private static readonly List<string> Services = new List<string>();
         private MicroServiceConfig _config;
 
@@ -23,7 +26,7 @@ namespace Acb.MicroService.Register
                     {
                         ID = $"{ass.AssemblyKey()}_{config.Host}_{config.Port}".Md5(),
                         Name = assName.Name,
-                        Tags = new[] { assName.Version.ToString() },
+                        Tags = new[] { $"{Consts.Mode}_{assName.Version}" },
                         EnableTagOverride = true,
                         Address = $"http://{config.Host}",
                         Port = config.Port

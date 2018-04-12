@@ -1,16 +1,11 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
-using Acb.Core.Helper;
+﻿using Acb.Core.Extensions;
 using Acb.Core.Logging;
-using Acb.Core.Tests;
-using Acb.Core.Timing;
 using Acb.Demo.Contracts;
-using Acb.Demo.Contracts.Dtos;
-using Acb.Demo.Contracts.Enums;
 using Acb.MicroService.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Acb.Framework.Tests
 {
@@ -30,28 +25,29 @@ namespace Acb.Framework.Tests
         public void Test()
         {
             var proxy = ProxyService.Proxy<IDemoService>();
-            var result = CodeTimer.Time("micro", 2000, () =>
-            {
-                var word = proxy.Hello(IdentityHelper.Guid32, new DemoInputDto
-                {
-                    Demo = DemoEnums.Test,
-                    Name = "shay" + IdentityHelper.Guid16,
-                    Time = Clock.Now
-                });
-                //Print(word);
-            }, 10);
-            Print(result.ToString());
-            result = CodeTimer.Time("local", 2000, () =>
-            {
-                var word = _demoService.Hello(IdentityHelper.Guid32, new DemoInputDto
-                {
-                    Demo = DemoEnums.Test,
-                    Name = "shay" + IdentityHelper.Guid16,
-                    Time = Clock.Now
-                });
-                //Print(word);
-            }, 10);
-            Print(result.ToString());
+            Print(proxy.List(new List<string> { "a" }));
+            //var result = CodeTimer.Time("micro", 2000, () =>
+            //{
+            //    var word = proxy.Hello(IdentityHelper.Guid32, new DemoInputDto
+            //    {
+            //        Demo = DemoEnums.Test,
+            //        Name = "shay" + IdentityHelper.Guid16,
+            //        Time = Clock.Now
+            //    });
+            //    //Print(word);
+            //}, 10);
+            //Print(result.ToString());
+            //result = CodeTimer.Time("local", 2000, () =>
+            //{
+            //    var word = _demoService.Hello(IdentityHelper.Guid32, new DemoInputDto
+            //    {
+            //        Demo = DemoEnums.Test,
+            //        Name = "shay" + IdentityHelper.Guid16,
+            //        Time = Clock.Now
+            //    });
+            //    //Print(word);
+            //}, 10);
+            //Print(result.ToString());
         }
 
         [TestMethod]

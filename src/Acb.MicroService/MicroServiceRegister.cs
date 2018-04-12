@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.MicroService.Register;
+using System;
 
 namespace Acb.MicroService
 {
@@ -8,20 +9,34 @@ namespace Acb.MicroService
     internal class MicroServiceRegister
     {
         public const string MicroSreviceKey = "micro_service";
+        private const string HostEnvironmentName = "MICRO_SERVICE_HOST";
+        private const string PortEnvironmentName = "MICRO_SERVICE_PORT";
+
         private static MicroServiceConfig _config;
         private static IRegister _register;
 
         static MicroServiceRegister()
         {
-            _config = MicroSreviceKey.Config<MicroServiceConfig>();
+            LoadConfig();
             _register = GetRegister();
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
                 Deregist();
-                _config = MicroSreviceKey.Config<MicroServiceConfig>();
+                LoadConfig();
                 _register = GetRegister();
                 Regist();
             };
+        }
+
+        private static void LoadConfig()
+        {
+            _config = MicroSreviceKey.Config<MicroServiceConfig>();
+            var host = Environment.GetEnvironmentVariable(HostEnvironmentName);
+            var port = Environment.GetEnvironmentVariable(PortEnvironmentName).CastTo(0);
+            if (!string.IsNullOrWhiteSpace(host))
+                _config.Host = host;
+            if (port > 0)
+                _config.Port = port;
         }
 
         private static IRegister GetRegister()

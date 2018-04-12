@@ -114,6 +114,9 @@ namespace Acb.MicroService
                         }
                         else
                         {
+                            //var item = list[i];
+                            //var arg = JsonConvert.DeserializeObject(item.ToString(), parameterType);
+                            //item.ToString();
                             var arg = list[i].ToObject(parameterType);
                             args.Add(arg);
                         }
