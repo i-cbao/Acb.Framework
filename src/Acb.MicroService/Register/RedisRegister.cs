@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Redis;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,6 @@ namespace Acb.MicroService.Register
     internal class RedisRegister : IRegister
     {
         private const string RegistCenterKey = MicroServiceRegister.MicroSreviceKey + ":center";
-        private string RedisKey => string.IsNullOrWhiteSpace(_config.RedisKey) ? RegistCenterKey : _config.RedisKey;
 
         private MicroServiceConfig _config;
         private HashSet<Assembly> _asses;
@@ -26,7 +26,7 @@ namespace Acb.MicroService.Register
             var redis = RedisManager.Instance.GetDatabase();
             foreach (var ass in asses)
             {
-                redis.SetAdd($"{RedisKey}:{ass.AssemblyKey()}", ServiceUrl());
+                redis.SetAdd($"{RegistCenterKey}:{Consts.Mode}:{ass.AssemblyKey()}", ServiceUrl());
             }
         }
 
@@ -37,7 +37,7 @@ namespace Acb.MicroService.Register
             var redis = RedisManager.Instance.GetDatabase();
             foreach (var type in _asses)
             {
-                redis.SetRemove($"{RedisKey}:{type}", ServiceUrl());
+                redis.SetRemove($"{RegistCenterKey}:{Consts.Mode}:{type}", ServiceUrl());
             }
         }
     }

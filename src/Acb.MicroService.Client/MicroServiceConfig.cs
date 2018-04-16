@@ -9,7 +9,6 @@
     internal class MicroServiceConfig
     {
         public RegisterType Register { get; set; }
-        public string RedisKey { get; set; }
         public string ConsulServer { get; set; }
     }
 }

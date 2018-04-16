@@ -88,7 +88,7 @@ namespace Acb.MicroService.Client
             {
                 if (!services.Any())
                     throw ErrorCodes.NoService.CodeException();
-                service = services.RandomSort().First();
+                service = services.First();
                 var url = string.Concat(service, targetMethod.Name);
                 var remoteIp = AcbHttpContext.RemoteIpAddress;
                 var headers = new Dictionary<string, string>
