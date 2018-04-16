@@ -50,6 +50,17 @@ namespace Acb.MicroService
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc(routes =>
             {
+                //routes.MapGet("micro/{contract}/{method}", (request, response, route) =>
+                //{
+                //    route.Values.TryGetValue("method", out var method);
+                //    route.Values.TryGetValue("contract", out var contract);
+                //    var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(new
+                //    {
+                //        contract,
+                //        method
+                //    }));
+                //    return response.Body.WriteAsync(bytes, 0, bytes.Length);
+                //});
                 routes.Routes.Add(new MicroServiceRouter());
             });
         }

@@ -9,8 +9,6 @@ namespace Acb.MicroService.Register
 {
     internal class ConsulRegister : IRegister
     {
-        
-
         private static readonly List<string> Services = new List<string>();
         private MicroServiceConfig _config;
 

@@ -56,7 +56,7 @@ namespace Acb.WebApi.Filters
                 var action = filterContext.RouteData.Values["action"];
                 var url = Utils.RawUrl(filterContext.HttpContext.Request);
                 logger.Warn(string.Format(
-                    $"运营监控{controller}_{action}[{url}],执行:{actionTimer.ElapsedMilliseconds}ms,渲染:{renderTimer.ElapsedMilliseconds}ms"));
+                    $"运营监控{controller}_{action},执行:{actionTimer.ElapsedMilliseconds}ms,渲染:{renderTimer.ElapsedMilliseconds}ms,url:{url}"));
             }
 
             base.OnResultExecuted(filterContext);
