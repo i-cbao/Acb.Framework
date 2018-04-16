@@ -1,5 +1,7 @@
 ﻿using Acb.Core;
+using Acb.Core.Domain;
 using Acb.Core.Logging;
+using Acb.Core.Timing;
 using Acb.Framework;
 using Acb.Framework.Logging;
 using Acb.WebApi.Filters;
@@ -10,7 +12,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
-using Acb.Core.Timing;
 
 namespace Acb.WebApi
 {
@@ -28,6 +29,10 @@ namespace Acb.WebApi
             services
                 .AddMvc(options =>
                 {
+                    if (Consts.Mode != ProductMode.Dev)
+                    {
+                        options.Filters.Add<ActionTimingFilter>();
+                    }
                     //自定义异常捕获
                     options.Filters.Add<DExceptionFilter>();
                 })

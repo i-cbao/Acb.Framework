@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace Acb.WebApi.Filters
 {
     /// <summary> Action执行监控 </summary>
-    public class ActionTimingAttribute : ActionFilterAttribute
+    public class ActionTimingFilter : ActionFilterAttribute
     {
         private const string Prefix = "__timer__";
         private const string ThresoldConfig = "actionTimingThreshold";
@@ -51,7 +51,7 @@ namespace Acb.WebApi.Filters
             var elapsedThrold = ThresoldConfig.Config(100);
             if (actionTimer.ElapsedMilliseconds >= elapsedThrold || renderTimer.ElapsedMilliseconds >= elapsedThrold)
             {
-                var logger = LogManager.Logger<ActionTimingAttribute>();
+                var logger = LogManager.Logger<ActionTimingFilter>();
                 var controller = filterContext.RouteData.Values["controller"];
                 var action = filterContext.RouteData.Values["action"];
                 var url = Utils.RawUrl(filterContext.HttpContext.Request);

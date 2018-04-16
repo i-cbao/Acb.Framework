@@ -10,7 +10,6 @@ namespace Acb.WebApi
 {
     /// <summary> 控制器基类 </summary>
     [ValidateModel]
-    [ActionTiming]
     public abstract class DController : Controller
     {
         /// <summary> 当前请求上下文 </summary>

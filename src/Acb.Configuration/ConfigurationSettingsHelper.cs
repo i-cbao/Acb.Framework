@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Microsoft.Extensions.Configuration;
 using System;
 
@@ -26,7 +27,7 @@ namespace Acb.Configuration
             var clientConfigsection = config.GetSection(configPrefix);
 
             settings.Name = GetApplicationName(clientConfigsection, config, settings.Name);
-            settings.Environment = config.GetValue<string>("mode");
+            settings.Environment = Consts.Mode.ToString(); /*config.GetValue<string>("mode")*/;
             settings.Label = GetLabel(clientConfigsection, config);
             settings.Username = GetUsername(clientConfigsection, config);
             settings.Password = GetPassword(clientConfigsection, config);
