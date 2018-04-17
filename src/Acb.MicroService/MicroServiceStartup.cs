@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Domain;
 using Acb.Core.Logging;
 using Acb.Framework;
 using Acb.Framework.Logging;
@@ -6,6 +7,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -43,25 +45,29 @@ namespace Acb.MicroService
         /// <param name="app"></param>
         /// <param name="env"></param>
         /// <param name="loggerFactory"></param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        /// <param name="applicationLifetime"></param>
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime applicationLifetime)
         {
             loggerFactory.AddConsole((p, l) => l >= LogLevel.Warning);
             var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc(routes =>
             {
-                //routes.MapGet("micro/{contract}/{method}", (request, response, route) =>
-                //{
-                //    route.Values.TryGetValue("method", out var method);
-                //    route.Values.TryGetValue("contract", out var contract);
-                //    var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(new
-                //    {
-                //        contract,
-                //        method
-                //    }));
-                //    return response.Body.WriteAsync(bytes, 0, bytes.Length);
-                //});
-                routes.Routes.Add(new MicroServiceRouter());
+                routes.MapGet("healthy", async ctx => await ctx.Response.WriteAsync("ok"));
+                routes.MapGet("micro", async ctx => await MicroServiceRunner.Methods(ctx));
+                routes.MapPost("micro/{contract}/{method}", (request, response, route) =>
+                {
+                    route.Values.TryGetValue("contract", out var contract);
+                    route.Values.TryGetValue("method", out var method);
+                    return MicroServiceRunner.MicroTask(request, response, $"{contract}/{method}");
+                });
+            });
+
+            applicationLifetime.ApplicationStopping.Register(() =>
+            {
+                DBootstrap.Instance.Dispose();
+                if (Consts.Mode == ProductMode.Prod)
+                    MicroServiceRegister.Deregist();
             });
         }
     }

@@ -1,7 +1,14 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Reflection;
 using Acb.MicroService.Register;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Acb.MicroService
 {
@@ -11,12 +18,18 @@ namespace Acb.MicroService
         public const string MicroSreviceKey = "micro_service";
         private const string HostEnvironmentName = "MICRO_SERVICE_HOST";
         private const string PortEnvironmentName = "MICRO_SERVICE_PORT";
+        internal static ConcurrentDictionary<string, MethodInfo> Methods { get; }
+
+        internal static HashSet<Assembly> ServiceAssemblies { get; }
+
 
         private static MicroServiceConfig _config;
         private static IRegister _register;
 
         static MicroServiceRegister()
         {
+            Methods = new ConcurrentDictionary<string, MethodInfo>();
+            ServiceAssemblies = new HashSet<Assembly>();
             LoadConfig();
             _register = GetRegister();
             ConfigHelper.Instance.ConfigChanged += obj =>
@@ -26,6 +39,24 @@ namespace Acb.MicroService
                 _register = GetRegister();
                 Regist();
             };
+        }
+
+        /// <summary> 初始化服务 </summary>
+        internal static void InitServices()
+        {
+            var services = CurrentIocManager.Resolve<ITypeFinder>()
+                .Find(t => typeof(IMicroService).IsAssignableFrom(t) && t.IsInterface && t != typeof(IMicroService))
+                .ToList();
+            foreach (var service in services)
+            {
+                if (!ServiceAssemblies.Contains(service.Assembly))
+                    ServiceAssemblies.Add(service.Assembly);
+                var methods = service.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                foreach (var method in methods)
+                {
+                    Methods.TryAdd($"{service.Name}/{method.Name}".ToLower(), method);
+                }
+            }
         }
 
         private static void LoadConfig()
@@ -56,8 +87,8 @@ namespace Acb.MicroService
         /// <summary> 注册微服务 </summary>
         public static void Regist()
         {
-            MicroServiceRouter.InitServices();
-            var asses = MicroServiceRouter.ServiceAssemblies;
+            InitServices();
+            var asses = ServiceAssemblies;
             if (asses == null || asses.IsNullOrEmpty())
                 return;
             _register.Regist(asses, _config);

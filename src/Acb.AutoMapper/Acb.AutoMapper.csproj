@@ -7,6 +7,11 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Product>爱车保 - AutoMapper扩展类</Product>
     <Description>爱车保 - AutoMapper扩展类</Description>
+    <Version>1.3.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\Acb.AutoMapper.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

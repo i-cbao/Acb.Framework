@@ -78,6 +78,8 @@ namespace Acb.Core.Helper.Http
             {
                 foreach (var key in request.Headers)
                 {
+                    if (string.IsNullOrWhiteSpace(key.Value))
+                        continue;
                     req.Headers.Add(key.Key, key.Value);
                 }
             }

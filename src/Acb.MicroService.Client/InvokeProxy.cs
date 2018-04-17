@@ -55,7 +55,7 @@ namespace Acb.MicroService.Client
 
             if (urls == null || !urls.Any())
                 throw new BusiException($"{_type.FullName},没有可用的服务");
-            return urls.Select(url => $"{url}{_type.Name}/").ToList();
+            return urls.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
         }
 
         /// <inheritdoc />
@@ -71,7 +71,7 @@ namespace Acb.MicroService.Client
             var builder = Policy
                 .Handle<AggregateException>(ex => ex.GetBaseException() is HttpRequestException) //服务器异常
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound); //服务未找到
-            //熔断,3次异常,熔断5分钟
+                                                                                              //熔断,3次异常,熔断5分钟
             var breaker = builder.CircuitBreaker(3, TimeSpan.FromMinutes(5));
             //重试3次
             var retry = builder.Retry(3, (result, count) =>
@@ -95,7 +95,11 @@ namespace Acb.MicroService.Client
                 {
                     {"X-Forwarded-For", remoteIp},
                     {"X-Real-IP", remoteIp},
-                    {"User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent}
+                    {
+                        "User-Agent",
+                        AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
+                    },
+                    {"referer", AcbHttpContext.RawUrl}
                 };
                 //http请求
                 return HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
@@ -104,13 +108,6 @@ namespace Acb.MicroService.Client
                     Headers = headers
                 }).Result;
             });
-
-            //if (!services.Any())
-            //    throw ErrorCodes.NoService.CodeException();
-            //service = services.RandomSort().First();
-            //var url = string.Concat(service, targetMethod.Name);
-            ////http请求
-            //var resp = HttpHelper.Instance.RequestAsync(HttpMethod.Post, url, data: args).Result;
 
             if (resp.StatusCode == HttpStatusCode.OK)
             {

@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />

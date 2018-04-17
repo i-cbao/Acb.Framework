@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using Acb.Core.Monitor;
 
 namespace Acb.Framework.Tests
 {
@@ -17,7 +18,7 @@ namespace Acb.Framework.Tests
         public MicroServiceTest()
         {
             _demoService = ProxyService.Proxy<IDemoService>();
-            LogManager.SetLevel(LogLevel.Off);
+            //LogManager.SetLevel(LogLevel.Off);
             //_demoService = CurrentIocManager.Resolve<IDemoService>();
         }
 

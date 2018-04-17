@@ -27,7 +27,7 @@ namespace Acb.Configuration
             var clientConfigsection = config.GetSection(configPrefix);
 
             settings.Name = GetApplicationName(clientConfigsection, config, settings.Name);
-            settings.Environment = Consts.Mode.ToString(); /*config.GetValue<string>("mode")*/;
+            settings.Environment = Consts.Mode.ToString().ToLower(); /*config.GetValue<string>("mode")*/;
             settings.Label = GetLabel(clientConfigsection, config);
             settings.Username = GetUsername(clientConfigsection, config);
             settings.Password = GetPassword(clientConfigsection, config);

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Acb.MicroService\Acb.MicroService.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Middleware.Monitor\Acb.Middleware.Monitor.csproj" />
     <ProjectReference Include="..\Acb.Demo.Business\Acb.Demo.Business.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
   </ItemGroup>

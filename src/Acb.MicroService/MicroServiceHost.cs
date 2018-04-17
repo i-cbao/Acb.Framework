@@ -1,7 +1,4 @@
-﻿using Acb.Core;
-using Acb.Core.Domain;
-using Acb.Framework;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Acb.MicroService
@@ -20,9 +17,6 @@ namespace Acb.MicroService
             {
                 host.Run();
             }
-            DBootstrap.Instance.Dispose();
-            if (Consts.Mode == ProductMode.Prod)
-                MicroServiceRegister.Deregist();
         }
     }
 }

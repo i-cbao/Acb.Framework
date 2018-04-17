@@ -29,7 +29,7 @@ namespace Acb.WebApi
             services
                 .AddMvc(options =>
                 {
-                    if (Consts.Mode != ProductMode.Dev)
+                    if (Consts.Mode == ProductMode.Dev)
                     {
                         options.Filters.Add<ActionTimingFilter>();
                     }

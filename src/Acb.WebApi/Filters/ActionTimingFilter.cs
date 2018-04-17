@@ -1,9 +1,9 @@
 ﻿using Acb.Core;
-using Acb.Core.Extensions;
-using Acb.Core.Logging;
+using Acb.Core.Monitor;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Diagnostics;
+using System.IO;
 
 namespace Acb.WebApi.Filters
 {
@@ -11,9 +11,8 @@ namespace Acb.WebApi.Filters
     public class ActionTimingFilter : ActionFilterAttribute
     {
         private const string Prefix = "__timer__";
-        private const string ThresoldConfig = "actionTimingThreshold";
         private const string ActionKey = "action";
-        private const string RenderKey = "render";
+
         private static Stopwatch GetTimer(ActionContext context, string name)
         {
             var key = Prefix + name;
@@ -26,39 +25,28 @@ namespace Acb.WebApi.Filters
             context.HttpContext.Items[key] = result;
             return result;
         }
+
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             GetTimer(filterContext, ActionKey).Start();
             base.OnActionExecuting(filterContext);
         }
-        public override void OnActionExecuted(ActionExecutedContext filterContext)
-        {
-            GetTimer(filterContext, ActionKey).Stop();
-            base.OnActionExecuted(filterContext);
-        }
-
-        public override void OnResultExecuting(ResultExecutingContext filterContext)
-        {
-            GetTimer(filterContext, RenderKey).Start();
-            base.OnResultExecuting(filterContext);
-        }
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {
-            var renderTimer = GetTimer(filterContext, RenderKey);
-            renderTimer.Stop();
             var actionTimer = GetTimer(filterContext, ActionKey);
-            var elapsedThrold = ThresoldConfig.Config(100);
-            if (actionTimer.ElapsedMilliseconds >= elapsedThrold || renderTimer.ElapsedMilliseconds >= elapsedThrold)
+            actionTimer.Stop();
+            string data;
+            var input = filterContext.HttpContext.Request.Body;
+            using (var stream = new StreamReader(input))
             {
-                var logger = LogManager.Logger<ActionTimingFilter>();
-                var controller = filterContext.RouteData.Values["controller"];
-                var action = filterContext.RouteData.Values["action"];
-                var url = Utils.RawUrl(filterContext.HttpContext.Request);
-                logger.Warn(string.Format(
-                    $"运营监控{controller}_{action},执行:{actionTimer.ElapsedMilliseconds}ms,渲染:{renderTimer.ElapsedMilliseconds}ms,url:{url}"));
+                data = stream.ReadToEnd();
             }
-
+            var url = Utils.RawUrl(filterContext.HttpContext.Request);
+            filterContext.HttpContext.Request.Headers.TryGetValue("referer", out var from);
+            var monitor = MonitorManager.Monitor();
+            monitor.Record("gateway", url, from, actionTimer.ElapsedMilliseconds, data, AcbHttpContext.UserAgent,
+                AcbHttpContext.ClientIp).Wait();
             base.OnResultExecuted(filterContext);
         }
     }
