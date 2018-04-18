@@ -103,6 +103,9 @@ namespace Acb.Configuration
 
         private static string GetUri(IConfiguration clientConfigsection, IConfiguration resolve, string def)
         {
+            var uri = Environment.GetEnvironmentVariable("CONFIG_HOST");
+            if (!string.IsNullOrWhiteSpace(uri) && uri.IsUrl())
+                return uri;
             return GetConfigValue("uri", clientConfigsection, resolve, def);
         }
 
