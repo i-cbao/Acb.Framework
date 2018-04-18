@@ -89,7 +89,7 @@ namespace Acb.MicroService
         {
             InitServices();
             var asses = ServiceAssemblies;
-            if (asses == null || asses.IsNullOrEmpty())
+            if (asses == null || asses.IsNullOrEmpty() || string.IsNullOrWhiteSpace(_config?.Host) || _config?.Port <= 0)
                 return;
             _register.Regist(asses, _config);
         }
