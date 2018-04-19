@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Domain;
 using Acb.Core.Modules;
 using Acb.Core.Monitor;
 
@@ -9,7 +10,11 @@ namespace Acb.Middleware.Monitor
     {
         public override void Initialize()
         {
-            MonitorManager.Add(new AcbMonitor());
+            if (Consts.Mode != ProductMode.Dev)
+            {
+                MonitorManager.Add(new AcbMonitor());
+            }
+
             base.Initialize();
         }
     }

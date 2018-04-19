@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi.Filters
 {
@@ -26,10 +27,21 @@ namespace Acb.WebApi.Filters
             return result;
         }
 
-        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        public override Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            GetTimer(filterContext, ActionKey).Start();
-            base.OnActionExecuting(filterContext);
+            GetTimer(context, ActionKey).Start();
+            return base.OnActionExecutionAsync(context, next);
+        }
+
+        //public override void OnActionExecuting(ActionExecutingContext filterContext)
+        //{
+        //    GetTimer(filterContext, ActionKey).Start();
+        //    base.OnActionExecuting(filterContext);
+        //}
+
+        public override Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+        {
+            return base.OnResultExecutionAsync(context, next);
         }
 
         public override void OnResultExecuted(ResultExecutedContext filterContext)
@@ -43,6 +55,14 @@ namespace Acb.WebApi.Filters
                 data = stream.ReadToEnd();
             }
             var url = Utils.RawUrl(filterContext.HttpContext.Request);
+            var arr = url.Split('?');
+            if (arr.Length > 1)
+            {
+                url = arr[0];
+                if (!string.IsNullOrWhiteSpace(data))
+                    data += ",";
+                data += arr[1];
+            }
             filterContext.HttpContext.Request.Headers.TryGetValue("referer", out var from);
             var monitor = MonitorManager.Monitor();
             monitor.Record("gateway", url, from, actionTimer.ElapsedMilliseconds, data, AcbHttpContext.UserAgent,

@@ -58,7 +58,8 @@ namespace Acb.Dapper
             if (keyProp == null)
             {
                 keyProp = props.FirstOrDefault(p =>
-                    string.Equals(p.PropName(), id, StringComparison.CurrentCultureIgnoreCase));
+                    string.Equals(p.PropName(), id, StringComparison.CurrentCultureIgnoreCase)
+                    || string.Equals(p.Name, id, StringComparison.CurrentCultureIgnoreCase));
             }
 
             key = new KeyValuePair<string, string>(keyProp?.Name ?? id, keyProp?.PropName(naming) ?? id);
@@ -329,10 +330,13 @@ namespace Acb.Dapper
             sb.Append($"UPDATE [{tableName}] SET ");
             foreach (var prop in props)
             {
-                if (prop.Key == key.Key || updateProps != null && !updateProps.Contains(prop.Key))
+                if (prop.Key == key.Key || updateProps != null && !updateProps.Contains(prop.Key) &&
+                    !updateProps.Contains(prop.Value))
                     continue;
-                sb.Append($"[{prop.Value}]=@{prop.Key}");
+                sb.Append($"[{prop.Value}]=@{prop.Key},");
             }
+
+            sb.Remove(sb.Length - 1, 1);
 
             sb.Append($" WHERE [{key.Value}]=@{key.Key}");
             return sb.ToString();
@@ -350,6 +354,7 @@ namespace Acb.Dapper
             IDbTransaction trans = null, int? commandTimeout = null)
         {
             var sql = UpdateSql<T>(updateProps);
+            sql = conn.FormatSql(sql);
             return conn.Execute(sql, entityToUpdate, trans, commandTimeout);
         }
         #endregion

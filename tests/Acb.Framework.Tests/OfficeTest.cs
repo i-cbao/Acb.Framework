@@ -31,7 +31,7 @@ namespace Acb.Framework.Tests
                     new { code = "510700" });
                 var names = new Dictionary<string, string>
                 {
-                    {nameof(TAreas.CityCode), "城市编码"},
+                    {nameof(TAreas.Id), "城市编码"},
                     {nameof(TAreas.CityName), "城市名称"},
                     {nameof(TAreas.Deep), "深度"},
                     {nameof(TAreas.ParentCode), "父级编码"}

@@ -85,6 +85,7 @@ namespace Acb.Dapper
             IDbTransaction trans = null, int? commandTimeout = null)
         {
             var sql = UpdateSql<T>(updateProps);
+            sql = conn.FormatSql(sql);
             return await conn.ExecuteAsync(sql, entityToUpdate, trans, commandTimeout);
         }
 
@@ -94,7 +95,8 @@ namespace Acb.Dapper
         /// <param name="keyColumn">列名</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        public static async Task<int> DeleteAsync<T>(this IDbConnection conn, object value, string keyColumn = null, IDbTransaction trans = null)
+        public static async Task<int> DeleteAsync<T>(this IDbConnection conn, object value, string keyColumn = null,
+            IDbTransaction trans = null)
         {
             var sql = DeleteSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
@@ -108,7 +110,8 @@ namespace Acb.Dapper
         /// <param name="param"></param>
         /// <param name="trans"></param>
         /// <returns></returns>
-        public static async Task<int> DeleteWhereAsync<T>(this IDbConnection conn, string where, object param = null, IDbTransaction trans = null)
+        public static async Task<int> DeleteWhereAsync<T>(this IDbConnection conn, string where, object param = null,
+            IDbTransaction trans = null)
         {
             var tableName = typeof(T).PropName();
             var sql = $"DELETE FROM [{tableName}] WHERE {where}";

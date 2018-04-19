@@ -2,7 +2,6 @@
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Framework.Tests.Repositories;
-using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
@@ -24,10 +23,6 @@ namespace Acb.Framework.Tests
         public DapperTest()
         {
             _areaRepository = DRepository.Instance<AreaRepository>();
-            Mapper.Initialize(cfg =>
-            {
-                cfg.CreateMissingTypeMaps = true;
-            });
         }
 
         [TestMethod]
@@ -66,9 +61,12 @@ namespace Acb.Framework.Tests
             {
                 var result = conn.Update(new TAreas
                 {
-                    CityCode = "",
-                    CityName = ""
-                }, new[] { nameof(TAreas.CityName) });
+                    Id = "110000",
+                    CityName = "北京市",
+                    ParentCode = "0",
+                    Deep = 1
+                });
+                Print(result);
             }
         }
     }
