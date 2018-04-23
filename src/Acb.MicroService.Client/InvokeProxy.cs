@@ -54,7 +54,7 @@ namespace Acb.MicroService.Client
             var urls = finder.Find(_type.Assembly, _config);
 
             if (urls == null || !urls.Any())
-                throw new BusiException($"{_type.FullName},没有可用的服务");
+                throw new BusiException("没有可用的服务");
             return urls.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
         }
 
@@ -77,8 +77,8 @@ namespace Acb.MicroService.Client
             var retry = builder.Retry(3, (result, count) =>
             {
                 _logger.Warn(result.Exception != null
-                    ? $"{service}:retry,{count},{result.Exception.Format()}"
-                    : $"{service}:retry,{count},{result.Result.StatusCode}");
+                    ? $"{service}{targetMethod.Name}:retry,{count},{result.Exception.Format()}"
+                    : $"{service}{targetMethod.Name}:retry,{count},{result.Result.StatusCode}");
                 services.Remove(service);
             });
 

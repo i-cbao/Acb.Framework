@@ -22,8 +22,8 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            Print("1523879631960" + EncryptHelper.MD5("account=1&password=12385653b8832ad55cd1523879631960"));
-            //Print(IdentityHelper.Guid16);
+            //Print("1523879631960" + EncryptHelper.MD5("account=1&password=12385653b8832ad55cd1523879631960"));
+            Print(IdentityHelper.Guid16);
             //Print(Utils.GetSpellCode("±±¾©"));
             //Print(Clock.Now.ToTimestamp());
             //var md5 = "shay".Md5();

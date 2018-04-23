@@ -12,10 +12,20 @@ namespace Acb.MicroService.Register
         private static readonly List<string> Services = new List<string>();
         private MicroServiceConfig _config;
 
+        private ConsulClient GetClient()
+        {
+            return new ConsulClient(cfg =>
+            {
+                cfg.Address = new Uri(_config.ConsulServer);
+                if (!string.IsNullOrWhiteSpace(_config.ConsulToken))
+                    cfg.Token = _config.ConsulToken;
+            });
+        }
+
         public void Regist(HashSet<Assembly> asses, MicroServiceConfig config)
         {
             _config = config;
-            using (var client = new ConsulClient(cfg => cfg.Address = new Uri(config.ConsulServer)))
+            using (var client = GetClient())
             {
                 foreach (var ass in asses)
                 {
@@ -33,7 +43,7 @@ namespace Acb.MicroService.Register
                     {
                         service.Check = new AgentServiceCheck
                         {
-                            HTTP = "/healthy",
+                            HTTP = $"{service.Address}:{service.Port}/healthy",
                             Interval = TimeSpan.FromSeconds(config.Consulinterval),
                             DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(config.DeregisterAfter)
                         };
@@ -46,7 +56,7 @@ namespace Acb.MicroService.Register
 
         public void Deregist()
         {
-            using (var client = new ConsulClient(cfg => cfg.Address = new Uri(_config.ConsulServer)))
+            using (var client = GetClient())
             {
                 foreach (var service in Services)
                 {

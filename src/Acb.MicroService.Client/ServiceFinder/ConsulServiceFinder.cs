@@ -12,6 +12,17 @@ namespace Acb.MicroService.Client.ServiceFinder
 {
     internal class ConsulServiceFinder : IServiceFinder
     {
+
+        private static ConsulClient GetClient(MicroServiceConfig config)
+        {
+            return new ConsulClient(cfg =>
+            {
+                cfg.Address = new Uri(config.ConsulServer);
+                if (!string.IsNullOrWhiteSpace(config.ConsulToken))
+                    cfg.Token = config.ConsulToken;
+            });
+        }
+
         public string[] Find(Assembly ass, MicroServiceConfig config)
         {
             var cache = CacheManager.GetCacher(typeof(InvokeProxy<>));
@@ -21,7 +32,7 @@ namespace Acb.MicroService.Client.ServiceFinder
             if (urls != null)
                 return urls;
             var urlList = new List<string>();
-            using (var client = new ConsulClient(cfg => cfg.Address = new Uri(config.ConsulServer)))
+            using (var client = GetClient(config))
             {
                 var list = client.Catalog.Service(name.Name, $"{Consts.Mode}_{name.Version}").Result;
                 var items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
