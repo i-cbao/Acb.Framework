@@ -1,6 +1,5 @@
 ﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
-using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -155,6 +154,12 @@ namespace Acb.Core
                 return string.Empty;
             }
         }
+
+        /// <summary> url全路径 </summary>
+        /// <param name="url"></param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static string FullUrl(string url, string host) => url.FullUrl(host);
 
         /// <summary> 执行命令 </summary>
         /// <param name="inputAction"></param>
