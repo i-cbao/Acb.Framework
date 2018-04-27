@@ -14,5 +14,10 @@ namespace Acb.Core.Dependency
         /// <param name="type"></param>
         /// <returns></returns>
         object Resolve(Type type);
+
+        /// <summary> 是否注册注入 </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        bool IsRegistered(Type type);
     }
 }

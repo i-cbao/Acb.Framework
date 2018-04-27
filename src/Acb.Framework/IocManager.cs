@@ -14,12 +14,19 @@ namespace Acb.Framework
         }
         public T Resolve<T>()
         {
-            return _bootstrap.Container.Resolve<T>();
+            _bootstrap.Container.TryResolve<T>(out var instance);
+            return instance;
         }
 
         public object Resolve(Type type)
         {
-            return _bootstrap.Container.Resolve(type);
+            _bootstrap.Container.TryResolve(type, out var instance);
+            return instance;
+        }
+
+        public bool IsRegistered(Type type)
+        {
+            return _bootstrap.Container.IsRegistered(type);
         }
     }
 }

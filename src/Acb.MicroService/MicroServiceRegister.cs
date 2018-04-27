@@ -49,6 +49,8 @@ namespace Acb.MicroService
                 .ToList();
             foreach (var service in services)
             {
+                if (!CurrentIocManager.IsRegisted(service))
+                    continue;
                 if (!ServiceAssemblies.Contains(service.Assembly))
                     ServiceAssemblies.Add(service.Assembly);
                 var methods = service.GetMethods(BindingFlags.Public | BindingFlags.Instance);
