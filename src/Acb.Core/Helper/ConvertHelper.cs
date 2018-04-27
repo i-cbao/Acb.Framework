@@ -171,5 +171,50 @@ namespace Acb.Core.Helper
             }
             return desc.TrimEnd(word[0].ToCharArray());
         }
+
+        /// <summary>
+        /// 私有36进制字符配置
+        /// </summary>
+        private static readonly string[] DecimalSystem36Array =
+            new string[36] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" };
+
+        /// <summary>
+        /// 10进制转换为36进制
+        /// </summary>
+        /// <param name="num">正整数</param>
+        /// <returns>36进制字符串</returns>
+        public static string Ds10ToDs36(int num)
+        {
+            // 考虑过用uint,调用最多的还是int,避免转换
+            if (num < 0) num = 0;
+            int z = 36, x = num / z, y = num % z;
+            var s = DecimalSystem36Array[y];
+            if (x != 0) s = Ds10ToDs36(x) + s;
+            return s;
+        }
+
+        /// <summary>
+        /// 36进制转换为10进制
+        /// </summary>
+        /// <param name="str">36进制字符串</param>
+        /// <returns>正整数</returns>
+        public static int Ds36ToDs10(string str)
+        {
+            // B => 11
+            // BBB => 36*36*11 + 36*11 +36*0 + 11
+            int z = 36, len = str.Length;
+            str = str.ToUpper();
+            //先计算个位数
+            var result = Array.IndexOf(DecimalSystem36Array, str[len - 1].ToString());
+            if (result == -1) return 0;
+            //无需计算个位数“36*0”（36的0次方）
+            for (int i = 0; i < len - 1; i++)
+            {
+                var tmpCharIdx = Array.IndexOf(DecimalSystem36Array, str[i].ToString());
+                if (tmpCharIdx == -1) return 0;
+                result += (int)(Math.Pow(z, len - 1 - i)) * tmpCharIdx;
+            }
+            return result;
+        }
     }
 }
