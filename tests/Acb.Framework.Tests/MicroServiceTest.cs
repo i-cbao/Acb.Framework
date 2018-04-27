@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using Acb.Core.Dependency;
 using Acb.Core.Monitor;
 
 namespace Acb.Framework.Tests
@@ -25,8 +26,10 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Test()
         {
-            var proxy = ProxyService.Proxy<IDemoService>();
-            Print(proxy.List(new List<string> { "a" }));
+            var instance = CurrentIocManager.IsRegisted(typeof(IDemoService));
+            Assert.AreEqual(instance,false);
+            //var dict = _demoService.List(new[] {"a"});
+            //Print(dict);
             //var result = CodeTimer.Time("micro", 2000, () =>
             //{
             //    var word = proxy.Hello(IdentityHelper.Guid32, new DemoInputDto

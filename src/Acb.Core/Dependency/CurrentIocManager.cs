@@ -23,5 +23,10 @@ namespace Acb.Core.Dependency
         {
             return IocManager.Resolve(interfaceType);
         }
+
+        public static bool IsRegisted(Type interfaceType)
+        {
+            return IocManager.IsRegistered(interfaceType);
+        }
     }
 }
