@@ -115,17 +115,13 @@ namespace Acb.Payment.Notify
                 if (IsXmlData)
                 {
                     var reader = new StreamReader(AcbHttpContext.Body);
-                    string xmlData = reader.ReadToEnd();
+                    var xmlData = reader.ReadToEnd();
                     reader.Dispose();
                     gatewayData.FromXml(xmlData);
                 }
                 else
                 {
-                    try
-                    {
-                        gatewayData.FromForm(AcbHttpContext.Form);
-                    }
-                    catch { }
+                    gatewayData.FromForm(AcbHttpContext.Form);
                 }
             }
 
@@ -167,6 +163,7 @@ namespace Acb.Payment.Notify
             if (gateway is NullGateway)
             {
                 OnUnknownGateway(new PaymentUnknowEventArgs(gateway));
+                gateway.WriteFailureFlag();
             }
             else
             {

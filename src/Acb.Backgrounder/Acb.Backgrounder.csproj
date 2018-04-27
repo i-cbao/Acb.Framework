@@ -7,7 +7,7 @@
     <Product>爱车保 - 后台任务</Product>
     <Description>爱车保 - 后台任务</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

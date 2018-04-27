@@ -2,6 +2,7 @@
 using Acb.Demo.Contracts.Dtos;
 using System.Collections.Generic;
 using System.Linq;
+using Acb.Core;
 
 namespace Acb.Demo.Business
 {
@@ -18,9 +19,17 @@ namespace Acb.Demo.Business
             };
         }
 
-        public string[] List(List<string> ids)
+        public IList<string> List(IEnumerable<string> ids)
         {
-            return ids?.ToArray() ?? new string[] { };
+            var agent = AcbHttpContext.UserAgent;
+            var list = (ids?.ToArray() ?? new string[] { }).ToList();
+            list.Add(agent);
+            return list;
+        }
+
+        public Dictionary<string, object> Dict(string[] ids)
+        {
+            return ids.ToDictionary(k => k, v => (object)new { key = v });
         }
     }
 }

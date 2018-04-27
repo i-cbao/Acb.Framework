@@ -5,6 +5,9 @@ using Acb.Core.Tests;
 using Acb.Core.Timing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Threading;
+using Acb.Redis;
+using StackExchange.Redis;
 
 namespace Acb.Framework.Tests
 {
@@ -42,6 +45,18 @@ namespace Acb.Framework.Tests
             var id = t.StringIncrement(key);
             t.KeyExpire(key, Clock.Now.Date.AddDays(1));
             Print(id);
+        }
+
+        [TestMethod]
+        public void SubscribeTest()
+        {
+            var t = RedisManager.Instance.GetSubscriber();
+            const string chnl = "Subscriber_Test";
+
+            t.Subscribe(chnl, (channel, value) => Print(value.ToString()));
+
+            t.Publish(chnl, "shay");
+            Thread.Sleep(2000);
         }
     }
 }

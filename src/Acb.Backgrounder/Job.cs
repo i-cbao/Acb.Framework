@@ -6,6 +6,7 @@ namespace Acb.Backgrounder
     /// <summary> 后台任务基类 </summary>
     public abstract class Job : IJob
     {
+        private readonly TimeSpan _interval;
         /// <summary>
         /// 任务构造函数
         /// </summary>
@@ -18,29 +19,42 @@ namespace Acb.Backgrounder
             DateTime? start = null, DateTime? expire = null)
         {
             Name = name;
-            Interval = interval;
+            Interval = _interval = interval;
             TimeOut = timeout;
             StartTime = start;
             ExpireTime = expire;
         }
 
+        /// <summary> 修改任务间隔 </summary>
+        /// <param name="interval"></param>
+        protected void ChangeInterval(TimeSpan interval)
+        {
+            Interval = interval;
+        }
+
+        /// <summary> 还原任务间隔 </summary>
+        protected void RestoreInterval()
+        {
+            Interval = _interval;
+        }
+
         /// <summary> 名称 </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary> 异步任务 </summary>
         /// <returns></returns>
         public abstract Task Execute();
 
         /// <summary> 开始时间 </summary>
-        public DateTime? StartTime { get; private set; }
+        public DateTime? StartTime { get; protected set; }
 
         /// <summary> 截至时间 </summary>
-        public DateTime? ExpireTime { get; private set; }
+        public DateTime? ExpireTime { get; protected set; }
 
         /// <summary> 时间间隔 </summary>
         public TimeSpan Interval { get; private set; }
 
         /// <summary> 超时时间 </summary>
-        public TimeSpan? TimeOut { get; private set; }
+        public TimeSpan? TimeOut { get; protected set; }
     }
 }

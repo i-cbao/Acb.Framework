@@ -2,6 +2,7 @@
 using Acb.Core.Extensions;
 using Acb.Core.Serialize;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
@@ -145,6 +146,8 @@ namespace Acb.Payment
         public T GetValue<T>(string key, T def = default(T))
         {
             _values.TryGetValue(key, out object value);
+            if (value is StringValues values)
+                return values.ToString().CastTo(def);
             return value.CastTo(def);
         }
 
@@ -218,17 +221,13 @@ namespace Acb.Payment
         /// <returns></returns>
         public void FromForm(IFormCollection form)
         {
-            try
-            {
-                Clear();
-                var allKeys = form.Keys;
+            Clear();
+            var allKeys = form.Keys;
 
-                foreach (var item in allKeys)
-                {
-                    Add(item, form[item]);
-                }
+            foreach (var item in allKeys)
+            {
+                Add(item, form[item].ToString());
             }
-            catch { }
         }
 
         /// <summary>

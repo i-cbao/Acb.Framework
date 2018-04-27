@@ -80,7 +80,7 @@ namespace Acb.Core.Helper.Http
                 {
                     if (string.IsNullOrWhiteSpace(key.Value))
                         continue;
-                    req.Headers.Add(key.Key, key.Value);
+                    req.Headers.TryAddWithoutValidation(key.Key, key.Value);
                 }
             }
             HttpContent content = null;

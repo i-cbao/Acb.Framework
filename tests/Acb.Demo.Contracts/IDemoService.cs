@@ -9,6 +9,8 @@ namespace Acb.Demo.Contracts
     {
         DemoDto Hello(string id, DemoInputDto dto);
 
-        string[] List(List<string> ids);
+        IList<string> List(IEnumerable<string> ids);
+
+        Dictionary<string, object> Dict(string[] ids);
     }
 }

@@ -203,7 +203,7 @@ namespace Acb.MicroService
                 var monitor = MonitorManager.Monitor();
                 var url = Utils.RawUrl(ctx.Request);
                 ctx.Request.Headers.TryGetValue("referer", out var from);
-                monitor.Record("micro_service", url, from, watcher.ElapsedMilliseconds, requestBody,
+                await monitor.Record("micro_service", url, from, watcher.ElapsedMilliseconds, requestBody,
                     AcbHttpContext.UserAgent, AcbHttpContext.ClientIp);
             }
         }

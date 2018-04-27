@@ -22,6 +22,10 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
+            var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
+            Print(str);
+            var time = DateTime.Parse(str);
+            Print(time);
             //Print("1523879631960" + EncryptHelper.MD5("account=1&password=12385653b8832ad55cd1523879631960"));
             Print(IdentityHelper.Guid16);
             //Print(Utils.GetSpellCode("±±¾©"));

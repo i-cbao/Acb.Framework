@@ -25,8 +25,8 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Test()
         {
-            var proxy = ProxyService.Proxy<IDemoService>();
-            Print(proxy.List(new List<string> { "a" }));
+            var dict = _demoService.List(new[] {"a"});
+            Print(dict);
             //var result = CodeTimer.Time("micro", 2000, () =>
             //{
             //    var word = proxy.Hello(IdentityHelper.Guid32, new DemoInputDto

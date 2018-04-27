@@ -29,9 +29,11 @@ namespace Acb.Configuration
             settings.Name = GetApplicationName(clientConfigsection, config, settings.Name);
             settings.Environment = Consts.Mode.ToString().ToLower(); /*config.GetValue<string>("mode")*/;
             settings.Label = GetLabel(clientConfigsection, config);
+
             settings.Username = GetUsername(clientConfigsection, config);
             settings.Password = GetPassword(clientConfigsection, config);
             settings.Uri = GetUri(clientConfigsection, config, settings.Uri);
+
             settings.Enabled = GetEnabled(clientConfigsection, config, settings.Enabled);
             settings.FailFast = GetFailFast(clientConfigsection, config, settings.FailFast);
             settings.ValidateCertificates = GetCertificateValidation(clientConfigsection, config, settings.ValidateCertificates);
@@ -111,11 +113,17 @@ namespace Acb.Configuration
 
         private static string GetPassword(IConfiguration clientConfigsection, IConfiguration resolve)
         {
+            var pwd = Environment.GetEnvironmentVariable("CONFIG_PWD");
+            if (!string.IsNullOrWhiteSpace(pwd))
+                return pwd;
             return GetConfigValue<string>("password", clientConfigsection, resolve, null);
         }
 
         private static string GetUsername(IConfiguration clientConfigsection, IConfiguration resolve)
         {
+            var user = Environment.GetEnvironmentVariable("CONFIG_USER");
+            if (!string.IsNullOrWhiteSpace(user))
+                return user;
             return GetConfigValue<string>("username", clientConfigsection, resolve, null);
         }
 

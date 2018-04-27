@@ -5,7 +5,7 @@ namespace Acb.Backgrounder
     /// <summary> 后台任务进度 </summary>
     public class Schedule : IDisposable
     {
-        readonly Func<DateTime> _nowThunk;
+        private readonly Func<DateTime> _nowThunk;
 
         public Schedule(IJob job)
             : this(job, () => DateTime.UtcNow)

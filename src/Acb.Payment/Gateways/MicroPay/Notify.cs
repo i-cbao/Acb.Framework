@@ -125,7 +125,7 @@ namespace Acb.Payment.Gateways.MicroPay
         public double TotalFee
         {
             get => _totalFee;
-            set => _totalFee = value * 100;
+            set => _totalFee = value / 100;
         }
         private double _totalFee;
 

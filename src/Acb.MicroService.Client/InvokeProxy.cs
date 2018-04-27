@@ -84,7 +84,7 @@ namespace Acb.MicroService.Client
 
             var policy = Policy.Wrap(retry, breaker);
 
-            var resp = policy.Execute(() =>
+            var respTask = policy.ExecuteAsync(async () =>
             {
                 if (!services.Any())
                     throw ErrorCodes.NoService.CodeException();
@@ -96,19 +96,19 @@ namespace Acb.MicroService.Client
                     {"X-Forwarded-For", remoteIp},
                     {"X-Real-IP", remoteIp},
                     {
-                        "User-Agent",
-                        AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
+                        "User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
                     },
                     {"referer", AcbHttpContext.RawUrl}
                 };
                 //http请求
-                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
+                return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
                 {
                     Data = args,
                     Headers = headers
-                }).Result;
+                });
             });
-
+            respTask.Wait();
+            var resp = respTask.Result;
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var html = resp.Content.ReadAsStringAsync().Result;
