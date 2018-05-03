@@ -51,19 +51,25 @@ namespace Acb.MicroService.Client
             }
         }
 
-        private List<string> GetTypeService()
+        private IEnumerable<string> GetService()
         {
             var key = _type.Assembly.AssemblyKey();
             var urls = _serviceCache.Get<List<string>>(key);
             if (urls != null && urls.Any())
                 return urls;
+
             var finder = GetServiceFinder();
             urls = finder.Find(_type.Assembly, _config).ToList();
             if (urls == null || !urls.Any())
                 throw ErrorCodes.NoService.CodeException();
-            urls = urls.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
             _serviceCache.Set(key, urls, TimeSpan.FromMinutes(5));
             return urls;
+        }
+
+        private List<string> GetTypeService()
+        {
+            var services = GetService();
+            return services.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
         }
 
         /// <inheritdoc />
