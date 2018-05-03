@@ -19,7 +19,7 @@ namespace Acb.Core.Config
         Production
     }
 
-    /// <summary> 开心科技通用配置 </summary>
+    /// <summary> 通用配置 </summary>
     [Serializable]
     [XmlRoot("root")]
     [FileName("base.config")]
