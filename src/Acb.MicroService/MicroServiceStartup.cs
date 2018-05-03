@@ -72,8 +72,7 @@ namespace Acb.MicroService
             applicationLifetime.ApplicationStopping.Register(() =>
             {
                 DBootstrap.Instance.Dispose();
-                if (Consts.Mode == ProductMode.Prod)
-                    MicroServiceRegister.Deregist();
+                MicroServiceRegister.Deregist();
             });
         }
     }

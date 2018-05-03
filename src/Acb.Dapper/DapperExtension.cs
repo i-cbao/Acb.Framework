@@ -7,7 +7,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -87,46 +86,47 @@ namespace Acb.Dapper
         /// <summary> 查询到DataSet </summary>
         /// <param name="conn"></param>
         /// <param name="sql"></param>
-        /// <param name="formatVariable"></param>
         /// <param name="param"></param>
-        /// <param name="adapter"></param>
         /// <param name="commandTimeout"></param>
         /// <param name="commandType"></param>
         /// <returns></returns>
-        public static DataSet QueryDataSet(this IDbConnection conn, string sql, Func<string, string> formatVariable,
-            object param = null, IDbDataAdapter adapter = null, int? commandTimeout = null,
+        public static DataSet QueryDataSet(this IDbConnection conn, string sql, object param = null, int? commandTimeout = null,
             CommandType? commandType = null)
         {
-            var ds = new DataSet();
-            var wasClosed = conn.State == ConnectionState.Closed;
-            if (wasClosed)
-                conn.Open();
-            var command = conn.CreateCommand();
-            if (commandType.HasValue)
-                command.CommandType = commandType.Value;
-            if (commandTimeout.HasValue)
-                command.CommandTimeout = commandTimeout.Value;
-            command.CommandText = sql;
-            if (param != null)
-            {
-                var ps = param.GetType().GetProperties();
-                foreach (var propertyInfo in ps)
-                {
-                    var propType = propertyInfo.PropertyType;
-                    var value = propertyInfo.GetValue(param);
-                    if (propType.IsNullableType() && value == null)
-                        continue;
-                    var p = command.CreateParameter();
-                    p.ParameterName = formatVariable(propertyInfo.Name);
-                    p.Value = value;
-                    command.Parameters.Add(p);
-                }
-            }
-            adapter = adapter ?? new SqlDataAdapter();
-            adapter.SelectCommand = command;
-            adapter.Fill(ds);
-            if (wasClosed) conn.Close();
-            return ds;
+            var reader = conn.ExecuteReader(sql, param, null, commandTimeout, commandType);
+            var dataset = new XDataSet();
+            dataset.Load(reader, LoadOption.OverwriteChanges, null, new DataTable[] { });
+            return dataset;
+            //var ds = new DataSet();
+            //var wasClosed = conn.State == ConnectionState.Closed;
+            //if (wasClosed)
+            //    conn.Open();
+            //var command = conn.CreateCommand();
+            //if (commandType.HasValue)
+            //    command.CommandType = commandType.Value;
+            //if (commandTimeout.HasValue)
+            //    command.CommandTimeout = commandTimeout.Value;
+            //command.CommandText = sql;
+            //if (param != null)
+            //{
+            //    var ps = param.GetType().GetProperties();
+            //    foreach (var propertyInfo in ps)
+            //    {
+            //        var propType = propertyInfo.PropertyType;
+            //        var value = propertyInfo.GetValue(param);
+            //        if (propType.IsNullableType() && value == null)
+            //            continue;
+            //        var p = command.CreateParameter();
+            //        p.ParameterName = formatVariable(propertyInfo.Name);
+            //        p.Value = value;
+            //        command.Parameters.Add(p);
+            //    }
+            //}
+            //adapter = adapter ?? new SqlDataAdapter();
+            //adapter.SelectCommand = command;
+            //adapter.Fill(ds);
+            //if (wasClosed) conn.Close();
+            //return ds;
         }
 
         /// <summary> 字段列表 </summary>

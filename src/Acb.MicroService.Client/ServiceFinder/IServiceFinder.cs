@@ -1,9 +1,10 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 
 namespace Acb.MicroService.Client.ServiceFinder
 {
     internal interface IServiceFinder
     {
-        string[] Find(Assembly ass, MicroServiceConfig config);
+        List<string> Find(Assembly ass, MicroServiceConfig config);
     }
 }

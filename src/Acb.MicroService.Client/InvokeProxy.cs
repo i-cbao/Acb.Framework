@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Cache;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
@@ -22,6 +23,7 @@ namespace Acb.MicroService.Client
     {
         private readonly ILogger _logger = LogManager.Logger(typeof(ProxyService));
         private readonly MicroServiceConfig _config;
+        private readonly ICache _serviceCache;
 
 
         /// <summary> 接口类型 </summary>
@@ -33,6 +35,7 @@ namespace Acb.MicroService.Client
         {
             _type = typeof(T);
             _config = Constans.MicroSreviceKey.Config<MicroServiceConfig>();
+            _serviceCache = CacheManager.GetCacher(typeof(InvokeProxy<>));
         }
 
         private IServiceFinder GetServiceFinder()
@@ -50,12 +53,17 @@ namespace Acb.MicroService.Client
 
         private List<string> GetTypeService()
         {
+            var key = _type.Assembly.AssemblyKey();
+            var urls = _serviceCache.Get<List<string>>(key);
+            if (urls != null && urls.Any())
+                return urls;
             var finder = GetServiceFinder();
-            var urls = finder.Find(_type.Assembly, _config);
-
+            urls = finder.Find(_type.Assembly, _config).ToList();
             if (urls == null || !urls.Any())
-                throw new BusiException("没有可用的服务");
-            return urls.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
+                throw ErrorCodes.NoService.CodeException();
+            urls = urls.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
+            _serviceCache.Set(key, urls, TimeSpan.FromMinutes(5));
+            return urls;
         }
 
         /// <inheritdoc />
@@ -87,7 +95,11 @@ namespace Acb.MicroService.Client
             var resp = policy.Execute(() =>
             {
                 if (!services.Any())
+                {
+                    _serviceCache.Remove(_type.Assembly.AssemblyKey());
                     throw ErrorCodes.NoService.CodeException();
+                }
+
                 service = services.First();
                 var url = string.Concat(service, targetMethod.Name);
                 var remoteIp = AcbHttpContext.RemoteIpAddress;

@@ -1,5 +1,5 @@
-﻿using Acb.Core;
-using Acb.Dapper;
+﻿using Acb.Dapper;
+using Acb.Dapper.Adapters;
 using Acb.Dapper.Domain;
 using Acb.Framework.Tests.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -32,11 +32,13 @@ namespace Acb.Framework.Tests
             var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
             using (var conn = ConnectionFactory.Instance.Connection("default", false))
             {
-                var list = conn.PagedList<TAreas>(sql, 2, 6, new { code = "510100" });
-                //var mapper = _config.CreateMapper();
-                //var dtos = Mapper.Map<PagedList<TAreas>>(list);
-                //Print(dtos);
-                Print(DResult.Succ(list));
+                var set = conn.QueryDataSet(conn.FormatSql(sql), new { code = "510100" });
+                Print(set);
+                //var list = conn.PagedList<TAreas>(sql, 2, 6, new { code = "510100" });
+                ////var mapper = _config.CreateMapper();
+                ////var dtos = Mapper.Map<PagedList<TAreas>>(list);
+                ////Print(dtos);
+                //Print(DResult.Succ(list));
             }
         }
 

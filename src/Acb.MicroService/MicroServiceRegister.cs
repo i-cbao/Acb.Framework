@@ -18,6 +18,7 @@ namespace Acb.MicroService
         public const string MicroSreviceKey = "micro_service";
         private const string HostEnvironmentName = "MICRO_SERVICE_HOST";
         private const string PortEnvironmentName = "MICRO_SERVICE_PORT";
+        private const string AutoDeregistEnvironmentName = "AUTO_DEREGIST";
         internal static ConcurrentDictionary<string, MethodInfo> Methods { get; }
 
         internal static HashSet<Assembly> ServiceAssemblies { get; }
@@ -70,6 +71,9 @@ namespace Acb.MicroService
                 _config.Host = host;
             if (port > 0)
                 _config.Port = port;
+            var autoDeregist = Environment.GetEnvironmentVariable(AutoDeregistEnvironmentName).CastTo<bool?>(null);
+            if (autoDeregist.HasValue)
+                _config.AutoDeregist = autoDeregist.Value;
         }
 
         private static IRegister GetRegister()
@@ -99,7 +103,8 @@ namespace Acb.MicroService
         /// <summary> 取消注册 </summary>
         public static void Deregist()
         {
-            _register.Deregist();
+            if (_config.AutoDeregist)
+                _register.Deregist();
         }
     }
 }

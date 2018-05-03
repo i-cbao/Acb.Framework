@@ -18,5 +18,7 @@
         public int DeregisterAfter { get; set; } = 180;
         public string Host { get; set; }
         public int Port { get; set; }
+        /// <summary> 自动注销服务 </summary>
+        public bool AutoDeregist { get; set; }
     }
 }

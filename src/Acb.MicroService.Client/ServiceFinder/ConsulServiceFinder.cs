@@ -1,7 +1,5 @@
 ﻿using Acb.Core;
-using Acb.Core.Cache;
 using Acb.Core.Domain;
-using Acb.Core.Extensions;
 using Consul;
 using System;
 using System.Collections.Generic;
@@ -12,7 +10,6 @@ namespace Acb.MicroService.Client.ServiceFinder
 {
     internal class ConsulServiceFinder : IServiceFinder
     {
-
         private static ConsulClient GetClient(MicroServiceConfig config)
         {
             return new ConsulClient(cfg =>
@@ -23,14 +20,9 @@ namespace Acb.MicroService.Client.ServiceFinder
             });
         }
 
-        public string[] Find(Assembly ass, MicroServiceConfig config)
+        public List<string> Find(Assembly ass, MicroServiceConfig config)
         {
-            var cache = CacheManager.GetCacher(typeof(InvokeProxy<>));
-            var assemblyKey = ass.AssemblyKey();
             var name = ass.GetName();
-            var urls = cache.Get<string[]>(assemblyKey);
-            if (urls != null)
-                return urls;
             var urlList = new List<string>();
             using (var client = GetClient(config))
             {
@@ -46,10 +38,7 @@ namespace Acb.MicroService.Client.ServiceFinder
                 }
             }
 
-            urls = urlList.ToArray();
-            cache.Set(assemblyKey, urls, TimeSpan.FromMinutes(5));
-
-            return urls;
+            return urlList;
         }
     }
 }
