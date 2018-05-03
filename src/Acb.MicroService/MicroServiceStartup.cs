@@ -3,6 +3,7 @@ using Acb.Core.Domain;
 using Acb.Core.Logging;
 using Acb.Framework;
 using Acb.Framework.Logging;
+using Acb.MicroService.Filters;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,7 +31,12 @@ namespace Acb.MicroService
         /// <returns></returns>
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                //自定义异常捕获
+                options.Filters.Add<DExceptionFilter>();
+            });
+
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
             _bootstrap.Initialize();

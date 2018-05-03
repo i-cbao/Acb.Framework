@@ -84,7 +84,7 @@ namespace Acb.MicroService.Client
 
             var policy = Policy.Wrap(retry, breaker);
 
-            var respTask = policy.ExecuteAsync(async () =>
+            var resp = policy.Execute(() =>
             {
                 if (!services.Any())
                     throw ErrorCodes.NoService.CodeException();
@@ -101,14 +101,12 @@ namespace Acb.MicroService.Client
                     {"referer", AcbHttpContext.RawUrl}
                 };
                 //http请求
-                return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
+                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
                 {
                     Data = args,
                     Headers = headers
-                });
+                }).Result;
             });
-            respTask.Wait();
-            var resp = respTask.Result;
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var html = resp.Content.ReadAsStringAsync().Result;

@@ -16,9 +16,9 @@ namespace Acb.Core.Helper
         private const string UrlRegex =
             @"^(http|https)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{1,10}))(\:[0-9]+)*(/($|[a-zA-Z0-9\.\,\?\'\\\+&%\$#\=~_\-]+))*$";
         /// <summary> 手机号码 </summary>
-        private const string MobileRegex = @"1[0-9]{10}";//@"^(0[0-9]{2,3}-?[0-9]{7,8})|((13|15|18)\d{9})$";
+        private const string MobileRegex = @"^1[0-9]{10}$";//@"^(0[0-9]{2,3}-?[0-9]{7,8})|((13|15|18)\d{9})$";
         /// <summary> 邮箱 </summary>
-        private const string EmailRegex = @"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
+        private const string EmailRegex = @"^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$";
 
         /// <summary> 身份证 </summary>
         private const string IdCardRegex =
@@ -28,7 +28,7 @@ namespace Acb.Core.Helper
         private const string FloatRegex = @"^([-]|[0-9])[0-9]*(\.\w*)?$";
         /// <summary> 车牌号码 </summary>
         private const string PlateNumberRegex =
-            @"^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$";
+            @"^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4,5}[A-Z0-9挂学警港澳]{1}$";
 
         private const string HtmlFindByIdRegex =
             @"<([0-9a-zA-Z]+)[^>]*\bid=([""']){0}\2[^>]*>(?><\1[^>]*>(?<tag>)|</\1>(?<-tag>)|.)*?(?(tag)(?!))</\1>";
