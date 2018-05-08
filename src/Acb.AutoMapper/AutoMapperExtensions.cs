@@ -15,48 +15,65 @@ namespace Acb.AutoMapper
         ToUrl
     }
 
+    /// <summary> AutoMapper扩展 </summary>
     public static class AutoMapperExtensions
     {
+        /// <summary> 映射实体 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="mapperType"></param>
+        /// <returns></returns>
         public static T MapTo<T>(this object source, MapperType mapperType = MapperType.Normal)
         {
             if (source == null)
                 return default(T);
             var cfg = new MapperConfiguration(config =>
             {
-                config.CreateMap(source.GetType(), typeof(T));
-                config.CreateMissingTypeMaps = true;
-                config.ValidateInlineMaps = false;
-                if (mapperType == MapperType.FromUrl)
-                    config.SourceMemberNamingConvention = new LowerUnderscoreNamingConvention();
-                else if (mapperType == MapperType.ToUrl)
-                    config.DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
-            });
-            return cfg.CreateMapper().Map<T>(source);
-        }
-
-        public static List<T> MapTo<T>(this IEnumerable source, MapperType mapperType = MapperType.Normal)
-        {
-            if (source == null)
-                return new List<T>();
-            var cfg = new MapperConfiguration(config =>
-            {
-                foreach (var item in source)
+                if (source is IEnumerable listSource)
                 {
-                    config.CreateMap(item.GetType(), typeof(T));
-                    break;
+                    foreach (var item in listSource)
+                    {
+                        config.CreateMap(item.GetType(), typeof(T));
+                        break;
+                    }
+                }
+                else
+                {
+                    config.CreateMap(source.GetType(), typeof(T));
                 }
 
                 config.CreateMissingTypeMaps = true;
                 config.ValidateInlineMaps = false;
-                if (mapperType == MapperType.FromUrl)
-                    config.SourceMemberNamingConvention = new LowerUnderscoreNamingConvention();
-                else if (mapperType == MapperType.ToUrl)
-                    config.DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
+                switch (mapperType)
+                {
+                    case MapperType.FromUrl:
+                        config.SourceMemberNamingConvention = new LowerUnderscoreNamingConvention();
+                        break;
+                    case MapperType.ToUrl:
+                        config.DestinationMemberNamingConvention = new LowerUnderscoreNamingConvention();
+                        break;
+                }
             });
             var mapper = cfg.CreateMapper();
-            return mapper.Map<List<T>>(source);
+            return mapper.Map<T>(source);
         }
 
+        /// <summary> 映射实体 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="mapperType"></param>
+        /// <returns></returns>
+        public static List<T> MapTo<T>(this IEnumerable source, MapperType mapperType = MapperType.Normal)
+        {
+            return ((object)source).MapTo<List<T>>(mapperType);
+        }
+
+        /// <summary> 映射成分页类型 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TSource"></typeparam>
+        /// <param name="pagedList"></param>
+        /// <param name="mapperType"></param>
+        /// <returns></returns>
         public static PagedList<T> MapPagedList<T, TSource>(this PagedList<TSource> pagedList, MapperType mapperType = MapperType.Normal)
         {
             if (pagedList == null)

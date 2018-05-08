@@ -5,7 +5,7 @@
     <Authors>icb@shay</Authors>
     <Company>成都爱车保信息技术有限公司</Company>
     <Product>爱车保 - 监控中间件</Product>
-    <Version>1.3.3</Version>
+    <Version>1.3.6</Version>
     <Description>爱车保 - 监控中间件</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>

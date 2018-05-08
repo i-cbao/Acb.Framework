@@ -1,7 +1,8 @@
 ﻿using Acb.Core;
-using Acb.Core.Domain;
+using Acb.Core.Extensions;
 using Acb.Core.Modules;
 using Acb.Core.Monitor;
+using System;
 
 namespace Acb.Middleware.Monitor
 {
@@ -10,7 +11,8 @@ namespace Acb.Middleware.Monitor
     {
         public override void Initialize()
         {
-            if (Consts.Mode != ProductMode.Dev)
+            if (Environment.GetEnvironmentVariable("ENABLE_MONITOR").CastTo(false))
+            //if (Consts.Mode != ProductMode.Dev)
             {
                 MonitorManager.Add(new AcbMonitor());
             }

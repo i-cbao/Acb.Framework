@@ -4,7 +4,7 @@ using System;
 
 namespace Acb.Middleware.Monitor
 {
-    [Naming(NamingType.UrlCase, Name = "t_monitor")]
+    [Naming(NamingType.UrlCase, Name = "t_called_record")]
     internal class TMonitor : BaseEntity<string>
     {
         public string Service { get; set; }

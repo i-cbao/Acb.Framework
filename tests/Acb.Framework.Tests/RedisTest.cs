@@ -35,13 +35,13 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void IncrementTest()
         {
-            var t = Redis.RedisManager.Instance.GetDatabase();
-            const string key = "test";
-            //if (!t.KeyExists(key))
-            //{
-            //    t.StringSet(key, RandomHelper.Random().Next(100), Clock.Now.Date.AddDays(1) - Clock.Now);
-            //}
-
+            var t = RedisManager.Instance.GetDatabase("Twemproxy");
+            const string key = "icb10";
+            if (!t.KeyExists(key))
+            {
+                t.StringSet(key, RandomHelper.Random().Next(100), Clock.Now.Date.AddDays(1) - Clock.Now);
+            }
+            //Print(t.StringGet(key).ToString());
             var id = t.StringIncrement(key);
             t.KeyExpire(key, Clock.Now.Date.AddDays(1));
             Print(id);
