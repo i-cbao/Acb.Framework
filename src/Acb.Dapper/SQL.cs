@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Dapper.Adapters;
 using Dapper;
@@ -89,14 +90,14 @@ namespace Acb.Dapper
         /// <returns></returns>
         public bool IsSelect()
         {
-            return Regex.IsMatch(_sqlBuilder.ToString(), "select\\s+", RegexOptions.IgnoreCase);
+            return !IsChange() && Regex.IsMatch(_sqlBuilder.ToString(), "select\\s+", RegexOptions.IgnoreCase);
         }
 
         /// <summary> 获取查询列 </summary>
         /// <returns></returns>
-        private string Columns()
+        private static string Columns(string sql)
         {
-            var match = Regex.Match(_sqlBuilder.ToString(),
+            var match = Regex.Match(sql,
                 "select\\s(?<column>((?!select).)+(select((?!from).)+from((?!from).)+)*((?!from).)*)\\sfrom", RegexOptions.IgnoreCase);
             return match.Groups["column"].Value;
         }
@@ -125,15 +126,15 @@ namespace Acb.Dapper
             return string.Join(",", columnList);
         }
 
-        private string Where()
+        private string Where(string sql)
         {
-            var match = Regex.Match(_sqlBuilder.ToString(), "where\\s+(.+)order", RegexOptions.IgnoreCase);
+            var match = Regex.Match(sql, "where\\s+(.+)order", RegexOptions.IgnoreCase);
             return match.Groups[1].Value;
         }
 
-        private string Order()
+        private static string Order(string sql)
         {
-            var match = Regex.Match(_sqlBuilder.ToString(), "order\\s+by\\s+(.+)$", RegexOptions.IgnoreCase);
+            var match = Regex.Match(sql, "order\\s+by\\s+(.+)$", RegexOptions.IgnoreCase);
             return match.Value;
         }
 
@@ -147,9 +148,8 @@ namespace Acb.Dapper
             if (!IsSelect())
                 return;
             var sql = ToString();
-            var columns = Columns();
-            var order = Order();
-
+            var columns = Columns(sql);
+            var order = Order(sql);
             sql = conn.PagedSql(sql, columns, order);
 
             _parameters.Add("skip", (page - 1) * size);
@@ -227,6 +227,8 @@ namespace Acb.Dapper
         public override string ToString()
         {
             var sql = _sqlBuilder.ToString();
+            sql = sql.Replace("\r\n", " ", RegexOptions.IgnoreCase);
+            sql = sql.Replace("[\\s]+", " ", RegexOptions.IgnoreCase);
             _logger.Debug(sql);
             return sql;
         }

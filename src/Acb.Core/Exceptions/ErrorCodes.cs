@@ -17,7 +17,7 @@ namespace Acb.Core.Exceptions
         /// <summary> 默认错误码 </summary>
         public const int DefaultCode = -1;
 
-        /// <summary> 系统错误 </summary>
+        /// <summary> 服务器心情不好，请稍后重试~ </summary>
         [Description("服务器心情不好，请稍后重试~")]
         public const int SystemError = 10001;
 

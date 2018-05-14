@@ -1,8 +1,8 @@
-﻿using System;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Helper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
+using Acb.MicroService.Client;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +19,7 @@ namespace Acb.WebApi.Test.Controllers
         public DemoController(IDemoService demoService)
         {
             //sendCom
-            _demoService = demoService; //ProxyService.Proxy<IDemoService>();
+            _demoService = ProxyService.Proxy<IDemoService>();
         }
 
         /// <summary>

@@ -17,7 +17,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public async Task ClientTest()
         {
-            var client = ApiClient.HttpApiClient.Create<IMyClass>();
+            var client = HttpApiClient.Create<IMyClass>();
             var html = await client.GetHtmlAsync("http://www.baidu.com");
             Print(html);
         }

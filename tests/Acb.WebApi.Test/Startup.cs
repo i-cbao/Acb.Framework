@@ -1,6 +1,8 @@
-﻿using Acb.Demo.Contracts;
+﻿using Acb.Core.Exceptions;
+using Acb.Demo.Contracts;
 using Acb.MicroService.Client;
 using Acb.Payment;
+using Acb.WebApi.Filters;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,12 +15,23 @@ using System.IO;
 
 namespace Acb.WebApi.Test
 {
-    public class Startup :
-        DStartup
+    public class Startup : DStartup
     {
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            DExceptionFilter.ResultFilter = result =>
+            {
+                switch (result.Code)
+                {
+                    case ErrorCodes.SystemError:
+                        result.Message = "";
+                        break;
+                    case ErrorCodes.NoService:
+                        result.Message = "";
+                        break;
+                }
+            };
         }
 
         public IConfiguration Configuration { get; }

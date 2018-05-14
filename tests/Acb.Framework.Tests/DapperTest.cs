@@ -71,5 +71,34 @@ namespace Acb.Framework.Tests
                 Print(result);
             }
         }
+
+        [TestMethod]
+        public void SqlPagedTest()
+        {
+            const string str = @"SELECT
+  s.`id` AS ShopId,
+  s.`name` AS ShopName,
+  Count(u.id) AS Total,
+  0 AS DownLoadedUser,
+  0 AS UnDownLoadUser
+FROM
+  `t_shop` AS s
+LEFT JOIN `t_user` AS u ON s.`id` = u.`shop_id`
+WHERE
+  u.state !=- 400
+AND u.create_time >=""2018 / 05 / 10""
+            AND u.create_time < ""2018/05/13""
+            GROUP BY
+            s.`id`
+            ORDER BY
+            Count(u.`id`) DESC";
+            SQL sql = str;
+            using (var conn = ConnectionFactory.Instance.Connection(threadCache: false))
+            {
+                sql.Paged(1, 15, conn);
+                var t = sql.ToString();
+            }
+
+        }
     }
 }
