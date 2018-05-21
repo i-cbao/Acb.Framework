@@ -276,6 +276,7 @@ namespace Acb.Office
             filename = $"{name.UrlEncode()}{ext}";
             //resp.Buffer = true;
             //resp.Charset = Encoding.UTF8.BodyName;
+            resp.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
             resp.Headers.Add("Content-Disposition", $"attachment;filename={filename}");
             resp.ContentType = "application/vnd.ms-excel; charset=UTF-8";
             var wb = await CreateAsync(dataSet);

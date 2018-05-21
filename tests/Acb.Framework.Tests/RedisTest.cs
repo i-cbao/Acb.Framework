@@ -3,11 +3,10 @@ using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Tests;
 using Acb.Core.Timing;
+using Acb.Redis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading;
-using Acb.Redis;
-using StackExchange.Redis;
 
 namespace Acb.Framework.Tests
 {
@@ -35,12 +34,16 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void IncrementTest()
         {
-            var t = RedisManager.Instance.GetDatabase("Twemproxy");
+            var t = RedisManager.Instance.GetDatabase("test");
             const string key = "icb10";
             if (!t.KeyExists(key))
             {
                 t.StringSet(key, RandomHelper.Random().Next(100), Clock.Now.Date.AddDays(1) - Clock.Now);
             }
+
+            t.StringSet("shay", IdentityHelper.Guid16);
+
+            Print(t.StringGet("shay").ToString());
             //Print(t.StringGet(key).ToString());
             var id = t.StringIncrement(key);
             t.KeyExpire(key, Clock.Now.Date.AddDays(1));

@@ -7,6 +7,9 @@
     <Product>爱车保 - 分布式配置</Product>
     <Description>爱车保 - 分布式配置</Description>
     <Version>1.3.3</Version>
+    <Title>爱车保 - 分布式配置</Title>
+    <Owners>成都爱车保信息技术有限公司</Owners>
+    <Copyright>爱车保 © 2018</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

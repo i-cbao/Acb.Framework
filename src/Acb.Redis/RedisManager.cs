@@ -2,6 +2,7 @@
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Logging;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
@@ -15,10 +16,12 @@ namespace Acb.Redis
         private const string DefaultConfigName = "redisDefault";
         private const string DefaultDbConfigName = "redisDefaultDb";
         private const string DefaultName = "default";
+        private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ConnectionMultiplexer> _connections;
         private RedisManager()
         {
             _connections = new ConcurrentDictionary<string, ConnectionMultiplexer>();
+            _logger = LogManager.Logger<RedisManager>();
 
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
@@ -47,17 +50,41 @@ namespace Acb.Redis
             return connectionString;
         }
 
+        private ConnectionMultiplexer Connect(string connectionString)
+        {
+            var opts = ConfigurationOptions.Parse(connectionString);
+            return Connect(opts);
+        }
+
+        private ConnectionMultiplexer Connect(ConfigurationOptions configOpts)
+        {
+            var conn = ConnectionMultiplexer.Connect(configOpts);
+            conn.ConfigurationChanged += (sender, e) =>
+            {
+                _logger.Debug($"Redis Configuration changed: {e.EndPoint}");
+            };
+            conn.ConnectionRestored += (sender, e) => { _logger.Debug($"Redis ConnectionRestored: {e.EndPoint}"); };
+            conn.ErrorMessage += (sender, e) => { _logger.Error($"Redis Error{e.EndPoint}: {e.Message}"); };
+            conn.ConnectionFailed += (sender, e) =>
+            {
+                _logger.Warn(
+                    $"Redis 重新连接：Endpoint failed: ${e.EndPoint}, ${e.FailureType},${e.Exception?.Message}");
+            };
+            conn.InternalError += (sender, e) => { _logger.Warn($"Redis InternalError:{e.Exception.Message}"); };
+            return conn;
+        }
+
         private ConnectionMultiplexer GetConnection(string configName)
         {
             configName = GetConfigName(configName);
             var connectionString = GetConnectionString(configName);
-            return _connections.GetOrAdd(configName, p => ConnectionMultiplexer.Connect(connectionString));
+            return _connections.GetOrAdd(configName, p => Connect(connectionString));
         }
 
         private ConnectionMultiplexer GetConnection(string configName, ConfigurationOptions configOpts)
         {
             configName = GetConfigName(configName);
-            return _connections.GetOrAdd(configName, p => ConnectionMultiplexer.Connect(configOpts));
+            return _connections.GetOrAdd(configName, p => Connect(configOpts));
         }
 
         /// <summary> 获取Database </summary>

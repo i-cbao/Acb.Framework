@@ -2,6 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>icb@shay</Authors>
+    <Company>成都爱车保信息技术有限公司</Company>
+    <Product>Api接口客户端项目</Product>
+    <Description>Api接口客户端项目</Description>
+    <Title>Api接口客户端项目</Title>
+    <Owners>成都爱车保信息技术有限公司</Owners>
+    <Copyright>爱车保 © 2018</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
