@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Framework.Tests
 {
@@ -22,6 +23,8 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
+            Print("XkPMyA6BQjLyvl1BuTgCk7XIQ8FHiBTDHZWoCpfdW7Uboj10zxh3qcQqfrD0kqFbKBBZxvf6FagZJM6aNG/hYlvIrQV3+zF9C61qlnEHBowV7GtBoM5/cc1uoh18vOthf1u7oRiH+vc83hvrqcdD0Rnun+YuXYBYIx4pgitX/mlUd0A3iC+SS2a7G6lyFgO+jTUEAP7zYMyHkYH1+lhLuVPE6PBtO9WiUiNNgE7hg3g3ktYR4+msMVkP9Iy9c6ikkN51YJNwDbM=".UrlEncode());
+            return;
             var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
             Print(str);
             var time = DateTime.Parse(str);

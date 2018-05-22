@@ -32,9 +32,9 @@ namespace Acb.MicroService.Register
                     var assName = ass.GetName();
                     var service = new AgentServiceRegistration
                     {
-                        ID = $"{ass.AssemblyKey()}_{config.Host}_{config.Port}".Md5(),
+                        ID = $"{ass.GetName().Name}_{config.Host}_{config.Port}".Md5(),
                         Name = assName.Name,
-                        Tags = new[] { $"{Consts.Mode}_{assName.Version}" },
+                        Tags = new[] { $"{Consts.Mode}" },
                         EnableTagOverride = true,
                         Address = $"http://{config.Host}",
                         Port = config.Port

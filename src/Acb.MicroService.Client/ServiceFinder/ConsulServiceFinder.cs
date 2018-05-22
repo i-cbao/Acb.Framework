@@ -26,13 +26,13 @@ namespace Acb.MicroService.Client.ServiceFinder
             var urlList = new List<string>();
             using (var client = GetClient(config))
             {
-                var list = client.Catalog.Service(name.Name, $"{Consts.Mode}_{name.Version}").Result;
+                var list = client.Catalog.Service(name.Name, $"{Consts.Mode}").Result;
                 var items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
                 urlList.AddRange(items);
                 //开发环境 可调用测试环境的微服务
                 if (Consts.Mode == ProductMode.Dev)
                 {
-                    list = client.Catalog.Service(name.Name, $"{ProductMode.Test}_{name.Version}").Result;
+                    list = client.Catalog.Service(name.Name, $"{ProductMode.Test}").Result;
                     items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
                     urlList.AddRange(items);
                 }

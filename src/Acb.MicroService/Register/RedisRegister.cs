@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Extensions;
 using Acb.Redis;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +18,11 @@ namespace Acb.MicroService.Register
             return _config == null ? string.Empty : $"http://{_config.Host}:{_config.Port}/";
         }
 
+        private static string AssKey(Assembly ass)
+        {
+            return $"{RegistCenterKey}:{Consts.Mode}:{ass.GetName().Name}";
+        }
+
         public void Regist(HashSet<Assembly> asses, MicroServiceConfig config)
         {
             _config = config;
@@ -26,7 +30,7 @@ namespace Acb.MicroService.Register
             var redis = RedisManager.Instance.GetDatabase();
             foreach (var ass in asses)
             {
-                redis.SetAdd($"{RegistCenterKey}:{Consts.Mode}:{ass.AssemblyKey()}", ServiceUrl());
+                redis.SetAdd(AssKey(ass), ServiceUrl());
             }
         }
 
@@ -35,9 +39,9 @@ namespace Acb.MicroService.Register
             if (_asses == null || !_asses.Any())
                 return;
             var redis = RedisManager.Instance.GetDatabase();
-            foreach (var type in _asses)
+            foreach (var ass in _asses)
             {
-                redis.SetRemove($"{RegistCenterKey}:{Consts.Mode}:{type}", ServiceUrl());
+                redis.SetRemove(AssKey(ass), ServiceUrl());
             }
         }
     }
