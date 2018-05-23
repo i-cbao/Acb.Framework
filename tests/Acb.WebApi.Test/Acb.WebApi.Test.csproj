@@ -8,6 +8,10 @@
     <DocumentationFile>bin\Release\netcoreapp2.0\Acb.WebApi.Test.xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.0\Acb.WebApi.Test.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="_logs\**" />
     <Content Remove="_logs\**" />

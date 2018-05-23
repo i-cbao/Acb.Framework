@@ -15,7 +15,7 @@ using System;
 
 namespace Acb.WebApi
 {
-    public abstract class DStartup
+    public class DStartup
     {
         private readonly DBootstrap _bootstrap;
 
@@ -55,6 +55,8 @@ namespace Acb.WebApi
             var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc();
+            var liftscope = app.ApplicationServices.GetService<IApplicationLifetime>();
+            liftscope.ApplicationStopping.Register(DBootstrap.Instance.Dispose);
         }
     }
 }

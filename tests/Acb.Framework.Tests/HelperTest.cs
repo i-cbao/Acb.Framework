@@ -23,7 +23,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            Print("XkPMyA6BQjLyvl1BuTgCk7XIQ8FHiBTDHZWoCpfdW7Uboj10zxh3qcQqfrD0kqFbKBBZxvf6FagZJM6aNG/hYlvIrQV3+zF9C61qlnEHBowV7GtBoM5/cc1uoh18vOthf1u7oRiH+vc83hvrqcdD0Rnun+YuXYBYIx4pgitX/mlUd0A3iC+SS2a7G6lyFgO+jTUEAP7zYMyHkYH1+lhLuVPE6PBtO9WiUiNNgE7hg3g3ktYR4+msMVkP9Iy9c6ikkN51YJNwDbM=".UrlEncode());
+            Print("L7iBVV52RCs0IuWcvrnSRwQpVqOyz9y3KFONd5ZhBc5/ev84j27711veJ/Pj82UveRsV4zq7EcN7H+JABWBZBy71agOv2xDB3Oous/1TSCQwax3CBcaWliooj78Z037JeYsXd4BM2HCihhUsEwXvJHgHJFfCLF/f3yEMyKRvEL+MKLyW+CBD/tKdaxJMkZ2fZGoVDR2+K7QlNNmX704T6mFg5nlxKXny4mwHz7taYz6TQgzrvRpkAooV65VPN32uA5XDibmQaAo=".UrlEncode());
             return;
             var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
             Print(str);

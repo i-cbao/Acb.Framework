@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Domain;
 using Acb.Core.Logging;
 using Acb.Framework;
 using Acb.Framework.Logging;
@@ -71,7 +70,7 @@ namespace Acb.MicroService
 
             applicationLifetime.ApplicationStopping.Register(() =>
             {
-                DBootstrap.Instance.Dispose();
+                _bootstrap.Dispose();
                 MicroServiceRegister.Deregist();
             });
         }

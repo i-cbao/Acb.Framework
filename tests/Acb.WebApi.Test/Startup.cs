@@ -1,14 +1,10 @@
-﻿using Acb.Core.Exceptions;
-using Acb.Demo.Contracts;
+﻿using Acb.Demo.Contracts;
 using Acb.MicroService.Client;
 using Acb.Payment;
-using Acb.WebApi.Filters;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
@@ -17,25 +13,6 @@ namespace Acb.WebApi.Test
 {
     public class Startup : DStartup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-            DExceptionFilter.ResultFilter = result =>
-            {
-                switch (result.Code)
-                {
-                    case ErrorCodes.SystemError:
-                        result.Message = "";
-                        break;
-                    case ErrorCodes.NoService:
-                        result.Message = "";
-                        break;
-                }
-            };
-        }
-
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
@@ -66,11 +43,11 @@ namespace Acb.WebApi.Test
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "docs")),
-                RequestPath = "/docs"
-            });
+            //app.UseStaticFiles(new StaticFileOptions
+            //{
+            //    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "docs")),
+            //    RequestPath = "/docs"
+            //});
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>

@@ -31,7 +31,7 @@ namespace Acb.Core
                         {
                             foreach (var json in jsons)
                             {
-                                b.AddJsonFile(json);
+                                b.AddJsonFile(json, false, true);
                             }
                         });
                     }
