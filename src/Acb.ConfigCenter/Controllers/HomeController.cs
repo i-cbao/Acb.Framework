@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Acb.ConfigCenter.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
 namespace Acb.ConfigCenter.Controllers
@@ -21,6 +22,7 @@ namespace Acb.ConfigCenter.Controllers
         public ActionResult Config(string module, string env)
         {
             var config = _config.Get(module, env);
+            if (config == null) return Content(string.Empty);
             return Json(config);
         }
 
@@ -38,25 +40,11 @@ namespace Acb.ConfigCenter.Controllers
         /// <param name="env"></param>
         /// <returns></returns>
         [HttpPost("{file}/{env?}")]
-        public ActionResult Add(string file, [FromBody]object config, string env = null)
+        public ActionResult Save(string file, [FromBody]VConfigInput config, string env = null)
         {
             if (!string.IsNullOrWhiteSpace(env))
                 file = $"{file}-{env}";
-            var result = _config.Create(file, config);
-            return Json(new { ok = result });
-        }
-
-        /// <summary> 编辑配置 </summary>
-        /// <param name="file"></param>
-        /// <param name="config"></param>
-        /// <param name="env"></param>
-        /// <returns></returns>
-        [HttpPut("{file}/{env?}")]
-        public ActionResult Edit(string file, [FromBody]object config, string env = null)
-        {
-            if (!string.IsNullOrWhiteSpace(env))
-                file = $"{file}-{env}";
-            var result = _config.Set(file, config);
+            var result = _config.Save(file, config.Config);
             return Json(new { ok = result });
         }
 
@@ -67,8 +55,16 @@ namespace Acb.ConfigCenter.Controllers
         [HttpDelete("{file}/{env?}")]
         public ActionResult Delete(string file, string env = null)
         {
+            if (!string.IsNullOrWhiteSpace(env))
+                file = $"{file}-{env}";
             _config.Remove(file);
             return Json(new { ok = true });
+        }
+
+        [HttpPost]
+        public ActionResult Login()
+        {
+            return Json(new { });
         }
     }
 }

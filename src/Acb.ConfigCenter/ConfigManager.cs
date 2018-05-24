@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using YamlDotNet.Serialization;
 
 namespace Acb.ConfigCenter
@@ -51,7 +52,7 @@ namespace Acb.ConfigCenter
             var path = Path.Combine(_configDirectory, file);
             if (!File.Exists(path))
                 return null;
-            var content = File.ReadAllText(path);
+            var content = File.ReadAllText(path, Encoding.UTF8);
             var ext = Path.GetExtension(file);
             switch (ext)
             {
@@ -90,31 +91,16 @@ namespace Acb.ConfigCenter
             return config;
         }
 
-        /// <summary> 更新配置 </summary>
-        /// <param name="file"></param>
-        /// <param name="config"></param>
-        public bool Set(string file, object config)
-        {
-            var path = Path.Combine(_configDirectory, $"{file}{ConfigExtension}");
-            if (!File.Exists(path))
-                return false;
-            var content = JsonConvert.SerializeObject(config);
-            File.Copy(path, path.Replace(ConfigExtension, $"_{Timestamp()}.bak"));
-            File.WriteAllText(path, content);
-            return true;
-        }
-
         /// <summary> 添加配置 </summary>
         /// <param name="file"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public bool Create(string file, object config)
+        public bool Save(string file, string config)
         {
             var path = Path.Combine(_configDirectory, $"{file}{ConfigExtension}");
             if (File.Exists(path))
-                return false;
-            var content = JsonConvert.SerializeObject(config);
-            File.WriteAllText(path, content);
+                File.Copy(path, path.Replace(ConfigExtension, $"_{Timestamp()}.bak"));
+            File.WriteAllText(path, config, Encoding.UTF8);
             return true;
         }
 
@@ -122,9 +108,13 @@ namespace Acb.ConfigCenter
         /// <param name="file"></param>
         public void Remove(string file)
         {
-            var path = Path.Combine(_configDirectory, $"{file}{ConfigExtension}");
+            var name = string.Concat(file, ConfigExtension);
+            var path = Path.Combine(_configDirectory, name);
             if (File.Exists(path))
+            {
                 File.Move(path, path.Replace(ConfigExtension, $"_{DateTime.Now.Ticks}.bk"));
+                _configeCache.TryRemove(name, out var _);
+            }
         }
 
         /// <summary> 配置文件列表 </summary>
@@ -132,7 +122,8 @@ namespace Acb.ConfigCenter
         public List<string> List()
         {
             var files = Directory.GetFiles(_configDirectory, $"*{ConfigExtension}");
-            return files.Select(Path.GetFileNameWithoutExtension).ToList();
+            return files.Select(t => Path.GetFileNameWithoutExtension(t).Split('-')[0]).Distinct().OrderBy(t => t)
+                .ToList();
         }
     }
 

@@ -1,0 +1,32 @@
+﻿{
+  "actionTimingThreshold": 200,
+  "app_sign_key": "85653b8832ad55cd",
+  "commonTicket": "1484356604d8762b16d360fda70417345bbae013e2",
+  "const": {
+    "icb_id": "1514814a05534c1cb1a1147a13e0cbad",
+    "mongo_db": "DBV3",
+    "report_limit": 5
+  },
+  "logLevel": "All",
+  "micro_service": {
+    "deregisterAfter": 180,
+    "redisKey": "micro_service:test_center",
+    "register": "redis"
+  },
+  "sites": {
+    "app": "http://192.168.0.252:6301",
+    "file": "http://140.143.96.228:8209",
+    "gps": "http://192.168.0.216:9099",
+    "management": "http://192.168.0.252:6302",
+    "open": "http://140.143.96.228:8206",
+    "static": "http://static.i-cbao.com",
+    "v2Api": "http://140.143.96.228:8071"
+  },
+  "tcpLogger": {
+    "address": "192.168.0.252",
+    "layout": "[%date] [%-5level] [%property{LogSite}] %r %thread [%logger] ##%message## ##%exception#_#",
+    "level": "Error",
+    "port": 8610
+  },
+  "ticketKey": "mrjjv1apqhtfuswmah0cgvxngi8yuumg"
+}

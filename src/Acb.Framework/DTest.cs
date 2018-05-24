@@ -15,10 +15,11 @@ namespace Acb.Framework
         /// <summary> 默认构造函数 </summary>
         protected DTest()
         {
+            LogManager.AddAdapter(new ConsoleAdapter());
             Bootstrap = DBootstrap.Instance;
             Bootstrap.Initialize();
             //LogManager.ClearAdapter();
-            LogManager.AddAdapter(new ConsoleAdapter());
+
         }
 
         /// <summary> 打印数据 </summary>

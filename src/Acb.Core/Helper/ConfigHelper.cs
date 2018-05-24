@@ -51,8 +51,8 @@ namespace Acb.Core.Helper
         }
 
         /// <summary> 单例 </summary>
-        public static ConfigHelper Instance =
-            Singleton<ConfigHelper>.Instance ?? (Singleton<ConfigHelper>.Instance = new ConfigHelper());
+        public static ConfigHelper Instance => Singleton<ConfigHelper>.Instance ??
+                                               (Singleton<ConfigHelper>.Instance = new ConfigHelper());
 
         /// <summary> 构建配置 </summary>
         /// <param name="builderAction"></param>
@@ -84,9 +84,22 @@ namespace Acb.Core.Helper
             var type = typeof(T);
             if (type.IsValueType || type == typeof(string))
                 return _config.GetValue(key, defaultValue);
-            var obj = Activator.CreateInstance<T>();
-            _config.GetSection(key).Bind(obj);
-            return obj;
+            try
+            {
+                return _config.GetSection(key).Get<T>();
+            }
+            catch
+            {
+                return defaultValue;
+            }
+
+            //var type = typeof(T);
+            //if (type.IsValueType || type == typeof(string))
+            //    return _config.GetValue(key, defaultValue);
+            //return _config.GetSection(key).Get<T>();
+            //var obj = Activator.CreateInstance<T>();
+            //_config.GetSection(key).Bind(obj);
+            //return obj;
         }
 
         /// <summary> 重新加载配置 </summary>

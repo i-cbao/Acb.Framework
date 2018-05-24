@@ -16,6 +16,13 @@ namespace Acb.Framework.Tests
         private readonly ILogger _logger = LogManager.Logger<ConfigTest>();
 
         [TestMethod]
+        public void AddJsonTest()
+        {
+            var t = "dapper:default".Config<ConnectionConfig>();
+            Print(t);
+        }
+
+        [TestMethod]
         public void GetTest()
         {
             var config = "dapper:default".Config<ConnectionConfig>();
