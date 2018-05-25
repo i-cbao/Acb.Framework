@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Acb.ConfigCenter.ViewModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
@@ -13,6 +14,7 @@ namespace Acb.ConfigCenter
 {
     public class ConfigManager
     {
+        private readonly IConfigurationRoot _config;
         private readonly ConcurrentDictionary<string, object> _configeCache;
         private readonly string _configDirectory;
         public event Action<string> Change;
@@ -21,10 +23,10 @@ namespace Acb.ConfigCenter
         public ConfigManager()
         {
             var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile("appsettings.json");
-            var config = builder.Build();
+            builder.AddJsonFile("appsettings.json", false, true);
+            _config = builder.Build();
             _configeCache = new ConcurrentDictionary<string, object>();
-            var dir = config.GetValue<string>("configPath");
+            var dir = _config.GetValue<string>("configPath");
             _configDirectory = Path.Combine(Directory.GetCurrentDirectory(), dir);
             //文件监控
             var watcher = new FileSystemWatcher(_configDirectory)
@@ -97,9 +99,14 @@ namespace Acb.ConfigCenter
         /// <returns></returns>
         public bool Save(string file, string config)
         {
-            var path = Path.Combine(_configDirectory, $"{file}{ConfigExtension}");
+            file = $"{file}{ConfigExtension}";
+            var path = Path.Combine(_configDirectory, file);
             if (File.Exists(path))
+            {
+                _configeCache.TryRemove(file, out var _);
                 File.Copy(path, path.Replace(ConfigExtension, $"_{Timestamp()}.bak"));
+            }
+
             File.WriteAllText(path, config, Encoding.UTF8);
             return true;
         }
@@ -110,11 +117,9 @@ namespace Acb.ConfigCenter
         {
             var name = string.Concat(file, ConfigExtension);
             var path = Path.Combine(_configDirectory, name);
-            if (File.Exists(path))
-            {
-                File.Move(path, path.Replace(ConfigExtension, $"_{DateTime.Now.Ticks}.bk"));
-                _configeCache.TryRemove(name, out var _);
-            }
+            if (!File.Exists(path)) return;
+            File.Move(path, path.Replace(ConfigExtension, $"_{Timestamp()}.bak"));
+            _configeCache.TryRemove(name, out var _);
         }
 
         /// <summary> 配置文件列表 </summary>
@@ -124,6 +129,11 @@ namespace Acb.ConfigCenter
             var files = Directory.GetFiles(_configDirectory, $"*{ConfigExtension}");
             return files.Select(t => Path.GetFileNameWithoutExtension(t).Split('-')[0]).Distinct().OrderBy(t => t)
                 .ToList();
+        }
+
+        public SecurityDto GetSecurity()
+        {
+            return _config.GetSection("security").Get<SecurityDto>();
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using Acb.ConfigCenter.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
@@ -61,10 +62,15 @@ namespace Acb.ConfigCenter.Controllers
             return Json(new { ok = true });
         }
 
-        [HttpPost]
-        public ActionResult Login()
+        [HttpPost("login"), AllowAnonymous]
+        public ActionResult Login([FromBody]VLoginInput input)
         {
-            return Json(new { });
+            if (string.IsNullOrWhiteSpace(input?.Account) || string.IsNullOrWhiteSpace(input.Password))
+                return Json(new { ok = false, message = "账号密码不能为空" });
+            var dto = _config.GetSecurity();
+            if (dto.Account != input.Account || dto.Password != input.Password)
+                return Json(new { ok = false, message = "账号密码不正确" });
+            return Json(new { ok = true, ticket = Helper.GetTicket(dto) });
         }
     }
 }
