@@ -17,7 +17,7 @@ namespace Acb.MicroService
             var configuration = options.ApplicationServices.GetRequiredService<IConfiguration>();
             var environment = options.ApplicationServices.GetRequiredService<IHostingEnvironment>();
 
-            var endpoints = configuration.GetSection("HttpServer:Endpoints")
+            var endpoints = configuration.GetSection("httpserver:ports")
                 .GetChildren()
                 .ToDictionary(section => section.Key, section =>
                 {

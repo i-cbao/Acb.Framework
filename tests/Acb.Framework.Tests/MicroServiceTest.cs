@@ -1,13 +1,9 @@
 ﻿using Acb.Core.Extensions;
-using Acb.Core.Logging;
 using Acb.Demo.Contracts;
 using Acb.MicroService.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using Acb.Core.Dependency;
-using Acb.Core.Monitor;
 
 namespace Acb.Framework.Tests
 {
@@ -26,8 +22,10 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Test()
         {
-            var instance = CurrentIocManager.IsRegisted(typeof(IDemoService));
-            Assert.AreEqual(instance,false);
+            _demoService.Load("shay");
+            var task = _demoService.LoadAsync();
+            var dict = _demoService.Dict(new[] { "123", "456" });
+            Print(dict);
             //var dict = _demoService.List(new[] {"a"});
             //Print(dict);
             //var result = CodeTimer.Time("micro", 2000, () =>

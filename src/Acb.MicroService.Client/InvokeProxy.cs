@@ -8,11 +8,13 @@ using Acb.MicroService.Client.ServiceFinder;
 using Newtonsoft.Json;
 using Polly;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Acb.MicroService.Client
 {
@@ -86,9 +88,9 @@ namespace Acb.MicroService.Client
                 .Handle<AggregateException>(ex => ex.GetBaseException() is HttpRequestException) //服务器异常
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound); //服务未找到
                                                                                               //熔断,3次异常,熔断5分钟
-            var breaker = builder.CircuitBreaker(3, TimeSpan.FromMinutes(5));
+            var breaker = builder.CircuitBreakerAsync(3, TimeSpan.FromMinutes(5));
             //重试3次
-            var retry = builder.Retry(3, (result, count) =>
+            var retry = builder.RetryAsync(3, (result, count) =>
             {
                 _logger.Warn(result.Exception != null
                     ? $"{service}{targetMethod.Name}:retry,{count},{result.Exception.Format()}"
@@ -96,44 +98,65 @@ namespace Acb.MicroService.Client
                 services.Remove(service);
             });
 
-            var policy = Policy.Wrap(retry, breaker);
+            var policy = Policy.WrapAsync(retry, breaker);
 
-            var resp = policy.Execute(() =>
+            var resp = policy.ExecuteAsync(async () =>
             {
                 if (!services.Any())
                 {
                     _serviceCache.Remove(_type.Assembly.AssemblyKey());
                     throw ErrorCodes.NoService.CodeException();
                 }
-
                 service = services.First();
                 var url = string.Concat(service, targetMethod.Name);
-                var remoteIp = AcbHttpContext.RemoteIpAddress;
-                var headers = new Dictionary<string, string>
-                {
-                    {"X-Forwarded-For", remoteIp},
-                    {"X-Real-IP", remoteIp},
-                    {
-                        "User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
-                    },
-                    {"referer", AcbHttpContext.RawUrl}
-                };
-                //http请求
-                return HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
-                {
-                    Data = args,
-                    Headers = headers
-                }).Result;
+                return await InvokeAsync(url, args);
             });
+            var type = targetMethod.ReturnType;
+            if (type == typeof(void))
+                return null;
+            if (type == typeof(Task))
+                return Task.CompletedTask;
+            return ResultAsync(resp.Result, type).Result;
+        }
+
+        /// <summary> 执行请求 </summary>
+        /// <param name="url"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private static async Task<HttpResponseMessage> InvokeAsync(string url, IEnumerable args)
+        {
+            var remoteIp = AcbHttpContext.RemoteIpAddress;
+            var headers = new Dictionary<string, string>
+            {
+                {"X-Forwarded-For", remoteIp},
+                {"X-Real-IP", remoteIp},
+                {
+                    "User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
+                },
+                {"referer", AcbHttpContext.RawUrl}
+            };
+            //http请求
+            return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
+            {
+                Data = args,
+                Headers = headers
+            });
+        }
+
+        /// <summary> 获取结果 </summary>
+        /// <param name="resp"></param>
+        /// <param name="returnType"></param>
+        /// <returns></returns>
+        private static async Task<object> ResultAsync(HttpResponseMessage resp, Type returnType)
+        {
             if (resp.StatusCode == HttpStatusCode.OK)
             {
-                var html = resp.Content.ReadAsStringAsync().Result;
-                var type = targetMethod.ReturnType;
-                return JsonConvert.DeserializeObject(html, type);
+                var html = await resp.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject(html, returnType);
             }
             else
             {
-                var html = resp.Content.ReadAsStringAsync().Result;
+                var html = await resp.Content.ReadAsStringAsync();
                 var result = JsonConvert.DeserializeObject<DResult>(html);
                 throw new BusiException(result.Message, result.Code);
             }
