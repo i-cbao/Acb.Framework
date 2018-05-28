@@ -1,5 +1,11 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
+using Acb.Core.Helper;
+using Acb.Core.Tests;
+using Acb.Core.Timing;
 using Acb.Demo.Contracts;
+using Acb.Demo.Contracts.Dtos;
+using Acb.Demo.Contracts.Enums;
 using Acb.MicroService.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -10,46 +16,45 @@ namespace Acb.Framework.Tests
     [TestClass]
     public class MicroServiceTest : DTest
     {
-        private readonly IDemoService _demoService;
+        private readonly IDemoService _microService;
+        private readonly IDemoService _localService;
 
         public MicroServiceTest()
         {
-            _demoService = ProxyService.Proxy<IDemoService>();
+            _microService = ProxyService.Proxy<IDemoService>();
             //LogManager.SetLevel(LogLevel.Off);
-            //_demoService = CurrentIocManager.Resolve<IDemoService>();
+            _localService = CurrentIocManager.Resolve<IDemoService>();
         }
 
         [TestMethod]
         public void Test()
         {
-            _demoService.Load("shay");
-            var task = _demoService.LoadAsync();
-            var dict = _demoService.Dict(new[] { "123", "456" });
+            _microService.Load("shay");
+            var task = _microService.LoadAsync();
+            var dict = _microService.Dict(new[] { "123", "456" });
             Print(dict);
-            //var dict = _demoService.List(new[] {"a"});
-            //Print(dict);
-            //var result = CodeTimer.Time("micro", 2000, () =>
-            //{
-            //    var word = proxy.Hello(IdentityHelper.Guid32, new DemoInputDto
-            //    {
-            //        Demo = DemoEnums.Test,
-            //        Name = "shay" + IdentityHelper.Guid16,
-            //        Time = Clock.Now
-            //    });
-            //    //Print(word);
-            //}, 10);
-            //Print(result.ToString());
-            //result = CodeTimer.Time("local", 2000, () =>
-            //{
-            //    var word = _demoService.Hello(IdentityHelper.Guid32, new DemoInputDto
-            //    {
-            //        Demo = DemoEnums.Test,
-            //        Name = "shay" + IdentityHelper.Guid16,
-            //        Time = Clock.Now
-            //    });
-            //    //Print(word);
-            //}, 10);
-            //Print(result.ToString());
+            var result = CodeTimer.Time("micro", 2000, () =>
+            {
+                var word = _microService.Hello(IdentityHelper.Guid32, new DemoInputDto
+                {
+                    Demo = DemoEnums.Test,
+                    Name = "shay" + IdentityHelper.Guid16,
+                    Time = Clock.Now
+                });
+                //Print(word);
+            }, 10);
+            Print(result.ToString());
+            result = CodeTimer.Time("local", 2000, () =>
+            {
+                var word = _localService.Hello(IdentityHelper.Guid32, new DemoInputDto
+                {
+                    Demo = DemoEnums.Test,
+                    Name = "shay" + IdentityHelper.Guid16,
+                    Time = Clock.Now
+                });
+                //Print(word);
+            }, 10);
+            Print(result.ToString());
         }
 
         [TestMethod]

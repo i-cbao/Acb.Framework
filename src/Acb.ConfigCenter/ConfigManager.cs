@@ -69,12 +69,6 @@ namespace Acb.ConfigCenter
             return JsonConvert.DeserializeObject(content);
         }
 
-        private static long Timestamp(DateTime? time = null)
-        {
-            time = time ?? DateTime.Now;
-            return (long)(time.Value.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalSeconds;
-        }
-
         /// <summary> 获取配置 </summary>
         /// <param name="module"></param>
         /// <param name="env"></param>
@@ -104,7 +98,7 @@ namespace Acb.ConfigCenter
             if (File.Exists(path))
             {
                 _configeCache.TryRemove(file, out var _);
-                File.Copy(path, path.Replace(ConfigExtension, $"_{Timestamp()}.bak"));
+                File.Copy(path, path.Replace(ConfigExtension, $"_{DateTime.Now.Timestamp()}.bak"));
             }
 
             File.WriteAllText(path, config, Encoding.UTF8);
@@ -118,7 +112,7 @@ namespace Acb.ConfigCenter
             var name = string.Concat(file, ConfigExtension);
             var path = Path.Combine(_configDirectory, name);
             if (!File.Exists(path)) return;
-            File.Move(path, path.Replace(ConfigExtension, $"_{Timestamp()}.bak"));
+            File.Move(path, path.Replace(ConfigExtension, $"_{DateTime.Now.Timestamp()}.bak"));
             _configeCache.TryRemove(name, out var _);
         }
 

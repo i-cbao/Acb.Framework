@@ -11,17 +11,16 @@ using System.Text;
 
 namespace Acb.Core
 {
+    /// <inheritdoc />
     /// <summary> 初始化模块 </summary>
     public class CoreModule : DModule
     {
-        private static ILogger _logger;
         /// <inheritdoc />
         /// <summary> 初始化 </summary>
         public override void Initialize()
         {
             CurrentIocManager.IocManager = IocManager;
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            _logger = LogManager.Logger<CoreModule>();
             LoadLocalConfig();
             var provider = new ConfigCenterProvider();
             ConfigHelper.Instance.Build(b => b.Add(provider));
@@ -39,11 +38,11 @@ namespace Acb.Core
             if (string.IsNullOrWhiteSpace(configPath))
                 return;
             configPath = Path.Combine(Directory.GetCurrentDirectory(), configPath);
-            _logger.Info($"正在加载本地配置[{configPath}]");
             if (!Directory.Exists(configPath))
                 return;
+            LogManager.Logger<CoreModule>().Info($"正在加载本地配置[{configPath}]");
             var jsons = Directory.GetFiles(configPath, "*.json");
-            if (jsons != null && jsons.Any())
+            if (jsons.Any())
             {
                 configHelper.Build(b =>
                 {

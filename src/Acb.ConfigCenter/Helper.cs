@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Acb.ConfigCenter
 {
-    public class Helper
+    public static class Helper
     {
         private const string Key = "kd#2d^cw";
         private const string Iv = "l$d-lo%2";
@@ -87,6 +87,16 @@ namespace Acb.ConfigCenter
         public static string GetTicket(SecurityDto dto)
         {
             return Encrypt($"{dto.Account}__{Md5(dto.Password)}");
+        }
+
+        public static long Timestamp(this DateTime time)
+        {
+            return (long)(time.ToUniversalTime() - new DateTime(1970, 1, 1)).TotalSeconds;
+        }
+
+        public static DateTime FromTimestamp(this long timestamp)
+        {
+            return new DateTime(1970, 1, 1).Add(new TimeSpan(timestamp * TimeSpan.TicksPerSecond)).ToLocalTime();
         }
     }
 }

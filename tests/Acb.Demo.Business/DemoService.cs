@@ -41,7 +41,7 @@ namespace Acb.Demo.Business
             _logger.Info($"load:{id}");
         }
 
-        public Task<string> LoadAsync()
+        public Task LoadAsync()
         {
             _logger.Info("loadasync");
             return Task.FromResult("loadasync");
