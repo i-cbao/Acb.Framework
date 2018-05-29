@@ -1,4 +1,5 @@
-﻿using Acb.Core.Domain.Entities;
+﻿using System;
+using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
@@ -23,6 +24,7 @@ namespace Acb.Framework.Tests.Repositories
 
         /// <summary>父级</summary>
         public string ParentCode { get; set; }
+        public DateTime? ddd { get; set; }
     }
 
     internal class AreaRepository : DapperRepository<TAreas>

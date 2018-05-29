@@ -30,7 +30,7 @@ namespace Acb.Framework.Tests
                 //var dt = conn.Query<DataTable>($"select {columns} from `t_areas` where `parent_code`=@code",
                 //    new { code = "510700" });
                 //Print(dt);
-                var list = conn.Query<TAreas>($"select {columns} from `t_areas` where `parent_code`=@code",
+                var list = conn.Query<TAreas>($"select `city_code` as `Id` from `t_areas` where `parent_code`=@code",
                     new { code = "510700" });
                 var names = new Dictionary<string, string>
                 {

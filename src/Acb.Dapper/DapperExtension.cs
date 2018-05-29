@@ -504,9 +504,7 @@ namespace Acb.Dapper
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, new { id = key, count }, trans);
         }
-
-
-
+        
         /// <summary> 转换DataTable </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>
@@ -514,7 +512,8 @@ namespace Acb.Dapper
         /// <param name="tableName"></param>
         /// <param name="excepts"></param>
         /// <returns></returns>
-        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null, string tableName = null, string[] excepts = null)
+        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null,
+            string tableName = null, string[] excepts = null)
         {
             var type = GetInnerType<T>();
             tableName = string.IsNullOrWhiteSpace(tableName) ? type.PropName() : tableName;
@@ -525,7 +524,7 @@ namespace Acb.Dapper
             foreach (var prop in props)
             {
                 var key = headerFormat?.Invoke(prop.Name) ?? prop.Name;
-                dt.Columns.Add(key, prop.PropertyType);
+                dt.Columns.Add(key, prop.PropertyType.GetUnNullableType());
             }
 
             foreach (var item in data)
@@ -535,11 +534,13 @@ namespace Acb.Dapper
                 {
                     values.Add(prop.GetValue(item));
                 }
+
                 dt.Rows.Add(values.ToArray());
             }
 
             return dt;
         }
+
         #endregion
     }
 }

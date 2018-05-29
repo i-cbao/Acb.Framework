@@ -59,7 +59,7 @@ namespace Acb.Core.Helper.Http
         /// <returns></returns>
         public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, HttpRequest request)
         {
-            if (request == null || string.IsNullOrWhiteSpace(request.Url))
+            if (string.IsNullOrWhiteSpace(request?.Url))
                 throw new BusiException("Http请求参数异常");
             request.Encoding = request.Encoding ?? Encoding.UTF8;
             request.Headers = request.Headers ?? new Dictionary<string, string>();
@@ -93,8 +93,21 @@ namespace Acb.Core.Helper.Http
                             "application/json");
                         break;
                     case HttpBodyType.Form:
-                        var dict = request.Data.ToDictionary();
-                        content = new ByteArrayContent(request.Encoding.GetBytes(dict.ToUrl(false)));
+                        var str = string.Empty;
+                        if (request.Data != null)
+                        {
+                            var type = request.Data.GetType();
+                            if (type.IsSimpleType())
+                            {
+                                str = request.Data.ToString();
+                            }
+                            else
+                            {
+                                var dict = request.Data.ToDictionary();
+                                str = dict.ToUrl(true, request.Encoding);
+                            }
+                        }
+                        content = new ByteArrayContent(request.Encoding.GetBytes(str));
                         content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
                         break;
                     case HttpBodyType.Xml:
