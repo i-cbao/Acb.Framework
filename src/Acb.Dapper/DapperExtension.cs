@@ -6,6 +6,7 @@ using Dapper;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -504,7 +505,7 @@ namespace Acb.Dapper
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, new { id = key, count }, trans);
         }
-        
+
         /// <summary> 转换DataTable </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>
@@ -513,7 +514,7 @@ namespace Acb.Dapper
         /// <param name="excepts"></param>
         /// <returns></returns>
         public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null,
-            string tableName = null, string[] excepts = null)
+            string tableName = null, string[] excepts = null) where T : class
         {
             var type = GetInnerType<T>();
             tableName = string.IsNullOrWhiteSpace(tableName) ? type.PropName() : tableName;
@@ -523,7 +524,15 @@ namespace Acb.Dapper
                 props = props.Where(t => !excepts.Contains(t.Name)).ToList();
             foreach (var prop in props)
             {
-                var key = headerFormat?.Invoke(prop.Name) ?? prop.Name;
+                string key;
+                if (headerFormat != null)
+                    key = headerFormat.Invoke(prop.Name);
+                else
+                {
+                    var desc = prop.GetCustomAttribute<DescriptionAttribute>();
+                    key = desc == null ? prop.Name : desc.Description;
+                }
+
                 dt.Columns.Add(key, prop.PropertyType.GetUnNullableType());
             }
 
