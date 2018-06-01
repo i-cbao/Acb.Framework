@@ -5,13 +5,12 @@ namespace Acb.Core.Helper
 {
     internal class ConfigCenterRefresh
     {
-        private readonly Timer _timer;
+        private Timer _timer;
         private ConfigCenterProvider _provider;
         private int _interval;
 
         private ConfigCenterRefresh()
         {
-            _timer = new Timer(OnTimerElapsed);
         }
 
         public static ConfigCenterRefresh Instance =>
@@ -20,14 +19,11 @@ namespace Acb.Core.Helper
 
         public void Start(int seconds, ConfigCenterProvider provider)
         {
+            Stop();
+            _timer = new Timer(OnTimerElapsed);
             _interval = seconds;
             _provider = provider;
-            _timer.Change(TimeSpan.FromMilliseconds(1), Timeout.InfiniteTimeSpan);
-        }
-
-        public void SetInterval(int seconds)
-        {
-            _interval = seconds;
+            _timer.Change(TimeSpan.FromSeconds(_interval), Timeout.InfiniteTimeSpan);
         }
 
         private void OnTimerElapsed(object sender)
@@ -38,7 +34,7 @@ namespace Acb.Core.Helper
 
         public void Stop()
         {
-            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+            _timer?.Dispose();
         }
     }
 }

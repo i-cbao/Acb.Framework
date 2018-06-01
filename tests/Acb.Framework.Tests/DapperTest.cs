@@ -28,6 +28,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void PagedTest()
         {
+
             var columns = typeof(TAreas).Columns();
             var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
             using (var conn = ConnectionFactory.Instance.Connection("default", false))

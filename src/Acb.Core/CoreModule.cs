@@ -25,7 +25,6 @@ namespace Acb.Core
             var provider = new ConfigCenterProvider();
             ConfigHelper.Instance.Build(b => b.Add(provider));
             ConfigHelper.Instance.ConfigChanged += provider.Reload;
-
             base.Initialize();
         }
 

@@ -130,7 +130,7 @@ namespace Acb.Core.Logging
         /// <param name="level"></param>
         public static void SetLevel(LogLevel? level = null)
         {
-            level = level ?? ConfigLevel.Config(LogLevel.Info);
+            level = level ?? ConfigLevel.Config(LogLevel.Debug);
             if (_logLevel == level)
                 return;
             _logLevel = level.Value;

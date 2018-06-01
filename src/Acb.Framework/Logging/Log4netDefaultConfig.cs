@@ -71,7 +71,7 @@ namespace Acb.Framework.Logging
         internal static IAppender TcpAppender()
         {
             var tcp = TcpLoggerConfigName.Config<TcpLoggerConfig>();
-            if (tcp == null || string.IsNullOrWhiteSpace(tcp.Address) || tcp.Port <= 0)
+            if (string.IsNullOrWhiteSpace(tcp?.Address) || tcp.Port <= 0)
                 return null;
             var tcpAppender = new TcpAppender
             {

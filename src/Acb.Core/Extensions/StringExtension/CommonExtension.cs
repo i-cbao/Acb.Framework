@@ -418,18 +418,5 @@ namespace Acb.Core.Extensions
                 return url;
             return new Uri(new Uri(host), url).AbsoluteUri;
         }
-
-        public static string Unescape(this string str)
-        {
-            var sb = new StringBuilder();
-            var len = str.Length;
-            var i = 0;
-            while (i != len)
-            {
-                sb.Append(Uri.IsHexEncoding(str, i) ? Uri.HexUnescape(str, ref i) : str[i++]);
-            }
-
-            return sb.ToString();
-        }
     }
 }

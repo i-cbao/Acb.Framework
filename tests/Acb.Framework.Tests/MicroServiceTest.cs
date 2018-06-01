@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Logging;
 using Acb.Core.Tests;
 using Acb.Core.Timing;
 using Acb.Demo.Contracts;
@@ -22,7 +23,7 @@ namespace Acb.Framework.Tests
         public MicroServiceTest()
         {
             _microService = ProxyService.Proxy<IDemoService>();
-            //LogManager.SetLevel(LogLevel.Off);
+            LogManager.SetLevel(LogLevel.Off);
             _localService = CurrentIocManager.Resolve<IDemoService>();
         }
 

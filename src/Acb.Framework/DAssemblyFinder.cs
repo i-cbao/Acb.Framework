@@ -8,6 +8,12 @@ namespace Acb.Framework
     public class DAssemblyFinder : DefaultAssemblyFinder
     {
         private const string FrameworkName = "Acb.";
+        private static readonly string BaseAssemblyName;
+
+        static DAssemblyFinder()
+        {
+            BaseAssemblyName = "baseAssembly".Config(string.Empty);
+        }
 
         private static readonly Func<string, bool> AssemblyFinder =
             t =>
@@ -15,8 +21,7 @@ namespace Acb.Framework
                 var frame = t.StartsWith(FrameworkName, StringComparison.CurrentCultureIgnoreCase);
                 if (frame)
                     return true;
-                var baseAssemblyName = "baseAssembly".Config(string.Empty);
-                return !string.IsNullOrWhiteSpace(baseAssemblyName) && t.StartsWith(baseAssemblyName);
+                return !string.IsNullOrWhiteSpace(BaseAssemblyName) && t.StartsWith(BaseAssemblyName);
             };
 
         public DAssemblyFinder()

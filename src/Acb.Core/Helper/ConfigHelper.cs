@@ -1,4 +1,5 @@
-﻿using Acb.Core.Logging;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -82,24 +83,21 @@ namespace Acb.Core.Helper
             if (!string.IsNullOrWhiteSpace(supressKey))
                 key = supressKey;
             var type = typeof(T);
-            if (type.IsValueType || type == typeof(string))
+            if (type.IsSimpleType())
                 return _config.GetValue(key, defaultValue);
+            //枚举类型处理
+            if (type.IsEnum)
+                return _config.GetValue<string>(key).CastTo(defaultValue);
             try
             {
+                //区分大小写
                 return _config.GetSection(key).Get<T>();
             }
-            catch
+            catch (Exception ex)
             {
+                LogManager.Logger<ConfigHelper>().Error(ex.Message, ex);
                 return defaultValue;
             }
-
-            //var type = typeof(T);
-            //if (type.IsValueType || type == typeof(string))
-            //    return _config.GetValue(key, defaultValue);
-            //return _config.GetSection(key).Get<T>();
-            //var obj = Activator.CreateInstance<T>();
-            //_config.GetSection(key).Bind(obj);
-            //return obj;
         }
 
         /// <summary> 重新加载配置 </summary>

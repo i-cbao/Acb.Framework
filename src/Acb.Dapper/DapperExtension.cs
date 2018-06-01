@@ -98,36 +98,6 @@ namespace Acb.Dapper
             var dataset = new XDataSet();
             dataset.Load(reader, LoadOption.OverwriteChanges, null, new DataTable[] { });
             return dataset;
-            //var ds = new DataSet();
-            //var wasClosed = conn.State == ConnectionState.Closed;
-            //if (wasClosed)
-            //    conn.Open();
-            //var command = conn.CreateCommand();
-            //if (commandType.HasValue)
-            //    command.CommandType = commandType.Value;
-            //if (commandTimeout.HasValue)
-            //    command.CommandTimeout = commandTimeout.Value;
-            //command.CommandText = sql;
-            //if (param != null)
-            //{
-            //    var ps = param.GetType().GetProperties();
-            //    foreach (var propertyInfo in ps)
-            //    {
-            //        var propType = propertyInfo.PropertyType;
-            //        var value = propertyInfo.GetValue(param);
-            //        if (propType.IsNullableType() && value == null)
-            //            continue;
-            //        var p = command.CreateParameter();
-            //        p.ParameterName = formatVariable(propertyInfo.Name);
-            //        p.Value = value;
-            //        command.Parameters.Add(p);
-            //    }
-            //}
-            //adapter = adapter ?? new SqlDataAdapter();
-            //adapter.SelectCommand = command;
-            //adapter.Fill(ds);
-            //if (wasClosed) conn.Close();
-            //return ds;
         }
 
         /// <summary> 字段列表 </summary>

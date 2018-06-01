@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Acb.Core.Helper
@@ -30,12 +32,19 @@ namespace Acb.Core.Helper
 
         private ConfigCenter _config;
         private IDictionary<string, string> _headers;
-        private ILogger _logger;
+        private readonly ILogger _logger;
+        private const string ArrayPattern = @"(\[[0-9]+\])*$";
+
+        public ConfigCenterProvider()
+        {
+            _logger = LogManager.Logger<ConfigCenterProvider>();
+        }
 
         private async Task LoadTicket()
         {
             if (!string.IsNullOrWhiteSpace(_config.Account))
             {
+                _logger.Info("正在加载配置中心令牌");
                 var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
                 var loginResp = await HttpHelper.Instance.PostAsync(loginUrl,
                     new { account = _config.Account, password = _config.Password });
@@ -53,14 +62,15 @@ namespace Acb.Core.Helper
             }
         }
 
-        private async Task<IDictionary<string, string>> LoadConfig()
+        private async Task LoadConfig(bool reload = false)
         {
-            var dict = new Dictionary<string, string>();
+            Data.Clear();
             if (string.IsNullOrWhiteSpace(_config.Uri) || string.IsNullOrWhiteSpace(_config.Application))
-                return dict;
+                return;
             var parser = new JsonConfigurationParser();
             var apps = _config.Application.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
-            _logger.Info($"正在加载配置中心[{_config.Uri}:{Consts.Mode.ToString().ToLower()}:{string.Join(",", apps)}]");
+            var act = reload ? "更新" : "加载";
+            _logger.Info($"正在{act}配置中心[{_config.Uri}:{Consts.Mode.ToString().ToLower()}:{string.Join(",", apps)}]");
             foreach (var app in apps)
             {
                 try
@@ -81,7 +91,10 @@ namespace Acb.Core.Helper
                     var t = parser.Parse(json);
                     foreach (var key in t.Keys)
                     {
-                        dict[key] = t[key];
+                        var dKey = ConvertKey(key);
+                        if (string.IsNullOrWhiteSpace(dKey))
+                            continue;
+                        Data[dKey] = t[key];
                     }
                 }
                 catch (Exception ex)
@@ -89,13 +102,37 @@ namespace Acb.Core.Helper
                     _logger.Error(ex.Message, ex);
                 }
             }
+        }
 
-            return dict;
+        protected internal virtual string ConvertKey(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return key;
+            }
+            var split = key.Split('.');
+            var sb = new StringBuilder();
+            foreach (var part in split)
+            {
+                var keyPart = ConvertArrayKey(part);
+                sb.Append(keyPart);
+                sb.Append(ConfigurationPath.KeyDelimiter);
+            }
+
+            return sb.ToString(0, sb.Length - 1);
+        }
+
+        protected internal virtual string ConvertArrayKey(string key)
+        {
+            return Regex.Replace(key, ArrayPattern, (match) =>
+            {
+                var result = match.Value.Replace("[", ":").Replace("]", string.Empty);
+                return result;
+            });
         }
 
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            _logger = LogManager.Logger<ConfigCenterProvider>();
             _headers = new Dictionary<string, string>();
             _config = "config".Config<ConfigCenter>() ?? new ConfigCenter();
             LoadTicket().Wait();
@@ -118,21 +155,20 @@ namespace Acb.Core.Helper
 
         public override void Load()
         {
-            Data = LoadConfig().Result;
+            LoadConfig().Wait();
         }
 
         internal void Reload(object state = null)
         {
             if (state == null)
             {
-                Load();
+                LoadConfig(true).Wait();
                 return;
             }
             if (!(state is IConfigurationRoot config) || config.Providers.All(t => t is ConfigCenterProvider))
                 return;
             _config = "config".Config<ConfigCenter>() ?? new ConfigCenter();
             LoadTicket().Wait();
-            Load();
             StartRefresh();
         }
     }

@@ -7,6 +7,7 @@ using Acb.MongoDb;
 using log4net.Appender;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Acb.Framework.Logging;
 
 namespace Acb.Framework.Tests
 {

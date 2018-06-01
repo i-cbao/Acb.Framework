@@ -18,7 +18,7 @@ namespace Acb.Middleware.Monitor
                 Id = IdentityHelper.Guid32,
                 Service = service,
                 Url = url,
-                Data = (data ?? string.Empty).Unescape(),
+                Data = (data ?? string.Empty).UnEscape(),
                 Referer = from,
                 UserAgent = userAgent,
                 ClientIp = clientIp,

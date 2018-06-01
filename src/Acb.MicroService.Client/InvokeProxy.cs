@@ -85,7 +85,7 @@ namespace Acb.MicroService.Client
             var service = string.Empty;
 
             var builder = Policy
-                .Handle<AggregateException>(ex => ex.GetBaseException() is HttpRequestException) //服务器异常
+                .Handle<HttpRequestException>() //服务器异常
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound); //服务未找到
                                                                                               //熔断,3次异常,熔断5分钟
             var breaker = builder.CircuitBreakerAsync(3, TimeSpan.FromMinutes(5));
