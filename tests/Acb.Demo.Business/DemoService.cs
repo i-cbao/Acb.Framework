@@ -14,13 +14,14 @@ namespace Acb.Demo.Business
 
         public DemoDto Hello(string id, DemoInputDto dto)
         {
-            return new DemoDto
+            var t = new DemoDto
             {
                 Id = id,
                 Demo = dto.Demo,
                 Name = dto.Name + ",Success",
                 Time = dto.Time
             };
+            return t;
         }
 
         public IList<string> List(IEnumerable<string> ids)

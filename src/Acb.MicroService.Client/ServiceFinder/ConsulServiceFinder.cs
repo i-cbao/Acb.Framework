@@ -1,5 +1,7 @@
 ﻿using Acb.Core;
+using Acb.Core.Cache;
 using Acb.Core.Domain;
+using Acb.Core.Extensions;
 using Consul;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,14 @@ namespace Acb.MicroService.Client.ServiceFinder
 {
     internal class ConsulServiceFinder : IServiceFinder
     {
+        private readonly ICache _cache;
+        private static readonly object LockObj = new object();
+
+        public ConsulServiceFinder()
+        {
+            _cache = CacheManager.GetCacher<ConsulServiceFinder>();
+        }
+
         private static ConsulClient GetClient(MicroServiceConfig config)
         {
             return new ConsulClient(cfg =>
@@ -22,23 +32,33 @@ namespace Acb.MicroService.Client.ServiceFinder
 
         public List<string> Find(Assembly ass, MicroServiceConfig config)
         {
-            var name = ass.GetName();
-            var urlList = new List<string>();
-            using (var client = GetClient(config))
+            lock (LockObj)
             {
-                var list = client.Catalog.Service(name.Name, $"{Consts.Mode}").Result;
-                var items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
-                urlList.AddRange(items);
-                //开发环境 可调用测试环境的微服务
-                if (Consts.Mode == ProductMode.Dev)
+                var key = ass.AssemblyKey();
+                var urls = _cache.Get<List<string>>(key);
+                if (urls != null)
+                    return urls;
+                var name = ass.GetName();
+                urls = new List<string>();
+                using (var client = GetClient(config))
                 {
-                    list = client.Catalog.Service(name.Name, $"{ProductMode.Test}").Result;
-                    items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
-                    urlList.AddRange(items);
+                    var list = client.Catalog.Service(name.Name, $"{Consts.Mode}").Result;
+                    var items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
+                    urls.AddRange(items);
+                    //开发环境 可调用测试环境的微服务
+                    if (Consts.Mode == ProductMode.Dev)
+                    {
+                        list = client.Catalog.Service(name.Name, $"{ProductMode.Test}").Result;
+                        items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
+                        urls.AddRange(items);
+                    }
                 }
+
+                _cache.Set(key, urls, TimeSpan.FromMinutes(5));
+                return urls;
             }
 
-            return urlList;
+
         }
     }
 }

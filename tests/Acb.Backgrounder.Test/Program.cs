@@ -13,7 +13,7 @@ namespace Acb.Backgrounder.Test
             DBootstrap.Instance.Initialize();
             LogManager.ClearAdapter();
             LogManager.AddAdapter(new ConsoleAdapter(), LogLevel.All);
-            LogManager.SetLevel(LogLevel.All);
+            LogManager.LogLevel(LogLevel.All);
             var host = new ConsoleHost(new IJob[]
             {
                 new TestJob("hello_5s", TimeSpan.FromSeconds(5)),

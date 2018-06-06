@@ -11,6 +11,7 @@ namespace Acb.Core.Logging
     public static class LogManager
     {
         private const string ConfigLevel = "logLevel";
+        private const string ConfigLevelEnvironmentName = "ACB_LOGLEVEL";
 
         private static readonly ConcurrentDictionary<string, Logger> LoggerDictionary;
 
@@ -24,8 +25,34 @@ namespace Acb.Core.Logging
         {
             LoggerDictionary = new ConcurrentDictionary<string, Logger>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
-            SetLevel();
-            ConfigHelper.Instance.ConfigChanged += obj => { SetLevel(); };
+            LogLevel();
+            ConfigHelper.Instance.ConfigChanged += obj =>
+            {
+                LogLevel();
+            };
+        }
+
+        /// <summary> 设置日志登记 </summary>
+        /// <param name="level">为空时重置</param>
+        public static void LogLevel(LogLevel? level = null)
+        {
+            LogLevel logLevel;
+            if (level.HasValue)
+                logLevel = level.Value;
+            else
+            {
+                var mode = Environment.GetEnvironmentVariable(ConfigLevelEnvironmentName);
+                if (string.IsNullOrWhiteSpace(mode))
+                    mode = ConfigLevel.Config<string>();
+                logLevel = mode.CastTo(Logging.LogLevel.Info);
+            }
+            if (_logLevel == logLevel) return;
+            _logLevel = logLevel;
+            foreach (var adapter in LoggerAdapters)
+            {
+                if (adapter.Value == Logging.LogLevel.Off || !IsEnableLevel(adapter.Value))
+                    LoggerAdapters[adapter.Key] = _logLevel;
+            }
         }
 
         /// <summary> 是否启用日志级别 </summary>
@@ -35,8 +62,8 @@ namespace Acb.Core.Logging
         private static bool IsEnableLevel(LogLevel level, LogLevel? targetLevel = null)
         {
             targetLevel = targetLevel ?? _logLevel;
-            if (targetLevel == LogLevel.All) return true;
-            if (targetLevel == LogLevel.Off) return false;
+            if (targetLevel == Logging.LogLevel.All) return true;
+            if (targetLevel == Logging.LogLevel.Off) return false;
             return level >= targetLevel;
         }
 
@@ -124,21 +151,6 @@ namespace Acb.Core.Logging
         public static Logger Logger<T>()
         {
             return Logger(typeof(T));
-        }
-
-        /// <summary> 设置日志等级 </summary>
-        /// <param name="level"></param>
-        public static void SetLevel(LogLevel? level = null)
-        {
-            level = level ?? ConfigLevel.Config(LogLevel.Debug);
-            if (_logLevel == level)
-                return;
-            _logLevel = level.Value;
-            foreach (var adapter in LoggerAdapters)
-            {
-                if (adapter.Value == LogLevel.Off || !IsEnableLevel(adapter.Value))
-                    LoggerAdapters[adapter.Key] = _logLevel;
-            }
         }
 
         internal static IEnumerable<ILog> GetLogs(string name, LogLevel level)
