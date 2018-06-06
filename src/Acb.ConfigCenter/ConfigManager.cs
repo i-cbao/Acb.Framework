@@ -18,7 +18,7 @@ namespace Acb.ConfigCenter
         private readonly ConcurrentDictionary<string, object> _configeCache;
         private readonly string _configDirectory;
         public event Action<string> Change;
-        private const string ConfigExtension = ".json";
+        private static string _configExtension;
 
         public ConfigManager()
         {
@@ -27,12 +27,13 @@ namespace Acb.ConfigCenter
             _config = builder.Build();
             _configeCache = new ConcurrentDictionary<string, object>();
             var dir = _config.GetValue<string>("configPath");
+            _configExtension = _config.GetValue("configExt", ".json");
             _configDirectory = Path.Combine(Directory.GetCurrentDirectory(), dir);
             //文件监控
             var watcher = new FileSystemWatcher(_configDirectory)
             {
                 IncludeSubdirectories = true,
-                Filter = $"*{ConfigExtension}", //"*.config|*.xml"多个扩展名不受支持！
+                Filter = $"*{_configExtension}", //"*.config|*.xml"多个扩展名不受支持！
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.Size
             };
             watcher.Changed += Reset;
@@ -45,18 +46,16 @@ namespace Acb.ConfigCenter
         private void Reset(object sender, FileSystemEventArgs e)
         {
             if (_configeCache.ContainsKey(e.Name))
-                _configeCache.TryRemove(e.Name, out var _);
+                _configeCache.TryRemove(e.Name, out _);
             Change?.Invoke(e.Name);
         }
 
-        private object ReadFile(string file)
+        private static object ReadFile(string path)
         {
-            var path = Path.Combine(_configDirectory, file);
             if (!File.Exists(path))
                 return null;
             var content = File.ReadAllText(path, Encoding.UTF8);
-            var ext = Path.GetExtension(file);
-            switch (ext)
+            switch (_configExtension)
             {
                 case ".yml":
                     var d = new Deserializer();
@@ -64,9 +63,29 @@ namespace Acb.ConfigCenter
                     {
                         return d.Deserialize(reader);
                     }
+                default:
+                    return JsonConvert.DeserializeObject(content);
             }
+        }
 
-            return JsonConvert.DeserializeObject(content);
+        private static void SaveFile(string path, string config)
+        {
+            switch (_configExtension)
+            {
+                case ".yml":
+                    //var obj = JsonConvert.DeserializeObject(config);
+                    var builder = new SerializerBuilder();
+                    builder.JsonCompatible();
+                    var d = builder.Build();
+                    using (var writer = new StreamWriter(path, false))
+                    {
+                        d.Serialize(writer, obj, obj.GetType());
+                    }
+                    break;
+                default:
+                    File.WriteAllText(path, config, Encoding.UTF8);
+                    break;
+            }
         }
 
         /// <summary> 获取配置 </summary>
@@ -75,15 +94,23 @@ namespace Acb.ConfigCenter
         /// <returns></returns>
         public object Get(string module, string env)
         {
-            var file = $"{module}-{env}{ConfigExtension}";
-            var config = _configeCache.GetOrAdd(file, ReadFile);
+            var file = $"{module}-{env}{_configExtension}";
+            var config = _configeCache.GetOrAdd(file, t =>
+            {
+                var path = Path.Combine(_configDirectory, t);
+                return ReadFile(path);
+            });
             if (config != null)
                 return config;
-            _configeCache.TryRemove(file, out var _);
-            file = $"{module}{ConfigExtension}";
-            config = _configeCache.GetOrAdd(file, ReadFile);
+            _configeCache.TryRemove(file, out _);
+            file = $"{module}{_configExtension}";
+            config = _configeCache.GetOrAdd(file, t =>
+            {
+                var path = Path.Combine(_configDirectory, t);
+                return ReadFile(path);
+            });
             if (config == null)
-                _configeCache.TryRemove(file, out var _);
+                _configeCache.TryRemove(file, out _);
             return config;
         }
 
@@ -93,15 +120,14 @@ namespace Acb.ConfigCenter
         /// <returns></returns>
         public bool Save(string file, string config)
         {
-            file = $"{file}{ConfigExtension}";
+            file = $"{file}{_configExtension}";
             var path = Path.Combine(_configDirectory, file);
             if (File.Exists(path))
             {
-                _configeCache.TryRemove(file, out var _);
-                File.Copy(path, path.Replace(ConfigExtension, $"_{DateTime.Now.Timestamp()}.bak"));
+                _configeCache.TryRemove(file, out _);
+                File.Copy(path, path.Replace(_configExtension, $"_{DateTime.Now.Timestamp()}.bak"));
             }
-
-            File.WriteAllText(path, config, Encoding.UTF8);
+            SaveFile(path, config);
             return true;
         }
 
@@ -109,10 +135,10 @@ namespace Acb.ConfigCenter
         /// <param name="file"></param>
         public void Remove(string file)
         {
-            var name = string.Concat(file, ConfigExtension);
+            var name = string.Concat(file, _configExtension);
             var path = Path.Combine(_configDirectory, name);
             if (!File.Exists(path)) return;
-            File.Move(path, path.Replace(ConfigExtension, $"_{DateTime.Now.Timestamp()}.bak"));
+            File.Move(path, path.Replace(_configExtension, $"_{DateTime.Now.Timestamp()}.bak"));
             _configeCache.TryRemove(name, out var _);
         }
 
@@ -120,7 +146,7 @@ namespace Acb.ConfigCenter
         /// <returns></returns>
         public List<string> List()
         {
-            var files = Directory.GetFiles(_configDirectory, $"*{ConfigExtension}");
+            var files = Directory.GetFiles(_configDirectory, $"*{_configExtension}");
             return files.Select(t => Path.GetFileNameWithoutExtension(t).Split('-')[0]).Distinct().OrderBy(t => t)
                 .ToList();
         }

@@ -68,7 +68,6 @@ namespace Acb.Core.Helper
             }
 
             _config = _builder.Build();
-            LogManager.SetLevel();
         }
 
         /// <summary> 配置文件读取 </summary>

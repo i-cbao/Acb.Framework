@@ -2,6 +2,7 @@
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
+using Acb.Core.Serialize;
 using Acb.Core.Tests;
 using Acb.Core.Timing;
 using Acb.Demo.Contracts;
@@ -9,8 +10,14 @@ using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
 using Acb.MicroService.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
 {
@@ -23,39 +30,106 @@ namespace Acb.Framework.Tests
         public MicroServiceTest()
         {
             _microService = ProxyService.Proxy<IDemoService>();
-            LogManager.SetLevel(LogLevel.Off);
             _localService = CurrentIocManager.Resolve<IDemoService>();
         }
 
         [TestMethod]
         public void Test()
         {
+
             _microService.Load("shay");
             var task = _microService.LoadAsync();
             var dict = _microService.Dict(new[] { "123", "456" });
             Print(dict);
-            var result = CodeTimer.Time("micro", 2000, () =>
+
+            //LogManager.LogLevel(LogLevel.Off);
+            //var result = CodeTimer.Time("micro", 200, () =>
+            //{
+            //    _microService.Hello(IdentityHelper.Guid32, new DemoInputDto
+            //    {
+            //        Demo = DemoEnums.Test,
+            //        Name = "shay" + IdentityHelper.Guid16,
+            //        Time = Clock.Now
+            //    });
+            //    //Print(word);
+            //}, 10);
+            //Print(result.ToString());
+            //result = CodeTimer.Time("local", 200, () =>
+            //{
+            //    _localService.Hello(IdentityHelper.Guid32, new DemoInputDto
+            //    {
+            //        Demo = DemoEnums.Test,
+            //        Name = "shay" + IdentityHelper.Guid16,
+            //        Time = Clock.Now
+            //    });
+            //    //Print(word);
+            //}, 10);
+            //Print(result.ToString());
+        }
+
+        private async Task<WebResponse> Request(HttpMethod method, string url, object data = null)
+        {
+            var req = (HttpWebRequest)WebRequest.Create(url);
+            req.Method = method.ToString();
+            req.Accept = "application/json";
+            if (data == null || method == HttpMethod.Get || method == HttpMethod.Delete)
+                return await req.GetResponseAsync();
+            req.ContentType = "application/json";
+            using (var stream = await req.GetRequestStreamAsync())
             {
-                var word = _microService.Hello(IdentityHelper.Guid32, new DemoInputDto
+                var str = data.GetType().IsSimpleType() || data.GetType().IsEnum ? data.ToJson() : data.ToString();
+                var buffer = Encoding.UTF8.GetBytes(str);
+                await stream.WriteAsync(buffer, 0, buffer.Length);
+                req.ContentLength = buffer.Length;
+            }
+
+            return await req.GetResponseAsync();
+        }
+
+        private async Task<string> PostAsync(string url, object data)
+        {
+            var stream = await PostToStreamAsync(url, data);
+            if (stream == null) return string.Empty;
+            using (var reader = new StreamReader(stream, Encoding.UTF8))
+            {
+                return await reader.ReadToEndAsync();
+            }
+        }
+
+        private async Task<Stream> PostToStreamAsync(string url, object data)
+        {
+            var resp = await Request(HttpMethod.Post, url, data);
+            return resp.GetResponseStream();
+        }
+
+        [TestMethod]
+        public void HttpTest()
+        {
+            const string url = "http://localhost:63409/micro/idemoservice/hello";
+            var data = JsonHelper.ToJson(new object[]
+            {
+                IdentityHelper.Guid32,
+                new DemoInputDto
                 {
                     Demo = DemoEnums.Test,
                     Name = "shay" + IdentityHelper.Guid16,
                     Time = Clock.Now
-                });
-                //Print(word);
-            }, 10);
-            Print(result.ToString());
-            result = CodeTimer.Time("local", 2000, () =>
+                }
+            });
+
+            LogManager.LogLevel(LogLevel.Off);
+            var result1 = CodeTimer.Time("HttpClient", 200, () =>
             {
-                var word = _localService.Hello(IdentityHelper.Guid32, new DemoInputDto
-                {
-                    Demo = DemoEnums.Test,
-                    Name = "shay" + IdentityHelper.Guid16,
-                    Time = Clock.Now
-                });
-                //Print(word);
+                var html = new HttpClient().PostAsync(url,
+                        new StringContent(data, Encoding.UTF8, "application/json")).Result.Content.ReadAsStringAsync()
+                    .Result;
             }, 10);
-            Print(result.ToString());
+            var resul2 = CodeTimer.Time("WebRequest", 200, () =>
+            {
+                var html = PostAsync(url, data).Result;
+            }, 10);
+            Print(result1.ToString());
+            Print(resul2.ToString());
         }
 
         [TestMethod]

@@ -27,7 +27,6 @@ namespace Acb.MicroService.Client
         private readonly MicroServiceConfig _config;
         private readonly ICache _serviceCache;
 
-
         /// <summary> 接口类型 </summary>
         private readonly Type _type;
 
@@ -55,16 +54,10 @@ namespace Acb.MicroService.Client
 
         private IEnumerable<string> GetService()
         {
-            var key = _type.Assembly.AssemblyKey();
-            var urls = _serviceCache.Get<List<string>>(key);
-            if (urls != null && urls.Any())
-                return urls;
-
             var finder = GetServiceFinder();
-            urls = finder.Find(_type.Assembly, _config).ToList();
+            var urls = finder.Find(_type.Assembly, _config).ToList();
             if (urls == null || !urls.Any())
                 throw ErrorCodes.NoService.CodeException();
-            _serviceCache.Set(key, urls, TimeSpan.FromMinutes(5));
             return urls;
         }
 
@@ -83,7 +76,6 @@ namespace Acb.MicroService.Client
         {
             var services = GetTypeService();
             var service = string.Empty;
-
             var builder = Policy
                 .Handle<HttpRequestException>() //服务器异常
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound); //服务未找到
@@ -116,7 +108,7 @@ namespace Acb.MicroService.Client
                 return null;
             if (type == typeof(Task))
                 return Task.CompletedTask;
-            return ResultAsync(resp.Result, type).Result;
+            return ResultAsync(resp, type).Result;
         }
 
         /// <summary> 执行请求 </summary>
@@ -135,7 +127,6 @@ namespace Acb.MicroService.Client
                 },
                 {"referer", AcbHttpContext.RawUrl}
             };
-            //http请求
             return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
             {
                 Data = args,
@@ -144,11 +135,12 @@ namespace Acb.MicroService.Client
         }
 
         /// <summary> 获取结果 </summary>
-        /// <param name="resp"></param>
+        /// <param name="respTask"></param>
         /// <param name="returnType"></param>
         /// <returns></returns>
-        private static async Task<object> ResultAsync(HttpResponseMessage resp, Type returnType)
+        private static async Task<object> ResultAsync(Task<HttpResponseMessage> respTask, Type returnType)
         {
+            var resp = await respTask;
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var html = await resp.Content.ReadAsStringAsync();
