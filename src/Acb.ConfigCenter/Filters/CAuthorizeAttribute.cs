@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
@@ -23,6 +24,12 @@ namespace Acb.ConfigCenter.Filters
             var dto = config.GetSecurity();
             if (dto == null || !dto.Enabled)
                 return;
+            if (dto.Get)
+            {
+                var action = context.ActionDescriptor as ControllerActionDescriptor;
+                if (action?.ControllerName == "Home" && action.ActionName == "Config")
+                    return;
+            }
             var verify = Helper.VerifyTicket(context.HttpContext.Request, dto);
             if (!verify)
             {

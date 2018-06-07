@@ -19,16 +19,19 @@ namespace Acb.ConfigCenter
         private readonly string _configDirectory;
         public event Action<string> Change;
         private static string _configExtension;
+        private const string ConfigDir = "_config";
+        private static readonly string[] Modes = { "dev", "test", "ready", "prod" };
 
         public ConfigManager()
         {
-            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory());
-            builder.AddJsonFile("appsettings.json", false, true);
-            _config = builder.Build();
             _configeCache = new ConcurrentDictionary<string, object>();
-            var dir = _config.GetValue<string>("configPath");
+            _configDirectory = Path.Combine(Directory.GetCurrentDirectory(), ConfigDir);
+
+            var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory());
+            builder.AddJsonFile(Path.Combine(_configDirectory, "application.json"), false, true);
+            _config = builder.Build();
             _configExtension = _config.GetValue("configExt", ".json");
-            _configDirectory = Path.Combine(Directory.GetCurrentDirectory(), dir);
+
             //文件监控
             var watcher = new FileSystemWatcher(_configDirectory)
             {
@@ -147,11 +150,20 @@ namespace Acb.ConfigCenter
         public List<string> List()
         {
             var files = Directory.GetFiles(_configDirectory, $"*{_configExtension}");
-            return files.Select(t => Path.GetFileNameWithoutExtension(t).Split('-')[0]).Distinct().OrderBy(t => t)
-                .ToList();
+            return files.Select(t =>
+            {
+                var file = Path.GetFileNameWithoutExtension(t);
+                var arr = file.Split('-');
+                if (arr.Length <= 1)
+                    return file;
+                var mode = arr[arr.Length - 1];
+                if (Modes.Contains(mode))
+                    return file.Substring(0, file.LastIndexOf('-'));
+                return file;
+            }).Distinct().OrderBy(t => t).ToList();
         }
 
-        public SecurityDto GetSecurity()
+        internal SecurityDto GetSecurity()
         {
             return _config.GetSection("security").Get<SecurityDto>();
         }
