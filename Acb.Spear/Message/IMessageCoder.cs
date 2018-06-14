@@ -1,6 +1,4 @@
-﻿using Acb.Spear.Message;
-
-namespace Acb.Spear.Transport
+﻿namespace Acb.Spear.Message
 {
     /// <summary> 消息编码器 </summary>
     public interface IMessageEncoder
@@ -8,7 +6,7 @@ namespace Acb.Spear.Transport
         /// <summary> 消息编码 </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        byte[] Encode(TransportMessage message);
+        byte[] Encode(IMicroMessage message);
     }
 
     /// <summary> 消息解码器 </summary>
@@ -17,7 +15,7 @@ namespace Acb.Spear.Transport
         /// <summary> 消息解码 </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        TransportMessage Decode(byte[] data);
+        IMicroMessage Decode(byte[] data);
     }
 
     public interface IMessageCoderFactory

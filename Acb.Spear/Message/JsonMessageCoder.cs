@@ -1,8 +1,7 @@
-﻿using Acb.Spear.Message;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Text;
 
-namespace Acb.Spear.Transport.Impl
+namespace Acb.Spear.Message
 {
     public class JsonMessageCoderFactory : IMessageCoderFactory
     {
@@ -21,7 +20,7 @@ namespace Acb.Spear.Transport.Impl
 
     public class JsonMessageEncoder : IMessageEncoder
     {
-        public byte[] Encode(TransportMessage message)
+        public byte[] Encode(IMicroMessage message)
         {
             var content = JsonConvert.SerializeObject(message);
             return Encoding.UTF8.GetBytes(content);
@@ -30,17 +29,17 @@ namespace Acb.Spear.Transport.Impl
 
     public class JsonMessageDecoder : IMessageDecoder
     {
-        public TransportMessage Decode(byte[] data)
+        public IMicroMessage Decode(byte[] data)
         {
             var content = Encoding.UTF8.GetString(data);
-            var message = JsonConvert.DeserializeObject<TransportMessage>(content);
+            var message = JsonConvert.DeserializeObject<MicroMessage>(content);
             if (message.IsInvoke)
             {
                 message.Content = JsonConvert.DeserializeObject<InvokeMessage>(message.Content.ToString());
             }
             if (message.IsResult)
             {
-                message.Content = JsonConvert.DeserializeObject<InvokeResultMessage>(message.Content.ToString());
+                message.Content = JsonConvert.DeserializeObject<ResultMessage>(message.Content.ToString());
             }
             return message;
         }

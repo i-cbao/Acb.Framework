@@ -11,21 +11,63 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.IO;
+using System.Reflection;
 
 namespace Acb.WebApi
 {
     public class DStartup
     {
         private readonly DBootstrap _bootstrap;
+        private string _appName;
 
-        protected DStartup()
+        protected DStartup(string name = null)
         {
             _bootstrap = DBootstrap.Instance;
+            _appName = name;
+        }
+
+        private void AddSwagger(IServiceCollection services)
+        {
+            if (Consts.Mode == ProductMode.Prod)
+                return;
+            var assName = Assembly.GetExecutingAssembly().GetName();
+            _appName = string.IsNullOrWhiteSpace(_appName) ? assName.Name : _appName;
+            services.AddSwaggerGen(option =>
+            {
+                option.SwaggerDoc("help", new Info
+                {
+                    Title = _appName,
+                    Version = $"v{assName.Version}"
+                });
+                var dir = AppDomain.CurrentDomain.BaseDirectory;
+                var files = Directory.GetFiles(dir, "*.xml", SearchOption.TopDirectoryOnly);
+                foreach (var file in files)
+                {
+                    option.IncludeXmlComments(file);
+                }
+
+                option.CustomSchemaIds(t => t.FullName);
+            });
+        }
+
+        private void UseSwagger(IApplicationBuilder app)
+        {
+            if (Consts.Mode == ProductMode.Prod)
+                return;
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint(
+                    "/swagger/help/swagger.json", _appName);
+            });
         }
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            AddSwagger(services);
             services
                 .AddMvc(options =>
                 {
@@ -42,6 +84,10 @@ namespace Acb.WebApi
                     //json序列化处理
                     opts.SerializerSettings.Converters.Add(new DateTimeConverter());
                 });
+            if (Consts.Mode != ProductMode.Prod)
+            {
+
+            }
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
@@ -52,6 +98,7 @@ namespace Acb.WebApi
 
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            UseSwagger(app);
             var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc();

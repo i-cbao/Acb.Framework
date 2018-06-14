@@ -1,7 +1,7 @@
 ﻿namespace Acb.Spear.Message
 {
     /// <summary> 调用结果消息 </summary>
-    public class InvokeResultMessage
+    public class ResultMessage
     {
         /// <summary> 状态码 </summary>
         public int Code { get; set; } = 200;

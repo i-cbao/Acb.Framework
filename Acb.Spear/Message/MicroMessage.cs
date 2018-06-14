@@ -2,29 +2,26 @@
 
 namespace Acb.Spear.Message
 {
-    /// <summary> 传输消息实体 </summary>
-    public class TransportMessage
+    public class MicroMessage : IMicroMessage
     {
-        /// <summary> 消息Id </summary>
+        /// <summary> 消息ID </summary>
         public string Id { get; set; }
-
+        /// <summary> 内容类型 </summary>
+        public string ContentType { get; set; }
         /// <summary> 消息内容 </summary>
         public object Content { get; set; }
 
-        /// <summary> 内容类型 </summary>
-        public string ContentType { get; set; }
-
-        public TransportMessage()
+        public MicroMessage()
         {
         }
 
-        public TransportMessage(object content)
+        public MicroMessage(object content)
         {
             Content = content ?? throw new ArgumentNullException(nameof(content));
             ContentType = content.GetType().FullName;
         }
 
-        public TransportMessage(object content, string contentType)
+        public MicroMessage(object content, string contentType)
         {
             Content = content ?? throw new ArgumentNullException(nameof(content));
             ContentType = contentType;
@@ -41,9 +38,9 @@ namespace Acb.Spear.Message
         /// <summary> 创建调用消息 </summary>
         /// <param name="invokeMessage"></param>
         /// <returns></returns>
-        public static TransportMessage CreateInvokeMessage(InvokeMessage invokeMessage)
+        public static MicroMessage CreateInvokeMessage(InvokeMessage invokeMessage)
         {
-            return new TransportMessage(invokeMessage, ContentTypes.InvokeType)
+            return new MicroMessage(invokeMessage, ContentTypes.InvokeType)
             {
                 Id = Guid.NewGuid().ToString("N")
             };
@@ -53,9 +50,9 @@ namespace Acb.Spear.Message
         /// <param name="id"></param>
         /// <param name="result"></param>
         /// <returns></returns>
-        public static TransportMessage CreateInvokeResultMessage(string id, InvokeResultMessage result)
+        public static MicroMessage CreateResultMessage(string id, ResultMessage result)
         {
-            return new TransportMessage(result, ContentTypes.InvokeResultType)
+            return new MicroMessage(result, ContentTypes.InvokeResultType)
             {
                 Id = id
             };
@@ -66,19 +63,19 @@ namespace Acb.Spear.Message
         public bool IsResult => ContentType == ContentTypes.InvokeResultType;
     }
 
-    public static class TransportMessageExtension
+    public static class MicroMessageExtension
     {
         /// <summary> 创建调用消息 </summary>
         /// <param name="invokeMessage"></param>
         /// <returns></returns>
-        public static TransportMessage Create(this InvokeMessage invokeMessage) =>
-            TransportMessage.CreateInvokeMessage(invokeMessage);
+        public static MicroMessage Create(this InvokeMessage invokeMessage) =>
+            MicroMessage.CreateInvokeMessage(invokeMessage);
 
         /// <summary> 创建调用结果消息 </summary>
         /// <param name="invokeResultMessage"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public static TransportMessage Create(this InvokeResultMessage invokeResultMessage, string id) =>
-            TransportMessage.CreateInvokeResultMessage(id, invokeResultMessage);
+        public static MicroMessage Create(this ResultMessage invokeResultMessage, string id) =>
+            MicroMessage.CreateResultMessage(id, invokeResultMessage);
     }
 }
