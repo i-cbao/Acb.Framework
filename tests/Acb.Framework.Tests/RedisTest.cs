@@ -1,4 +1,4 @@
-﻿using Acb.Core.Cache;
+﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Tests;
@@ -17,15 +17,26 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void GetTest()
         {
-
+            ThreadPool.GetMinThreads(out var min, out var compt);
+            Print($"最小线程数：{min},{compt}");
+            //ThreadPool.SetMinThreads(300, compt);
             const string key = "shay";
-            var redis = CacheManager.GetCacher("framework", CacheLevel.Both);
-
+            var redis = RedisManager.Instance.GetDatabase("local", 4);
             redis.Set(key, "test", TimeSpan.FromMinutes(2));
-            var result = CodeTimer.Time("redis test", 1000, () =>
+            var result = CodeTimer.Time("redis test", 100, () =>
             {
-                var tmp = redis.Get<string>(key);
-            }, 10);
+                try
+                {
+                    var ritem = RedisManager.Instance.GetDatabase("local", 4);
+                    var tmp = ritem.Get<string>(key);
+                }
+                catch (Exception ex)
+                {
+                    //Print(ex.Format());
+                    throw;
+                }
+
+            }, 100);
             Print(result.ToString());
             var value = redis.Get<string>(key);
             Print(value);
@@ -47,7 +58,7 @@ namespace Acb.Framework.Tests
             //Print(t.StringGet(key).ToString());
             var id = t.StringIncrement(key);
             t.KeyExpire(key, Clock.Now.Date.AddDays(1));
-            Print(id);            
+            Print(id);
         }
 
         [TestMethod]

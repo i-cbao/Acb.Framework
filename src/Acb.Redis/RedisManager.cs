@@ -6,6 +6,9 @@ using Acb.Core.Logging;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Net;
+using Acb.Core.Serialize;
 
 namespace Acb.Redis
 {
@@ -58,6 +61,8 @@ namespace Acb.Redis
 
         private ConnectionMultiplexer Connect(ConfigurationOptions configOpts)
         {
+            var points = string.Join<EndPoint>(",", configOpts.EndPoints.ToArray());
+            _logger.Info($"Create Redis: {points}");
             var conn = ConnectionMultiplexer.Connect(configOpts);
             conn.ConfigurationChanged += (sender, e) =>
             {
@@ -78,13 +83,20 @@ namespace Acb.Redis
         {
             configName = GetConfigName(configName);
             var connectionString = GetConnectionString(configName);
-            return _connections.GetOrAdd(configName, p => Connect(connectionString));
+            var opts = ConfigurationOptions.Parse(connectionString);
+            return GetConnection(configName, opts);
         }
 
         private ConnectionMultiplexer GetConnection(string configName, ConfigurationOptions configOpts)
         {
             configName = GetConfigName(configName);
-            return _connections.GetOrAdd(configName, p => Connect(configOpts));
+            var conn = _connections.GetOrAdd(configName, p => Connect(configOpts));
+            if (conn != null && conn.IsConnected)
+                return conn;
+            conn?.Dispose();
+            conn = Connect(configOpts);
+            _connections[configName] = conn;
+            return conn;
         }
 
         /// <summary> 获取Database </summary>

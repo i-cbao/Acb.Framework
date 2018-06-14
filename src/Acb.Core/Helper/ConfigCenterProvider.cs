@@ -45,19 +45,26 @@ namespace Acb.Core.Helper
             if (!string.IsNullOrWhiteSpace(_config.Account))
             {
                 _logger.Info("正在加载配置中心令牌");
-                var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
-                var loginResp = await HttpHelper.Instance.PostAsync(loginUrl,
-                    new { account = _config.Account, password = _config.Password });
-                var data = await loginResp.Content.ReadAsStringAsync();
-                if (loginResp.IsSuccessStatusCode)
+                try
                 {
-                    var json = JsonConvert.DeserializeObject<dynamic>(data);
-                    if ((bool)json.ok)
-                        _headers["Authorization"] = $"acb {json.ticket}";
+                    var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
+                    var loginResp = await HttpHelper.Instance.PostAsync(loginUrl,
+                        new { account = _config.Account, password = _config.Password });
+                    var data = await loginResp.Content.ReadAsStringAsync();
+                    if (loginResp.IsSuccessStatusCode)
+                    {
+                        var json = JsonConvert.DeserializeObject<dynamic>(data);
+                        if ((bool)json.ok)
+                            _headers["Authorization"] = $"acb {json.ticket}";
+                    }
+                    else
+                    {
+                        _logger.Info(data);
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    _logger.Info(data);
+                    _logger.Error(ex.Message, ex);
                 }
             }
         }
