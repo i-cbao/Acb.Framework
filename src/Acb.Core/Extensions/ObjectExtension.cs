@@ -153,5 +153,32 @@ namespace Acb.Core.Extensions
                 inner = inner.InnerException;
             return inner;
         }
+
+        /// <summary> unescape </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string UnEscape(this object value)
+        {
+            if (value == null)
+                return string.Empty;
+            var type = value.GetType();
+            //枚举值
+            if (type.IsEnum)
+                return value.CastTo(0).ToString();
+            //布尔值
+            if (type == typeof(bool))
+                return ((bool)value ? 1 : 0).ToString();
+
+            var sb = new StringBuilder();
+            var str = value.ToString();
+            var len = str.Length;
+            var i = 0;
+            while (i != len)
+            {
+                sb.Append(Uri.IsHexEncoding(str, i) ? Uri.HexUnescape(str, ref i) : str[i++]);
+            }
+
+            return sb.ToString();
+        }
     }
 }

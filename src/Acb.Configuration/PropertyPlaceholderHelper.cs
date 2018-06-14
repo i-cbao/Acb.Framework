@@ -34,19 +34,19 @@ namespace Acb.Configuration
         {
             if (config == null || string.IsNullOrEmpty(property))
                 return property;
-            StringBuilder stringBuilder = new StringBuilder(property);
-            int num = property.IndexOf(Prefix, StringComparison.Ordinal);
+            var stringBuilder = new StringBuilder(property);
+            var num = property.IndexOf(Prefix, StringComparison.Ordinal);
             while (num != -1)
             {
-                int endIndex = PropertyPlaceholderHelper.FindEndIndex(stringBuilder, num);
+                var endIndex = FindEndIndex(stringBuilder, num);
                 if (endIndex != -1)
                 {
-                    string property1 = stringBuilder.Substring(num + Prefix.Length, endIndex);
-                    string str1 = property1;
+                    var property1 = stringBuilder.Substring(num + Prefix.Length, endIndex);
+                    var str1 = property1;
                     if (!visitedPlaceHolders.Add(str1))
                         throw new ArgumentException(
                             string.Format("Circular placeholder reference '{0}' in property definitions", str1));
-                    string stringValue1 = ParseStringValue(property1, config, visitedPlaceHolders);
+                    var stringValue1 = ParseStringValue(property1, config, visitedPlaceHolders);
                     string index1 = stringValue1.Replace('[', ':').Replace("]", string.Empty);
                     string property2 = config[index1];
                     if (property2 == null)

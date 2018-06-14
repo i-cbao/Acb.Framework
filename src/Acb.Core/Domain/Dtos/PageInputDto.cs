@@ -1,5 +1,6 @@
 ﻿namespace Acb.Core.Domain.Dtos
 {
+    /// <summary> 分页基础接口 </summary>
     public interface IPageInput
     {
         /// <summary> 当前页码 </summary>
@@ -18,11 +19,16 @@
         /// <summary> 每页数量 </summary>
         public int Size { get; set; }
 
+        /// <summary> 构造函数 </summary>
         public PageInputDto()
         {
             Page = 1;
             Size = 20;
         }
+
+        /// <summary> 构造函数 </summary>
+        /// <param name="page"></param>
+        /// <param name="size"></param>
         public PageInputDto(int page, int size)
         {
             Page = page;

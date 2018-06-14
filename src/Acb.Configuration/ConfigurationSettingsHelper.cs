@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Microsoft.Extensions.Configuration;
 using System;
 
@@ -26,11 +27,13 @@ namespace Acb.Configuration
             var clientConfigsection = config.GetSection(configPrefix);
 
             settings.Name = GetApplicationName(clientConfigsection, config, settings.Name);
-            settings.Environment = config.GetValue<string>("mode");
+            settings.Environment = Consts.Mode.ToString().ToLower(); /*config.GetValue<string>("mode")*/;
             settings.Label = GetLabel(clientConfigsection, config);
+
             settings.Username = GetUsername(clientConfigsection, config);
             settings.Password = GetPassword(clientConfigsection, config);
             settings.Uri = GetUri(clientConfigsection, config, settings.Uri);
+
             settings.Enabled = GetEnabled(clientConfigsection, config, settings.Enabled);
             settings.FailFast = GetFailFast(clientConfigsection, config, settings.FailFast);
             settings.ValidateCertificates = GetCertificateValidation(clientConfigsection, config, settings.ValidateCertificates);
@@ -102,16 +105,25 @@ namespace Acb.Configuration
 
         private static string GetUri(IConfiguration clientConfigsection, IConfiguration resolve, string def)
         {
+            var uri = Environment.GetEnvironmentVariable("CONFIG_HOST");
+            if (!string.IsNullOrWhiteSpace(uri) && uri.IsUrl())
+                return uri;
             return GetConfigValue("uri", clientConfigsection, resolve, def);
         }
 
         private static string GetPassword(IConfiguration clientConfigsection, IConfiguration resolve)
         {
+            var pwd = Environment.GetEnvironmentVariable("CONFIG_PWD");
+            if (!string.IsNullOrWhiteSpace(pwd))
+                return pwd;
             return GetConfigValue<string>("password", clientConfigsection, resolve, null);
         }
 
         private static string GetUsername(IConfiguration clientConfigsection, IConfiguration resolve)
         {
+            var user = Environment.GetEnvironmentVariable("CONFIG_USER");
+            if (!string.IsNullOrWhiteSpace(user))
+                return user;
             return GetConfigValue<string>("username", clientConfigsection, resolve, null);
         }
 

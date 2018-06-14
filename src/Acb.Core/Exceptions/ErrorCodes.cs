@@ -17,7 +17,7 @@ namespace Acb.Core.Exceptions
         /// <summary> 默认错误码 </summary>
         public const int DefaultCode = -1;
 
-        /// <summary> 系统错误 </summary>
+        /// <summary> 服务器心情不好，请稍后重试~ </summary>
         [Description("服务器心情不好，请稍后重试~")]
         public const int SystemError = 10001;
 
@@ -40,6 +40,10 @@ namespace Acb.Core.Exceptions
         /// <summary> 客户端令牌已失效 </summary>
         [Description("登录令牌已失效")]
         public const int InvalidTicket = 10006;
+
+        /// <summary> 没有可用的服务 </summary>
+        [Description("没有可用的服务")]
+        public const int NoService = 10007;
     }
 
     /// <summary> 错误码扩展 </summary>

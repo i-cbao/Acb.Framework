@@ -1,11 +1,11 @@
-﻿using Acb.Configuration;
+﻿using Acb.Core;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Modules;
 
 namespace Acb.Framework.Logging
 {
-    [DependsOn(typeof(ConfigurationModule))]
+    [DependsOn(typeof(CoreModule))]
     public class LogginModule : DModule
     {
         private static void SetTcpAddpend()

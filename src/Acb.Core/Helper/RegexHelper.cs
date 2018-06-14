@@ -5,9 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Acb.Core.Helper
 {
-    /// <summary>
-    /// 正则辅助类
-    /// </summary>
+    /// <summary> 正则辅助类 </summary>
     public static class RegexHelper
     {
         private const string BrRegex = @"(\r|\n)";
@@ -17,12 +15,20 @@ namespace Acb.Core.Helper
 
         private const string UrlRegex =
             @"^(http|https)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{1,10}))(\:[0-9]+)*(/($|[a-zA-Z0-9\.\,\?\'\\\+&%\$#\=~_\-]+))*$";
+        /// <summary> 手机号码 </summary>
+        private const string MobileRegex = @"^1[0-9]{10}$";//@"^(0[0-9]{2,3}-?[0-9]{7,8})|((13|15|18)\d{9})$";
+        /// <summary> 邮箱 </summary>
+        private const string EmailRegex = @"^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$";
 
-        private const string MobileRegex = @"1[0-9]{10}";//@"^(0[0-9]{2,3}-?[0-9]{7,8})|((13|15|18)\d{9})$";
-        private const string EmailRegex = @"\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*";
+        /// <summary> 身份证 </summary>
+        private const string IdCardRegex =
+            @"^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$)|(^[1-9]\d{5}\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{2}$";
 
         private const string HtmlTagRegex = @"</?[0-9a-zA-Z]+[^>]*/?>";
         private const string FloatRegex = @"^([-]|[0-9])[0-9]*(\.\w*)?$";
+        /// <summary> 车牌号码 </summary>
+        private const string PlateNumberRegex =
+            @"^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4,5}[A-Z0-9挂学警港澳]{1}$";
 
         private const string HtmlFindByIdRegex =
             @"<([0-9a-zA-Z]+)[^>]*\bid=([""']){0}\2[^>]*>(?><\1[^>]*>(?<tag>)|</\1>(?<-tag>)|.)*?(?(tag)(?!))</\1>";
@@ -161,9 +167,95 @@ namespace Acb.Core.Helper
             return !string.IsNullOrWhiteSpace(str) && Regex.IsMatch(str, FloatRegex);
         }
 
-        /// <summary>
-        /// 清楚Html标签
-        /// </summary>
+        /// <summary> 是否是身份证号码 </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static bool IsIdCardNo(string str)
+        {
+            return !string.IsNullOrWhiteSpace(str) && Regex.IsMatch(str, IdCardRegex);
+        }
+
+        /// <summary> 是否是车牌号 </summary>
+        /// <param name="plateNumber"></param>
+        /// <returns></returns>
+        public static bool IsPlateNumber(string plateNumber)
+        {
+            return !string.IsNullOrWhiteSpace(plateNumber) &&
+                   Regex.IsMatch(plateNumber, PlateNumberRegex);
+        }
+
+        /// <summary> 车架号校验 </summary>
+        /// <param name="vinNumber"></param>
+        /// <returns></returns>
+        public static bool IsVinNumber(string vinNumber)
+        {
+            if (vinNumber.IsNullOrEmpty() || vinNumber.Length != 17)
+                return false;
+            vinNumber = vinNumber.ToUpper();
+
+            //车架号不会包含“I,O,Q”
+            if (Regex.IsMatch(vinNumber, @"[IOQ]"))
+                return false;
+            if (!Regex.IsMatch(vinNumber, @"[A-Z0-9]{8}\d[A-Z0-9]{3}\d{5}"))
+                return false;
+
+            //加权值
+            var weightList = new[] { 8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+            //对应值
+            var contrastDict = new Dictionary<char, int>
+            {
+                {'0', 0},
+                {'1', 1},
+                {'2', 2},
+                {'3', 3},
+                {'4', 4},
+                {'5', 5},
+                {'6', 6},
+                {'7', 7},
+                {'8', 8},
+                {'9', 9},
+                {'A', 1},
+                {'B', 2},
+                {'C', 3},
+                {'D', 4},
+                {'E', 5},
+                {'F', 6},
+                {'G', 7},
+                {'H', 8},
+                {'J', 1},
+                {'K', 2},
+                {'L', 3},
+                {'M', 4},
+                {'N', 5},
+                {'P', 7},
+                {'R', 9},
+                {'S', 2},
+                {'T', 3},
+                {'U', 4},
+                {'V', 5},
+                {'W', 6},
+                {'X', 7},
+                {'Y', 8},
+                {'Z', 9}
+            };
+
+            var sum = 0;
+            var chars = vinNumber.ToCharArray();
+            for (var i = 0; i < chars.Length; i++)
+            {
+                if (i == 8) continue;
+                var c = chars[i];
+                if (!contrastDict.ContainsKey(c))
+                    return false;
+                sum += contrastDict[c] * weightList[i];
+            }
+
+            return sum % 11 == int.Parse(chars[8].ToString());
+
+        }
+
+        /// <summary> 清除Html标签 </summary>
         /// <param name="str"></param>
         /// <returns></returns>
         public static string ClearHtml(string str)

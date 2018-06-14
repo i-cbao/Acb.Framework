@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>icb@shay</Authors>
+    <Company>成都爱车保信息技术有限公司</Company>
+    <Product>爱车保 - 监控中间件</Product>
+    <Version>1.3.8</Version>
+    <Description>爱车保 - 监控中间件</Description>
+    <Title>爱车保 - 监控中间件</Title>
+    <Owners>成都爱车保信息技术有限公司</Owners>
+    <Copyright>爱车保 © 2018</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,12 @@
+{
+    "market": {
+        "jisu_app_key": "1996a3c9b1026fd2",
+        "juhe_app_key": "2478acd5ee618d5767b0ba0a544cb6b1",
+        "weixin": {
+            "AppId": "wx615260566af104db",
+            "AppSecret": "763506114457eb09bcd4a907dadb955e",
+            "h5AppId": "wx2582af1b78096126",
+            "h5AppSecret": "955b60efb38b6471d9daffb1f4a0a669"
+        }
+    }
+}

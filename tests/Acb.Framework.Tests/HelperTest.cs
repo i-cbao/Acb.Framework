@@ -1,13 +1,18 @@
 using Acb.Core;
-using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
+using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -19,7 +24,29 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            Print("15120222222?" == "");
+            var dict = new Dictionary<string, object>
+            {
+                {"Account", "17313040610"},
+                {"Password", "a123456"}
+            };
+            var timestamp = Clock.Now.ToMillisecondsTimestamp();
+            const string signKey = "85653b8832ad55cd";
+            var array = new SortedDictionary<string, object>(dict).Select(t => $"{t.Key}={t.Value.UnEscape()}");
+
+            // 规则 Sign=时间戳(毫秒) + Md532(除Sign外所有参数的url拼接(如：a=1&b=2,不编码) + key + 时间戳(毫秒)).ToLower()
+            var unSigned = string.Concat(string.Join("&", array), signKey, timestamp);
+            var sign = timestamp + EncryptHelper.MD5(unSigned);
+            Print(sign);
+            //Print("L7iBVV52RCs0IuWcvrnSRwQpVqOyz9y3KFONd5ZhBc5/ev84j27711veJ/Pj82UveRsV4zq7EcN7H+JABWBZBy71agOv2xDB3Oous/1TSCQwax3CBcaWliooj78Z037JeYsXd4BM2HCihhUsEwXvJHgHJFfCLF/f3yEMyKRvEL+MKLyW+CBD/tKdaxJMkZ2fZGoVDR2+K7QlNNmX704T6mFg5nlxKXny4mwHz7taYz6TQgzrvRpkAooV65VPN32uA5XDibmQaAo=".UrlEncode());
+            //return;
+            var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
+            Print(str);
+            var time = DateTime.Parse(str);
+            Print(time);
+            //Print("1523879631960" + EncryptHelper.MD5("account=1&password=12385653b8832ad55cd1523879631960"));
+            Print(IdentityHelper.Guid16);
+            //Print(Utils.GetSpellCode("北京"));
+            //Print(Clock.Now.ToTimestamp());
             //var md5 = "shay".Md5();
             //_logger.Info(md5);
             //Assert.AreEqual(md5.Length, 32);
@@ -60,7 +87,7 @@ namespace Acb.Framework.Tests
         public async Task HttpTest()
         {
             const string uri = "/query/life?t=1";
-            var helper = new RestHelper(Site.Market, 1);
+            var helper = new RestHelper(Site.Market);
             var result = await helper.GetAsync<DResult<dynamic>>(uri, new
             {
                 cityCode = "510100"
@@ -118,6 +145,41 @@ namespace Acb.Framework.Tests
             //    string.Format(uri, Clock.Now.ToTimestamp()), headers: headers, content: data);
             //var html = await resp.Content.ReadAsStringAsync();
             //Print(html);
+        }
+
+        [TestMethod]
+        public async Task CspTest()
+        {
+            var htmlCollection = new BlockingCollection<string>();
+            var client = new HttpClient();
+            var urls = new ConcurrentQueue<string>(new[]
+            {
+                "https://www.github.com",
+                "http://www.baidu.com",
+                "https://www.cnblogs.com/",
+                "http://www.csdn.net"
+            });
+            //produce
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var tasks = urls.Select(async url =>
+                    {
+                        var html = await client.GetStringAsync(url);
+                        htmlCollection.Add(html);
+                    }).ToArray();
+                    await Task.WhenAll(tasks);
+                    htmlCollection.CompleteAdding();
+                });
+            }
+            //consume
+            {
+                foreach (var html in htmlCollection.GetConsumingEnumerable())
+                {
+                    var title = RegexHelper.Match(html, "<title>(.+)</title>", RegexOptions.IgnoreCase);
+                    Console.WriteLine(title);
+                }
+            }
         }
     }
 }

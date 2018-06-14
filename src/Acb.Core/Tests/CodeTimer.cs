@@ -71,31 +71,51 @@ namespace Acb.Core.Tests
                 var tasks = new List<Task>();
                 for (var i = 0; i < thread; i++)
                 {
-                    var task = Task.Run(() =>
+                    var task = Task.Factory.StartNew(() =>
                     {
-                        try
+                        int succ = 0, fail = 0;
+                        for (var j = 0; j < iteration; j++)
                         {
-                            for (var j = 0; j < iteration; j++)
+                            try
                             {
                                 action.Invoke();
+                                succ++;
+                            }
+                            catch
+                            {
+                                fail++;
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            Logger.Error(ex.Message, ex);
-                        }
+
+                        return new KeyValuePair<int, int>(succ, fail);
                     });
                     tasks.Add(task);
                 }
 
                 Task.WaitAll(tasks.ToArray());
+                foreach (var task1 in tasks)
+                {
+                    var task = (Task<KeyValuePair<int, int>>)task1;
+                    result.SuccessCount += task.Result.Key;
+                    result.FailureCount += task.Result.Value;
+                }
             }
             else
             {
                 try
                 {
                     for (var i = 0; i < iteration; i++)
-                        action();
+                    {
+                        try
+                        {
+                            action.Invoke();
+                            result.SuccessCount++;
+                        }
+                        catch
+                        {
+                            result.FailureCount++;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -1,4 +1,5 @@
-﻿using Acb.Core.Domain.Entities;
+﻿using System;
+using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
@@ -9,9 +10,11 @@ namespace Acb.Framework.Tests.Repositories
     [Naming(NamingType.UrlCase, Name = "t_areas")]
     internal class TAreas : BaseEntity<string>
     {
-        /// <summary>城市编码</summary>
-        [Key]
-        public string CityCode { get; set; }
+        [Key, Naming("city_code")]
+        public override string Id { get; set; }
+
+        ///// <summary>城市编码</summary>
+        //public string CityCode => Id;
         /// <summary>城市名字</summary>
 
         public string CityName { get; set; }

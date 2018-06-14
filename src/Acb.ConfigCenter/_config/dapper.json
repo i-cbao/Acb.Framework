@@ -1,0 +1,44 @@
+{
+    "dapper": {
+        "assets": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=icbv3db_asset;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "assets",
+            "ProviderName": "mysql"
+        },
+        "default": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=icbv2db;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "default",
+            "ProviderName": "mysql"
+        },
+        "icb_main": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=db_main;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "icb_main",
+            "ProviderName": "mysql"
+        },
+        "order": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=icbv3db_order;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "order",
+            "ProviderName": "mysql"
+        },
+        "shop4s": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=icbv3db_4s;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "shop4s",
+            "ProviderName": "mysql"
+        },
+        "statistic": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=db_main;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "statistic",
+            "ProviderName": "mysql"
+        },
+        "sword": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=db_sword;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "sword",
+            "ProviderName": "mysql"
+        },
+        "user": {
+            "ConnectionString": "server=140.143.96.228;user=root;database=icbv3db_user;port=3306;password=icb@888;Pooling=true;Charset=utf8;",
+            "Name": "user",
+            "ProviderName": "mysql"
+        }
+    }
+}

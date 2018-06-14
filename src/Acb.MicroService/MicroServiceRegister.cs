@@ -1,7 +1,13 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
-using Acb.Redis;
+using Acb.Core.Reflection;
+using Acb.MicroService.Register;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Acb.MicroService
@@ -9,56 +15,96 @@ namespace Acb.MicroService
     /// <summary> 微服务注册 </summary>
     internal class MicroServiceRegister
     {
-        private const string MicroSreviceKey = "micro_service";
-        private const string RegistCenterKey = MicroSreviceKey + ":center";
-        private MicroServiceConfig _config;
-        private string RedisKey => string.IsNullOrWhiteSpace(_config.RedisKey) ? RegistCenterKey : _config.RedisKey;
+        public const string MicroSreviceKey = "micro_service";
+        private const string HostEnvironmentName = "MICRO_SERVICE_HOST";
+        private const string PortEnvironmentName = "MICRO_SERVICE_PORT";
+        private const string AutoDeregistEnvironmentName = "AUTO_DEREGIST";
+        internal static ConcurrentDictionary<string, MethodInfo> Methods { get; }
 
-        private MicroServiceRegister()
+        internal static HashSet<Assembly> ServiceAssemblies { get; }
+
+
+        private static MicroServiceConfig _config;
+        private static IRegister _register;
+
+        static MicroServiceRegister()
         {
-            _config = MicroSreviceKey.Config<MicroServiceConfig>();
+            Methods = new ConcurrentDictionary<string, MethodInfo>();
+            ServiceAssemblies = new HashSet<Assembly>();
+            LoadConfig();
+            _register = GetRegister();
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
-                UnRegist();
-                _config = MicroSreviceKey.Config<MicroServiceConfig>();
+                Deregist();
+                LoadConfig();
+                _register = GetRegister();
                 Regist();
             };
         }
 
-        public static MicroServiceRegister Instance => Singleton<MicroServiceRegister>.Instance ??
-                                                       (Singleton<MicroServiceRegister>.Instance =
-                                                           new MicroServiceRegister());
-
-
-        private string TypeUrl(MemberInfo type)
+        /// <summary> 初始化服务 </summary>
+        internal static void InitServices()
         {
-            return $"http://{_config.Host}:{_config.Port}/{type.Name}/";
+            var services = CurrentIocManager.Resolve<ITypeFinder>()
+                .Find(t => typeof(IMicroService).IsAssignableFrom(t) && t.IsInterface && t != typeof(IMicroService))
+                .ToList();
+            foreach (var service in services)
+            {
+                if (!CurrentIocManager.IsRegisted(service))
+                    continue;
+                if (!ServiceAssemblies.Contains(service.Assembly))
+                    ServiceAssemblies.Add(service.Assembly);
+                var methods = service.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                foreach (var method in methods)
+                {
+                    Methods.TryAdd($"{service.Name}/{method.Name}".ToLower(), method);
+                }
+            }
         }
 
-        /// <summary> 注册 </summary>
-        public void Regist()
+        private static void LoadConfig()
         {
-            var list = MicroServiceRouter.GetServices();
-            if (list == null || list.IsNullOrEmpty())
-                return;
-            var redis = RedisManager.Instance.GetDatabase();
-            foreach (var type in list)
+            _config = MicroSreviceKey.Config<MicroServiceConfig>();
+            var host = Environment.GetEnvironmentVariable(HostEnvironmentName);
+            var port = Environment.GetEnvironmentVariable(PortEnvironmentName).CastTo(0);
+            if (!string.IsNullOrWhiteSpace(host))
+                _config.Host = host;
+            if (port > 0)
+                _config.Port = port;
+            var autoDeregist = Environment.GetEnvironmentVariable(AutoDeregistEnvironmentName).CastTo<bool?>(null);
+            if (autoDeregist.HasValue)
+                _config.AutoDeregist = autoDeregist.Value;
+        }
+
+        private static IRegister GetRegister()
+        {
+            switch (_config.Register)
             {
-                redis.SetAdd($"{RedisKey}:{type.FullName}", TypeUrl(type));
+                case RegisterType.Consul:
+                    return new ConsulRegister();
+                case RegisterType.Redis:
+                    return new RedisRegister();
+                default:
+                    return new RedisRegister();
             }
+        }
+
+
+        /// <summary> 注册微服务 </summary>
+        public static void Regist()
+        {
+            InitServices();
+            var asses = ServiceAssemblies;
+            if (asses == null || asses.IsNullOrEmpty() || string.IsNullOrWhiteSpace(_config?.Host) || _config?.Port <= 0)
+                return;
+            _register.Regist(asses, _config);
         }
 
         /// <summary> 取消注册 </summary>
-        public void UnRegist()
+        public static void Deregist()
         {
-            var list = MicroServiceRouter.GetServices();
-            if (list == null || list.IsNullOrEmpty())
-                return;
-            var redis = RedisManager.Instance.GetDatabase();
-            foreach (var type in list)
-            {
-                redis.SetRemove($"{RedisKey}:{type.FullName}", TypeUrl(type));
-            }
+            if (_config.AutoDeregist)
+                _register.Deregist();
         }
     }
 }

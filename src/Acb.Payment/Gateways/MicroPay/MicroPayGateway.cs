@@ -229,7 +229,7 @@ namespace Acb.Payment.Gateways.MicroPay
             GatewayData.Add(Constant.PARTNERID, Merchant.MchId);
             GatewayData.Add(Constant.PREPAYID, Notify.PrepayId);
             GatewayData.Add(Constant.PACKAGE, "Sign=WXPay");
-            GatewayData.Add(Constant.NONCE_STR, Merchant.NonceStr);
+            GatewayData.Add(Constant.NONCEsTR, Merchant.NonceStr);
             GatewayData.Add(Constant.TIMESTAMP, Clock.Now.ToTimestamp());
             GatewayData.Add(Constant.SIGN, BuildSign());
         }

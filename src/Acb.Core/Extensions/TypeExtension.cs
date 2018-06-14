@@ -197,5 +197,14 @@ namespace Acb.Core.Extensions
             }
             return false;
         }
+
+        /// <summary> 程序集key </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        public static string AssemblyKey(this Assembly assembly)
+        {
+            var assName = assembly.GetName();
+            return $"{assName.Name}_{assName.Version}";
+        }
     }
 }

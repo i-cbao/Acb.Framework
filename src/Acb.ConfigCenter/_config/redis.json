@@ -1,0 +1,5 @@
+{
+    "redis": {
+        "default": "140.143.96.228:6379,password=icb@888,abortConnect=false,connectRetry=3,connectTimeout=3000,defaultDatabase=0,syncTimeout=3000,version=3.2.1,responseTimeout=3000"
+    }
+}

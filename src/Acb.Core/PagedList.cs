@@ -32,10 +32,8 @@ namespace Acb.Core
         {
             var total = queryable.Count();
             Total = total;
-            Pages = total / size;
-
-            if (total % size > 0)
-                Pages++;
+            if (Total > 0 && size > 0)
+                Pages = (int)Math.Ceiling(Total / (float)size);
 
             Size = size;
             Index = index;
@@ -50,10 +48,8 @@ namespace Acb.Core
         public PagedList(ICollection<TEntity> list, int index, int size, int total = 0)
         {
             Total = total <= 0 ? list.Count : total;
-            Pages = Total / size;
-
-            if (Total % size > 0)
-                Pages++;
+            if (Total > 0 && size > 0)
+                Pages = (int)Math.Ceiling(Total / (float)size);
 
             Size = size;
             Index = index;

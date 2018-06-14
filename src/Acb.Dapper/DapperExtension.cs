@@ -6,8 +6,8 @@ using Dapper;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -58,7 +58,8 @@ namespace Acb.Dapper
             if (keyProp == null)
             {
                 keyProp = props.FirstOrDefault(p =>
-                    string.Equals(p.PropName(), id, StringComparison.CurrentCultureIgnoreCase));
+                    string.Equals(p.PropName(), id, StringComparison.CurrentCultureIgnoreCase)
+                    || string.Equals(p.Name, id, StringComparison.CurrentCultureIgnoreCase));
             }
 
             key = new KeyValuePair<string, string>(keyProp?.Name ?? id, keyProp?.PropName(naming) ?? id);
@@ -86,46 +87,17 @@ namespace Acb.Dapper
         /// <summary> 查询到DataSet </summary>
         /// <param name="conn"></param>
         /// <param name="sql"></param>
-        /// <param name="formatVariable"></param>
         /// <param name="param"></param>
-        /// <param name="adapter"></param>
         /// <param name="commandTimeout"></param>
         /// <param name="commandType"></param>
         /// <returns></returns>
-        public static DataSet QueryDataSet(this IDbConnection conn, string sql, Func<string, string> formatVariable,
-            object param = null, IDbDataAdapter adapter = null, int? commandTimeout = null,
+        public static DataSet QueryDataSet(this IDbConnection conn, string sql, object param = null, int? commandTimeout = null,
             CommandType? commandType = null)
         {
-            var ds = new DataSet();
-            var wasClosed = conn.State == ConnectionState.Closed;
-            if (wasClosed)
-                conn.Open();
-            var command = conn.CreateCommand();
-            if (commandType.HasValue)
-                command.CommandType = commandType.Value;
-            if (commandTimeout.HasValue)
-                command.CommandTimeout = commandTimeout.Value;
-            command.CommandText = sql;
-            if (param != null)
-            {
-                var ps = param.GetType().GetProperties();
-                foreach (var propertyInfo in ps)
-                {
-                    var propType = propertyInfo.PropertyType;
-                    var value = propertyInfo.GetValue(param);
-                    if (propType.IsNullableType() && value == null)
-                        continue;
-                    var p = command.CreateParameter();
-                    p.ParameterName = formatVariable(propertyInfo.Name);
-                    p.Value = value;
-                    command.Parameters.Add(p);
-                }
-            }
-            adapter = adapter ?? new SqlDataAdapter();
-            adapter.SelectCommand = command;
-            adapter.Fill(ds);
-            if (wasClosed) conn.Close();
-            return ds;
+            var reader = conn.ExecuteReader(sql, param, null, commandTimeout, commandType);
+            var dataset = new XDataSet();
+            dataset.Load(reader, LoadOption.OverwriteChanges, null, new DataTable[] { });
+            return dataset;
         }
 
         /// <summary> 字段列表 </summary>
@@ -147,8 +119,9 @@ namespace Acb.Dapper
         /// <param name="modelType"></param>
         /// <param name="excepts">排除的字段</param>
         /// <param name="includes">包含的字段</param>
+        /// <param name="tableAlias"></param>
         /// <returns></returns>
-        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null)
+        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null, string tableAlias = null)
         {
             var props = modelType.TypeProperties();
             var sb = new StringBuilder();
@@ -159,9 +132,14 @@ namespace Acb.Dapper
                 if (includes != null && !includes.Contains(prop.Key))
                     continue;
                 if (prop.Key.Equals(prop.Value, StringComparison.CurrentCultureIgnoreCase))
-                    sb.AppendFormat("[{0}],", prop.Key);
+                    sb.AppendFormat(
+                        string.IsNullOrWhiteSpace(tableAlias) ? "[{0}]," : string.Concat(tableAlias, ".[{0}],"),
+                        prop.Key);
                 else
-                    sb.AppendFormat("[{0}] AS [{1}],", prop.Value, prop.Key);
+                    sb.AppendFormat(
+                        string.IsNullOrWhiteSpace(tableAlias)
+                            ? "[{0}] AS [{1}],"
+                            : string.Concat(tableAlias, ".[{0}] AS [{1}],"), prop.Value, prop.Key);
             }
             return sb.ToString().TrimEnd(',');
         }
@@ -323,10 +301,13 @@ namespace Acb.Dapper
             sb.Append($"UPDATE [{tableName}] SET ");
             foreach (var prop in props)
             {
-                if (prop.Key == key.Key || updateProps != null && !updateProps.Contains(prop.Key))
+                if (prop.Key == key.Key || updateProps != null && !updateProps.Contains(prop.Key) &&
+                    !updateProps.Contains(prop.Value))
                     continue;
-                sb.Append($"[{prop.Value}]=@{prop.Key}");
+                sb.Append($"[{prop.Value}]=@{prop.Key},");
             }
+
+            sb.Remove(sb.Length - 1, 1);
 
             sb.Append($" WHERE [{key.Value}]=@{key.Key}");
             return sb.ToString();
@@ -344,6 +325,7 @@ namespace Acb.Dapper
             IDbTransaction trans = null, int? commandTimeout = null)
         {
             var sql = UpdateSql<T>(updateProps);
+            sql = conn.FormatSql(sql);
             return conn.Execute(sql, entityToUpdate, trans, commandTimeout);
         }
         #endregion
@@ -494,8 +476,6 @@ namespace Acb.Dapper
             return conn.Execute(sql, new { id = key, count }, trans);
         }
 
-
-
         /// <summary> 转换DataTable </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>
@@ -503,7 +483,8 @@ namespace Acb.Dapper
         /// <param name="tableName"></param>
         /// <param name="excepts"></param>
         /// <returns></returns>
-        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null, string tableName = null, string[] excepts = null)
+        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null,
+            string tableName = null, string[] excepts = null) where T : class
         {
             var type = GetInnerType<T>();
             tableName = string.IsNullOrWhiteSpace(tableName) ? type.PropName() : tableName;
@@ -513,8 +494,16 @@ namespace Acb.Dapper
                 props = props.Where(t => !excepts.Contains(t.Name)).ToList();
             foreach (var prop in props)
             {
-                var key = headerFormat?.Invoke(prop.Name) ?? prop.Name;
-                dt.Columns.Add(key, prop.PropertyType);
+                string key;
+                if (headerFormat != null)
+                    key = headerFormat.Invoke(prop.Name);
+                else
+                {
+                    var desc = prop.GetCustomAttribute<DescriptionAttribute>();
+                    key = desc == null ? prop.Name : desc.Description;
+                }
+
+                dt.Columns.Add(key, prop.PropertyType.GetUnNullableType());
             }
 
             foreach (var item in data)
@@ -524,11 +513,13 @@ namespace Acb.Dapper
                 {
                     values.Add(prop.GetValue(item));
                 }
+
                 dt.Rows.Add(values.ToArray());
             }
 
             return dt;
         }
+
         #endregion
     }
 }

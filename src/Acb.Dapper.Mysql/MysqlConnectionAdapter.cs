@@ -3,6 +3,7 @@ using Acb.Dapper.Adapters;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace Acb.Dapper.Mysql
 {
@@ -18,7 +19,7 @@ namespace Acb.Dapper.Mysql
         /// <returns></returns>
         public string FormatSql(string sql)
         {
-            return sql.Replace("[", "`").Replace("]", "`").Replace("\"", "`");
+            return sql.Replace("[", "`").Replace("]", "`");
         }
 
         /// <summary> 构造分页SQL </summary>
@@ -33,6 +34,8 @@ namespace Acb.Dapper.Mysql
             {
                 countSql = countSql.Replace($" {order}", string.Empty);
             }
+            if (countSql.IsMatch("group by", RegexOptions.IgnoreCase))
+                countSql = $"SELECT COUNT(1) FROM ({countSql}) AS count_t";
             sql =
                 $"{sql} LIMIT @skip,@size;{countSql};";
             return sql;

@@ -1,7 +1,9 @@
 ﻿using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
 
 namespace Acb.Dapper.Adapters
 {
@@ -36,6 +38,8 @@ namespace Acb.Dapper.Adapters
             }
 
             var countSql = sql.Replace(columns, "COUNT(1) ").Replace($" {order}", string.Empty);
+            if (countSql.IsMatch("group by", RegexOptions.IgnoreCase))
+                countSql = $"SELECT COUNT(1) FROM ({countSql}) AS count_t";
 
             sql = sql.Replace($" {order}", string.Empty);
             sql = sql.Replace(columns, $"ROW_NUMBER() OVER({order}) AS [paged_row],{columns}");

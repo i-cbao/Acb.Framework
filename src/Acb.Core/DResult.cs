@@ -9,12 +9,14 @@ namespace Acb.Core
     [Serializable]
     public class DResult
     {
+        /// <summary> 状态 </summary>
         public bool Status => Code == 0;
-
+        /// <summary> 状态码 </summary>
         public int Code { get; set; }
-
+        /// <summary> 错误消息 </summary>
         public string Message { get; set; }
         private DateTime _timestamp;
+        /// <summary> 时间戳 </summary>
         public DateTime Timestamp
         {
             get => _timestamp == DateTime.MinValue ? Clock.Now : _timestamp;
@@ -70,6 +72,7 @@ namespace Acb.Core
     [Serializable]
     public class DResult<T> : DResult
     {
+        /// <summary> 数据 </summary>
         public T Data { get; set; }
 
         public DResult() : this(default(T)) { }

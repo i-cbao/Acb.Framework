@@ -407,5 +407,16 @@ namespace Acb.Core.Extensions
             }
             return qs[0] + "?" + search;
         }
+
+        /// <summary> url全路径 </summary>
+        /// <param name="url"></param>
+        /// <param name="host"></param>
+        /// <returns></returns>
+        public static string FullUrl(this string url, string host)
+        {
+            if (string.IsNullOrWhiteSpace(url) || url.IsMatch("^(http(s)?://)|(data:[^;]+;base64,)", RegexOptions.IgnoreCase))
+                return url;
+            return new Uri(new Uri(host), url).AbsoluteUri;
+        }
     }
 }

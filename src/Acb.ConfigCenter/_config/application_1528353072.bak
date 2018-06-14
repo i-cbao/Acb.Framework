@@ -1,0 +1,9 @@
+﻿{
+  //"configExt": ".yml",
+  "security": {
+    "enabled": false,
+    "get": true,
+    "account": "icb",
+    "password": "123456"
+  }
+}

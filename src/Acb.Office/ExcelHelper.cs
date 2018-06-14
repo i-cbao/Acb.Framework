@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Office.Excel;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
@@ -268,10 +269,14 @@ namespace Acb.Office
             var ext = Path.GetExtension(filename);
             if (string.IsNullOrWhiteSpace(ext) || !new[] { ".xls", ".xlsx" }.Contains(ext))
             {
-                filename = $"{Path.GetFileNameWithoutExtension(filename)}.xls";
+                ext = ".xls";
             }
+
+            var name = Path.GetFileNameWithoutExtension(filename);
+            filename = $"{name.UrlEncode()}{ext}";
             //resp.Buffer = true;
             //resp.Charset = Encoding.UTF8.BodyName;
+            resp.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
             resp.Headers.Add("Content-Disposition", $"attachment;filename={filename}");
             resp.ContentType = "application/vnd.ms-excel; charset=UTF-8";
             var wb = await CreateAsync(dataSet);

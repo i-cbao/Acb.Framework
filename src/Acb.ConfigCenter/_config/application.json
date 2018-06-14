@@ -1,0 +1,8 @@
+﻿{
+  "security": {
+    "enabled": true,
+    "get": true,
+    "account": "icb",
+    "password": "123456"
+  }
+}

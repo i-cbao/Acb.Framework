@@ -27,7 +27,7 @@ namespace Acb.Framework.Logging
             return new RollingFileAppender
             {
                 Name = name,
-                File = $"_logs\\{Clock.Now:yyyyMM}\\",
+                File = $"_logs/{Clock.Now:yyyyMM}/",
                 AppendToFile = true,
                 LockingModel = new FileAppender.MinimalLock(),
                 RollingStyle = RollingFileAppender.RollingMode.Date,
@@ -71,7 +71,7 @@ namespace Acb.Framework.Logging
         internal static IAppender TcpAppender()
         {
             var tcp = TcpLoggerConfigName.Config<TcpLoggerConfig>();
-            if (tcp == null || string.IsNullOrWhiteSpace(tcp.Address) || tcp.Port <= 0)
+            if (string.IsNullOrWhiteSpace(tcp?.Address) || tcp.Port <= 0)
                 return null;
             var tcpAppender = new TcpAppender
             {
@@ -80,10 +80,10 @@ namespace Acb.Framework.Logging
                 RemotePort = tcp.Port,
                 Layout = string.IsNullOrWhiteSpace(tcp.Layout) ? ErrorLayout : new PatternLayout(tcp.Layout)
             };
+            var level = Log4NetLog.ParseLevel(tcp.Level);
             tcpAppender.AddFilter(new LevelRangeFilter
             {
-                LevelMin = Level.Error,
-                LevelMax = Level.Fatal
+                LevelMin = level
             });
             tcpAppender.ActivateOptions();
             return tcpAppender;

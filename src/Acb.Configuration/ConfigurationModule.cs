@@ -20,9 +20,7 @@ namespace Acb.Configuration
                 helper.Build(b => b.Add(provider));
                 helper.ConfigChanged += obj =>
                 {
-                    var config = obj as IConfigurationRoot;
-                    var mode = config.GetValue<string>("mode");
-                    if (config == null || string.IsNullOrWhiteSpace(mode) || config.GetSection("config") == null)
+                    if (!(obj is IConfigurationRoot config)  || config.GetSection("config") == null)
                         return;
                     provider.Reload(helper.Config);
                     if (provider.Settings.RefreshEnable)

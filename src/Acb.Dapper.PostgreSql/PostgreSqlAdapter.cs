@@ -3,6 +3,7 @@ using Acb.Dapper.Adapters;
 using Npgsql;
 using System;
 using System.Data;
+using System.Text.RegularExpressions;
 
 namespace Acb.Dapper.PostgreSql
 {
@@ -34,6 +35,8 @@ namespace Acb.Dapper.PostgreSql
             {
                 countSql = countSql.Replace($" {order}", string.Empty);
             }
+            if (countSql.IsMatch("group by", RegexOptions.IgnoreCase))
+                countSql = $"SELECT COUNT(1) FROM ({countSql}) AS count_t";
             sql =
                 $"{sql} LIMIT @size OFFSET @skip;{countSql};";
             return sql;

@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="6.2.2" />
+    <PackageReference Include="Consul" Version="0.7.2.4" />
+    <PackageReference Include="Microsoft.ML" Version="0.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
@@ -17,6 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Acb.ApiClient\Acb.ApiClient.csproj" />
+    <ProjectReference Include="..\..\src\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
@@ -24,6 +28,7 @@
     <ProjectReference Include="..\..\src\Acb.MongoDb\Acb.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Acb.Office\Acb.Office.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
+    <ProjectReference Include="..\Acb.Demo.Business\Acb.Demo.Business.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
   </ItemGroup>
 

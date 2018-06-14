@@ -33,7 +33,7 @@ namespace Acb.MongoDb
                 SocketTimeout = TimeSpan.FromSeconds(_config.Timeout),
                 ConnectTimeout = TimeSpan.FromSeconds(_config.Timeout)
             };
-            var cred = _config.Credentials.FirstOrDefault(t => t.Database == _database);
+            var cred = _config.Credentials.FirstOrDefault();
             if (cred != null)
             {
                 settings.Credential = MongoCredential.CreateCredential(cred.Database, cred.User, cred.Pwd);

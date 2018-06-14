@@ -9,10 +9,16 @@ using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
+    /// <summary> 主页接口 </summary>
     [Route("api/[controller]")]
     public class HomeController : DController
     {
-        private readonly ILogger _logger = LogManager.Logger<HomeController>();
+        private readonly ILogger _logger;
+
+        public HomeController()
+        {
+            _logger = LogManager.Logger<HomeController>();
+        }
         // GET api/values
         [HttpGet]
         public DResults<string> Get()

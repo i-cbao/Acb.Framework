@@ -1,12 +1,17 @@
-﻿using Acb.Dapper;
-using Acb.Dapper.Adapters;
+﻿using Acb.Core.Helper.Http;
+using Acb.Core.Logging;
+using Acb.Dapper;
 using Acb.Framework.Tests.Repositories;
 using Acb.Office;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
 {
@@ -26,12 +31,15 @@ namespace Acb.Framework.Tests
             {
                 var excepts = new[] { nameof(TAreas.Deep) };
                 var columns = typeof(TAreas).Columns(excepts);
-                columns = conn.FormatSql(columns);
-                var list = conn.Query<TAreas>($"select {columns} from `t_areas` where `parent_code`=@code",
+                //columns = conn.FormatSql(columns);
+                //var dt = conn.Query<DataTable>($"select {columns} from `t_areas` where `parent_code`=@code",
+                //    new { code = "510700" });
+                //Print(dt);
+                var list = conn.Query<TAreas>($"select `city_code` as `Id` from `t_areas` where `parent_code`=@code",
                     new { code = "510700" });
                 var names = new Dictionary<string, string>
                 {
-                    {nameof(TAreas.CityCode), "城市编码"},
+                    {nameof(TAreas.Id), "城市编码"},
                     {nameof(TAreas.CityName), "城市名称"},
                     {nameof(TAreas.Deep), "深度"},
                     {nameof(TAreas.ParentCode), "父级编码"}
@@ -40,6 +48,45 @@ namespace Acb.Framework.Tests
                 ExcelHelper.CreateFile(new DataSet { Tables = { dt } },
                     Path.Combine(Directory.GetCurrentDirectory(), "test.xlsx"));
             }
+        }
+
+        [TestMethod]
+        public async Task ExportTest()
+        {
+            const string gateway = "http://open.i-cbao.com/jk/many-vehicle-mileage";
+            const string xls = "d://导出4S店车辆里程数据.xls";
+            const int size = 10;
+            var dt = ExcelHelper.ReadFirst(xls);
+            var rows = dt.Rows.Count;
+            Print(rows);
+            LogManager.LogLevel(LogLevel.Off);
+            var page = (int)Math.Ceiling(rows / (float)size);
+            for (var i = 0; i < page; i++)
+            {
+                var list = new Dictionary<string, DataRow>();
+                for (var j = 0; j < size; j++)
+                {
+                    var index = i * size + j;
+                    if (index > rows - 1)
+                        break;
+                    var row = dt.Rows[index];
+                    list.Add(row[0].ToString(), row);
+                }
+
+                var resp = await HttpHelper.Instance.PostAsync(gateway, new
+                {
+                    ArrVehicleId = list.Keys.ToList()
+                });
+                var html = await resp.Content.ReadAsStringAsync();
+                var results = JsonConvert.DeserializeObject<dynamic>(html);
+                foreach (var item in results.data)
+                {
+                    var key = (string)item.vehicleId;
+                    if (list.ContainsKey(key))
+                        list[key][7] = item.mileage;
+                }
+            }
+            ExcelHelper.CreateFile(new DataSet { Tables = { dt } }, "d://data.xls");
         }
     }
 }

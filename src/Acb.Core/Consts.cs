@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Domain;
 using Acb.Core.Extensions;
+using System;
 
 namespace Acb.Core
 {
@@ -9,8 +10,20 @@ namespace Acb.Core
         /// <summary> 版本号 </summary>
         public const string Version = "1.3.0";
 
+        private const string ModeEnvironmentName = "ACB_MODE";
+        private const string ModeConfigName = "mode";
+
         /// <summary> 产品模式 </summary>
-        public static ProductMode Mode => "mode".Config(ProductMode.Dev);
+        public static ProductMode Mode
+        {
+            get
+            {
+                var mode = Environment.GetEnvironmentVariable(ModeEnvironmentName);
+                if (string.IsNullOrWhiteSpace(mode))
+                    mode = ModeConfigName.Config<string>();
+                return mode.CastTo(ProductMode.Dev);
+            }
+        }
 
         /// <summary> Ticket配置键 </summary>
         public const string AppTicketKey = "ticketKey";
