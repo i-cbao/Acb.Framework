@@ -41,7 +41,7 @@ namespace Acb.Framework.Tests
 
             var id = t.StringIncrement(key);
             t.KeyExpire(key, Clock.Now.Date.AddDays(1));
-            Print(id);
+            Print(id);            
         }
     }
 }

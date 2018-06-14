@@ -38,16 +38,16 @@ namespace Acb.WebApi.Test.Controllers
             return DResult.Succ(dto);
         }
 
-        /// <summary> 店铺列表 </summary>
-        /// <returns></returns>
-        [HttpGet("list"), AllowAnonymous]
-        public DResults<ShopDto> List()
-        {
-            var shopService = ProxyService.Proxy<IShopService>();
+        ///// <summary> 店铺列表 </summary>
+        ///// <returns></returns>
+        //[HttpGet("list"), AllowAnonymous]
+        //public DResults<ShopDto> List()
+        //{
+        //    var shopService = ProxyService.Proxy<IShopService>();
 
-            var dtos = shopService.ShopList(new ShopListInput());
-            return DResult.Succ(dtos.List, dtos.Total);
-        }
+        //    var dtos = shopService.ShopList(new ShopListInput());
+        //    return DResult.Succ(dtos.List, dtos.Total);
+        //}
 
         [HttpGet("token"), AllowAnonymous]
         public DResult<string> Token()
