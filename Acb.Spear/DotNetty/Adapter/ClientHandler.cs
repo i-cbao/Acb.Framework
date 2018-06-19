@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Logging;
+using Acb.Spear.Message;
 using DotNetty.Transport.Channels;
 using System;
 
@@ -8,21 +9,26 @@ namespace Acb.Spear.DotNetty.Adapter
     public class ClientHandler : ChannelHandlerAdapter
     {
         private readonly Action<IChannel> _removeAction;
+        private readonly Action<IChannelHandlerContext, MicroMessage> _readAction;
         private readonly ILogger _logger;
 
-        public ClientHandler(Action<IChannel> removeAction)
+        public ClientHandler(Action<IChannel> removeAction, Action<IChannelHandlerContext, MicroMessage> readAction)
         {
             _removeAction = removeAction;
+            _readAction = readAction;
             _logger = LogManager.Logger<ClientHandler>();
         }
         public override void ChannelInactive(IChannelHandlerContext context)
         {
-            _removeAction(context.Channel);
+            _removeAction?.Invoke(context.Channel);
         }
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            _logger.Info(message);
+            _logger.Debug(message);
+            if (!(message is MicroMessage msg))
+                return;
+            _readAction?.Invoke(context, msg);
         }
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)

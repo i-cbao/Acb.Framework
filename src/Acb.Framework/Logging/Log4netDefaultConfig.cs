@@ -1,11 +1,11 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
 using Acb.Core.Extensions;
-using Acb.Core.Timing;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Filter;
 using log4net.Layout;
+using log4net.Util;
 using System.Net;
 using System.Text;
 
@@ -27,7 +27,7 @@ namespace Acb.Framework.Logging
             return new RollingFileAppender
             {
                 Name = name,
-                File = $"_logs/{Clock.Now:yyyyMM}/",
+                File = new PatternString("_logs/%date{yyyyMM}/").Format(),
                 AppendToFile = true,
                 LockingModel = new FileAppender.MinimalLock(),
                 RollingStyle = RollingFileAppender.RollingMode.Date,

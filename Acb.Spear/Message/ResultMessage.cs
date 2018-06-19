@@ -9,5 +9,18 @@
         public string Message { get; set; }
         /// <summary> 数据实体 </summary>
         public object Data { get; set; }
+
+        public ResultMessage() { }
+
+        public ResultMessage(object data)
+        {
+            Data = data;
+        }
+
+        public ResultMessage(string message, int code = 500)
+        {
+            Message = message;
+            Code = code;
+        }
     }
 }

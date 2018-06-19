@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Acb.Spear\Acb.Spear.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
   </ItemGroup>
 
 </Project>

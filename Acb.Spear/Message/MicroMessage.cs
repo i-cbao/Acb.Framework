@@ -1,4 +1,5 @@
 ﻿using System;
+using Acb.Core.Helper;
 
 namespace Acb.Spear.Message
 {
@@ -15,15 +16,11 @@ namespace Acb.Spear.Message
         {
         }
 
-        public MicroMessage(object content)
+        public MicroMessage(object content, string contentType = null)
         {
+            Id = IdentityHelper.Guid32;
             Content = content ?? throw new ArgumentNullException(nameof(content));
-            ContentType = content.GetType().FullName;
-        }
-
-        public MicroMessage(object content, string contentType)
-        {
-            Content = content ?? throw new ArgumentNullException(nameof(content));
+            contentType = string.IsNullOrWhiteSpace(contentType) ? content.GetType().FullName : contentType;
             ContentType = contentType;
         }
 

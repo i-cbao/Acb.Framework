@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Logging;
+using Acb.Spear.Message;
 using DotNetty.Transport.Channels;
 using System;
 using System.Net;
@@ -10,15 +11,23 @@ namespace Acb.Spear.DotNetty.Adapter
     internal class ServerHandler : ChannelHandlerAdapter
     {
         private readonly ILogger _logger;
+        private readonly Action<IChannelHandlerContext, MicroMessage> _readAction;
 
-        public ServerHandler()
+        public ServerHandler(Action<IChannelHandlerContext, MicroMessage> readAction)
         {
+            _readAction = readAction;
             _logger = LogManager.Logger<ServerHandler>();
         }
 
         public override Task ConnectAsync(IChannelHandlerContext context, EndPoint remoteAddress, EndPoint localAddress)
         {
             _logger.Debug("ConnectAsync");
+            return Task.CompletedTask;
+        }
+
+        public override Task DisconnectAsync(IChannelHandlerContext context)
+        {
+            _logger.Debug("DisconnectAsync");
             return Task.CompletedTask;
         }
 
@@ -39,7 +48,10 @@ namespace Acb.Spear.DotNetty.Adapter
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            _logger.Info(message);
+            _logger.Debug(message);
+            if (!(message is MicroMessage msg))
+                return;
+            Task.Run(() => _readAction(context, msg));
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context)
@@ -53,5 +65,7 @@ namespace Acb.Spear.DotNetty.Adapter
             context.CloseAsync();
             _logger.Error($"与服务器：{context.Channel.RemoteAddress}通信时发送了错误。", exception);
         }
+
+
     }
 }

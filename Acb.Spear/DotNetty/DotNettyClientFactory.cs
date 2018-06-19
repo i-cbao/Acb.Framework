@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Logging;
 using Acb.Spear.DotNetty.Adapter;
 using Acb.Spear.Message;
+using Acb.Spear.Micro;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Common.Utilities;
@@ -9,15 +10,17 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Net;
 
 namespace Acb.Spear.DotNetty
 {
-    public class DotNettyClientFactory
+    public class DotNettyClientFactory : IMicroClientFactory, IDisposable
     {
         private readonly Bootstrap _bootstrap;
         private readonly ILogger _logger;
         private readonly IMessageCoderFactory _coderFactory;
+        private readonly IMicroExecutor _microExecutor;
 
         private readonly ConcurrentDictionary<EndPoint, Lazy<IMicroClient>> _clients =
             new ConcurrentDictionary<EndPoint, Lazy<IMicroClient>>();
@@ -25,9 +28,13 @@ namespace Acb.Spear.DotNetty
         private static readonly AttributeKey<EndPoint> OrigEndPointKey =
             AttributeKey<EndPoint>.ValueOf(typeof(DotNettyClientFactory), nameof(EndPoint));
 
-        public DotNettyClientFactory()
+        private static readonly AttributeKey<IMicroSender> SenderKey = AttributeKey<IMicroSender>.ValueOf(typeof(DotNettyClientFactory), nameof(IMicroSender));
+        private static readonly AttributeKey<IMicroListener> ListenerKey = AttributeKey<IMicroListener>.ValueOf(typeof(DotNettyClientFactory), nameof(IMicroListener));
+
+        public DotNettyClientFactory(IMessageCoderFactory coderFactory, IMicroExecutor executor = null)
         {
-            _coderFactory = new JsonMessageCoderFactory();
+            _coderFactory = coderFactory;
+            _microExecutor = executor;
             LogManager.AddAdapter(new ConsoleAdapter());
             _logger = LogManager.Logger<DotNettyClientFactory>();
             _bootstrap = GetBootstrap();
@@ -42,6 +49,11 @@ namespace Acb.Spear.DotNetty
                     var k = channel.GetAttribute(OrigEndPointKey).Get();
                     _logger.Debug($"删除客户端：{k}");
                     _clients.TryRemove(k, out _);
+                }, async (context, msg) =>
+                {
+                    var listener = context.Channel.GetAttribute(ListenerKey).Get();
+                    var sender = context.Channel.GetAttribute(SenderKey).Get();
+                    await listener.OnReceived(sender, msg);
                 }));
             }));
         }
@@ -71,15 +83,28 @@ namespace Acb.Spear.DotNetty
                         _logger.Debug($"准备为服务端地址：{key}创建客户端。");
                         var bootstrap = _bootstrap;
                         var channel = bootstrap.ConnectAsync(k).Result;
+                        var listener = new MicroListener();
+                        var sender = new DotNettyClientSender(_coderFactory.GetEncoder(), channel);
                         channel.GetAttribute(OrigEndPointKey).Set(k);
-                        return new DotNettyMicroClient(channel, _coderFactory.GetEncoder());
+                        channel.GetAttribute(ListenerKey).Set(listener);
+                        channel.GetAttribute(SenderKey).Set(sender);
+                        return new MicroClient(sender, listener, _microExecutor);
                     }
                 )).Value;
             }
             catch (Exception ex)
             {
+                _logger.Error("创建客户端失败", ex);
                 _clients.TryRemove(key, out _);
                 throw;
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var client in _clients.Values.Where(i => i.IsValueCreated))
+            {
+                (client.Value as IDisposable)?.Dispose();
             }
         }
     }

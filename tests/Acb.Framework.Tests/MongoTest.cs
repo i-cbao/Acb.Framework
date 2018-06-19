@@ -1,6 +1,6 @@
 ﻿using Acb.Core.Domain.Entities;
-using Acb.Core.Helper;
-using Acb.Core.Timing;
+using Acb.Core.Extensions;
+using Acb.Core.Tests;
 using Acb.MongoDb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
@@ -8,6 +8,7 @@ using MongoDB.Driver;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Core.Logging;
 
 namespace Acb.Framework.Tests
 {
@@ -19,6 +20,7 @@ namespace Acb.Framework.Tests
 
         public MongoTest()
         {
+            LogManager.LogLevel(LogLevel.Info);
             _helper = MongoManager.Instance.GetHelper(DbName);
         }
 
@@ -31,23 +33,30 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public async Task Test()
+        public void Test()
         {
-            var clt = _helper.Collection<MTest>();
+            
+            var result = CodeTimer.Time("redis test", 10, () =>
+            {
+                try
+                {
+                    var clt = _helper.Collection<MTest>();
+                    var builder = Builders<MTest>.Filter;
+                    var updater = Builders<MTest>.Update;
 
-            await clt.InsertOneAsync(
-                new MTest { Id = IdentityHelper.Guid32, Name = "nice", Age = 22, CreationTime = Clock.Now });
+                    clt.UpdateOne(builder.Eq(nameof(MTest.Id), "79074105e587cfd0ab4308d5d2d0d4ad"),
+                        updater.Set(nameof(MTest.Age), 18));
 
-            //var builder = Builders<MTest>.Filter;
-            //var updater = Builders<MTest>.Update;
-
-            //var result = await clt.UpdateOneAsync(builder.Eq(nameof(MTest.Id), "9c8ee318f694c0118ea108d57f58df4a"),
-            //    updater.Set(nameof(MTest.Age), 18));
-            //Print(result);
-
-            //var filters = builder.Empty;
-            //var model = await clt.FindAsync(filters);
-            //Print(model.ToList());
+                    var filters = builder.Empty;
+                    clt.Find(filters);
+                }
+                catch (Exception ex)
+                {
+                    Print(ex.Format());
+                    throw;
+                }
+            }, 100);
+            Print(result.ToString());
         }
 
         [TestMethod]
