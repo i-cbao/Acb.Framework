@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Helper.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using Acb.Core;
 
 namespace Acb.Framework.Tests
 {
@@ -26,6 +27,20 @@ namespace Acb.Framework.Tests
             };
             var rest = new RestHelper();
             return await rest.PostAsync(url, data);
+        }
+
+        [TestMethod]
+        public async Task RestHelperTest()
+        {
+            const string uri = "/query/life?t=1";
+            var helper = new RestHelper(HelperTest.Site.Market);
+            var result = await helper.GetAsync<DResult<dynamic>>(uri, new
+            {
+                cityCode = "510100"
+            });
+            //var xx = JsonConvert.SerializeObject(html.Data.xianXing);
+            //if (html.Data.xianxing != null)
+            Print(result);
         }
 
         [TestMethod]

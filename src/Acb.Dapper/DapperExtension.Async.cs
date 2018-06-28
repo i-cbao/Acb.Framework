@@ -28,7 +28,7 @@ namespace Acb.Dapper
         {
             var sql = QueryByIdSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
-            return await conn.QueryFirstOrDefaultAsync<T>(sql, new { id = key });
+            return await conn.QuerySingleOrDefaultAsync<T>(sql, new { id = key });
         }
 
         /// <summary> 分页异步 </summary>

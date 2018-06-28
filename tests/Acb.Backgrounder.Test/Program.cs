@@ -10,7 +10,7 @@ namespace Acb.Backgrounder.Test
     {
         private static void Main(string[] args)
         {
-            DBootstrap.Instance.Initialize();
+            new DBootstrap().Initialize();
             LogManager.ClearAdapter();
             LogManager.AddAdapter(new ConsoleAdapter(), LogLevel.All);
             LogManager.LogLevel(LogLevel.All);

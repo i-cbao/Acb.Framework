@@ -14,6 +14,8 @@ namespace Acb.Core.Helper
         private const string ConfigName = "appsettings.json";
         private IDisposable _callbackRegistration;
         private IConfigurationBuilder _builder;
+        private static ConfigHelper _instance;
+        private static readonly object LockObj = new object();
 
         /// <summary> 配置文件变更事件 </summary>
         public event Action<object> ConfigChanged;
@@ -26,6 +28,23 @@ namespace Acb.Core.Helper
             InitBuilder();
             InitConfig();
         }
+
+        public static ConfigHelper Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    lock (LockObj)
+                    {
+                        if (_instance == null)
+                            _instance = new ConfigHelper();
+                    }
+                }
+                return _instance;
+            }
+        }
+
 
         private void InitBuilder()
         {
@@ -51,9 +70,9 @@ namespace Acb.Core.Helper
             _callbackRegistration = _config.GetReloadToken().RegisterChangeCallback(OnConfigChanged, state);
         }
 
-        /// <summary> 单例 </summary>
-        public static ConfigHelper Instance => Singleton<ConfigHelper>.Instance ??
-                                               (Singleton<ConfigHelper>.Instance = new ConfigHelper());
+        ///// <summary> 单例 </summary>
+        //public static ConfigHelper Instance => Singleton<ConfigHelper>.Instance ??
+        //                                       (Singleton<ConfigHelper>.Instance = new ConfigHelper());
 
         /// <summary> 构建配置 </summary>
         /// <param name="builderAction"></param>

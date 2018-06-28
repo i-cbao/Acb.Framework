@@ -6,7 +6,7 @@ namespace Acb.Dapper.Domain
 {
     /// <summary> 基础仓储 </summary>
     /// <typeparam name="T"></typeparam>
-    public class DapperRepository<T> : DRepository
+    public partial class DapperRepository<T> : DRepository
         where T : IEntity
     {
         /// <summary> 构造 </summary>

@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
@@ -34,10 +35,12 @@ namespace Acb.Core.Helper
         private IDictionary<string, string> _headers;
         private readonly ILogger _logger;
         private const string ArrayPattern = @"(\[[0-9]+\])*$";
+        private readonly HttpHelper _httpHelper;
 
         public ConfigCenterProvider()
         {
             _logger = LogManager.Logger<ConfigCenterProvider>();
+            _httpHelper = CurrentIocManager.Resolve<HttpHelper>();
         }
 
         private async Task LoadTicket()
@@ -48,7 +51,7 @@ namespace Acb.Core.Helper
                 try
                 {
                     var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
-                    var loginResp = await HttpHelper.Instance.PostAsync(loginUrl,
+                    var loginResp = await _httpHelper.PostAsync(loginUrl,
                         new { account = _config.Account, password = _config.Password });
                     var data = await loginResp.Content.ReadAsStringAsync();
                     if (loginResp.IsSuccessStatusCode)
@@ -84,7 +87,7 @@ namespace Acb.Core.Helper
                 {
                     var path = $"{app}/{Consts.Mode.ToString().ToLower()}";
                     var url = new Uri(new Uri(_config.Uri), path).AbsoluteUri;
-                    var resp = await HttpHelper.Instance.RequestAsync(HttpMethod.Get,
+                    var resp = await _httpHelper.RequestAsync(HttpMethod.Get,
                         new HttpRequest(url) { Headers = _headers });
                     var json = await resp.Content.ReadAsStringAsync();
                     if (!resp.IsSuccessStatusCode)
@@ -150,13 +153,14 @@ namespace Acb.Core.Helper
         private void StartRefresh()
         {
             _logger.Info($"refresh:{_config.Interval}");
+            var refresh = CurrentIocManager.Resolve<ConfigCenterRefresh>();
             if (_config.Interval > 0)
             {
-                ConfigCenterRefresh.Instance.Start(_config.Interval, this);
+                refresh.Start(_config.Interval, this);
             }
             else
             {
-                ConfigCenterRefresh.Instance.Stop();
+                refresh.Stop();
             }
         }
 

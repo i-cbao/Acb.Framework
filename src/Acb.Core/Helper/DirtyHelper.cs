@@ -1,11 +1,12 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Acb.Core.Helper
 {
     /// <summary> 敏感词辅助 </summary>
-    public class DirtyHelper
+    public class DirtyHelper : ISingleDependency
     {
         private readonly DirtyNode _root;
         private const string DirtyWordsFile = "dirty_words.txt";
@@ -24,8 +25,8 @@ namespace Acb.Core.Helper
             }
         }
 
-        public static DirtyHelper Instance
-            => Singleton<DirtyHelper>.Instance ?? (Singleton<DirtyHelper>.Instance = new DirtyHelper());
+        //public static DirtyHelper Instance
+        //    => Singleton<DirtyHelper>.Instance ?? (Singleton<DirtyHelper>.Instance = new DirtyHelper());
 
         /// <summary> 添加脏词 </summary>
         /// <param name="word"></param>

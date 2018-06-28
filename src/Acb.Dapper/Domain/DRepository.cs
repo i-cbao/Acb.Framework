@@ -1,24 +1,21 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
 using System;
 using System.Data;
 
 namespace Acb.Dapper.Domain
 {
-    public abstract class DRepository
+    public abstract class DRepository : IScopedDependency
     {
         private readonly string _defaultConnectionName;
+        private readonly ConnectionFactory _factory;
         /// <summary> 获取默认连接 </summary>
         protected IDbConnection Connection => GetConnection(_defaultConnectionName);
 
         protected DRepository(string connectionName = null)
         {
+            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
             _defaultConnectionName = connectionName;
-        }
-
-        public static TRepository Instance<TRepository>()
-            where TRepository : DRepository, new()
-        {
-            return Singleton<TRepository>.Instance ?? (Singleton<TRepository>.Instance = new TRepository());
         }
 
         protected DRepository(Enum enumType) : this(enumType.ToString())
@@ -31,7 +28,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected IDbConnection GetConnection(Enum connectionName, bool threadCache = true)
         {
-            return ConnectionFactory.Instance.Connection(connectionName, threadCache);
+            return _factory.Connection(connectionName, threadCache);
         }
 
         /// <summary> 获取数据库连接 </summary>
@@ -40,7 +37,8 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected IDbConnection GetConnection(string connectionName = null, bool threadCache = true)
         {
-            return ConnectionFactory.Instance.Connection(connectionName, threadCache);
+            var name = string.IsNullOrWhiteSpace(connectionName) ? _defaultConnectionName : connectionName;
+            return _factory.Connection(name, threadCache);
         }
 
         /// <summary> 执行数据库事务 </summary>
@@ -52,7 +50,8 @@ namespace Acb.Dapper.Domain
         protected TResult Transaction<TResult>(Func<IDbConnection, IDbTransaction, TResult> action, string connectionName = null,
             IsolationLevel? level = null)
         {
-            var conn = GetConnection(connectionName ?? _defaultConnectionName, false);
+            var name = string.IsNullOrWhiteSpace(connectionName) ? _defaultConnectionName : connectionName;
+            var conn = GetConnection(name, false);
             using (conn)
             {
                 conn.Open();

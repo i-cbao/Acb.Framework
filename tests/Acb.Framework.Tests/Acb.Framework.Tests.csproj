@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="6.2.2" />
     <PackageReference Include="Consul" Version="0.7.2.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Microsoft.ML" Version="0.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
@@ -23,6 +24,7 @@
     <ProjectReference Include="..\..\src\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
+    <ProjectReference Include="..\..\src\Acb.EntityFramework\Acb.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.MicroService.Client\Acb.MicroService.Client.csproj" />
     <ProjectReference Include="..\..\src\Acb.MongoDb\Acb.MongoDb.csproj" />

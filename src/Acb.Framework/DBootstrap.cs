@@ -11,11 +11,6 @@ namespace Acb.Framework
     public class DBootstrap : Bootstrap
     {
         private bool _init;
-        protected DBootstrap() { }
-
-        public static DBootstrap Instance
-            => Singleton<DBootstrap>.Instance ??
-               (Singleton<DBootstrap>.Instance = new DBootstrap());
 
         public ContainerBuilder Builder { get; private set; }
 
@@ -31,12 +26,12 @@ namespace Acb.Framework
         {
             if (_init) return;
             _init = true;
+
             LoggerInit();
             CacheInit();
             IocRegisters();
             BuilderHandler?.Invoke(Builder);
             _container = Builder.Build();
-            IocManager = _container.Resolve<IIocManager>();
             DatabaseInit();
             ModulesInstaller();
         }
@@ -44,10 +39,9 @@ namespace Acb.Framework
         public override void IocRegisters()
         {
             Builder = new ContainerBuilder();
-
-            var assemblies = DAssemblyFinder.Instance.FindAll().ToArray();
+            var assemblies = new DAssemblyFinder().FindAll().ToArray();
             Builder.RegisterAssemblyTypes(assemblies)
-                .Where(type => typeof(ILifetimeDependency).IsAssignableFrom(type) && !type.IsAbstract)
+                .Where(type => typeof(IScopedDependency).IsAssignableFrom(type) && !type.IsAbstract)
                 .AsSelf() //自身服务，用于没有接口的类
                 .AsImplementedInterfaces() //接口服务
                 .PropertiesAutowired()//属性注入
@@ -65,6 +59,8 @@ namespace Acb.Framework
                 .AsImplementedInterfaces() //接口服务
                 .PropertiesAutowired()//属性注入
                 .SingleInstance(); //保证单例注入
+            IocManager = new IocManager(this);
+            Builder.Register(context => IocManager).SingleInstance();
         }
 
         public override void CacheInit()

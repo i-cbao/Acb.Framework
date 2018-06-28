@@ -28,16 +28,15 @@ namespace Acb.EntityFramework
             }
         }
 
-        protected AcbDbContext(string configName = null)
+        protected AcbDbContext(DbContextOptions options) : base(options)
         {
-            _configName = configName;
         }
 
         public bool IsTransaction { get; set; }
 
         public TResult Transaction<TResult>(Func<TResult> action)
         {
-            throw new NotImplementedException();
+            return default(TResult);
         }
 
         #region 私有方法

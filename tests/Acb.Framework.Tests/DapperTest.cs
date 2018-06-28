@@ -1,6 +1,6 @@
-﻿using Acb.Dapper;
-using Acb.Dapper.Adapters;
-using Acb.Dapper.Domain;
+﻿using Acb.Core;
+using Acb.Core.Dependency;
+using Acb.Dapper;
 using Acb.Framework.Tests.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
@@ -11,6 +11,7 @@ namespace Acb.Framework.Tests
     public class DapperTest : DTest
     {
         private readonly AreaRepository _areaRepository;
+        private readonly ConnectionFactory _factory;
 
         public class AreaDto
         {
@@ -22,7 +23,8 @@ namespace Acb.Framework.Tests
 
         public DapperTest()
         {
-            _areaRepository = DRepository.Instance<AreaRepository>();
+            _areaRepository = CurrentIocManager.Resolve<AreaRepository>();
+            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
         }
 
         [TestMethod]
@@ -31,15 +33,15 @@ namespace Acb.Framework.Tests
 
             var columns = typeof(TAreas).Columns();
             var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
-            using (var conn = ConnectionFactory.Instance.Connection("default", false))
+            using (var conn = _factory.Connection("default", false))
             {
-                var set = conn.QueryDataSet(conn.FormatSql(sql), new { code = "510100" });
-                Print(set);
-                //var list = conn.PagedList<TAreas>(sql, 2, 6, new { code = "510100" });
-                ////var mapper = _config.CreateMapper();
-                ////var dtos = Mapper.Map<PagedList<TAreas>>(list);
-                ////Print(dtos);
-                //Print(DResult.Succ(list));
+                //var set = conn.QueryDataSet(conn.FormatSql(sql), new { code = "510100" });
+                //Print(set);
+                var list = conn.PagedList<TAreas>(sql, 2, 6, new { code = "510100" });
+                //var mapper = _config.CreateMapper();
+                //var dtos = Mapper.Map<PagedList<TAreas>>(list);
+                //Print(dtos);
+                Print(DResult.Succ(list));
             }
         }
 
@@ -60,7 +62,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void UpdateTest()
         {
-            using (var conn = ConnectionFactory.Instance.Connection(threadCache: false))
+            using (var conn = _factory.Connection(threadCache: false))
             {
                 var result = conn.Update(new TAreas
                 {
@@ -94,7 +96,7 @@ AND u.create_time >=""2018 / 05 / 10""
             ORDER BY
             Count(u.`id`) DESC";
             SQL sql = str;
-            using (var conn = ConnectionFactory.Instance.Connection(threadCache: false))
+            using (var conn = _factory.Connection(threadCache: false))
             {
                 sql.Paged(1, 15, conn);
                 var t = sql.ToString();

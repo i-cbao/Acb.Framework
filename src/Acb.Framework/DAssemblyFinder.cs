@@ -1,11 +1,11 @@
-﻿using Acb.Core;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Reflection;
 using System;
 
 namespace Acb.Framework
 {
-    public class DAssemblyFinder : DefaultAssemblyFinder
+    public class DAssemblyFinder : DefaultAssemblyFinder, ISingleDependency
     {
         private const string FrameworkName = "Acb.";
         private static readonly string BaseAssemblyName;
@@ -28,8 +28,5 @@ namespace Acb.Framework
             : base(ass => AssemblyFinder.Invoke(ass.FullName), AssemblyFinder)
         {
         }
-
-        public static DAssemblyFinder Instance => Singleton<DAssemblyFinder>.Instance ??
-                                                       (Singleton<DAssemblyFinder>.Instance = new DAssemblyFinder());
     }
 }

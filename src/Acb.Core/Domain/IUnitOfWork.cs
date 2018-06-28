@@ -1,7 +1,5 @@
 ﻿using Acb.Core.Dependency;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace Acb.Core.Domain
 {

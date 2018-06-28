@@ -4,7 +4,7 @@ using System.Data;
 
 namespace Acb.WebApi.Test.Connections
 {
-    public interface IConnectionStruct : ILifetimeDependency, IDisposable
+    public interface IConnectionStruct : IScopedDependency, IDisposable
     {
         IDbConnection Connection(string name = null);
     }

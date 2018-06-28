@@ -1,4 +1,4 @@
-﻿using Acb.Core;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Dapper.Adapters;
@@ -16,13 +16,13 @@ using Timer = System.Timers.Timer;
 namespace Acb.Dapper
 {
     /// <summary> 数据库连接管理 </summary>
-    public class ConnectionFactory : IDbConnectionProvider
+    public class ConnectionFactory : ISingleDependency, IDbConnectionProvider
     {
         private const string Prefix = "dapper:";
         private const string DefaultConfigName = "dapperDefault";
         private const string DefaultName = "default";
 
-        private static readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> ConnectionCache;
+        private readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> ConnectionCache;
         private static readonly object LockObj = new object();
         private int _removeCount;
         private int _cacheCount;
@@ -30,7 +30,7 @@ namespace Acb.Dapper
         private readonly Timer _clearTimer;
         private bool _clearTimerRun;
 
-        static ConnectionFactory()
+        public ConnectionFactory()
         {
             ConnectionCache = new ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>>();
             //配置文件改变时，清空缓存
@@ -38,10 +38,6 @@ namespace Acb.Dapper
             {
                 ConnectionCache.Clear();
             };
-        }
-
-        private ConnectionFactory()
-        {
             _clearTimer = new Timer(1000 * 60);
             _clearTimer.Elapsed += ClearTimerElapsed;
             _clearTimer.Enabled = true;
@@ -59,13 +55,6 @@ namespace Acb.Dapper
                 _clearTimer.Stop();
             }
         }
-
-        /// <summary> 单例 </summary>
-        public static ConnectionFactory Instance
-            =>
-                Singleton<ConnectionFactory>.Instance ??
-                (Singleton<ConnectionFactory>.Instance = new ConnectionFactory());
-
 
         /// <summary> 清理失效的线程级缓存 </summary>
         private void ClearDict()

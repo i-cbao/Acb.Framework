@@ -1,7 +1,9 @@
 using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
+using Acb.Core.Timing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
@@ -11,8 +13,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Acb.Core.Extensions;
-using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -81,20 +81,6 @@ namespace Acb.Framework.Tests
             Story,
             Payment,
             Market
-        }
-
-        [TestMethod]
-        public async Task HttpTest()
-        {
-            const string uri = "/query/life?t=1";
-            var helper = new RestHelper(Site.Market);
-            var result = await helper.GetAsync<DResult<dynamic>>(uri, new
-            {
-                cityCode = "510100"
-            });
-            //var xx = JsonConvert.SerializeObject(html.Data.xianXing);
-            //if (html.Data.xianxing != null)
-            Print(result);
         }
 
         [TestMethod]

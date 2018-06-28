@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Logging;
+using Acb.Demo.Business.Domain;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ namespace Acb.Demo.Business
     public class DemoService : IDemoService
     {
         private readonly ILogger _logger = LogManager.Logger<DemoService>();
+        public AreaRepository AreaRepository { private get; set; }
 
         public DemoDto Hello(string id, DemoInputDto dto)
         {
@@ -34,7 +36,9 @@ namespace Acb.Demo.Business
 
         public Dictionary<string, object> Dict(string[] ids)
         {
-            return ids.ToDictionary(k => k, v => (object)new { key = v });
+            var list = AreaRepository.QueryArea("510100");
+            return list.ToDictionary(k => k.Id, v => (object)v);
+            //return ids.ToDictionary(k => k, v => (object)new { key = v });
         }
 
         public void Load(string id)

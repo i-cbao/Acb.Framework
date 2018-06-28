@@ -39,7 +39,7 @@ namespace Acb.Framework.Tests
 
             _microService.Load("shay");
             var task = _microService.LoadAsync();
-            var dict = _microService.Dict(new[] { "123", "456" });
+            var dict = _localService.Dict(new[] { "123", "456" });
             Print(dict);
 
             //LogManager.LogLevel(LogLevel.Off);

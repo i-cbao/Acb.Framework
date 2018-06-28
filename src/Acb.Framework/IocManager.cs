@@ -8,9 +8,9 @@ namespace Acb.Framework
     {
         private readonly DBootstrap _bootstrap;
 
-        public IocManager()
+        public IocManager(DBootstrap bootstrap)
         {
-            _bootstrap = DBootstrap.Instance;
+            _bootstrap = bootstrap;
         }
         public T Resolve<T>()
         {

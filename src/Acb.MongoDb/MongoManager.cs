@@ -1,18 +1,18 @@
-﻿using Acb.Core;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using System.Collections.Concurrent;
 
 namespace Acb.MongoDb
 {
-    public class MongoManager
+    public class MongoManager : ISingleDependency
     {
         private readonly ConcurrentDictionary<string, MongoHelper> _mongoCaches;
         private const string Prefix = "mongo:";
         private const string DefaultConfigName = "mongoDefault";
         private const string DefaultName = "default";
 
-        private MongoManager()
+        public MongoManager()
         {
             _mongoCaches = new ConcurrentDictionary<string, MongoHelper>();
             ConfigHelper.Instance.ConfigChanged += obj =>
@@ -20,9 +20,6 @@ namespace Acb.MongoDb
                 _mongoCaches.Clear();
             };
         }
-
-        public static MongoManager Instance => Singleton<MongoManager>.Instance ??
-                                               (Singleton<MongoManager>.Instance = new MongoManager());
 
         public MongoHelper GetHelper(string database, string configName = null)
         {

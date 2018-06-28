@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Dapper;
 using System.Collections.Concurrent;
@@ -32,7 +33,7 @@ namespace Acb.WebApi.Test.Connections
             var connName = string.IsNullOrWhiteSpace(name) ? "dapperDefault".Config("default") : name;
             return _connCache.GetOrAdd(connName, key =>
             {
-                var conn = ConnectionFactory.Instance.Connection(key, false);
+                var conn = CurrentIocManager.Resolve<ConnectionFactory>().Connection(key, false);
                 return conn;
             });
         }

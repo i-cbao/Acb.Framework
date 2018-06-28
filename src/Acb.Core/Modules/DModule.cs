@@ -3,7 +3,7 @@
 namespace Acb.Core.Modules
 {
     /// <summary> 应用启动依赖模块基类 </summary>
-    public abstract class DModule : ILifetimeDependency
+    public abstract class DModule : IScopedDependency
     {
         /// <summary> 依赖管理 </summary>
         protected internal IIocManager IocManager { get; internal set; }

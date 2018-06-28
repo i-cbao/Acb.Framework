@@ -15,6 +15,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using Acb.Core.Dependency;
 
 namespace Acb.MicroService.Client
 {
@@ -127,7 +128,7 @@ namespace Acb.MicroService.Client
                 },
                 {"referer", AcbHttpContext.RawUrl}
             };
-            return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
+            return await CurrentIocManager.Resolve<HttpHelper>().RequestAsync(HttpMethod.Post, new HttpRequest(url)
             {
                 Data = args,
                 Headers = headers

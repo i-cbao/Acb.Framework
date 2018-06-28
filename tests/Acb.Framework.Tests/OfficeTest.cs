@@ -12,6 +12,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Core.Dependency;
 
 namespace Acb.Framework.Tests
 {
@@ -27,7 +28,7 @@ namespace Acb.Framework.Tests
             //{
             //    dt.Rows.Add($"姓名{i}", RandomHelper.Random().Next(10000, 30000));
             //}
-            using (var conn = ConnectionFactory.Instance.Connection(threadCache: false))
+            using (var conn = CurrentIocManager.Resolve<ConnectionFactory>().Connection(threadCache: false))
             {
                 var excepts = new[] { nameof(TAreas.Deep) };
                 var columns = typeof(TAreas).Columns(excepts);
@@ -73,7 +74,7 @@ namespace Acb.Framework.Tests
                     list.Add(row[0].ToString(), row);
                 }
 
-                var resp = await HttpHelper.Instance.PostAsync(gateway, new
+                var resp = await CurrentIocManager.Resolve<HttpHelper>().PostAsync(gateway, new
                 {
                     ArrVehicleId = list.Keys.ToList()
                 });

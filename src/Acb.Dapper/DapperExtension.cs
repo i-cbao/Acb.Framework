@@ -134,7 +134,7 @@ namespace Acb.Dapper
                 if (prop.Key.Equals(prop.Value, StringComparison.CurrentCultureIgnoreCase))
                     sb.AppendFormat(
                         string.IsNullOrWhiteSpace(tableAlias) ? "[{0}]," : string.Concat(tableAlias, ".[{0}],"),
-                        prop.Key);
+                        prop.Value);
                 else
                     sb.AppendFormat(
                         string.IsNullOrWhiteSpace(tableAlias)

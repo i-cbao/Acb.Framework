@@ -1,4 +1,4 @@
-﻿using Acb.Core;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
@@ -8,12 +8,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
-using Acb.Core.Serialize;
 
 namespace Acb.Redis
 {
     /// <summary> Redis管理器 </summary>
-    public class RedisManager : IDisposable
+    public class RedisManager : ISingleDependency, IDisposable
     {
         private const string Prefix = "redis:";
         private const string DefaultConfigName = "redisDefault";
@@ -21,7 +20,7 @@ namespace Acb.Redis
         private const string DefaultName = "default";
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ConnectionMultiplexer> _connections;
-        private RedisManager()
+        public RedisManager()
         {
             _connections = new ConcurrentDictionary<string, ConnectionMultiplexer>();
             _logger = LogManager.Logger<RedisManager>();
@@ -34,10 +33,6 @@ namespace Acb.Redis
                 _connections.Clear();
             };
         }
-
-        /// <summary> 单例 </summary>
-        public static RedisManager Instance =
-            Singleton<RedisManager>.Instance = (Singleton<RedisManager>.Instance = new RedisManager());
 
         private static string GetConfigName(string configName)
         {
@@ -75,7 +70,7 @@ namespace Acb.Redis
                 _logger.Warn(
                     $"Redis 重新连接：Endpoint failed: ${e.EndPoint}, ${e.FailureType},${e.Exception?.Message}");
             };
-            conn.InternalError += (sender, e) => { _logger.Warn($"Redis InternalError:{e.Exception.Message}"); };
+            conn.InternalError += (sender, e) => { _logger.Warn($"Redis InternalError:{e.Exception.Message}"); };            
             return conn;
         }
 

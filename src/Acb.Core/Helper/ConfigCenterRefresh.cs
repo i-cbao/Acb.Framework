@@ -1,21 +1,14 @@
-﻿using System;
+﻿using Acb.Core.Dependency;
+using System;
 using System.Threading;
 
 namespace Acb.Core.Helper
 {
-    internal class ConfigCenterRefresh
+    internal class ConfigCenterRefresh : ISingleDependency
     {
         private Timer _timer;
         private ConfigCenterProvider _provider;
         private int _interval;
-
-        private ConfigCenterRefresh()
-        {
-        }
-
-        public static ConfigCenterRefresh Instance =>
-            Singleton<ConfigCenterRefresh>.Instance ??
-            (Singleton<ConfigCenterRefresh>.Instance = new ConfigCenterRefresh());
 
         public void Start(int seconds, ConfigCenterProvider provider)
         {

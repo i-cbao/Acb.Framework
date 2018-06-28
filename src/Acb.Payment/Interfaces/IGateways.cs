@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Acb.Payment.Interfaces
 {
-    public interface IGateways : ILifetimeDependency
+    public interface IGateways : IScopedDependency
     {
         /// <summary>
         /// 添加网关

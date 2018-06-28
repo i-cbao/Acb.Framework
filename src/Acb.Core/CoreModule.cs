@@ -21,17 +21,17 @@ namespace Acb.Core
         {
             CurrentIocManager.IocManager = IocManager;
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            LoadLocalConfig();
+            var configHelper = ConfigHelper.Instance;
+            LoadLocalConfig(configHelper);
             var provider = new ConfigCenterProvider();
-            ConfigHelper.Instance.Build(b => b.Add(provider));
-            ConfigHelper.Instance.ConfigChanged += provider.Reload;
+            configHelper.Build(b => b.Add(provider));
+            configHelper.ConfigChanged += provider.Reload;
             base.Initialize();
         }
 
         /// <summary> 加载本地配置 </summary>
-        private static void LoadLocalConfig()
+        private void LoadLocalConfig(ConfigHelper configHelper)
         {
-            var configHelper = ConfigHelper.Instance;
             //本地文件配置
             var configPath = "configPath".Config<string>();
             if (string.IsNullOrWhiteSpace(configPath))
@@ -55,7 +55,7 @@ namespace Acb.Core
 
         public override void Shutdown()
         {
-            HttpHelper.Instance.Dispose();
+            IocManager.Resolve<HttpHelper>().Dispose();
             base.Shutdown();
         }
     }

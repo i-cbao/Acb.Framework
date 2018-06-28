@@ -21,7 +21,7 @@ namespace Acb.Core
         /// <summary> 初始化各个模块 </summary>
         public void ModulesInstaller()
         {
-            IocManager.Resolve<IModuleManager>().InitializeModules();
+            IocManager?.Resolve<IModuleManager>().InitializeModules();
         }
 
         /// <summary> 缓存初始化 </summary>

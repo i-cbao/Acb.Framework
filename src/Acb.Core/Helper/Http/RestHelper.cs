@@ -1,4 +1,5 @@
-﻿using Acb.Core.Exceptions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
@@ -17,12 +18,14 @@ namespace Acb.Core.Helper.Http
         private readonly string _baseUri;
         private const string Prefix = "sites:";
         private readonly ILogger _logger = LogManager.Logger<RestHelper>();
+        private readonly HttpHelper _httpHelper;
 
         /// <summary> 构造函数 </summary>
         /// <param name="baseUri"></param>
         public RestHelper(string baseUri = null)
         {
             _baseUri = baseUri;
+            _httpHelper = CurrentIocManager.Resolve<HttpHelper>();
         }
 
         /// <inheritdoc />
@@ -55,7 +58,7 @@ namespace Acb.Core.Helper.Http
             request.Headers = request.Headers ?? new Dictionary<string, string>();
             if (ticket)
                 request.Headers.Add("App-Ticket", GetTicket());
-            var resp = await HttpHelper.Instance.RequestAsync(method ?? HttpMethod.Get, request);
+            var resp = await _httpHelper.RequestAsync(method ?? HttpMethod.Get, request);
             if (resp.StatusCode == HttpStatusCode.OK)
                 return await resp.Content.ReadAsStringAsync();
             return string.Empty;

@@ -2,6 +2,7 @@
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Framework.Logging;
+using Autofac;
 using System;
 
 namespace Acb.Framework
@@ -12,11 +13,14 @@ namespace Acb.Framework
         /// <summary> 项目启动项 </summary>
         protected DBootstrap Bootstrap;
 
+        protected Action<ContainerBuilder> MapServices;
+
         /// <summary> 默认构造函数 </summary>
         protected DTest()
         {
             LogManager.AddAdapter(new ConsoleAdapter());
-            Bootstrap = DBootstrap.Instance;
+            Bootstrap = new DBootstrap();
+            MapServices?.Invoke(Bootstrap.Builder);
             Bootstrap.Initialize();
             //LogManager.ClearAdapter();
 

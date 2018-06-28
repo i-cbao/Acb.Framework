@@ -1,5 +1,7 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
 using Acb.Redis;
+using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +14,12 @@ namespace Acb.MicroService.Register
 
         private MicroServiceConfig _config;
         private HashSet<Assembly> _asses;
+        private readonly IDatabase _redis;
+
+        public RedisRegister()
+        {
+            _redis = CurrentIocManager.Resolve<RedisManager>().GetDatabase();
+        }
 
         private string ServiceUrl()
         {
@@ -27,10 +35,9 @@ namespace Acb.MicroService.Register
         {
             _config = config;
             _asses = asses;
-            var redis = RedisManager.Instance.GetDatabase();
             foreach (var ass in asses)
             {
-                redis.SetAdd(AssKey(ass), ServiceUrl());
+                _redis.SetAdd(AssKey(ass), ServiceUrl());
             }
         }
 
@@ -38,10 +45,9 @@ namespace Acb.MicroService.Register
         {
             if (_asses == null || !_asses.Any())
                 return;
-            var redis = RedisManager.Instance.GetDatabase();
             foreach (var ass in _asses)
             {
-                redis.SetRemove(AssKey(ass), ServiceUrl());
+                _redis.SetRemove(AssKey(ass), ServiceUrl());
             }
         }
     }

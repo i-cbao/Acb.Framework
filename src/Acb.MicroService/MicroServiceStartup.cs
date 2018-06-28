@@ -22,7 +22,7 @@ namespace Acb.MicroService
 
         public MicroServiceStartup()
         {
-            _bootstrap = DBootstrap.Instance;
+            _bootstrap = new DBootstrap();
         }
 
         /// <summary> 配置服务 </summary>

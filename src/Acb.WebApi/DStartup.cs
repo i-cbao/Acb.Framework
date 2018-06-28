@@ -25,7 +25,7 @@ namespace Acb.WebApi
 
         protected DStartup(string name = null)
         {
-            _bootstrap = DBootstrap.Instance;
+            _bootstrap = new DBootstrap();
             _appName = name;
         }
 
@@ -103,7 +103,7 @@ namespace Acb.WebApi
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc();
             var liftscope = app.ApplicationServices.GetService<IApplicationLifetime>();
-            liftscope.ApplicationStopping.Register(DBootstrap.Instance.Dispose);
+            liftscope.ApplicationStopping.Register(_bootstrap.Dispose);
         }
     }
 }

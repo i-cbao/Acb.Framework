@@ -1,4 +1,4 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Tests;
@@ -14,6 +14,11 @@ namespace Acb.Framework.Tests
     public class RedisTest : DTest
     {
         private readonly ILogger _logger = LogManager.Logger<ConfigTest>();
+        private readonly RedisManager _manager;
+        public RedisTest()
+        {
+            _manager = CurrentIocManager.Resolve<RedisManager>();
+        }
         [TestMethod]
         public void GetTest()
         {
@@ -21,13 +26,13 @@ namespace Acb.Framework.Tests
             Print($"最小线程数：{min},{compt}");
             //ThreadPool.SetMinThreads(300, compt);
             const string key = "shay";
-            var redis = RedisManager.Instance.GetDatabase("local", 4);
+            var redis = _manager.GetDatabase("local", 4);
             redis.Set(key, "test", TimeSpan.FromMinutes(2));
             var result = CodeTimer.Time("redis test", 100, () =>
             {
                 try
                 {
-                    var ritem = RedisManager.Instance.GetDatabase("local", 4);
+                    var ritem = _manager.GetDatabase("local", 4);
                     var tmp = ritem.Get<string>(key);
                 }
                 catch (Exception ex)
@@ -35,7 +40,6 @@ namespace Acb.Framework.Tests
                     //Print(ex.Format());
                     throw;
                 }
-
             }, 100);
             Print(result.ToString());
             var value = redis.Get<string>(key);
@@ -45,7 +49,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void IncrementTest()
         {
-            var t = RedisManager.Instance.GetDatabase("test");
+            var t = _manager.GetDatabase("test");
             const string key = "icb10";
             if (!t.KeyExists(key))
             {
@@ -64,7 +68,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void SubscribeTest()
         {
-            var t = RedisManager.Instance.GetSubscriber();
+            var t = _manager.GetSubscriber();
             const string chnl = "Subscriber_Test";
 
             t.Subscribe(chnl, (channel, value) => Print(value.ToString()));

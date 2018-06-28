@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using System;
 using System.Collections.Concurrent;
@@ -26,10 +27,6 @@ namespace Acb.Core.Logging
             LoggerDictionary = new ConcurrentDictionary<string, Logger>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
             LogLevel();
-            ConfigHelper.Instance.ConfigChanged += obj =>
-            {
-                LogLevel();
-            };
         }
 
         /// <summary> 设置日志登记 </summary>

@@ -1,4 +1,5 @@
-﻿using Acb.Core.Helper;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Helper;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,13 +19,14 @@ namespace Acb.Configuration
             if (_isRunning)
                 return;
             _abort = false;
+            var helper = ConfigHelper.Instance;
             Task.Run(() =>
             {
                 _isRunning = true;
                 while (true)
                 {
                     Thread.CurrentThread.Join(TimeSpan.FromSeconds(seconds));
-                    ConfigHelper.Instance.Reload();
+                    helper.Reload();
                     if (_abort)
                         break;
                 }

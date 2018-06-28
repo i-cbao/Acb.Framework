@@ -19,7 +19,7 @@ namespace Acb.Redis
 
         public override void Shutdown()
         {
-            RedisManager.Instance.Dispose();
+            IocManager.Resolve<RedisManager>().Dispose();
             base.Shutdown();
         }
     }

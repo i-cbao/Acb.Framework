@@ -1,4 +1,5 @@
-﻿using Acb.Core.Helper;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Helper;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
@@ -180,7 +181,8 @@ namespace Acb.Core.Extensions
         /// <returns></returns>
         public static T Config<T>(this string configName, T def = default(T))
         {
-            return ConfigHelper.Instance.Get(def, supressKey: configName);
+            var helper = ConfigHelper.Instance;
+            return helper.Get(def, supressKey: configName);
         }
 
         /// <summary> 小驼峰命名法 </summary>

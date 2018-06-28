@@ -28,4 +28,8 @@
     <ProjectReference Include="..\Acb.Redis\Acb.Redis.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Proxy\" />
+  </ItemGroup>
+
 </Project>

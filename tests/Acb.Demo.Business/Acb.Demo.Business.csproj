@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
   </ItemGroup>
 

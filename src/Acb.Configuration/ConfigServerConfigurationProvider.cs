@@ -1,4 +1,5 @@
-﻿using Acb.Core.Exceptions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Exceptions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
@@ -114,7 +115,8 @@ namespace Acb.Configuration
 
         public virtual IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            ConfigurationSettingsHelper.Initialize(Prefix, _settings, ConfigHelper.Instance.Config);
+            var helper = ConfigHelper.Instance;
+            ConfigurationSettingsHelper.Initialize(Prefix, _settings, helper.Config);
             return this;
         }
 
