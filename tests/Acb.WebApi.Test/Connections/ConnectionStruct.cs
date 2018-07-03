@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Dapper;
 using System.Collections.Concurrent;
@@ -10,13 +9,15 @@ namespace Acb.WebApi.Test.Connections
     public class ConnectionStruct : IConnectionStruct
     {
         private readonly ConcurrentDictionary<string, IDbConnection> _connCache;
+        private readonly IDbConnectionProvider _provider;
         private readonly ILogger _logger;
 
-        public ConnectionStruct()
+        public ConnectionStruct(IDbConnectionProvider provider)
         {
             _logger = LogManager.Logger<ConnectionStruct>();
             _logger.Info("connection create");
             _connCache = new ConcurrentDictionary<string, IDbConnection>();
+            _provider = provider;
         }
 
         public void Dispose()
@@ -33,7 +34,7 @@ namespace Acb.WebApi.Test.Connections
             var connName = string.IsNullOrWhiteSpace(name) ? "dapperDefault".Config("default") : name;
             return _connCache.GetOrAdd(connName, key =>
             {
-                var conn = CurrentIocManager.Resolve<ConnectionFactory>().Connection(key, false);
+                var conn = _provider.Connection(key, false);
                 return conn;
             });
         }

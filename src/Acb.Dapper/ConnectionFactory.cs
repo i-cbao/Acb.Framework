@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Dapper.Adapters;
 using Acb.Dapper.Config;
@@ -16,7 +15,7 @@ using Timer = System.Timers.Timer;
 namespace Acb.Dapper
 {
     /// <summary> 数据库连接管理 </summary>
-    public class ConnectionFactory : ISingleDependency, IDbConnectionProvider
+    public class ConnectionFactory : IDbConnectionProvider
     {
         private const string Prefix = "dapper:";
         private const string DefaultConfigName = "dapperDefault";
@@ -24,6 +23,7 @@ namespace Acb.Dapper
 
         private readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> ConnectionCache;
         private static readonly object LockObj = new object();
+        private int _createCount;
         private int _removeCount;
         private int _cacheCount;
         private int _clearCount;
@@ -83,12 +83,13 @@ namespace Acb.Dapper
         /// <summary> 创建数据库连接 </summary>
         /// <param name="connectionName"></param>
         /// <returns></returns>
-        private static IDbConnection Create(string connectionName)
+        private IDbConnection Create(string connectionName)
         {
             var connectionConfig = $"{Prefix}{connectionName}".Config<ConnectionConfig>();
             if (connectionConfig == null || string.IsNullOrWhiteSpace(connectionConfig.ConnectionString))
                 throw new ArgumentException($"未找到connectionName为{connectionName}的数据库配置");
             //DbProviderFactories.GetFactory(connectionConfig.ProviderName).CreateConnection();
+            _createCount++;
             var adapter = DbConnectionManager.Create(connectionConfig.ProviderName);
             var connection = adapter.Create();
             if (connection == null)
@@ -122,6 +123,7 @@ namespace Acb.Dapper
                         throw new Exception("Can not set db connection!");
                     }
                 }
+
                 if (connDict.ContainsKey(connectionName))
                 {
                     _cacheCount++;
@@ -135,6 +137,7 @@ namespace Acb.Dapper
                     _clearTimer.Start();
                     _clearTimerRun = true;
                 }
+
                 return connDict[connectionName].GetConnection();
             }
         }
@@ -168,7 +171,7 @@ namespace Acb.Dapper
                     sb.AppendLine(item.ToString());
                 }
             }
-            sb.AppendLine($"total:{Count},useCache:{_cacheCount},clear:{_clearCount},remove:{_removeCount}");
+            sb.AppendLine($"create:{_createCount},total:{Count},useCache:{_cacheCount},clear:{_clearCount},remove:{_removeCount}");
             return sb.ToString();
         }
     }

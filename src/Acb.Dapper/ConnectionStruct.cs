@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Acb.Core.Timing;
+using System;
 using System.Data;
-using Acb.Core.Timing;
 
 namespace Acb.Dapper
 {

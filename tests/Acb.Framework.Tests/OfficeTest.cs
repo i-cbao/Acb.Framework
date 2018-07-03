@@ -28,7 +28,7 @@ namespace Acb.Framework.Tests
             //{
             //    dt.Rows.Add($"姓名{i}", RandomHelper.Random().Next(10000, 30000));
             //}
-            using (var conn = CurrentIocManager.Resolve<ConnectionFactory>().Connection(threadCache: false))
+            using (var conn = CurrentIocManager.Resolve<IDbConnectionProvider>().Connection(threadCache: false))
             {
                 var excepts = new[] { nameof(TAreas.Deep) };
                 var columns = typeof(TAreas).Columns(excepts);

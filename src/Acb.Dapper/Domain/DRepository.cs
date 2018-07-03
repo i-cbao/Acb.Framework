@@ -5,16 +5,17 @@ using System.Data;
 
 namespace Acb.Dapper.Domain
 {
-    public abstract class DRepository : IScopedDependency
+    public abstract class DRepository : IScopedDependency, IDisposable
     {
         private readonly string _defaultConnectionName;
-        private readonly ConnectionFactory _factory;
+        public IDbConnectionProvider ConnectionProvider { private get; set; }
+
         /// <summary> 获取默认连接 </summary>
-        protected IDbConnection Connection => GetConnection(_defaultConnectionName);
+        protected IDbConnection Connection => GetConnection();
+
 
         protected DRepository(string connectionName = null)
         {
-            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
             _defaultConnectionName = connectionName;
         }
 
@@ -28,7 +29,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected IDbConnection GetConnection(Enum connectionName, bool threadCache = true)
         {
-            return _factory.Connection(connectionName, threadCache);
+            return ConnectionProvider.Connection(connectionName, threadCache);
         }
 
         /// <summary> 获取数据库连接 </summary>
@@ -38,7 +39,7 @@ namespace Acb.Dapper.Domain
         protected IDbConnection GetConnection(string connectionName = null, bool threadCache = true)
         {
             var name = string.IsNullOrWhiteSpace(connectionName) ? _defaultConnectionName : connectionName;
-            return _factory.Connection(name, threadCache);
+            return ConnectionProvider.Connection(name, threadCache);
         }
 
         /// <summary> 执行数据库事务 </summary>
@@ -101,6 +102,11 @@ namespace Acb.Dapper.Domain
             int count = 1, IDbConnection conn = null, IDbTransaction trans = null)
         {
             return (conn ?? Connection).Increment<T>(column, key, keyColumn, count, trans);
+        }
+
+        public void Dispose()
+        {
+            Connection?.Dispose();
         }
     }
 }

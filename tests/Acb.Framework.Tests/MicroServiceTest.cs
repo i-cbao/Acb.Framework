@@ -5,6 +5,7 @@ using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
 using Acb.Core.Timing;
+using Acb.Dapper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
@@ -13,6 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -36,11 +38,25 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Test()
         {
-
             _microService.Load("shay");
             var task = _microService.LoadAsync();
-            var dict = _localService.Dict(new[] { "123", "456" });
-            Print(dict);
+            var logger = LogManager.Logger<MicroServiceTest>();
+            var result = CodeTimer.Time("dapper", 100, () =>
+            {
+                try
+                {
+                    var dict = CurrentIocManager.Resolve<IDemoService>().Dict(new[] { "123", "456" });
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.Message, ex);
+                    throw;
+                }
+
+                //Print(dict);
+            }, 10);
+            Print(result.ToString());
+            Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
 
             //LogManager.LogLevel(LogLevel.Off);
             //var result = CodeTimer.Time("micro", 200, () =>

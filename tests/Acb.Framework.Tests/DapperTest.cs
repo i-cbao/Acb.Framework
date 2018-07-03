@@ -11,7 +11,7 @@ namespace Acb.Framework.Tests
     public class DapperTest : DTest
     {
         private readonly AreaRepository _areaRepository;
-        private readonly ConnectionFactory _factory;
+        private readonly IDbConnectionProvider _factory;
 
         public class AreaDto
         {
@@ -24,7 +24,7 @@ namespace Acb.Framework.Tests
         public DapperTest()
         {
             _areaRepository = CurrentIocManager.Resolve<AreaRepository>();
-            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
+            _factory = CurrentIocManager.Resolve<IDbConnectionProvider>();
         }
 
         [TestMethod]
