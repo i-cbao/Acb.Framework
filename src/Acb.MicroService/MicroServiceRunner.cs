@@ -88,6 +88,18 @@ namespace Acb.MicroService
         {
             response.StatusCode = code;
             response.ContentType = "application/json";
+            if (data is Task task)
+            {
+                await task;
+                var taskType = task.GetType().GetTypeInfo();
+                if (taskType.IsGenericType)
+                {
+                    var prop = taskType.GetProperty("Result");
+                    if (prop != null)
+                        data = prop.GetValue(task);
+                }
+            }
+
             var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(data));
             await response.Body.WriteAsync(bytes, 0, bytes.Length);
         }

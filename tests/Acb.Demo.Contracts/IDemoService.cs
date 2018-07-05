@@ -8,11 +8,13 @@ namespace Acb.Demo.Contracts
 {
     public interface IDemoService : IDependency, IMicroService
     {
-        DemoDto Hello(string id, DemoInputDto dto);
+        Task<DemoDto> Hello(string id, DemoInputDto dto);
 
         IList<string> List(IEnumerable<string> ids);
 
-        Dictionary<string, object> Dict(string[] ids);
+        Task<Dictionary<string, object>> Dict(string[] ids);
+
+        Task<Dictionary<string, object>> Areas(string parentCode);
 
         void Load(string id);
 

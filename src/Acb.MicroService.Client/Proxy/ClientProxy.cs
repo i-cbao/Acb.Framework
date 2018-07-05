@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Cache;
+using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
@@ -15,16 +16,14 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using Acb.Core.Dependency;
 
-namespace Acb.MicroService.Client
+namespace Acb.MicroService.Client.Proxy
 {
-    /// <inheritdoc />
     /// <summary> 代理调用 </summary>
     /// <typeparam name="T"></typeparam>
-    public class InvokeProxy<T> : DispatchProxy where T : IMicroService
+    public class ClientProxy<T> : ProxyAsync where T : IMicroService
     {
-        private readonly ILogger _logger = LogManager.Logger(typeof(ProxyService));
+        private readonly ILogger _logger = LogManager.Logger(typeof(ClientProxy<>));
         private readonly MicroServiceConfig _config;
         private readonly ICache _serviceCache;
 
@@ -33,11 +32,11 @@ namespace Acb.MicroService.Client
 
         /// <inheritdoc />
         /// <summary> 构造函数 </summary>
-        public InvokeProxy()
+        public ClientProxy()
         {
             _type = typeof(T);
             _config = Constans.MicroSreviceKey.Config<MicroServiceConfig>();
-            _serviceCache = CacheManager.GetCacher(typeof(InvokeProxy<>));
+            _serviceCache = CacheManager.GetCacher(typeof(ClientProxy<>));
         }
 
         private IServiceFinder GetServiceFinder()
@@ -68,19 +67,14 @@ namespace Acb.MicroService.Client
             return services.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
         }
 
-        /// <inheritdoc />
-        /// <summary> 接口调用 </summary>
-        /// <param name="targetMethod"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        protected override object Invoke(MethodInfo targetMethod, object[] args)
+        private Task<object> BaseInvoke(MethodInfo targetMethod, IEnumerable args)
         {
             var services = GetTypeService();
             var service = string.Empty;
             var builder = Policy
                 .Handle<HttpRequestException>() //服务器异常
                 .OrResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.NotFound); //服务未找到
-                                                                                              //熔断,3次异常,熔断5分钟
+            //熔断,3次异常,熔断5分钟
             var breaker = builder.CircuitBreakerAsync(3, TimeSpan.FromMinutes(5));
             //重试3次
             var retry = builder.RetryAsync(3, (result, count) =>
@@ -105,11 +99,31 @@ namespace Acb.MicroService.Client
                 return await InvokeAsync(url, args);
             });
             var type = targetMethod.ReturnType;
-            if (type == typeof(void))
-                return null;
-            if (type == typeof(Task))
-                return Task.CompletedTask;
-            return ResultAsync(resp, type).Result;
+            if (type == typeof(void) || type == typeof(Task))
+                return Task.FromResult<object>(0);
+            return ResultAsync(resp, type);
+        }
+
+        /// <inheritdoc />
+        /// <summary> 接口调用 </summary>
+        /// <param name="targetMethod"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public override object Invoke(MethodInfo targetMethod, object[] args)
+        {
+            var result = BaseInvoke(targetMethod, args);
+            return result.Result;
+        }
+
+        public override Task InvokeAsync(MethodInfo method, object[] args)
+        {
+            return BaseInvoke(method, args);
+        }
+
+        public override async Task<TR> InvokeAsyncT<TR>(MethodInfo method, object[] args)
+        {
+            var result = await BaseInvoke(method, args);
+            return result.CastTo<TR>();
         }
 
         /// <summary> 执行请求 </summary>
@@ -145,6 +159,10 @@ namespace Acb.MicroService.Client
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var html = await resp.Content.ReadAsStringAsync();
+                if (typeof(Task<>).IsGenericAssignableFrom(returnType))
+                {
+                    returnType = returnType.GenericTypeArguments[0];
+                }
                 return JsonConvert.DeserializeObject(html, returnType);
             }
             else

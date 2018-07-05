@@ -1,17 +1,16 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
-using Acb.Core.Timing;
 using Acb.Dapper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
 using Acb.MicroService.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -36,51 +35,47 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public void Test()
+        public async Task LoadTest()
         {
             _microService.Load("shay");
-            var task = _microService.LoadAsync();
+            await _microService.LoadAsync();
+            var dict = await _microService.Dict(new[] { "123", "456" });
+            Print(dict);
+        }
+
+        [TestMethod]
+        public void Test()
+        {
+
             var logger = LogManager.Logger<MicroServiceTest>();
-            var result = CodeTimer.Time("dapper", 100, () =>
+            var localResult = CodeTimer.Time("local", 100, async () =>
+             {
+                 try
+                 {
+                     var dict = await _localService.Areas("510100");
+                 }
+                 catch (Exception ex)
+                 {
+                     logger.Error(ex.Message, ex);
+                     throw;
+                 }
+             }, 10);
+            var result = CodeTimer.Time("micro", 100, async () =>
             {
                 try
                 {
-                    var dict = CurrentIocManager.Resolve<IDemoService>().Dict(new[] { "123", "456" });
+                    var dict = await _microService.Areas("510100");
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex.Message, ex);
                     throw;
                 }
-
-                //Print(dict);
             }, 10);
+            Print(localResult.ToString());
             Print(result.ToString());
-            Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
 
-            //LogManager.LogLevel(LogLevel.Off);
-            //var result = CodeTimer.Time("micro", 200, () =>
-            //{
-            //    _microService.Hello(IdentityHelper.Guid32, new DemoInputDto
-            //    {
-            //        Demo = DemoEnums.Test,
-            //        Name = "shay" + IdentityHelper.Guid16,
-            //        Time = Clock.Now
-            //    });
-            //    //Print(word);
-            //}, 10);
-            //Print(result.ToString());
-            //result = CodeTimer.Time("local", 200, () =>
-            //{
-            //    _localService.Hello(IdentityHelper.Guid32, new DemoInputDto
-            //    {
-            //        Demo = DemoEnums.Test,
-            //        Name = "shay" + IdentityHelper.Guid16,
-            //        Time = Clock.Now
-            //    });
-            //    //Print(word);
-            //}, 10);
-            //Print(result.ToString());
+            Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
         }
 
         private async Task<WebResponse> Request(HttpMethod method, string url, object data = null)
@@ -93,7 +88,9 @@ namespace Acb.Framework.Tests
             req.ContentType = "application/json";
             using (var stream = await req.GetRequestStreamAsync())
             {
-                var str = data.GetType().IsSimpleType() || data.GetType().IsEnum ? data.ToJson() : data.ToString();
+                var str = (data.GetType().IsSimpleType() || data.GetType().IsEnum)
+                    ? data.ToString()
+                    : JsonHelper.ToJson(data);
                 var buffer = Encoding.UTF8.GetBytes(str);
                 await stream.WriteAsync(buffer, 0, buffer.Length);
                 req.ContentLength = buffer.Length;
@@ -122,27 +119,37 @@ namespace Acb.Framework.Tests
         public void HttpTest()
         {
             const string url = "http://localhost:63409/micro/idemoservice/hello";
-            var data = JsonHelper.ToJson(new object[]
+            var data = new object[]
             {
                 IdentityHelper.Guid32,
                 new DemoInputDto
                 {
                     Demo = DemoEnums.Test,
-                    Name = "shay" + IdentityHelper.Guid16,
-                    Time = Clock.Now
+                    Name = "shay" + IdentityHelper.Guid16
                 }
-            });
+            };
+
+            var helper = CurrentIocManager.Resolve<HttpHelper>();
+            Task.Run(async () =>
+            {
+                var req = await helper.PostAsync(url, data);
+                var html = await req.Content.ReadAsStringAsync();
+                Print(html);
+                html = await PostAsync(url, data);
+                Print(html);
+            }).Wait();
 
             LogManager.LogLevel(LogLevel.Off);
-            var result1 = CodeTimer.Time("HttpClient", 200, () =>
+            var resul2 = CodeTimer.Time("WebRequest", 20, async () =>
             {
-                var html = new HttpClient().PostAsync(url,
-                        new StringContent(data, Encoding.UTF8, "application/json")).Result.Content.ReadAsStringAsync()
-                    .Result;
+                var html = await PostAsync(url, data);
+                Print($"web_request:{html}");
             }, 10);
-            var resul2 = CodeTimer.Time("WebRequest", 200, () =>
+            var result1 = CodeTimer.Time("HttpClient", 20, async () =>
             {
-                var html = PostAsync(url, data).Result;
+                var req = await helper.PostAsync(url, data);
+                var html = await req.Content.ReadAsStringAsync();
+                Print($"http_client:{html}");
             }, 10);
             Print(result1.ToString());
             Print(resul2.ToString());

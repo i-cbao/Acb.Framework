@@ -36,14 +36,7 @@ namespace Acb.Core
         private static extern bool InternetGetConnectedState(out int connectionDescription, int reservedValue);
 
         /// <summary> 是否有网络链接 </summary>
-        public static bool IsNetConnected
-        {
-            get
-            {
-                int i;
-                return InternetGetConnectedState(out i, 0);
-            }
-        }
+        public static bool IsNetConnected => InternetGetConnectedState(out _, 0);
 
         /// <summary> 获取真是IP </summary>
         /// <returns></returns>

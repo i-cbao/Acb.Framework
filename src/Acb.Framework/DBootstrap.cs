@@ -59,6 +59,7 @@ namespace Acb.Framework
                 .AsImplementedInterfaces() //接口服务
                 .PropertiesAutowired()//属性注入
                 .SingleInstance(); //保证单例注入
+
             IocManager = new IocManager(this);
             Builder.Register(context => IocManager).SingleInstance();
         }

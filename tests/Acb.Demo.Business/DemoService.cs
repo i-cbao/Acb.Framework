@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Exceptions;
 using Acb.Core.Logging;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Contracts;
@@ -6,6 +7,7 @@ using Acb.Demo.Contracts.Dtos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Core.Timing;
 
 namespace Acb.Demo.Business
 {
@@ -14,16 +16,16 @@ namespace Acb.Demo.Business
         private readonly ILogger _logger = LogManager.Logger<DemoService>();
         public AreaRepository AreaRepository { private get; set; }
 
-        public DemoDto Hello(string id, DemoInputDto dto)
+        public async Task<DemoDto> Hello(string id, DemoInputDto dto)
         {
             var t = new DemoDto
             {
                 Id = id,
                 Demo = dto.Demo,
                 Name = dto.Name + ",Success",
-                Time = dto.Time
+                Time = Clock.Now
             };
-            return t;
+            return await Task.FromResult(t);
         }
 
         public IList<string> List(IEnumerable<string> ids)
@@ -34,11 +36,16 @@ namespace Acb.Demo.Business
             return list;
         }
 
-        public Dictionary<string, object> Dict(string[] ids)
+        public async Task<Dictionary<string, object>> Dict(string[] ids)
         {
-            var list = AreaRepository.QueryArea("510100");
+            throw new BusiException("dist error");
+            return await Task.FromResult(ids.ToDictionary(k => k, v => (object)v));
+        }
+
+        public async Task<Dictionary<string, object>> Areas(string parentCode)
+        {
+            var list = await AreaRepository.QueryAreaAsync(parentCode);
             return list.ToDictionary(k => k.Id, v => (object)v);
-            //return ids.ToDictionary(k => k, v => (object)new { key = v });
         }
 
         public void Load(string id)
@@ -49,7 +56,7 @@ namespace Acb.Demo.Business
         public Task LoadAsync()
         {
             _logger.Info("loadasync");
-            return Task.FromResult("loadasync");
+            return Task.CompletedTask;
         }
     }
 }

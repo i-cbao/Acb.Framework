@@ -1,5 +1,5 @@
 ﻿using Acb.Core;
-using System.Reflection;
+using Acb.MicroService.Client.Proxy;
 
 namespace Acb.MicroService.Client
 {
@@ -11,7 +11,7 @@ namespace Acb.MicroService.Client
         /// <returns></returns>
         public static T Proxy<T>() where T : IMicroService
         {
-            return DispatchProxy.Create<T, InvokeProxy<T>>();
+            return ProxyAsync.Create<T, ClientProxy<T>>();
         }
     }
 }
