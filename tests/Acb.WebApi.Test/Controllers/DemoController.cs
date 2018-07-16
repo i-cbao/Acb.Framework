@@ -1,4 +1,5 @@
-﻿using Acb.Core;
+﻿using System.Threading.Tasks;
+using Acb.Core;
 using Acb.Core.Helper;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts;
@@ -33,10 +34,10 @@ namespace Acb.WebApi.Test.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpGet("hello")]//, AppTicket]
-        public DResult<DemoDto> Hello(VDemoInput input)
+        public async Task<DResult<DemoDto>> Hello(VDemoInput input)
         {
             var inputDto = Mapper.Map<DemoInputDto>(input);
-            var dto = _demoService.Hello(IdentityHelper.Guid32, inputDto);
+            var dto = await _demoService.Hello(IdentityHelper.Guid32, inputDto);
             return DResult.Succ(dto);
         }
 

@@ -12,13 +12,14 @@ namespace Acb.MicroService.Register
     {
         private const string RegistCenterKey = MicroServiceRegister.MicroSreviceKey + ":center";
 
-        private MicroServiceConfig _config;
+        private readonly MicroServiceConfig _config;
         private HashSet<Assembly> _asses;
         private readonly IDatabase _redis;
 
-        public RedisRegister()
+        public RedisRegister(MicroServiceConfig config)
         {
             _redis = CurrentIocManager.Resolve<RedisManager>().GetDatabase();
+            _config = config;
         }
 
         private string ServiceUrl()
@@ -31,9 +32,8 @@ namespace Acb.MicroService.Register
             return $"{RegistCenterKey}:{Consts.Mode}:{ass.GetName().Name}";
         }
 
-        public void Regist(HashSet<Assembly> asses, MicroServiceConfig config)
+        public void Regist(HashSet<Assembly> asses)
         {
-            _config = config;
             _asses = asses;
             foreach (var ass in asses)
             {

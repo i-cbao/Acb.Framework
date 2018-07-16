@@ -10,7 +10,12 @@ namespace Acb.MicroService.Register
     internal class ConsulRegister : IRegister
     {
         private static readonly List<string> Services = new List<string>();
-        private MicroServiceConfig _config;
+        private readonly MicroServiceConfig _config;
+
+        public ConsulRegister(MicroServiceConfig config)
+        {
+            _config = config;
+        }
 
         private ConsulClient GetClient()
         {
@@ -22,9 +27,8 @@ namespace Acb.MicroService.Register
             });
         }
 
-        public void Regist(HashSet<Assembly> asses, MicroServiceConfig config)
+        public void Regist(HashSet<Assembly> asses)
         {
-            _config = config;
             using (var client = GetClient())
             {
                 foreach (var ass in asses)
@@ -32,20 +36,20 @@ namespace Acb.MicroService.Register
                     var assName = ass.GetName();
                     var service = new AgentServiceRegistration
                     {
-                        ID = $"{ass.GetName().Name}_{config.Host}_{config.Port}".Md5(),
+                        ID = $"{ass.GetName().Name}_{_config.Host}_{_config.Port}".Md5(),
                         Name = assName.Name,
                         Tags = new[] { $"{Consts.Mode}" },
                         EnableTagOverride = true,
-                        Address = $"http://{config.Host}",
-                        Port = config.Port
+                        Address = $"http://{_config.Host}",
+                        Port = _config.Port
                     };
-                    if (config.ConsulCheck)
+                    if (_config.ConsulCheck)
                     {
                         service.Check = new AgentServiceCheck
                         {
                             HTTP = $"{service.Address}:{service.Port}/healthy",
-                            Interval = TimeSpan.FromSeconds(config.Consulinterval),
-                            DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(config.DeregisterAfter)
+                            Interval = TimeSpan.FromSeconds(_config.Consulinterval),
+                            DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(_config.DeregisterAfter)
                         };
                     }
                     Services.Add(service.ID);

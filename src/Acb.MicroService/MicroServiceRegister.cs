@@ -81,11 +81,11 @@ namespace Acb.MicroService
             switch (_config.Register)
             {
                 case RegisterType.Consul:
-                    return new ConsulRegister();
+                    return new ConsulRegister(_config);
                 case RegisterType.Redis:
-                    return new RedisRegister();
+                    return new RedisRegister(_config);
                 default:
-                    return new RedisRegister();
+                    return new RedisRegister(_config);
             }
         }
 
@@ -97,7 +97,7 @@ namespace Acb.MicroService
             var asses = ServiceAssemblies;
             if (asses == null || asses.IsNullOrEmpty() || string.IsNullOrWhiteSpace(_config?.Host) || _config?.Port <= 0)
                 return;
-            _register.Regist(asses, _config);
+            _register.Regist(asses);
         }
 
         /// <summary> 取消注册 </summary>

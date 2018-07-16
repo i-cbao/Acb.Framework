@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
+using Acb.MicroService.Register;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Acb.MicroService
@@ -35,6 +36,8 @@ namespace Acb.MicroService
                 //自定义异常捕获
                 options.Filters.Add<DExceptionFilter>();
             });
+
+            //services.TryAddSingleton<IRegister, ConsulRegister>();
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };

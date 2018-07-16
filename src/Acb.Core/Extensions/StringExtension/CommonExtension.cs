@@ -360,6 +360,7 @@ namespace Acb.Core.Extensions
         {
             try
             {
+
                 var c = AcbHttpContext.Current;
                 var qs = c.Request.Query.ContainsKey(str) ? c.Request.Query[str].ToString() : c.Request.Form[str].ToString();
                 return qs.CastTo(def);

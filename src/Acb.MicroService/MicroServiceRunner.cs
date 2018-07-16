@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -106,7 +107,13 @@ namespace Acb.MicroService
 
         public static async Task Methods(HttpContext ctx)
         {
-            await WriteJsonAsync(ctx.Response, MicroServiceRegister.Methods.Keys);
+            var methods = MicroServiceRegister.Methods.Select(t => new
+                {
+                    url = t.Key,
+                    param = t.Value.GetParameters().ToDictionary(k => k.Name, v => v.ParameterType.Name)
+                }).OrderBy(t => t.url)
+                .ToDictionary(t => t.url, v => v.param);
+            await WriteJsonAsync(ctx.Response, methods);
         }
 
         public static Task MicroTask(HttpRequest req, HttpResponse resp, string contract, string method)

@@ -37,7 +37,7 @@ namespace Acb.Framework.Tests
         public void Test()
         {
 
-            var result = CodeTimer.Time("redis test", 10, () =>
+            var result = CodeTimer.Time("mongo test", 10, () =>
             {
                 try
                 {
