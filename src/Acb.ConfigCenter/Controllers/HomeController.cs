@@ -1,4 +1,5 @@
-﻿using Acb.ConfigCenter.ViewModels;
+﻿using Acb.ConfigCenter.Filters;
+using Acb.ConfigCenter.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -19,11 +20,22 @@ namespace Acb.ConfigCenter.Controllers
         /// <param name="module"></param>
         /// <param name="env"></param>
         /// <returns></returns>
-        [HttpGet("{module}/{env}")]
+        [HttpGet("v/{module}/{env}"), AllowGet]
+        public long Version(string module, string env)
+        {
+            return _config.Version(module, env);
+        }
+
+        /// <summary> 获取配置 </summary>
+        /// <param name="module"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        [HttpGet("{module}/{env}"), AllowGet]
         public ActionResult Config(string module, string env)
         {
             var config = _config.Get(module, env);
-            if (config == null) return Content(string.Empty);
+            if (config == null)
+                return Content(string.Empty);
             return Json(config);
         }
 

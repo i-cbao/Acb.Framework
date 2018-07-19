@@ -1,6 +1,7 @@
 ﻿using Acb.ConfigCenter.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -21,9 +22,11 @@ namespace Acb.ConfigCenter
         private static string _configExtension;
         private const string ConfigDir = "_config";
         private static readonly string[] Modes = { "dev", "test", "ready", "prod" };
+        private readonly ConcurrentDictionary<string, long> _configVersions;
 
         public ConfigManager()
         {
+            _configVersions = new ConcurrentDictionary<string, long>();
             _configeCache = new ConcurrentDictionary<string, object>();
             _configDirectory = Path.Combine(Directory.GetCurrentDirectory(), ConfigDir);
 
@@ -91,6 +94,29 @@ namespace Acb.ConfigCenter
             }
         }
 
+        public long Version(string module, string env)
+        {
+            var key = $"{module}_{env}";
+            if (_configVersions.ContainsKey(key) && _configVersions.TryGetValue(key, out var version))
+                return version;
+            var file = Path.Combine(_configDirectory, $"{module}-{env}{_configExtension}");
+            if (!File.Exists(file))
+            {
+                file = Path.Combine(_configDirectory, $"{module}{_configExtension}");
+            }
+
+            if (!File.Exists(file))
+                version = 0;
+            else
+            {
+                var info = new FileInfo(Path.Combine(_configDirectory, file));
+                version = info.LastWriteTime.Timestamp();
+            }
+
+            _configVersions.TryAdd(key, version);
+            return version;
+        }
+
         /// <summary> 获取配置 </summary>
         /// <param name="module"></param>
         /// <param name="env"></param>
@@ -131,6 +157,7 @@ namespace Acb.ConfigCenter
                 File.Copy(path, path.Replace(_configExtension, $"_{DateTime.Now.Timestamp()}.bak"));
             }
             SaveFile(path, config);
+            _configVersions.Clear();
             return true;
         }
 
@@ -142,7 +169,8 @@ namespace Acb.ConfigCenter
             var path = Path.Combine(_configDirectory, name);
             if (!File.Exists(path)) return;
             File.Move(path, path.Replace(_configExtension, $"_{DateTime.Now.Timestamp()}.bak"));
-            _configeCache.TryRemove(name, out var _);
+            _configeCache.TryRemove(name, out _);
+            _configVersions.Clear();
         }
 
         /// <summary> 配置文件列表 </summary>
@@ -173,7 +201,7 @@ namespace Acb.ConfigCenter
     {
         public static void AddConfigManager(this IServiceCollection service)
         {
-            service.AddSingleton(new ConfigManager());
+            service.TryAddSingleton(new ConfigManager());
         }
     }
 }

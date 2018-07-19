@@ -26,8 +26,8 @@ namespace Acb.ConfigCenter.Filters
                 return;
             if (dto.Get)
             {
-                var action = context.ActionDescriptor as ControllerActionDescriptor;
-                if (action?.ControllerName == "Home" && action.ActionName == "Config")
+                if (context.ActionDescriptor is ControllerActionDescriptor action &&
+                    action.FilterDescriptors.Any(t => t.Filter.GetType() == typeof(AllowGetAttribute)))
                     return;
             }
             var verify = Helper.VerifyTicket(context.HttpContext.Request, dto);

@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Framework;
 using Acb.Framework.Logging;
@@ -12,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
-using Acb.MicroService.Register;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Acb.MicroService
@@ -62,6 +62,11 @@ namespace Acb.MicroService
             app.UseMvc(routes =>
             {
                 routes.MapGet("healthy", async ctx => await ctx.Response.WriteAsync("ok"));
+                routes.MapGet("reload", async ctx =>
+                {
+                    ConfigHelper.Instance.Reload();
+                    await ctx.Response.WriteAsync("ok");
+                });
                 routes.MapGet("micro", async ctx => await MicroServiceRunner.Methods(ctx));
                 routes.MapPost("micro/{contract}/{method}", (request, response, route) =>
                 {

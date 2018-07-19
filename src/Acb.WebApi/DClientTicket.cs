@@ -120,8 +120,8 @@ namespace Acb.WebApi
             if (!request.Headers.TryGetValue("Authorization", out var authorize) ||
                 string.IsNullOrWhiteSpace(authorize))
                 return default(TTicket);
-            var arr = authorize.ToString()?.Split(' ');
-            if (arr == null || arr.Length != 2)
+            var arr = authorize.ToString().Split(' ');
+            if (arr.Length != 2)
                 return default(TTicket);
             return new AuthenticationHeaderValue(arr[0], arr[1]).VerifyTicket<TTicket>(scheme);
         }

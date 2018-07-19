@@ -16,7 +16,7 @@ namespace Acb.WebApi.Test
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddPayment();
-            services.AddTransient(sp => ProxyService.Proxy<IDemoService>());
+            //services.AddTransient(sp => ProxyService.Proxy<IDemoService>());
             return base.ConfigureServices(services);
         }
 

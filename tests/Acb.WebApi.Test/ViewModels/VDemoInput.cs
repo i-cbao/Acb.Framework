@@ -21,4 +21,13 @@ namespace Acb.WebApi.Test.ViewModels
         //[EnumDataType(typeof(long),ErrorMessage = "时间格式不正确")]
         public DateTime? Time { get; set; }
     }
+
+    public class VTestInput
+    {
+        public DemoEnums Demo { get; set; }
+        public string Name { get; set; }
+        public DateTime? Time { get; set; }
+        public int Page { get; set; }
+        public int Size { get; set; }
+    }
 }

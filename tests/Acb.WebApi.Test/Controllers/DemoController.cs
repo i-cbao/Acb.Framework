@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Helper;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts;
@@ -11,6 +10,7 @@ using AutoMapper;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -24,8 +24,21 @@ namespace Acb.WebApi.Test.Controllers
         public DemoController(IDemoService demoService, IConnectionStruct conn)
         {
             //sendCom
-            _demoService = ProxyService.Proxy<IDemoService>();
+            //_demoService = ProxyService.Proxy<IDemoService>();
+            _demoService = demoService;
             _connection = conn;
+        }
+
+        /// <summary> Test </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<DResult<DemoDto>> Test(VTestInput input)
+        {
+            input = FromBody<VTestInput>();
+            var inputDto = Mapper.Map<DemoInputDto>(input);
+            var dto = await _demoService.Hello(IdentityHelper.Guid32, inputDto);
+            return DResult.Succ(dto);
         }
 
         /// <summary>

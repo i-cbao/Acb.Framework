@@ -231,7 +231,7 @@ namespace Acb.Core.Extensions
                 var value = dict.GetValue<string>(key);
                 if (value != null)
                 {
-                    item.SetValue(obj, Convert.ChangeType(value, item.PropertyType));
+                    item.SetValue(obj, value.CastTo(item.PropertyType));
                 }
             }
 
@@ -272,7 +272,7 @@ namespace Acb.Core.Extensions
             return source.Keys.ToDictionary(k => k.ToString(), v =>
             {
                 if (source.TryGetValue(v, out var value))
-                    return (object)value;
+                    return (object)value.ToString();
                 return null;
             });
         }

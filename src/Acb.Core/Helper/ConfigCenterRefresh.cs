@@ -21,6 +21,7 @@ namespace Acb.Core.Helper
 
         private void OnTimerElapsed(object sender)
         {
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
             _provider.Reload();
             _timer.Change(TimeSpan.FromSeconds(_interval), Timeout.InfiniteTimeSpan);
         }

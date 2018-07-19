@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
+using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
 using Acb.Framework;
@@ -9,6 +10,7 @@ using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Swashbuckle.AspNetCore.Swagger;
@@ -101,7 +103,14 @@ namespace Acb.WebApi
             UseSwagger(app);
             var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
-            app.UseMvc();
+            app.UseMvc(routes =>
+            {
+                routes.MapGet("reload", async ctx =>
+                {
+                    ConfigHelper.Instance.Reload();
+                    await ctx.Response.WriteAsync("ok");
+                });
+            });
             var liftscope = app.ApplicationServices.GetService<IApplicationLifetime>();
             liftscope.ApplicationStopping.Register(_bootstrap.Dispose);
         }

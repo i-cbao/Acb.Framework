@@ -6,6 +6,7 @@ using Acb.Core.Serialize;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -37,10 +38,13 @@ namespace Acb.Core.Helper
         private const string ArrayPattern = @"(\[[0-9]+\])*$";
         private readonly HttpHelper _httpHelper;
 
+        private readonly ConcurrentDictionary<string, long> _configVersions;
+
         public ConfigCenterProvider()
         {
             _logger = LogManager.Logger<ConfigCenterProvider>();
             _httpHelper = CurrentIocManager.Resolve<HttpHelper>();
+            _configVersions = new ConcurrentDictionary<string, long>();
         }
 
         private async Task LoadTicket()
@@ -72,19 +76,54 @@ namespace Acb.Core.Helper
             }
         }
 
+        /// <summary> 检测版本号 </summary>
+        /// <param name="app"></param>
+        /// <returns></returns>
+        private async Task<long> CheckVersion(string app)
+        {
+            var mode = Consts.Mode.ToString().ToLower();
+            _logger.Debug($"正在检测配置中心版本[{_config.Uri}:{mode}:{app}]");
+            var versionPath = $"v/{app}/{mode}";
+            var versionUrl = new Uri(new Uri(_config.Uri), versionPath).AbsoluteUri;
+            var versionResp =
+                await _httpHelper.RequestAsync(HttpMethod.Get, new HttpRequest(versionUrl) { Headers = _headers });
+            var version = (await versionResp.Content.ReadAsStringAsync()).CastTo(0L);
+            if (_configVersions.ContainsKey(app))
+            {
+                var change = version != _configVersions[app];
+                if (change)
+                    _configVersions[app] = version;
+                return change ? version : 0;
+            }
+
+            _configVersions.TryAdd(app, version);
+            return version;
+        }
+
+        /// <summary> 加载配置 </summary>
+        /// <param name="reload">使用重新加载</param>
+        /// <returns></returns>
         private async Task LoadConfig(bool reload = false)
         {
-            Data.Clear();
+            if (!reload)
+            {
+                Data.Clear();
+            }
+
             if (string.IsNullOrWhiteSpace(_config.Uri) || string.IsNullOrWhiteSpace(_config.Application))
                 return;
+            var mode = Consts.Mode.ToString().ToLower();
             var parser = new JsonConfigurationParser();
             var apps = _config.Application.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
             var act = reload ? "更新" : "加载";
-            _logger.Info($"正在{act}配置中心[{_config.Uri}:{Consts.Mode.ToString().ToLower()}:{string.Join(",", apps)}]");
             foreach (var app in apps)
             {
                 try
                 {
+                    var version = await CheckVersion(app);
+                    if (version <= 0)
+                        continue;
+                    _logger.Info($"正在{act}配置中心[{_config.Uri}:{mode}:{app}_{version}]");
                     var path = $"{app}/{Consts.Mode.ToString().ToLower()}";
                     var url = new Uri(new Uri(_config.Uri), path).AbsoluteUri;
                     var resp = await _httpHelper.RequestAsync(HttpMethod.Get,

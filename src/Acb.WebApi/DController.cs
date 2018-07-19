@@ -1,10 +1,8 @@
 ﻿using Acb.Core;
-using Acb.Core.Serialize;
 using Acb.WebApi.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Acb.WebApi
 {
@@ -21,14 +19,7 @@ namespace Acb.WebApi
         [NonAction]
         protected T FromBody<T>()
         {
-            if (Current == null) return default(T);
-            var input = Current.Request.Body;
-            input.Seek(0, SeekOrigin.Begin);
-            using (var stream = new StreamReader(input))
-            {
-                var body = stream.ReadToEnd();
-                return JsonHelper.Json<T>(body, NamingType.CamelCase);
-            }
+            return AcbHttpContext.FromBody<T>();
         }
 
         /// <summary> 身份验证 </summary>

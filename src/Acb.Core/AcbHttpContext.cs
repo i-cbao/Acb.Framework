@@ -1,5 +1,8 @@
-﻿using Acb.Core.Helper;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Helper;
+using Acb.Core.Serialize;
 using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Acb.Core
@@ -84,5 +87,40 @@ namespace Acb.Core
 
         /// <summary> 获取客户端IP </summary>
         public static string ClientIp => RemoteIpAddress;
+
+        public static T FromBody<T>()
+        {
+            if (Current == null) return default(T);
+
+            string GetBody()
+            {
+                if (Body.CanSeek)
+                {
+                    Body.Seek(0, SeekOrigin.Begin);
+                }
+
+                using (var stream = new StreamReader(Body))
+                {
+                    return stream.ReadToEnd();
+                }
+            }
+
+            string body;
+
+            switch (ContentType)
+            {
+                case "application/x-www-form-urlencoded":
+                    return Form.FromForm().ToObject<T>();
+                case "application/xml":
+                case "text/xml":
+                    body = GetBody();
+                    var dict = new Dictionary<string, object>();
+                    dict.FromXml(body);
+                    return dict.ToObject<T>();
+                default:
+                    body = GetBody();
+                    return JsonHelper.Json<T>(body, NamingType.CamelCase);
+            }
+        }
     }
 }

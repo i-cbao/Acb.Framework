@@ -37,7 +37,7 @@ namespace Acb.WebApi.Test.Controllers
         public async Task<DResult<string>> Get(string key)
         {
             Response.Clear();
-            var n = key.Config<string>();
+            var n = key.Replace("-", ":").Config<string>();
             _logger.Info(n);
             _logger.Error(n, new Exception("ex test"));
             return await Task.FromResult(Succ($"hello {n}"));
