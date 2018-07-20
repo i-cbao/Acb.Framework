@@ -52,6 +52,13 @@ namespace Acb.WebApi
                 }
 
                 option.CustomSchemaIds(t => t.FullName);
+                option.AddSecurityDefinition("acb", new ApiKeyScheme
+                {
+                    Description = "OAuth2授权(数据将在请求头中进行传输) 参数结构: \"Authorization: acb {token}\"",
+                    Name = "Authorization",//OAuth2默认的参数名称
+                    In = "header",
+                    Type = "apiKey"
+                });
             });
         }
 
@@ -86,10 +93,6 @@ namespace Acb.WebApi
                     //json序列化处理
                     opts.SerializerSettings.Converters.Add(new DateTimeConverter());
                 });
-            if (Consts.Mode != ProductMode.Prod)
-            {
-
-            }
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
