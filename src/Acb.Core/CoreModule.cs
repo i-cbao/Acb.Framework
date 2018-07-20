@@ -55,7 +55,7 @@ namespace Acb.Core
 
         public override void Shutdown()
         {
-            IocManager.Resolve<HttpHelper>().Dispose();
+            HttpHelper.Instance.Dispose();
             base.Shutdown();
         }
     }

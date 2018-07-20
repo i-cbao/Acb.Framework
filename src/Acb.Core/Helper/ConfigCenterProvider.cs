@@ -43,7 +43,7 @@ namespace Acb.Core.Helper
         public ConfigCenterProvider()
         {
             _logger = LogManager.Logger<ConfigCenterProvider>();
-            _httpHelper = CurrentIocManager.Resolve<HttpHelper>();
+            _httpHelper = HttpHelper.Instance;
             _configVersions = new ConcurrentDictionary<string, long>();
         }
 

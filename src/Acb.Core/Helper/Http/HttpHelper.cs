@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Exceptions;
+﻿using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
@@ -15,7 +14,7 @@ using System.Threading.Tasks;
 namespace Acb.Core.Helper.Http
 {
     /// <summary> Http请求类 </summary>
-    public class HttpHelper : ISingleDependency, IDisposable
+    public class HttpHelper : IDisposable
     {
         private static readonly HttpClient Client = new HttpClient();
         private static readonly ILogger Logger = LogManager.Logger<HttpHelper>();
@@ -29,7 +28,7 @@ namespace Acb.Core.Helper.Http
             {"x-requested-with", "XMLHttpRequest"}
         };
 
-        public HttpHelper()
+        private HttpHelper()
         {
             foreach (var header in DefaultHeaders)
             {
@@ -39,9 +38,9 @@ namespace Acb.Core.Helper.Http
             Client.Timeout = TimeSpan.FromSeconds(65);
         }
 
-        ///// <summary> 单例 </summary>
-        //public static HttpHelper Instance =>
-        //    Singleton<HttpHelper>.Instance ?? (Singleton<HttpHelper>.Instance = new HttpHelper());
+        /// <summary> 单例模式 </summary>
+        public static HttpHelper Instance => Singleton<HttpHelper>.Instance ??
+                                               (Singleton<HttpHelper>.Instance = new HttpHelper());
 
         /// <summary> 设置超时时间 </summary>
         /// <param name="timeout"></param>

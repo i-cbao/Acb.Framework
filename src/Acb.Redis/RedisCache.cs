@@ -1,5 +1,4 @@
 ﻿using Acb.Core.Cache;
-using Acb.Core.Dependency;
 using Acb.Core.Timing;
 using StackExchange.Redis;
 using System;
@@ -18,7 +17,7 @@ namespace Acb.Redis
         {
             _region = region;
             _configName = configName;
-            _redisManager = CurrentIocManager.Resolve<RedisManager>();
+            _redisManager = RedisManager.Instance;
         }
 
         public override string Region => _region;

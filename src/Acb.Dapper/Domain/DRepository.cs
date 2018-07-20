@@ -8,6 +8,8 @@ namespace Acb.Dapper.Domain
     public abstract class DRepository : IScopedDependency, IDisposable
     {
         private readonly string _defaultConnectionName;
+
+        /// <summary> 数据库连接提供者 </summary>
         public IDbConnectionProvider ConnectionProvider { private get; set; }
 
         /// <summary> 获取默认连接 </summary>
@@ -21,6 +23,15 @@ namespace Acb.Dapper.Domain
 
         protected DRepository(Enum enumType) : this(enumType.ToString())
         {
+        }
+
+        /// <summary> 建议使用Ioc注入的方式 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        [Obsolete("建议使用Ioc注入的方式")]
+        public static T Instance<T>() where T : DRepository
+        {
+            return CurrentIocManager.Resolve<T>();
         }
 
         /// <summary> 获取数据库连接 </summary>

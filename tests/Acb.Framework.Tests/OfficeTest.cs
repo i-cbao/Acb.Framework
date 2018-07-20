@@ -74,7 +74,7 @@ namespace Acb.Framework.Tests
                     list.Add(row[0].ToString(), row);
                 }
 
-                var resp = await CurrentIocManager.Resolve<HttpHelper>().PostAsync(gateway, new
+                var resp = await HttpHelper.Instance.PostAsync(gateway, new
                 {
                     ArrVehicleId = list.Keys.ToList()
                 });

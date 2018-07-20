@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Exceptions;
+﻿using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
@@ -25,7 +24,7 @@ namespace Acb.Core.Helper.Http
         public RestHelper(string baseUri = null)
         {
             _baseUri = baseUri;
-            _httpHelper = CurrentIocManager.Resolve<HttpHelper>();
+            _httpHelper = HttpHelper.Instance;
         }
 
         /// <inheritdoc />

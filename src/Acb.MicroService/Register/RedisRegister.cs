@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Dependency;
 using Acb.Redis;
 using StackExchange.Redis;
 using System.Collections.Generic;
@@ -18,7 +17,7 @@ namespace Acb.MicroService.Register
 
         public RedisRegister(MicroServiceConfig config)
         {
-            _redis = CurrentIocManager.Resolve<RedisManager>().GetDatabase();
+            _redis = RedisManager.Instance.GetDatabase();
             _config = config;
         }
 

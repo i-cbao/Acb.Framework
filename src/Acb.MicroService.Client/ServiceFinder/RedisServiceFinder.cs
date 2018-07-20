@@ -4,7 +4,6 @@ using Acb.Redis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Acb.Core.Dependency;
 
 namespace Acb.MicroService.Client.ServiceFinder
 {
@@ -13,7 +12,7 @@ namespace Acb.MicroService.Client.ServiceFinder
         public List<string> Find(Assembly ass, MicroServiceConfig config)
         {
             var urlList = new List<string>();
-            var redis = CurrentIocManager.Resolve<RedisManager>().GetDatabase();
+            var redis = RedisManager.Instance.GetDatabase();
 
             var list = redis.SetMembers($"{Constans.RegistCenterKey}:{Consts.Mode}:{ass.GetName().Name}");
             urlList.AddRange(list.Select(t => t.ToString()));

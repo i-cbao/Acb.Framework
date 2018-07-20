@@ -58,7 +58,7 @@ namespace Acb.Framework.Tests
             //Print(GetData().Result);
             var result = CodeTimer.Time("vote", 100, async () =>
              {
-                 var helper = CurrentIocManager.Resolve<HttpHelper>();
+                 var helper = HttpHelper.Instance;
                  var req = await helper.PostAsync(new HttpRequest("http://jypx.cdhrss.gov.cn:90/api/poll/click_poll")
                  {
                      BodyType = HttpBodyType.Form,

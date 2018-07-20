@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Domain.Entities;
 using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using Acb.Core.Tests;
 using Acb.MongoDb;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -8,8 +9,6 @@ using MongoDB.Driver;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Core.Dependency;
-using Acb.Core.Logging;
 
 namespace Acb.Framework.Tests
 {
@@ -22,7 +21,7 @@ namespace Acb.Framework.Tests
         public MongoTest()
         {
             LogManager.LogLevel(LogLevel.Info);
-            _helper = CurrentIocManager.Resolve<MongoManager>().GetHelper(DbName);
+            _helper = MongoManager.Instance.GetHelper(DbName);
         }
 
         public class MTest : BaseEntity<string>

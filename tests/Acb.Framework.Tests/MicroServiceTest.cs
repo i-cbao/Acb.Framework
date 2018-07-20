@@ -130,7 +130,7 @@ namespace Acb.Framework.Tests
                 }
             };
 
-            var helper = CurrentIocManager.Resolve<HttpHelper>();
+            var helper = HttpHelper.Instance;
             Task.Run(async () =>
             {
                 var req = await helper.PostAsync(url, data);

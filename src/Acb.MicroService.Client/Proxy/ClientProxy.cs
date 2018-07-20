@@ -142,7 +142,7 @@ namespace Acb.MicroService.Client.Proxy
                 },
                 {"referer", AcbHttpContext.RawUrl}
             };
-            return await CurrentIocManager.Resolve<HttpHelper>().RequestAsync(HttpMethod.Post, new HttpRequest(url)
+            return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
             {
                 Data = args,
                 Headers = headers

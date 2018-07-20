@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Acb.Core
@@ -6,30 +7,31 @@ namespace Acb.Core
     /// <summary> 单例辅助 </summary>
     public class Singleton
     {
+        /// <summary> 所有单例 </summary>
+        protected static ConcurrentDictionary<Type, object> AllSingletons { get; }
+
         static Singleton()
         {
-            AllSingletons = new Dictionary<Type, object>();
+            AllSingletons = new ConcurrentDictionary<Type, object>();
         }
-
-        /// <summary>
-        /// Dictionary of type to singleton instances.
-        /// </summary>
-        public static IDictionary<Type, object> AllSingletons { get; }
     }
 
     /// <summary> 单例泛型辅助 </summary>
     /// <typeparam name="T"></typeparam>
     public class Singleton<T> : Singleton
     {
-        private static T _instance;
-
+        /// <summary> 单例 </summary>
         public static T Instance
         {
-            get => _instance;
+            get
+            {
+                if (AllSingletons.TryGetValue(typeof(T), out var instance))
+                    return (T)instance;
+                return default(T);
+            }
             set
             {
-                _instance = value;
-                AllSingletons[typeof(T)] = value;
+                AllSingletons.AddOrUpdate(typeof(T), value, (type, obj) => value == null ? obj : value);
             }
         }
     }

@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Helper;
+﻿using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Tests;
 using Acb.Core.Timing;
@@ -17,7 +16,7 @@ namespace Acb.Framework.Tests
         private readonly RedisManager _manager;
         public RedisTest()
         {
-            _manager = CurrentIocManager.Resolve<RedisManager>();
+            _manager = RedisManager.Instance;
         }
         [TestMethod]
         public void GetTest()
