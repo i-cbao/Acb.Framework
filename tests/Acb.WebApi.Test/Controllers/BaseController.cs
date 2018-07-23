@@ -3,12 +3,14 @@ using Acb.Core.Exceptions;
 using Acb.WebApi.Filters;
 using Acb.WebApi.Test.ViewModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 基础身份认证类 </summary>
-    [DAuthorize]
+    [DAuthorize, Route("[controller]")]
+    [ApiExplorerSettings(GroupName = "help")]
     public abstract class BaseController : DAuthorController<DemoClientTicket>
     {
         /// <summary> 当前用户Id </summary>

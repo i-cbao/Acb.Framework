@@ -13,8 +13,7 @@ using System.Threading.Tasks;
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 支付相关接口 </summary>
-    [Route("api/payment")]
-    public class PaymentController : DController
+    public class PaymentController : BaseController
     {
         private readonly IGateways _gateways;
         private readonly string _outTradeNo = Clock.Now.ToString("yyyyMMddhhmmss");

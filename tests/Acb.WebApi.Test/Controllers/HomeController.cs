@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 主页接口 </summary>
-    [Route("api/[controller]")]
-    public class HomeController : DController
+    public class HomeController : BaseController
     {
         private readonly ILogger _logger;
 

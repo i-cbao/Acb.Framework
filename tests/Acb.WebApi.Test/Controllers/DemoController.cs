@@ -15,8 +15,7 @@ using System.Threading.Tasks;
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 实例接口 </summary>
-    [Route("api/[controller]")]
-    public class DemoController : DController
+    public class DemoController : BaseController
     {
         private readonly IDemoService _demoService;
         private readonly IConnectionStruct _connection;
@@ -33,7 +32,7 @@ namespace Acb.WebApi.Test.Controllers
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<DResult<DemoDto>> Test(VTestInput input)
+        public async Task<DResult<DemoDto>> Test([FromBody]VTestInput input)
         {
             input = FromBody<VTestInput>();
             var inputDto = Mapper.Map<DemoInputDto>(input);
