@@ -2,6 +2,7 @@
 using AutoMapper;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 
 namespace Acb.AutoMapper
 {
@@ -80,6 +81,16 @@ namespace Acb.AutoMapper
                 return new PagedList<T>(new List<T>(), 0);
             var list = pagedList.List.MapTo<T>(mapperType);
             return new PagedList<T>(list, pagedList.Index, pagedList.Size, pagedList.Total);
+        }
+
+        /// <summary> DataReader映射 </summary>
+        public static IEnumerable<T> DataReaderMapTo<T>(this IDataReader reader)
+        {
+            var cfg = new MapperConfiguration(config =>
+            {
+                config.CreateMap<IDataReader, IEnumerable<T>>();
+            });
+            return cfg.CreateMapper().Map<IDataReader, IEnumerable<T>>(reader);
         }
     }
 }

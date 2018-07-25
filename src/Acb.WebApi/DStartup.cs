@@ -32,6 +32,7 @@ namespace Acb.WebApi
             _appName = name;
         }
 
+        #region Swagger
         /// <summary> 接口分组 </summary>
         /// <returns></returns>
         protected virtual IDictionary<string, string> DocGroups()
@@ -93,7 +94,8 @@ namespace Acb.WebApi
                         $"/swagger/{docGroup.Key}/swagger.json", docGroup.Value);
                 }
             });
-        }
+        } 
+        #endregion
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {

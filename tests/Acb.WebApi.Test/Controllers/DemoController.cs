@@ -1,9 +1,11 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
+using Acb.Core.EventBus;
 using Acb.Core.Helper;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
-using Acb.MicroService.Client;
+using Acb.Demo.Contracts.EventBus;
 using Acb.WebApi.Test.Connections;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
@@ -69,6 +71,14 @@ namespace Acb.WebApi.Test.Controllers
             //var cacheKey = $"ticket:{ticket.Id}";
             //AuthorizeCache.Set(cacheKey, ticket.Ticket, TimeSpan.FromMinutes(30));
             return DResult.Succ(JsonHelper.ToJson(ticket));
+        }
+
+        [HttpGet("kafak"), AllowAnonymous]
+        public async Task<string> Kafka(string message)
+        {
+            var bus = CurrentIocManager.Resolve<IEventBus>();
+            bus.Publish(new TestEvent { Content = message });
+            return await Task.FromResult(message);
         }
     }
 }

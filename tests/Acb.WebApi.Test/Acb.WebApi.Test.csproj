@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <Compile Remove="_logs\**" />
+    <Content Remove="C:\Users\shay\.nuget\packages\rdkafka.internal.librdkafka\0.9.1\build\..\runtimes\win7-x64\native\**" />
+    <Content Remove="C:\Users\shay\.nuget\packages\rdkafka.internal.librdkafka\0.9.1\build\..\runtimes\win7-x86\native\**" />
     <Content Remove="_logs\**" />
     <EmbeddedResource Remove="_logs\**" />
     <None Remove="_logs\**" />
@@ -35,10 +37,17 @@
     <ProjectReference Include="..\..\src\Acb.MicroService.Client\Acb.MicroService.Client.csproj" />
     <ProjectReference Include="..\..\src\Acb.Middleware.Monitor\Acb.Middleware.Monitor.csproj" />
     <ProjectReference Include="..\..\src\Acb.Payment\Acb.Payment.csproj" />
+    <ProjectReference Include="..\..\src\Acb.RabbitMq\Acb.RabbitMq.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
     <ProjectReference Include="..\..\src\Acb.WebApi\Acb.WebApi.csproj" />
     <ProjectReference Include="..\Acb.Demo.Business\Acb.Demo.Business.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Confluent.Kafka">
+      <HintPath>C:\Users\shay\.nuget\packages\confluent.kafka\0.11.5\lib\netstandard1.3\Confluent.Kafka.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
