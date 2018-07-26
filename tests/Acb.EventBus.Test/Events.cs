@@ -2,7 +2,6 @@
 using Acb.Core.Serialize;
 using System;
 using System.Threading.Tasks;
-using Acb.Core.Exceptions;
 
 namespace Acb.EventBus.Test
 {
@@ -20,7 +19,7 @@ namespace Acb.EventBus.Test
             return Task.Run(() =>
             {
                 Console.WriteLine(JsonHelper.ToJson(@event));
-                throw new Exception("test");
+                //throw new Exception("test");
             });
         }
     }

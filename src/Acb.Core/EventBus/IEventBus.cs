@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Dependency;
 using System;
+using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
@@ -9,17 +10,17 @@ namespace Acb.Core.EventBus
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TH"></typeparam>
         /// <param name="handler"></param>
-        void Subscribe<T, TH>(Func<TH> handler)
+        Task Subscribe<T, TH>(Func<TH> handler)
             where TH : IEventHandler<T>;
 
         /// <summary> 取消订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TH"></typeparam>
-        void Unsubscribe<T, TH>()
+        Task Unsubscribe<T, TH>()
             where TH : IEventHandler<T>;
 
         /// <summary> 发布 </summary>
         /// <param name="event"></param>
-        void Publish(DEvent @event);
+        Task Publish(DEvent @event);
     }
 }

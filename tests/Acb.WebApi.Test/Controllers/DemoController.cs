@@ -77,7 +77,7 @@ namespace Acb.WebApi.Test.Controllers
         public async Task<string> Kafka(string message)
         {
             var bus = CurrentIocManager.Resolve<IEventBus>();
-            bus.Publish(new TestEvent { Content = message });
+            await bus.Publish(new TestEvent { Content = message });
             return await Task.FromResult(message);
         }
     }

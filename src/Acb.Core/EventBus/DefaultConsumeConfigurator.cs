@@ -15,6 +15,7 @@ namespace Acb.Core.EventBus
         {
             _eventBus = eventBus;
         }
+
         public void Configure(List<Type> consumers)
         {
             foreach (var consumer in consumers)
@@ -32,7 +33,6 @@ namespace Acb.Core.EventBus
                     .First();
                 try
                 {
-                    //var type = consumer;
                     this.FastInvoke(new[] { consumerType, consumer },
                         x => x.ConsumerTo<object, IEventHandler<object>>());
                 }

@@ -54,7 +54,7 @@ namespace Acb.RabbitMq
             }
         }
 
-        public override void Publish(DEvent @event)
+        public override async Task Publish(DEvent @event)
         {
             if (!_connection.IsConnected)
             {
@@ -63,11 +63,9 @@ namespace Acb.RabbitMq
 
             var policy = Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()
-                .WaitAndRetry(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
-                {
-                    _logger.Warn(ex.ToString());
-                });
-            policy.Execute(() =>
+                .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (ex, time) => { _logger.Warn(ex.ToString()); });
+            await policy.ExecuteAsync(async () =>
             {
                 using (var channel = _connection.CreateModel())
                 {
@@ -80,10 +78,12 @@ namespace Acb.RabbitMq
                     prop.DeliveryMode = 2;
                     channel.BasicPublish(_brokerName, key, prop, body);
                 }
+
+                await Task.CompletedTask;
             });
         }
 
-        public override void Subscribe<T, TH>(Func<TH> handler)
+        public override Task Subscribe<T, TH>(Func<TH> handler)
         {
             var key = GetEventKey(typeof(T));
             var subscription = GetSubscription(typeof(TH));
@@ -140,7 +140,7 @@ namespace Acb.RabbitMq
             }
 
             SubscriptionManager.AddSubscription<T, TH>(handler);
-
+            return Task.CompletedTask;
         }
 
         private static Func<IEventHandler> FindHandlerByType(Type handlerType, IEnumerable<Func<IEventHandler>> handlers)

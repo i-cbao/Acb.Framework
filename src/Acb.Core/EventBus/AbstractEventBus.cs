@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
@@ -11,14 +12,15 @@ namespace Acb.Core.EventBus
         {
             SubscriptionManager = manager ?? new DefaultSubscriptionManager();
         }
-        public abstract void Subscribe<T, TH>(Func<TH> handler) where TH : IEventHandler<T>;
+        public abstract Task Subscribe<T, TH>(Func<TH> handler) where TH : IEventHandler<T>;
 
-        public void Unsubscribe<T, TH>() where TH : IEventHandler<T>
+        public Task Unsubscribe<T, TH>() where TH : IEventHandler<T>
         {
             SubscriptionManager.RemoveSubscription<T, TH>();
+            return Task.CompletedTask;
         }
 
-        public abstract void Publish(DEvent @event);
+        public abstract Task Publish(DEvent @event);
 
         /// <summary> 获取事件的路由键 </summary>
         /// <param name="eventType"></param>
