@@ -20,7 +20,12 @@ namespace Acb.Core.EventBus
             return Task.CompletedTask;
         }
 
-        public abstract Task Publish(DEvent @event);
+        public virtual Task Publish(DEvent @event)
+        {
+            var key = GetEventKey(@event.GetType());
+            return Publish(key, @event);
+        }
+        public abstract Task Publish(string key, object @event);
 
         /// <summary> 获取事件的路由键 </summary>
         /// <param name="eventType"></param>

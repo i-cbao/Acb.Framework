@@ -22,5 +22,11 @@ namespace Acb.Core.EventBus
         /// <summary> 发布 </summary>
         /// <param name="event"></param>
         Task Publish(DEvent @event);
+
+        /// <summary> 发布 </summary>
+        /// <param name="key"></param>
+        /// <param name="event"></param>
+        /// <returns></returns>
+        Task Publish(string key, object @event);
     }
 }

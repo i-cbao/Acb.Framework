@@ -32,7 +32,7 @@ namespace Acb.RabbitMq
             _connection =
                 connection ?? throw new ArgumentNullException(nameof(connection));
             _logger = LogManager.Logger<EventBusRabbitMq>();
-            _consumerChannel = CreateConsumerChannel();
+            //_consumerChannel = CreateConsumerChannel();
             SubscriptionManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 
@@ -50,11 +50,11 @@ namespace Acb.RabbitMq
                 if (!SubscriptionManager.IsEmpty)
                     return;
                 _queueName = string.Empty;
-                _consumerChannel.Close();
+                _consumerChannel?.Close();
             }
         }
 
-        public override async Task Publish(DEvent @event)
+        public override async Task Publish(string key, object @event)
         {
             if (!_connection.IsConnected)
             {
@@ -65,26 +65,29 @@ namespace Acb.RabbitMq
                 .Or<SocketException>()
                 .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (ex, time) => { _logger.Warn(ex.ToString()); });
-            await policy.ExecuteAsync(async () =>
+            using (_connection)
             {
-                using (var channel = _connection.CreateModel())
+                await policy.ExecuteAsync(async () =>
                 {
-                    var key = GetEventKey(@event.GetType());
-                    //声明Exchange
-                    channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
-                    var message = JsonConvert.SerializeObject(@event);
-                    var body = Encoding.UTF8.GetBytes(message);
-                    var prop = channel.CreateBasicProperties();
-                    prop.DeliveryMode = 2;
-                    channel.BasicPublish(_brokerName, key, prop, body);
-                }
+                    using (var channel = _connection.CreateModel())
+                    {
+                        //声明Exchange
+                        channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
+                        var message = JsonConvert.SerializeObject(@event);
+                        var body = Encoding.UTF8.GetBytes(message);
+                        var prop = channel.CreateBasicProperties();
+                        prop.DeliveryMode = 2;
+                        channel.BasicPublish(_brokerName, key, prop, body);
+                    }
 
-                await Task.CompletedTask;
-            });
+                    await Task.CompletedTask;
+                });
+            }
         }
 
         public override Task Subscribe<T, TH>(Func<TH> handler)
         {
+            _consumerChannel = _consumerChannel ?? CreateConsumerChannel();
             var key = GetEventKey(typeof(T));
             var subscription = GetSubscription(typeof(TH));
             var queue = subscription.Queue;
