@@ -16,13 +16,13 @@ namespace Acb.Core.EventBus
         /// <typeparam name="TH"></typeparam>
         /// <param name="handler"></param>
         void AddSubscription<T, TH>(Func<TH> handler)
-            where TH : IIntegrationEventHandler<T>;
+            where TH : IEventHandler<T>;
 
         /// <summary> 删除订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TH"></typeparam>
         void RemoveSubscription<T, TH>()
-            where TH : IIntegrationEventHandler<T>;
+            where TH : IEventHandler<T>;
         /// <summary> 是否已订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -40,7 +40,7 @@ namespace Acb.Core.EventBus
         /// <summary> 获取订阅事件 </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IEnumerable<Delegate> GetHandlersForEvent<T>() where T : IntegrationEvent;
+        IEnumerable<Delegate> GetHandlersForEvent<T>() where T : DEvent;
         /// <summary> 获取订阅事件 </summary>
         /// <param name="eventName"></param>
         /// <returns></returns>

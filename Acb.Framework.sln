@@ -67,7 +67,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.ConfigCenter", "src\Acb
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.FileServer", "src\Acb.FileServer\Acb.FileServer.csproj", "{25618006-0715-403D-942E-BF6E4A88472A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.RabbitMq", "src\Acb.RabbitMq\Acb.RabbitMq.csproj", "{B122BA1E-D7B5-4568-AB07-C1EE79ADEB36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.RabbitMq", "src\Acb.RabbitMq\Acb.RabbitMq.csproj", "{B122BA1E-D7B5-4568-AB07-C1EE79ADEB36}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.EventBus.Test", "tests\Acb.EventBus.Test\Acb.EventBus.Test.csproj", "{15C3B040-B18A-4F80-87F7-0C292CE385FC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -183,6 +185,10 @@ Global
 		{B122BA1E-D7B5-4568-AB07-C1EE79ADEB36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B122BA1E-D7B5-4568-AB07-C1EE79ADEB36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B122BA1E-D7B5-4568-AB07-C1EE79ADEB36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15C3B040-B18A-4F80-87F7-0C292CE385FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15C3B040-B18A-4F80-87F7-0C292CE385FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15C3B040-B18A-4F80-87F7-0C292CE385FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15C3B040-B18A-4F80-87F7-0C292CE385FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -215,6 +221,7 @@ Global
 		{EA6C2989-04FB-49FD-A8D7-47B6E02EC928} = {25C460A4-BA63-46E5-8C79-B6FB0A3677C8}
 		{25618006-0715-403D-942E-BF6E4A88472A} = {25C460A4-BA63-46E5-8C79-B6FB0A3677C8}
 		{B122BA1E-D7B5-4568-AB07-C1EE79ADEB36} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
+		{15C3B040-B18A-4F80-87F7-0C292CE385FC} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

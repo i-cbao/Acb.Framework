@@ -4,23 +4,24 @@ using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts.EventBus;
 using Acb.Framework;
+using Acb.Framework.Logging;
 using System;
 using System.Threading.Tasks;
-using Acb.Framework.Logging;
 
 namespace Acb.Backgrounder.Test
 {
-
-    public class MessageHandler : IIntegrationEventHandler<TestEvent>
+    [Subscription("icb_handler_user_01")]
+    public class MessageHandler : IEventHandler<UserEvent>
     {
-        public Task Handle(TestEvent @event)
+        public Task Handle(UserEvent @event)
         {
             Console.WriteLine("one:" + JsonHelper.ToJson(@event));
             return Task.CompletedTask;
         }
     }
 
-    public class MessageHandlerTwo : IIntegrationEventHandler<TestEvent>
+    [Subscription("icb_handler_test")]
+    public class MessageHandlerTwo : IEventHandler<TestEvent>
     {
         public Task Handle(TestEvent @event)
         {
@@ -40,7 +41,7 @@ namespace Acb.Backgrounder.Test
             do
             {
                 input = Console.ReadLine();
-                bus.Publish(new TestEvent { Content = input });
+                bus.Publish(new UserEvent { Name = input });
             } while (!string.IsNullOrWhiteSpace(input) && input != "exit");
 
             //const string queue = "shay";

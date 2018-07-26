@@ -7,8 +7,8 @@ namespace Acb.Core.EventBus
     public class DefaultSubscriptionAdapter : ISubscriptionAdapter
     {
         private readonly IConsumeConfigurator _consumeConfigurator;
-        private readonly IEnumerable<IIntegrationEventHandler> _integrationEventHandler;
-        public DefaultSubscriptionAdapter(IConsumeConfigurator consumeConfigurator, IEnumerable<IIntegrationEventHandler> integrationEventHandler)
+        private readonly IEnumerable<IEventHandler> _integrationEventHandler;
+        public DefaultSubscriptionAdapter(IConsumeConfigurator consumeConfigurator, IEnumerable<IEventHandler> integrationEventHandler)
         {
             _consumeConfigurator = consumeConfigurator;
             _integrationEventHandler = integrationEventHandler;

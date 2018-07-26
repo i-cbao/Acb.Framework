@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Acb.Core.Extensions;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Acb.Core.EventBus
 {
@@ -22,7 +24,7 @@ namespace Acb.Core.EventBus
         public void Clear() => _handlers.Clear();
 
         public void AddSubscription<T, TH>(Func<TH> handler)
-            where TH : IIntegrationEventHandler<T>
+            where TH : IEventHandler<T>
         {
             var key = GetEventKey<T>();
             if (!HasSubscriptionsForEvent<T>())
@@ -35,7 +37,7 @@ namespace Acb.Core.EventBus
         }
 
         public void RemoveSubscription<T, TH>()
-            where TH : IIntegrationEventHandler<T>
+            where TH : IEventHandler<T>
         {
             var handlerToRemove = FindHandlerToRemove<T, TH>();
             if (handlerToRemove != null)
@@ -56,7 +58,7 @@ namespace Acb.Core.EventBus
             }
         }
 
-        public IEnumerable<Delegate> GetHandlersForEvent<T>() where T : IntegrationEvent
+        public IEnumerable<Delegate> GetHandlersForEvent<T>() where T : DEvent
         {
             var key = GetEventKey<T>();
             return GetHandlersForEvent(key);
@@ -76,7 +78,7 @@ namespace Acb.Core.EventBus
         }
 
         private Delegate FindHandlerToRemove<T, TH>()
-            where TH : IIntegrationEventHandler<T>
+            where TH : IEventHandler<T>
         {
             if (!HasSubscriptionsForEvent<T>())
             {
@@ -103,11 +105,18 @@ namespace Acb.Core.EventBus
         }
         public bool HasSubscriptionsForEvent(string eventName) => _handlers.ContainsKey(eventName);
 
-        public Type GetEventTypeByName(string eventName) => _eventTypes.Single(t => t.Name == eventName);
+        public Type GetEventTypeByName(string eventName) => _eventTypes.Single(t => GetEventKey(t) == eventName);
 
         private static string GetEventKey<T>()
         {
-            return typeof(T).Name;
+            return GetEventKey(typeof(T));
         }
+
+        private static string GetEventKey(MemberInfo type)
+        {
+            var attr = type.GetCustomAttribute<RouteKeyAttribute>();
+            return attr == null ? type.Name : attr.Key;
+        }
+
     }
 }

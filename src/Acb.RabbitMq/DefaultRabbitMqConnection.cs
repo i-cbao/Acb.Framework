@@ -23,10 +23,11 @@ namespace Acb.RabbitMq
         {
             if (string.IsNullOrWhiteSpace(config?.Host))
                 throw new ArgumentException(nameof(config));
-            var host = config.Host;
-            if (config.Port > 0)
-                host = $"{host}:{config.Port}";
-            _connectionFactory = new ConnectionFactory { HostName = host };
+            _connectionFactory = new ConnectionFactory {HostName = config.Host, Port = config.Port};
+            if (!string.IsNullOrWhiteSpace(config.VirtualHost))
+            {
+                _connectionFactory.VirtualHost = config.VirtualHost;
+            }
             if (!string.IsNullOrWhiteSpace(config.UserName))
             {
                 _connectionFactory.UserName = config.UserName;

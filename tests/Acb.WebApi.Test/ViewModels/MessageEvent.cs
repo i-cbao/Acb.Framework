@@ -2,7 +2,7 @@
 
 namespace Acb.WebApi.Test.ViewModels
 {
-    public class MessageEvent : IntegrationEvent
+    public class MessageEvent : DEvent
     {
         public string Message { get; set; }
     }

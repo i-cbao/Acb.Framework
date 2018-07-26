@@ -132,8 +132,9 @@ namespace Acb.Core.Extensions
         /// <summary> 属性名(Naming属性) </summary>
         /// <param name="item"></param>
         /// <param name="namingType"></param>
+        /// <param name="def"></param>
         /// <returns></returns>
-        public static string PropName(this MemberInfo item, NamingType? namingType = null)
+        public static string PropName(this MemberInfo item, NamingType? namingType = null, string def = null)
         {
             var propAttr = item.GetCustomAttribute<NamingAttribute>(true);
             if (propAttr != null)
@@ -144,14 +145,16 @@ namespace Acb.Core.Extensions
                     return propAttr.Name;
                 namingType = namingType ?? propAttr.NamingType;
             }
+
+            var name = string.IsNullOrWhiteSpace(def) ? item.Name : def;
             switch (namingType)
             {
                 case NamingType.CamelCase:
-                    return item.Name.ToCamelCase();
+                    return name.ToCamelCase();
                 case NamingType.UrlCase:
-                    return item.Name.ToUrlCase();
+                    return name.ToUrlCase();
                 default:
-                    return item.Name;
+                    return name;
             }
         }
 

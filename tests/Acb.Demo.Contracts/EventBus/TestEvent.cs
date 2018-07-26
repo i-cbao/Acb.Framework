@@ -1,8 +1,10 @@
 ﻿using Acb.Core.EventBus;
+using Acb.Core.Serialize;
 
 namespace Acb.Demo.Contracts.EventBus
 {
-    public class TestEvent : IntegrationEvent
+    [RouteKey("icb_event_test")]
+    public class TestEvent : DEvent
     {
         public string Content { get; set; }
     }

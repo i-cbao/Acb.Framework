@@ -27,14 +27,14 @@ namespace Acb.Core.EventBus
                     .Where(
                         d =>
                             d.GetTypeInfo().IsGenericType &&
-                            d.GetGenericTypeDefinition() == typeof(IIntegrationEventHandler<>))
+                            d.GetGenericTypeDefinition() == typeof(IEventHandler<>))
                     .Select(d => d.GetGenericArguments().Single())
                     .First();
                 try
                 {
                     //var type = consumer;
                     this.FastInvoke(new[] { consumerType, consumer },
-                        x => x.ConsumerTo<object, IIntegrationEventHandler<object>>());
+                        x => x.ConsumerTo<object, IEventHandler<object>>());
                 }
                 catch (Exception ex)
                 {
@@ -44,7 +44,7 @@ namespace Acb.Core.EventBus
         }
 
         protected void ConsumerTo<TEvent, TConsumer>()
-            where TConsumer : IIntegrationEventHandler<TEvent>
+            where TConsumer : IEventHandler<TEvent>
             where TEvent : class
         {
             _eventBus.Subscribe<TEvent, TConsumer>(CurrentIocManager.Resolve<TConsumer>);
