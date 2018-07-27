@@ -11,7 +11,8 @@ namespace Acb.MicroService.Client
         /// <returns></returns>
         public static T Proxy<T>() where T : IMicroService
         {
-            return ProxyAsync.Create<T, ClientProxy<T>>();
+            return ProxyAsync.Create<T, HttpProxy<T>>();
+            //return ProxyAsync.Create<T, NettyProxy<T>>();
         }
     }
 }

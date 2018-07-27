@@ -23,7 +23,7 @@ namespace Acb.RabbitMq
         {
             if (string.IsNullOrWhiteSpace(config?.Host))
                 throw new ArgumentException(nameof(config));
-            _connectionFactory = new ConnectionFactory {HostName = config.Host, Port = config.Port};
+            _connectionFactory = new ConnectionFactory { HostName = config.Host, Port = config.Port };
             if (!string.IsNullOrWhiteSpace(config.VirtualHost))
             {
                 _connectionFactory.VirtualHost = config.VirtualHost;
@@ -81,6 +81,7 @@ namespace Acb.RabbitMq
                 policy.Execute(() =>
                 {
                     _connection = _connectionFactory.CreateConnection();
+                    _disposed = false;
                 });
 
                 if (IsConnected)
@@ -93,11 +94,9 @@ namespace Acb.RabbitMq
 
                     return true;
                 }
-                else
-                {
-                    _logger.Fatal("FATAL ERROR: RabbitMQ connections could not be created and opened");
-                    return false;
-                }
+
+                _logger.Fatal("FATAL ERROR: RabbitMQ connections could not be created and opened");
+                return false;
             }
         }
 

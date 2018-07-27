@@ -1,26 +1,21 @@
-﻿using Acb.Core.Logging;
-using System;
-using System.Threading;
+﻿using System;
+using Quartz;
 using System.Threading.Tasks;
+using Acb.Core.Logging;
 
 namespace Acb.Backgrounder.Test.Jobs
 {
-    public class TestJob : Job
+    public class TestJob : Quartz.IJob
     {
-        [ThreadStatic]
-        private int _count;
+        private readonly ILogger _logger;
 
-        public TestJob(string name, TimeSpan interval, TimeSpan? timeout = null, DateTime? start = null,
-            DateTime? expire = null) : base(name, interval, timeout, start, expire)
+        public TestJob()
         {
+            _logger = LogManager.Logger<TestJob>();
         }
-
-        public override Task Execute()
+        public Task Execute(IJobExecutionContext context)
         {
-            _count++;
-            var logger = LogManager.Logger<TestJob>();
-            logger.Info($"hello {Name}!,{_count}");
-            Thread.CurrentThread.Join(TimeSpan.FromSeconds(_count));
+            _logger.Info("test job..");
             return Task.CompletedTask;
         }
     }

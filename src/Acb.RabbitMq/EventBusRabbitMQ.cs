@@ -65,24 +65,21 @@ namespace Acb.RabbitMq
                 .Or<SocketException>()
                 .WaitAndRetryAsync(5, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (ex, time) => { _logger.Warn(ex.ToString()); });
-            using (_connection)
+            await policy.ExecuteAsync(async () =>
             {
-                await policy.ExecuteAsync(async () =>
+                using (var channel = _connection.CreateModel())
                 {
-                    using (var channel = _connection.CreateModel())
-                    {
-                        //声明Exchange
-                        channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
-                        var message = JsonConvert.SerializeObject(@event);
-                        var body = Encoding.UTF8.GetBytes(message);
-                        var prop = channel.CreateBasicProperties();
-                        prop.DeliveryMode = 2;
-                        channel.BasicPublish(_brokerName, key, prop, body);
-                    }
+                    //声明Exchange
+                    channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
+                    var message = JsonConvert.SerializeObject(@event);
+                    var body = Encoding.UTF8.GetBytes(message);
+                    var prop = channel.CreateBasicProperties();
+                    prop.DeliveryMode = 2;
+                    channel.BasicPublish(_brokerName, key, prop, body);
+                }
 
-                    await Task.CompletedTask;
-                });
-            }
+                await Task.CompletedTask;
+            });
         }
 
         public override Task Subscribe<T, TH>(Func<TH> handler)

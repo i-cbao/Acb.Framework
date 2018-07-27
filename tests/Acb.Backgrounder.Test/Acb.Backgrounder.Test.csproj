@@ -7,8 +7,6 @@
 
   <ItemGroup>
     <Compile Remove="_logs\**" />
-    <Content Remove="C:\Users\shay\.nuget\packages\rdkafka.internal.librdkafka\0.9.1\build\..\runtimes\win7-x64\native\**" />
-    <Content Remove="C:\Users\shay\.nuget\packages\rdkafka.internal.librdkafka\0.9.1\build\..\runtimes\win7-x86\native\**" />
     <EmbeddedResource Remove="_logs\**" />
     <None Remove="_logs\**" />
   </ItemGroup>
@@ -25,12 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="0.11.5" />
-    <PackageReference Include="RabbitMQ.Client" Version="5.1.0" />
+    <PackageReference Include="Quartz" Version="3.0.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Acb.Backgrounder\Acb.Backgrounder.csproj" />
+    <!--<ProjectReference Include="..\..\src\Acb.Backgrounder\Acb.Backgrounder.csproj" />-->
     <ProjectReference Include="..\..\src\Acb.Core\Acb.Core.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.RabbitMq\Acb.RabbitMq.csproj" />

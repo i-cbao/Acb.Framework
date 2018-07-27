@@ -1,6 +1,5 @@
 ﻿using Acb.Core;
 using Acb.Core.Cache;
-using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
@@ -19,11 +18,11 @@ using System.Threading.Tasks;
 
 namespace Acb.MicroService.Client.Proxy
 {
-    /// <summary> 代理调用 </summary>
+    /// <summary> Http代理调用 </summary>
     /// <typeparam name="T"></typeparam>
-    public class ClientProxy<T> : ProxyAsync where T : IMicroService
+    public class HttpProxy<T> : ProxyAsync where T : IMicroService
     {
-        private readonly ILogger _logger = LogManager.Logger(typeof(ClientProxy<>));
+        private readonly ILogger _logger = LogManager.Logger(typeof(HttpProxy<>));
         private readonly MicroServiceConfig _config;
         private readonly ICache _serviceCache;
 
@@ -32,11 +31,11 @@ namespace Acb.MicroService.Client.Proxy
 
         /// <inheritdoc />
         /// <summary> 构造函数 </summary>
-        public ClientProxy()
+        public HttpProxy()
         {
             _type = typeof(T);
             _config = Constans.MicroSreviceKey.Config<MicroServiceConfig>();
-            _serviceCache = CacheManager.GetCacher(typeof(ClientProxy<>));
+            _serviceCache = CacheManager.GetCacher(typeof(HttpProxy<>));
         }
 
         private IServiceFinder GetServiceFinder()
@@ -111,8 +110,7 @@ namespace Acb.MicroService.Client.Proxy
         /// <returns></returns>
         public override object Invoke(MethodInfo targetMethod, object[] args)
         {
-            var result = BaseInvoke(targetMethod, args);
-            return result.Result;
+            return BaseInvoke(targetMethod, args).GetAwaiter().GetResult();
         }
 
         public override Task InvokeAsync(MethodInfo method, object[] args)
