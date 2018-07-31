@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Extensions;
+using Acb.Core.Timing;
 using Aliyun.OSS;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -37,13 +38,19 @@ namespace Acb.Framework.Tests
             var bucket = _ossConfig.Buckets[DefaultBucket];
             const string key = "icb.png";
             var client = new OssClient(_ossConfig.Endpoint, _ossConfig.KeyId, _ossConfig.KeySecret);
-            //获取所有存储空间
-            var list = client.ListBuckets();
-            Print(list);
-            var alc = client.GetBucketAcl(bucket.Name);
-            Print(alc);
-            var obj = client.GetObjectMetadata(bucket.Name, key);
-            Print(obj);
+            var req = new GeneratePresignedUriRequest(bucket.Name, key, SignHttpMethod.Get)
+            {
+                Expiration = Clock.Now.AddHours(1)
+            };
+            var url = client.GeneratePresignedUri(req);
+            Print(url);
+            ////获取所有存储空间
+            //var list = client.ListBuckets();
+            //Print(list);
+            //var alc = client.GetBucketAcl(bucket.Name);
+            //Print(alc);
+            //var obj = client.GetObjectMetadata(bucket.Name, key);
+            //Print(obj);
             //var bucket = _ossConfig.Buckets[DefaultBucket];
             //var baseUri = new Uri(bucket.Host);
             //using (var ms = new FileStream("d://20170227.png", FileMode.Open))

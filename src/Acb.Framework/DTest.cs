@@ -23,7 +23,6 @@ namespace Acb.Framework
             MapServices?.Invoke(Bootstrap.Builder);
             Bootstrap.Initialize();
             //LogManager.ClearAdapter();
-
         }
 
         /// <summary> 打印数据 </summary>

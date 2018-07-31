@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>成都爱车保信息技术有限公司</Company>
+    <Authors>icb@shay</Authors>
+    <Product>爱车保 - RabbitMQ</Product>
+    <Description>爱车保 - RabbitMQ</Description>
+    <Version>1.4.1</Version>
+    <Copyright>爱车保 © 2018</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

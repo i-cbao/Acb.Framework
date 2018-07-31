@@ -7,13 +7,13 @@
     <Company>成都爱车保信息技术有限公司</Company>
     <Product>爱车保 - 基础核心类</Product>
     <Description>爱车保 - 基础核心类</Description>
-    <Version>1.4.1</Version>
+    <Version>1.4.2</Version>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>http://192.168.0.110:8080/tfs/DefaultCollection/icb/_git/Acb.Framework</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Copyright />
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
-    <FileVersion>1.4.1.0</FileVersion>
+    <AssemblyVersion>1.4.2.0</AssemblyVersion>
+    <FileVersion>1.4.2.0</FileVersion>
     <Title>爱车保 - 基础核心类</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
