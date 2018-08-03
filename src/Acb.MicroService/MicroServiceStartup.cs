@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Acb.MicroService
 {
@@ -31,6 +30,12 @@ namespace Acb.MicroService
         {
 
         }
+
+        protected virtual void MapServices(IServiceCollection services)
+        {
+
+        }
+
         protected virtual void UseServices(IServiceProvider provider)
         {
 
@@ -48,7 +53,7 @@ namespace Acb.MicroService
             });
 
             //services.TryAddSingleton<IRegister, ConsulRegister>();
-
+            MapServices(services);
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             _bootstrap.BuilderHandler += builder =>
             {

@@ -5,6 +5,7 @@ using Acb.Middleware.JobScheduler.Domain.Enums;
 using Acb.Middleware.JobScheduler.Scheduler;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Acb.Middleware.JobScheduler.Controllers
@@ -36,9 +37,12 @@ namespace Acb.Middleware.JobScheduler.Controllers
 
         /// <summary> 获取所有任务 </summary>
         [HttpGet("")]
-        public async Task<List<JobDto>> JobList(string keyword = null, JobStatus status = JobStatus.All)
+        public async Task<DResults<JobDto>> JobList(string keyword = null, JobStatus status = JobStatus.All)
         {
-            return await _repository.QueryJobs(keyword, status);
+            var list = await _repository.QueryJobs(keyword, status);
+            var triggers = list.SelectMany(t => t.Triggers);
+            await _scheduler.SchedulerTriggers(triggers);
+            return DResult.Succ(list, -1);
         }
 
         /// <summary>
@@ -46,10 +50,11 @@ namespace Acb.Middleware.JobScheduler.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("hots")]
-        public async Task<List<JobDto>> JobHots()
+        public async Task<DResults<JobDto>> JobHots()
         {
             //:todo
-            return await Task.FromResult(new List<JobDto>());
+            var list = await Task.FromResult(new List<JobDto>());
+            return DResult.Succ(list, -1);
         }
 
         /// <summary> 暂停任务 </summary>
@@ -85,9 +90,11 @@ namespace Acb.Middleware.JobScheduler.Controllers
         /// <summary> 查询任务 </summary>
         /// <returns></returns>
         [HttpGet("{jobId}")]
-        public async Task<JobDto> QueryJob(string jobId)
+        public async Task<DResult<JobDto>> QueryJob(string jobId)
         {
-            return await _repository.QueryById(jobId);
+            var dto = await _repository.QueryByJobId(jobId);
+            await _scheduler.SchedulerTriggers(dto.Triggers);
+            return DResult.Succ(dto);
         }
 
         /// <summary> 修改 </summary>
@@ -108,36 +115,41 @@ namespace Acb.Middleware.JobScheduler.Controllers
         /// <param name="jobId"></param>
         /// <returns></returns>
         [HttpPost("start/{jobId}")]
-        public async Task<bool> TriggerJob(string jobId)
+        public async Task<DResult> TriggerJob(string jobId)
         {
-            await _scheduler.TriggerJob(jobId);
-            return true;
+            return await _scheduler.TriggerJob(jobId) ? DResult.Success : DResult.Error("执行失败");
         }
 
         /// <summary> 获取job日志 </summary>
         /// <param name="jobId"></param>
         /// <returns></returns>
         [HttpGet("logs/{jobId}")]
-        public async Task<PagedList<JobRecordDto>> GetJobLogs(string jobId)
+        public async Task<DResults<JobRecordDto>> GetJobLogs(string jobId)
         {
-            return await _repository.QueryRecords(jobId);
+            var list = await _repository.QueryRecords(jobId);
+            return DResult.Succ(list);
         }
 
         /// <summary> 启动调度 </summary>
         /// <returns></returns>
         [HttpPost("start")]
-        public async Task<bool> StartSchedule()
+        public async Task<DResult> StartSchedule()
         {
-            return await _scheduler.Start();
+            return await _scheduler.Start() ? DResult.Success : DResult.Error("启动任务调度中心失败");
         }
 
         /// <summary> 停止调度 </summary>
         [HttpPost("stop")]
-        public async Task<bool> StopSchedule()
+        public async Task<DResult> StopSchedule()
         {
-            return await _scheduler.Stop();
+            return await _scheduler.Stop() ? DResult.Success : DResult.Error("停止任务调度中心失败");
         }
 
-
+        /// <summary> 是否在运行 </summary>
+        [HttpGet("status")]
+        public DResult Status()
+        {
+            return _scheduler.IsRunning ? DResult.Success : DResult.Error("任务调度中心已停止");
+        }
     }
 }

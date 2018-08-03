@@ -9,10 +9,12 @@ using Acb.Payment.Notify.Events;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 支付相关接口 </summary>
+    [AllowAnonymous]
     public class PaymentController : BaseController
     {
         private readonly IGateways _gateways;

@@ -69,10 +69,11 @@ namespace Acb.Dapper
                 {
                     if (key.IsAlive && connDict[name].IsAlive())
                         continue;
+                    var conn = connDict[name];
                     if (connDict.Remove(name))
                     {
                         _removeCount++;
-                        connDict[name]?.Dispose();
+                        conn?.Dispose();
                     }
                 }
                 if (connDict.Count == 0)

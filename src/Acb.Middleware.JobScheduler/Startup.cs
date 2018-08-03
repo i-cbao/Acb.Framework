@@ -15,6 +15,12 @@ namespace Acb.Middleware.JobScheduler
         /// <summary> 构造函数 </summary>
         public Startup() : base("任务调度中心文档") { }
 
+        protected override void UseServices(IServiceProvider provider)
+        {
+            provider.GetService<SchedulerCenter>().StartScheduler().GetAwaiter().GetResult();
+            base.UseServices(provider);
+        }
+
         /// <summary> 注册服务 </summary>
         /// <param name="services"></param>
         /// <returns></returns>

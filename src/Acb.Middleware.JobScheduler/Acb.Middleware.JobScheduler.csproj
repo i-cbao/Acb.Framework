@@ -13,6 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_logs\**" />
+    <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="_logs\**" />
+    <None Remove="_logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

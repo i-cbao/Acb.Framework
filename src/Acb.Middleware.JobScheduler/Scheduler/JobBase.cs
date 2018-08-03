@@ -1,22 +1,22 @@
-﻿using Acb.Core.Exceptions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
+using Acb.Middleware.JobScheduler.Domain;
 using Acb.Middleware.JobScheduler.Domain.Dtos;
 using Acb.Middleware.JobScheduler.Domain.Entities;
 using Quartz;
 using System;
 using System.Threading.Tasks;
-using Acb.Core.Dependency;
-using Acb.Middleware.JobScheduler.Domain;
 
 namespace Acb.Middleware.JobScheduler.Scheduler
 {
     public abstract class JobBase<T> : IJob where T : JobDetailDto
     {
         protected readonly ILogger Logger;
-        
+
 
         protected JobBase()
         {
@@ -34,7 +34,7 @@ namespace Acb.Middleware.JobScheduler.Scheduler
             };
             try
             {
-                var data = context.Get(Constant.JobData).CastTo<T>();
+                var data = context.JobDetail.JobDataMap.Get(Constant.JobData).CastTo<T>();
                 if (data == null)
                     throw new BusiException("任务数据异常");
                 record.JobId = data.Id;
@@ -51,7 +51,9 @@ namespace Acb.Middleware.JobScheduler.Scheduler
             finally
             {
                 record.CompleteTime = Clock.Now;
-                await CurrentIocManager.Resolve<JobRepository>().InsertRecord(record);
+                var repository = CurrentIocManager.Resolve<JobRepository>();
+                await repository.InsertRecord(record);
+                await repository.UpdateTriggerTimes(record.JobId);
             }
         }
     }

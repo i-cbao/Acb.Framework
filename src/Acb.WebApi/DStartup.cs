@@ -103,6 +103,11 @@ namespace Acb.WebApi
 
         }
 
+        protected virtual void MapServices(IServiceCollection services)
+        {
+
+        }
+
         protected virtual void UseServices(IServiceProvider provider)
         {
 
@@ -129,6 +134,7 @@ namespace Acb.WebApi
                 });
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            MapServices(services);
             Bootstrap.BuilderHandler += builder =>
             {
                 builder.Populate(services);

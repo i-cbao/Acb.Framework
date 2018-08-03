@@ -1,4 +1,5 @@
-﻿using Acb.Core.Helper.Http;
+﻿using System.Collections.Generic;
+using Acb.Core.Helper.Http;
 using Acb.Middleware.JobScheduler.Domain.Dtos;
 using Acb.Middleware.JobScheduler.Domain.Entities;
 using Newtonsoft.Json;
@@ -28,6 +29,10 @@ namespace Acb.Middleware.JobScheduler.Scheduler
             }
         }
 
+        /// <summary> 执行任务 </summary>
+        /// <param name="data"></param>
+        /// <param name="record"></param>
+        /// <returns></returns>
         protected override async Task ExecuteJob(HttpDetailDto data, TJobRecord record)
         {
             var req = new HttpRequest(data.Url)
@@ -36,6 +41,10 @@ namespace Acb.Middleware.JobScheduler.Scheduler
             };
             if (!string.IsNullOrWhiteSpace(data.Data))
                 req.Data = JsonConvert.DeserializeObject(data.Data);
+            if (!string.IsNullOrWhiteSpace(data.Header))
+            {
+                req.Headers = JsonConvert.DeserializeObject<IDictionary<string, string>>(data.Header);
+            }
             var resp = await HttpHelper.Instance.RequestAsync(GetHttpMethod(data.Method), req);
             var html = await resp.Content.ReadAsStringAsync();
             record.Result = $"code:{resp.StatusCode},content:{html}";

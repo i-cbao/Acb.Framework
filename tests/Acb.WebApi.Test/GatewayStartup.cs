@@ -3,21 +3,22 @@ using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 
 namespace Acb.WebApi.Test
 {
-    public class Startup : DStartup
+    public class GatewayStartup : DStartup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public override IServiceProvider ConfigureServices(IServiceCollection services)
+        /// <summary> 注册服务 </summary>
+        /// <param name="services"></param>
+        protected override void MapServices(IServiceCollection services)
         {
             services.AddPayment();
-            //services.AddTransient(sp => ProxyService.Proxy<IDemoService>());
-            return base.ConfigureServices(services);
+            base.MapServices(services);
         }
 
+        /// <summary> 接口文档 </summary>
+        /// <returns></returns>
         protected override IDictionary<string, string> DocGroups()
         {
             return new Dictionary<string, string>
@@ -28,7 +29,9 @@ namespace Acb.WebApi.Test
             };
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary> 配置应用 </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public override void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -36,7 +39,6 @@ namespace Acb.WebApi.Test
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseMvc(routes => routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}"));
             Mapper.Initialize(cfg => cfg.CreateMissingTypeMaps = true);
             base.Configure(app, env);
         }
