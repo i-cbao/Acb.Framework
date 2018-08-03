@@ -23,4 +23,17 @@ namespace Acb.EventBus.Test
             });
         }
     }
+
+    [Subscription("icb_handler_user_02")]
+    public class UserEventTwoHandler : IEventHandler<UserEvent>
+    {
+        public Task Handle(UserEvent @event)
+        {
+            return Task.Run(() =>
+            {
+                Console.WriteLine("two:" + JsonHelper.ToJson(@event));
+                //throw new Exception("test");
+            });
+        }
+    }
 }

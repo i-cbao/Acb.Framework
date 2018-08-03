@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Acb.Dapper
 {
@@ -201,17 +202,29 @@ namespace Acb.Dapper
         /// <returns></returns>
         public PagedList<T> PagedList<T>(IDbConnection conn, int page, int size, object param = null)
         {
+            return PagedListAsync<T>(conn, page, size, param).GetAwaiter().GetResult();
+        }
+
+        /// <summary> 分页列表 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="page"></param>
+        /// <param name="size"></param>
+        /// <param name="conn"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<PagedList<T>> PagedListAsync<T>(IDbConnection conn, int page, int size, object param = null)
+        {
             if (!IsSelect())
                 return new PagedList<T>();
             Paged(page, size, conn);
             if (param != null)
                 _parameters.AddDynamicParams(param);
             var sql = ToString();
-            using (var muli = conn.QueryMultiple(sql, _parameters))
+            using (var muli = await conn.QueryMultipleAsync(sql, _parameters))
             {
-                var list = muli.Read<T>();
-                var count = muli.ReadFirstOrDefault<int>();
-                return new PagedList<T>(list.ToArray(), page, size, count);
+                var list = await muli.ReadAsync<T>();
+                var count = await muli.ReadFirstOrDefaultAsync<long>();
+                return new PagedList<T>(list.ToArray(), page, size, (int)count);
             }
         }
 

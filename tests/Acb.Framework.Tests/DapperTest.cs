@@ -37,7 +37,7 @@ namespace Acb.Framework.Tests
             {
                 //var set = conn.QueryDataSet(conn.FormatSql(sql), new { code = "510100" });
                 //Print(set);
-                var list = conn.PagedList<TAreas>(sql, 2, 6, new { code = "510100" });
+                var list = conn.PagedListAsync<TAreas>(sql, 2, 6, new { code = "510100" }).Result;
                 //var mapper = _config.CreateMapper();
                 //var dtos = Mapper.Map<PagedList<TAreas>>(list);
                 //Print(dtos);

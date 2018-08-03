@@ -2,11 +2,11 @@
 
 namespace Acb.Demo.MicroService
 {
-    public class Program
+    public class Program : MicroServiceHost<DemoStartup>
     {
         public static void Main(string[] args)
         {
-            MicroServiceHost.Start(args);
+            Start(args);
         }
     }
 }

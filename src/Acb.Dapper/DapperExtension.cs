@@ -11,6 +11,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Acb.Core.Domain.Entities;
 
 namespace Acb.Dapper
 {

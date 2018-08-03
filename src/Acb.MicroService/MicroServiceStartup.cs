@@ -4,6 +4,7 @@ using Acb.Core.Logging;
 using Acb.Framework;
 using Acb.Framework.Logging;
 using Acb.MicroService.Filters;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,10 +27,19 @@ namespace Acb.MicroService
             _bootstrap = new DBootstrap();
         }
 
+        protected virtual void MapServices(ContainerBuilder builder)
+        {
+
+        }
+        protected virtual void UseServices(IServiceProvider provider)
+        {
+
+        }
+
         /// <summary> 配置服务 </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddMvc(options =>
             {
@@ -40,7 +50,11 @@ namespace Acb.MicroService
             //services.TryAddSingleton<IRegister, ConsulRegister>();
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
+            _bootstrap.BuilderHandler += builder =>
+            {
+                builder.Populate(services);
+                MapServices(builder);
+            };
             _bootstrap.Initialize();
 
             MicroServiceRegister.Regist();
@@ -54,10 +68,10 @@ namespace Acb.MicroService
         /// <param name="env"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="applicationLifetime"></param>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime applicationLifetime)
+        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime applicationLifetime)
         {
-            loggerFactory.AddConsole((p, l) => l >= LogLevel.Warning);
-            var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
+            var provider = app.ApplicationServices;
+            var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc(routes =>
             {
@@ -74,7 +88,12 @@ namespace Acb.MicroService
                     route.Values.TryGetValue("method", out var method);
                     return MicroServiceRunner.MicroTask(request, response, $"{contract}/{method}");
                 });
+                //普通路由
+                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                //区域路由
+                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
             });
+            UseServices(provider);
 
             applicationLifetime.ApplicationStopping.Register(() =>
             {

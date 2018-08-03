@@ -1,10 +1,9 @@
-﻿using Acb.Core.Dependency;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
-    public interface IEventBus : ISingleDependency
+    public interface IEventBus
     {
         /// <summary> 订阅 </summary>
         /// <typeparam name="T"></typeparam>

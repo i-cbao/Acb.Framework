@@ -5,8 +5,12 @@ using System.IO;
 
 namespace Acb.MicroService
 {
+    public class MicroServiceHost : MicroServiceHost<MicroServiceStartup>
+    {
+    }
+
     /// <summary> 微服务主机 </summary>
-    public class MicroServiceHost
+    public class MicroServiceHost<TStartup> where TStartup : MicroServiceStartup
     {
         protected static event Action<IWebHostBuilder> Builder;
         /// <summary> 开启服务 </summary>
@@ -24,7 +28,7 @@ namespace Acb.MicroService
                 .UseKestrel(opt => opt.ConfigureEndpoints())
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .UseStartup<MicroServiceStartup>();
+                .UseStartup<TStartup>();
             Builder?.Invoke(builder);
             using (var host = builder.Build())
             {

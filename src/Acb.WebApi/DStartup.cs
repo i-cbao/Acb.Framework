@@ -6,6 +6,7 @@ using Acb.Core.Timing;
 using Acb.Framework;
 using Acb.Framework.Logging;
 using Acb.WebApi.Filters;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -23,12 +24,12 @@ namespace Acb.WebApi
 {
     public class DStartup
     {
-        private readonly DBootstrap _bootstrap;
+        protected readonly DBootstrap Bootstrap;
         private string _appName;
 
         protected DStartup(string name = null)
         {
-            _bootstrap = new DBootstrap();
+            Bootstrap = new DBootstrap();
             _appName = name;
         }
 
@@ -94,8 +95,18 @@ namespace Acb.WebApi
                         $"/swagger/{docGroup.Key}/swagger.json", docGroup.Value);
                 }
             });
-        } 
+        }
         #endregion
+
+        protected virtual void MapServices(ContainerBuilder builder)
+        {
+
+        }
+
+        protected virtual void UseServices(IServiceProvider provider)
+        {
+
+        }
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
@@ -118,18 +129,22 @@ namespace Acb.WebApi
                 });
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            _bootstrap.BuilderHandler += builder => { builder.Populate(services); };
-            _bootstrap.Initialize();
+            Bootstrap.BuilderHandler += builder =>
+            {
+                builder.Populate(services);
+                MapServices(builder);
+            };
+            Bootstrap.Initialize();
             LogManager.AddAdapter(new ConsoleAdapter());
-            return new AutofacServiceProvider(_bootstrap.Container);
+            return new AutofacServiceProvider(Bootstrap.Container);
         }
 
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             UseSwagger(app);
-            var httpContextAccessor = app.ApplicationServices.GetRequiredService<IHttpContextAccessor>();
+            var provider = app.ApplicationServices;
+            var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
-            app.UseMvcWithDefaultRoute();
             app.UseMvc(routes =>
             {
                 routes.MapGet("reload", async ctx =>
@@ -142,8 +157,9 @@ namespace Acb.WebApi
                 //区域路由
                 routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
             });
-            var liftscope = app.ApplicationServices.GetService<IApplicationLifetime>();
-            liftscope.ApplicationStopping.Register(_bootstrap.Dispose);
+            UseServices(provider);
+            var liftscope = provider.GetService<IApplicationLifetime>();
+            liftscope.ApplicationStopping.Register(Bootstrap.Dispose);
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Insert(IEnumerable<T> models, string[] excepts = null)
         {
-            return Connection.Insert(models, excepts);
+            return Connection.Insert<T>(models, excepts);
         }
 
         /// <summary> 删除 </summary>

@@ -6,7 +6,7 @@ namespace Acb.Demo.MicroService.Controllers
     public class NotifyController : Controller
     {
         [HttpGet, HttpPost]
-        public string Notify()
+        public string Index()
         {
             return "notify";
             //var resp = AcbHttpContext.Current.Response;

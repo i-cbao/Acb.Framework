@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.1\Acb.Middleware.JobScheduler.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netcoreapp2.1\Acb.Middleware.JobScheduler.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Quartz" Version="3.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.AutoMapper\Acb.AutoMapper.csproj" />
+    <ProjectReference Include="..\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
+    <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
+    <ProjectReference Include="..\Acb.WebApi\Acb.WebApi.csproj" />
+  </ItemGroup>
+
+</Project>

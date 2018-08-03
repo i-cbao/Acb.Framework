@@ -13,16 +13,17 @@ namespace Acb.Framework
         /// <summary> 项目启动项 </summary>
         protected DBootstrap Bootstrap;
 
-        protected Action<ContainerBuilder> MapServices;
+        protected virtual void MapServices(ContainerBuilder builder)
+        {
+        }
 
         /// <summary> 默认构造函数 </summary>
         protected DTest()
         {
             LogManager.AddAdapter(new ConsoleAdapter());
             Bootstrap = new DBootstrap();
-            MapServices?.Invoke(Bootstrap.Builder);
+            Bootstrap.BuilderHandler += MapServices;
             Bootstrap.Initialize();
-            //LogManager.ClearAdapter();
         }
 
         /// <summary> 打印数据 </summary>
