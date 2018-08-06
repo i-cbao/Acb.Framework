@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 namespace Acb.Middleware.JobScheduler.Controllers
 {
     /// <summary> 任务控制器 </summary>
-    [Route("api/job")]
     [ApiController]
-    public class JobController : ControllerBase
+    [Route("api/job")]
+    public class JobController : Controller
     {
         private readonly SchedulerCenter _scheduler;
         private readonly JobRepository _repository;
