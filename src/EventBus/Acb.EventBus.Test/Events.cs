@@ -1,5 +1,4 @@
-﻿using Acb.Core.EventBus;
-using Acb.Core.Serialize;
+﻿using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
 
@@ -18,7 +17,7 @@ namespace Acb.EventBus.Test
         {
             return Task.Run(() =>
             {
-                Console.WriteLine(JsonHelper.ToJson(@event));
+                Console.WriteLine(JsonConvert.SerializeObject(@event));
                 //throw new Exception("test");
             });
         }
@@ -31,7 +30,7 @@ namespace Acb.EventBus.Test
         {
             return Task.Run(() =>
             {
-                Console.WriteLine("two:" + JsonHelper.ToJson(@event));
+                Console.WriteLine("two:" + JsonConvert.SerializeObject(@event));
                 //throw new Exception("test");
             });
         }

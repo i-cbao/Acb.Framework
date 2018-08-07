@@ -2,11 +2,12 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Acb.Core.Reflection
+namespace Acb.EventBus
 {
     public class FastInvoker<T>
     {
-        [ThreadStatic] private static FastInvoker<T> _current;
+        [ThreadStatic]
+        static FastInvoker<T> _current;
         public static FastInvoker<T> Current
         {
             get
@@ -21,8 +22,8 @@ namespace Acb.Core.Reflection
         {
             var call = expression.Body as MethodCallExpression;
             if (call == null)
-                throw new ArgumentException("只支持方法调用表达式。 ", nameof(expression));
-            var invoker = GetInvoker(() => call.Method);
+                throw new ArgumentException("只支持方法调用表达式。 ", "expression");
+            Action<T> invoker = GetInvoker(() => call.Method);
             invoker(target);
         }
 
@@ -30,10 +31,10 @@ namespace Acb.Core.Reflection
         {
             var call = expression.Body as MethodCallExpression;
             if (call == null)
-                throw new ArgumentException("只支持方法调用表达式", nameof(expression));
+                throw new ArgumentException("只支持方法调用表达式", "expression");
 
-            var method = call.Method;
-            var invoker = GetInvoker(() =>
+            MethodInfo method = call.Method;
+            Action<T> invoker = GetInvoker(() =>
             {
                 if (method.IsGenericMethod)
                     return GetGenericMethodFromTypes(method.GetGenericMethodDefinition(), genericTypes);
@@ -42,11 +43,11 @@ namespace Acb.Core.Reflection
             invoker(target);
         }
 
-        private static MethodInfo GetGenericMethodFromTypes(MethodInfo method, Type[] genericTypes)
+        MethodInfo GetGenericMethodFromTypes(MethodInfo method, Type[] genericTypes)
         {
             if (!method.IsGenericMethod)
                 throw new ArgumentException("不能为非泛型方法指定泛型类型。: " + method.Name);
-            var genericArguments = method.GetGenericArguments();
+            Type[] genericArguments = method.GetGenericArguments();
             if (genericArguments.Length != genericTypes.Length)
             {
                 throw new ArgumentException("传递的泛型参数的数目错误" + genericTypes.Length
@@ -56,15 +57,15 @@ namespace Acb.Core.Reflection
             return method;
         }
 
-        private static Action<T> GetInvoker(Func<MethodInfo> getMethodInfo)
+        Action<T> GetInvoker(Func<MethodInfo> getMethodInfo)
         {
-            var method = getMethodInfo();
+            MethodInfo method = getMethodInfo();
 
-            var instanceParameter = Expression.Parameter(typeof(T), "target");
+            ParameterExpression instanceParameter = Expression.Parameter(typeof(T), "target");
 
-            var call = Expression.Call(instanceParameter, method);
+            MethodCallExpression call = Expression.Call(instanceParameter, method);
 
-            return Expression.Lambda<Action<T>>(call, instanceParameter).Compile();
+            return Expression.Lambda<Action<T>>(call, new[] { instanceParameter }).Compile();
 
         }
     }
