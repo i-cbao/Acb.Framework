@@ -13,6 +13,7 @@ using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Acb.Core.Helper.Http;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -79,6 +80,15 @@ namespace Acb.WebApi.Test.Controllers
             var bus = CurrentIocManager.Resolve<IEventBus>();
             await bus.Publish(new TestEvent { Content = message });
             return await Task.FromResult(message);
+        }
+
+        [HttpGet("download"), AllowAnonymous]
+        public async Task<ActionResult> Download()
+        {
+            const string url = "http://img.i-cbao.com/finance.pdf";
+            var resp = await HttpHelper.Instance.GetAsync(url);
+            var stream = await resp.Content.ReadAsStreamAsync();
+            return File(stream, "application/pdf", "icb.pdf");
         }
     }
 }

@@ -9,7 +9,8 @@ using System;
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 基础身份认证类 </summary>
-    [DAuthorize, Route("[controller]")]
+    //[DAuthorize]
+    [Route("[controller]")]
     [ApiExplorerSettings(GroupName = "help")]
     public abstract class BaseController : DAuthorController<DemoClientTicket>
     {

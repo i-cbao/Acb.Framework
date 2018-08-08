@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\src\Acb.Core\Acb.Core.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.RabbitMq\Acb.RabbitMq.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
   </ItemGroup>
 

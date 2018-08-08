@@ -1,9 +1,11 @@
-﻿using Acb.Payment;
+﻿using System;
+using Acb.Payment;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using Acb.WebApi.Test.Hubs;
 
 namespace Acb.WebApi.Test
 {
@@ -14,6 +16,9 @@ namespace Acb.WebApi.Test
         protected override void MapServices(IServiceCollection services)
         {
             services.AddPayment();
+            services.AddCors(opts =>
+                opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+            services.AddSignalR();
             base.MapServices(services);
         }
 
@@ -38,7 +43,13 @@ namespace Acb.WebApi.Test
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors("mhubs");
+            app.UseSignalR(route =>
+            {
+                route.MapHub<MessageHub>("/mhub");
+            });
+            app.UseWebSockets();
+            app.UseStaticFiles();
             Mapper.Initialize(cfg => cfg.CreateMissingTypeMaps = true);
             base.Configure(app, env);
         }

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Acb.WebApi.Test.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -13,9 +15,11 @@ namespace Acb.WebApi.Test.Controllers
     public class HomeController : BaseController
     {
         private readonly ILogger _logger;
+        private readonly IHubContext<MessageHub> _messageHub;
 
-        public HomeController()
+        public HomeController(IHubContext<MessageHub> mhub)
         {
+            _messageHub = mhub;
             _logger = LogManager.Logger<HomeController>();
         }
         // GET api/values
@@ -58,6 +62,16 @@ namespace Acb.WebApi.Test.Controllers
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
+        }
+
+        /// <summary> 发送消息 </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpPost("send")]
+        public async Task<DResult> Send([FromBody]VHomeInput input)
+        {
+            await _messageHub.Clients.All.SendAsync("send", input.Code);
+            return Success;
         }
     }
 }
