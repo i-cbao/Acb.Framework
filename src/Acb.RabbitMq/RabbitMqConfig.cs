@@ -3,7 +3,7 @@ using Acb.Core.Extensions;
 
 namespace Acb.RabbitMq
 {
-    public class RabbitMqConfig : ISingleDependency
+    public class RabbitMqConfig
     {
         private const string Region = "rabbit";
 
@@ -12,11 +12,21 @@ namespace Acb.RabbitMq
             return $"{Region}:{name}".Config(def);
         }
 
-        public string Host => Config<string>("host");
-        public int Port => Config("port", -1);
-        public string UserName => Config<string>("user");
-        public string Password => Config<string>("password");
-        public string Broker => Config("broker", "icb_broker");
-        public string VirtualHost => Config("virtualHost", "/");
+        public RabbitMqConfig()
+        {
+            Host = Config<string>("host");
+            Port = Config("port", -1);
+            UserName = Config<string>("user");
+            Password = Config<string>("password");
+            Broker = Config("broker", "icb_broker");
+            VirtualHost = Config("virtualHost", "/");
+        }
+
+        public string Host { get; set; }
+        public int Port { get; set; }
+        public string UserName { get; set; }
+        public string Password { get; set; }
+        public string Broker { get; set; }
+        public string VirtualHost { get; set; }
     }
 }

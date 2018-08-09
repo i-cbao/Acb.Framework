@@ -19,9 +19,10 @@ namespace Acb.RabbitMq
 
         private readonly object _syncRoot = new object();
 
-        public DefaultRabbitMqConnection(RabbitMqConfig config)
+        public DefaultRabbitMqConnection(RabbitMqConfig config = null)
         {
-            if (string.IsNullOrWhiteSpace(config?.Host))
+            config = config ?? new RabbitMqConfig();
+            if (string.IsNullOrWhiteSpace(config.Host))
                 throw new ArgumentException(nameof(config));
             _connectionFactory = new ConnectionFactory { HostName = config.Host, Port = config.Port };
             if (!string.IsNullOrWhiteSpace(config.VirtualHost))
@@ -34,8 +35,10 @@ namespace Acb.RabbitMq
                 _connectionFactory.Password = config.Password;
             }
             _logger = LogManager.Logger<DefaultRabbitMqConnection>();
+            Broker = config.Broker;
         }
 
+        public string Broker { get; }
         public bool IsConnected => _connection != null && _connection.IsOpen && !_disposed;
 
         public IModel CreateModel()

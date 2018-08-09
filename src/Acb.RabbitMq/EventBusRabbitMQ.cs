@@ -26,13 +26,12 @@ namespace Acb.RabbitMq
         private IModel _consumerChannel;
         private string _queueName;
 
-        public EventBusRabbitMq(IRabbitMqConnection connection, ISubscriptionManager subsManager, RabbitMqConfig config) : base(subsManager)
+        public EventBusRabbitMq(IRabbitMqConnection connection, ISubscriptionManager subsManager) : base(subsManager)
         {
-            _brokerName = config.Broker;
             _connection =
                 connection ?? throw new ArgumentNullException(nameof(connection));
+            _brokerName = connection.Broker;
             _logger = LogManager.Logger<EventBusRabbitMq>();
-            //_consumerChannel = CreateConsumerChannel();
             SubscriptionManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
 

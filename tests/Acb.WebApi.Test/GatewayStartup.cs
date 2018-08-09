@@ -1,11 +1,12 @@
-﻿using System;
-using Acb.Payment;
+﻿using Acb.Payment;
+using Acb.Redis;
+using Acb.WebApi.Test.Hubs;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
-using Acb.WebApi.Test.Hubs;
 
 namespace Acb.WebApi.Test
 {
@@ -15,11 +16,18 @@ namespace Acb.WebApi.Test
         /// <param name="services"></param>
         protected override void MapServices(IServiceCollection services)
         {
+            services.UseRedisEventBus();
             services.AddPayment();
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
             services.AddSignalR();
             base.MapServices(services);
+        }
+
+        protected override void UseServices(IServiceProvider provider)
+        {
+            provider.SubscriptAt();
+            base.UseServices(provider);
         }
 
         /// <summary> 接口文档 </summary>

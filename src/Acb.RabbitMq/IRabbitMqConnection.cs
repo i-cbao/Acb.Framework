@@ -6,6 +6,7 @@ namespace Acb.RabbitMq
 {
     public interface IRabbitMqConnection : IDisposable, IScopedDependency
     {
+        string Broker { get; }
         bool IsConnected { get; }
 
         bool TryConnect();
