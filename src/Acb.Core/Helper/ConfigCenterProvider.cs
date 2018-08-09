@@ -61,7 +61,7 @@ namespace Acb.Core.Helper
                     if (loginResp.IsSuccessStatusCode)
                     {
                         var json = JsonConvert.DeserializeObject<dynamic>(data);
-                        if (json.ok)
+                        if ((bool)json.ok)
                             _headers["Authorization"] = $"acb {json.ticket}";
                     }
                     else

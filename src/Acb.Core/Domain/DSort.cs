@@ -43,7 +43,7 @@ namespace Acb.Core.Domain
         public Expression<Func<TEntity, TProp>> Selector { get; private set; }
 
         /// <summary>
-        /// 使用排序字段与排序方式 初始化一个<see cref="DSort"/>类型的新实例
+        /// 使用排序字段与排序方式 初始化一个<see cref="Sort"/>类型的新实例
         /// </summary>
         public DSort(Expression<Func<TEntity, TProp>> keySelector,
             ListSortDirection listSortDirection = ListSortDirection.Ascending)

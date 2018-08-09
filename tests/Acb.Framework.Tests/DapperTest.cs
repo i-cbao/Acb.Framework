@@ -100,7 +100,6 @@ AND u.create_time >=""2018 / 05 / 10""
             {
                 sql.Paged(1, 15, conn);
                 var t = sql.ToString();
-                Print(t);
             }
 
         }
