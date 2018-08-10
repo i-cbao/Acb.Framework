@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
 
 namespace Acb.RabbitMq
 {

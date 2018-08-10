@@ -1,7 +1,9 @@
-﻿using Acb.WebApi;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Timing;
+using Acb.WebApi;
 using Microsoft.AspNetCore.Http;
 
-namespace Acb.Middleware.JobScheduler.Domain
+namespace Acb.Spear.Domain
 {
     /// <summary> 项目凭证 </summary>
     public class ConfigTicket : ClientTicket
@@ -11,6 +13,7 @@ namespace Acb.Middleware.JobScheduler.Domain
     }
     public static class ConfigTicketHelper
     {
+        private const string ProjectCodeKey = "project";
         /// <summary> 验证令牌 </summary>
         /// <param name="request"></param>
         /// <param name="scheme"></param>
@@ -24,7 +27,30 @@ namespace Acb.Middleware.JobScheduler.Domain
             if (arr == null || arr.Length != 2 || arr[0] != scheme)
                 return null;
             var ticket = arr[1];
-            return ticket.Client<ConfigTicket>();
+            var client = ticket.Client<ConfigTicket>();
+            if (client.ExpiredTime.HasValue && client.ExpiredTime.Value < Clock.Now)
+                return null;
+            return client;
+        }
+
+        public static string GetProjectCode(this HttpRequest request)
+        {
+            var ticket = request.GetTicket();
+            string code;
+            if (ticket != null)
+            {
+                code = ticket.Code;
+            }
+            else
+            {
+                code = ProjectCodeKey.QueryOrForm(string.Empty);
+                if (!string.IsNullOrWhiteSpace(code))
+                    return code;
+                if (request.Headers.TryGetValue(ProjectCodeKey, out var dcode))
+                    code = dcode;
+            }
+
+            return code;
         }
     }
 }

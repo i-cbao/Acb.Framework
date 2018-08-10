@@ -1,4 +1,4 @@
-﻿namespace Acb.Middleware.JobScheduler.Domain.Enums
+﻿namespace Acb.Spear.Domain.Enums
 {
     public enum JobType
     {

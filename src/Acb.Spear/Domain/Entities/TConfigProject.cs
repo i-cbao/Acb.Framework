@@ -1,7 +1,7 @@
 ﻿using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
 
-namespace Acb.Middleware.JobScheduler.Domain.Entities
+namespace Acb.Spear.Domain.Entities
 {
     /// <summary> 配置项目表 </summary>
     [Naming("t_config_project")]

@@ -1,4 +1,4 @@
-﻿namespace Acb.Middleware.JobScheduler.ViewModels
+﻿namespace Acb.Spear.ViewModels
 {
     public class VConfigInput
     {

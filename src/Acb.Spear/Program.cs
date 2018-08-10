@@ -1,6 +1,6 @@
 ﻿using Acb.WebApi;
 
-namespace Acb.Middleware.JobScheduler
+namespace Acb.Spear
 {
     public class Program : DHost<Startup>
     {

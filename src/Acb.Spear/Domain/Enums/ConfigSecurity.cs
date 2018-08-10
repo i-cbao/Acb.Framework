@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Acb.Middleware.JobScheduler.Domain.Enums
+namespace Acb.Spear.Domain.Enums
 {
     [Flags]
     public enum ConfigSecurity : byte

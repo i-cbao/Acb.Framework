@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Acb.Middleware.JobScheduler.Domain.Dtos
+namespace Acb.Spear.Domain.Dtos
 {
     public class JobRecordDto
     {

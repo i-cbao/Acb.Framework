@@ -5,22 +5,23 @@ using Acb.Core.Timing;
 using Acb.Dapper;
 using Acb.Dapper.Adapters;
 using Acb.Dapper.Domain;
-using Acb.Middleware.JobScheduler.Domain.Dtos;
-using Acb.Middleware.JobScheduler.Domain.Entities;
-using Acb.Middleware.JobScheduler.Domain.Enums;
+using Acb.Spear.Domain.Dtos;
+using Acb.Spear.Domain.Entities;
+using Acb.Spear.Domain.Enums;
 using Dapper;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Acb.Middleware.JobScheduler.Domain
+namespace Acb.Spear.Domain
 {
     /// <summary> 任务仓储 </summary>
     public class JobRepository : DapperRepository<TJob>
     {
         /// <summary> 查询所有任务 </summary>
         /// <returns></returns>
-        public async Task<List<JobDto>> QueryJobs(string keyword = null, JobStatus status = JobStatus.All)
+        public async Task<PagedList<JobDto>> QueryJobs(string keyword = null, JobStatus status = JobStatus.All, int page = 1, int size = 10)
         {
             SQL sql = "SELECT * FROM [t_job] WHERE 1=1";
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -33,16 +34,17 @@ namespace Acb.Middleware.JobScheduler.Domain
                 sql = (sql + "AND [Status]=@status")["status", status];
             }
 
-            sql += "ORDER BY [CreationTime] DESC";
+            sql += "ORDER BY [Group],[CreationTime] DESC";
             using (var conn = GetConnection(threadCache: false))
             {
                 var sqlStr = conn.FormatSql(sql.ToString());
-                var jobs = (await conn.QueryAsync<JobDto>(sqlStr, sql.Parameters())).ToList();
-                if (!jobs.Any()) return jobs;
-                var ids = jobs.Select(t => t.Id).ToArray();
+                var jobs = await conn.PagedListAsync<JobDto>(sqlStr, page, size, sql.Parameters());
+                if (jobs?.List == null || !jobs.List.Any())
+                    return jobs;
+                var ids = jobs.List.Select(t => t.Id).ToArray();
                 var triggers = await QueryTriggers(ids);
                 var https = await QueryHttpJobs(ids);
-                foreach (var dto in jobs)
+                foreach (var dto in jobs.List)
                 {
                     if (https.ContainsKey(dto.Id))
                         dto.Detail = https[dto.Id];
@@ -84,43 +86,24 @@ namespace Acb.Middleware.JobScheduler.Domain
 
         /// <summary> 查询Http任务 </summary>
         /// <param name="jobId"></param>
+        /// <param name="conn"></param>
         /// <returns></returns>
-        public async Task<HttpDetailDto> QueryHttpJobById(string jobId)
+        public async Task<HttpDetailDto> QueryHttpJobById(string jobId, IDbConnection conn)
         {
             const string sql = "SELECT * FROM [t_job_http] WHERE [Id] = @jobId";
-            using (var conn = GetConnection(threadCache: false))
-            {
-                var fmtSql = conn.FormatSql(sql);
-                return await conn.QueryFirstOrDefaultAsync<HttpDetailDto>(fmtSql, new { jobId });
-            }
+            var fmtSql = conn.FormatSql(sql);
+            return await conn.QueryFirstOrDefaultAsync<HttpDetailDto>(fmtSql, new { jobId });
         }
 
         /// <summary> 查询触发器 </summary>
         /// <param name="jobId"></param>
+        /// <param name="conn"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<TriggerDto>> QueryTriggersById(string jobId)
+        public async Task<IEnumerable<TriggerDto>> QueryTriggersById(string jobId, IDbConnection conn)
         {
             const string sql = "SELECT * FROM [t_job_trigger] WHERE [JobId] = @jobId";
-            using (var conn = GetConnection(threadCache: false))
-            {
-                var fmtSql = conn.FormatSql(sql);
-                return await conn.QueryAsync<TriggerDto>(fmtSql, new { jobId });
-            }
-        }
-
-        /// <summary> 更新触发器次数 </summary>
-        /// <param name="id"></param>
-        /// <param name="count"></param>
-        /// <returns></returns>
-        public async Task UpdateTriggerTimes(string id, int count = -1)
-        {
-            const string sql =
-                "UPDATE [t_job_trigger] SET [Times]=[Times]+@count,[PrevTime]=now() WHERE [JobId] = @id AND [Type]=2 AND [Times]>0";
-            using (var conn = GetConnection(threadCache: false))
-            {
-                var fmtSql = conn.FormatSql(sql);
-                await conn.ExecuteAsync(fmtSql, new { id, count });
-            }
+            var fmtSql = conn.FormatSql(sql);
+            return await conn.QueryAsync<TriggerDto>(fmtSql, new { jobId });
         }
 
         /// <summary> 添加任务 </summary>
@@ -160,10 +143,13 @@ namespace Acb.Middleware.JobScheduler.Domain
         /// <returns></returns>
         public async Task<JobDto> QueryByJobId(string jobId)
         {
-            var dto = QueryById(jobId).MapTo<JobDto>();
-            dto.Detail = await QueryHttpJobById(jobId);
-            dto.Triggers = (await QueryTriggersById(jobId)).ToList();
-            return dto;
+            using (var conn = GetConnection(threadCache: false))
+            {
+                var dto = (await conn.QueryByIdAsync<TJob>(jobId)).MapTo<JobDto>();
+                dto.Detail = await QueryHttpJobById(jobId, conn);
+                dto.Triggers = (await QueryTriggersById(jobId, conn)).ToList();
+                return dto;
+            }
         }
 
         /// <summary> 更新任务 </summary>
@@ -226,8 +212,13 @@ namespace Acb.Middleware.JobScheduler.Domain
         /// <returns></returns>
         public async Task InsertRecord(TJobRecord record)
         {
+            const string sql =
+                "UPDATE [t_job_trigger] SET [PrevTime]=@start WHERE [JobId] = @id;" +
+                "UPDATE [t_job_trigger] SET [Times]=[Times]-1 WHERE [JobId] = @id AND [Type]=2 AND [Times]>0;";
             using (var conn = GetConnection(threadCache: false))
             {
+                var fmtSql = conn.FormatSql(sql);
+                await conn.ExecuteAsync(fmtSql, new { id = record.JobId, start = record.StartTime });
                 await conn.InsertAsync(record);
             }
         }

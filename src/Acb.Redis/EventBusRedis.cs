@@ -13,8 +13,9 @@ namespace Acb.Redis
         private readonly ISubscriber _subscriber;
         private const string EventBusName = "eventBus";
         private readonly ILogger _logger;
-        public EventBusRedis(ISubscriptionManager manager, string configName = EventBusName) : base(manager)
+        public EventBusRedis(ISubscriptionManager manager, string configName = null) : base(manager)
         {
+            configName = string.IsNullOrWhiteSpace(configName) ? EventBusName : configName;
             _subscriber = RedisManager.Instance.GetSubscriber(configName);
             _logger = LogManager.Logger<EventBusRedis>();
         }
@@ -24,7 +25,6 @@ namespace Acb.Redis
             if (!SubscriptionManager.HasSubscriptionsForEvent<T>())
             {
                 var key = GetEventKey(typeof(T));
-                //var subscription = GetSubscription(typeof(TH));
                 _subscriber.SubscribeAsync(key,
                     async (channel, value) =>
                     {

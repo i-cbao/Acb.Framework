@@ -5,14 +5,15 @@ using Acb.Core.Timing;
 using Acb.Dapper;
 using Acb.Dapper.Adapters;
 using Acb.Dapper.Domain;
-using Acb.Middleware.JobScheduler.Domain.Entities;
+using Acb.Spear.Domain.Entities;
 using Dapper;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.Spear.Domain.Enums;
 using IdentityHelper = Acb.Core.Helper.IdentityHelper;
 
-namespace Acb.Middleware.JobScheduler.Domain
+namespace Acb.Spear.Domain
 {
     /// <summary> 配置中心仓储类 </summary>
     public class ConfigRepository : DapperRepository<TConfig>
@@ -152,6 +153,32 @@ namespace Acb.Middleware.JobScheduler.Domain
             {
                 return await conn.PagedListAsync<TConfig>(sql, page, size, new { code, name, mode });
             }
+        }
+
+        /// <summary> 还原历史版本 </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<TConfig> RecoveryHistory(string id)
+        {
+            //更新之前版本为历史版本
+            const string updateSql = "UPDATE [t_config] SET [Status]=1 WHERE [ProjectCode]=@code AND [Name]=@name AND [Mode]=@mode AND [Status]=0";
+            return await Transaction((conn, trans) =>
+            {
+                var history = conn.QueryById<TConfig>(id);
+                if (history == null || history.Status != (byte)ConfigStatus.History)
+                    throw new BusiException("历史版本不存在");
+
+                var count = conn.Execute(conn.FormatSql(updateSql), new
+                {
+                    code = history.ProjectCode,
+                    name = history.Name,
+                    mode = history.Mode
+                }, trans);
+                //更新状态
+                history.Status = (byte)ConfigStatus.Normal;
+                count += conn.Update(history, new[] { nameof(TConfig.Status) }, trans);
+                return Task.FromResult(count > 0 ? history : null);
+            });
         }
 
         /// <summary> 保存配置 </summary>

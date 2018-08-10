@@ -1,8 +1,8 @@
 ﻿using System;
-using Acb.Middleware.JobScheduler.Domain.Enums;
+using Acb.Spear.Domain.Enums;
 using System.Collections.Generic;
 
-namespace Acb.Middleware.JobScheduler.Domain.Dtos
+namespace Acb.Spear.Domain.Dtos
 {
     public class JobDto
     {

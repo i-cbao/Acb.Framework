@@ -1,24 +1,25 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
 using Acb.Core.Extensions;
-using Acb.Core.Timing;
-using Acb.Middleware.JobScheduler.Domain;
-using Acb.Middleware.JobScheduler.Domain.Dtos;
-using Acb.Middleware.JobScheduler.Domain.Entities;
-using Acb.Middleware.JobScheduler.Domain.Enums;
-using Acb.Middleware.JobScheduler.Filters;
-using Acb.Middleware.JobScheduler.ViewModels;
+using Acb.Spear.Domain;
+using Acb.Spear.Domain.Dtos;
+using Acb.Spear.Domain.Entities;
+using Acb.Spear.Domain.Enums;
+using Acb.Spear.Filters;
+using Acb.Spear.Hubs;
+using Acb.Spear.ViewModels;
+using Acb.WebApi;
 using Acb.WebApi.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.WebApi;
 
-namespace Acb.Middleware.JobScheduler.Controllers
+namespace Acb.Spear.Controllers
 {
     /// <summary> 配置中心 </summary>
     [ConfigAuthorize]
@@ -27,19 +28,38 @@ namespace Acb.Middleware.JobScheduler.Controllers
     public class ConfigController : Controller
     {
         private readonly ConfigRepository _repository;
+        private readonly IHubContext<ConfigHub> _configHub;
 
-        public ConfigController(ConfigRepository repository)
+        public ConfigController(ConfigRepository repository, IHubContext<ConfigHub> configHub)
         {
             _repository = repository;
+            _configHub = configHub;
         }
 
-        private string ProjectCode
+        private ConfigTicket _ticket;
+
+        /// <summary> 登录密钥 </summary>
+        public ConfigTicket Ticket
         {
             get
             {
-                if (ControllerContext.HttpContext.Request.Headers.TryGetValue("project", out var code))
-                    return code.ToString();
-                return string.Empty;
+                if (_ticket != null)
+                    return _ticket;
+                var ticket = HttpContext.Request.GetTicket();
+                return _ticket = ticket;
+            }
+        }
+
+        private string _projectCode;
+
+        /// <summary> 项目编码 </summary>
+        public string ProjectCode
+        {
+            get
+            {
+                if (_projectCode != null)
+                    return _projectCode;
+                return _projectCode = HttpContext.Request.GetProjectCode();
             }
         }
 
@@ -109,11 +129,26 @@ namespace Acb.Middleware.JobScheduler.Controllers
             return DResult.Succ(dtos, histories.Total);
         }
 
-        /// <summary> 保存项目 </summary>
+        /// <summary> 还原历史版本 </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPut("history/{id}")]
+        public async Task<DResult> RecoveryHistory(string id)
+        {
+            var result = await _repository.RecoveryHistory(id);
+            if (result == null)
+                return DResult.Error("还原版本失败");
+            var config = JsonConvert.DeserializeObject(result.Content);
+            await _configHub.Clients.Group($"{ProjectCode}_{result.Name}_{result.Mode}")
+                .SendAsync("UPDATE", config);
+            return DResult.Success;
+        }
+
+        /// <summary> 添加项目 </summary>
         /// <param name="input"></param>
         /// <returns></returns>
         [HttpPost("project"), AllowAnonymous]
-        public async Task<DResult> SaveProject([FromBody]VConfigProjectInput input)
+        public async Task<DResult> AddProject([FromBody]VConfigProjectInput input)
         {
             var model = input.MapTo<TConfigProject>();
             model.Password = model.Password.Md5();
@@ -159,7 +194,12 @@ namespace Acb.Middleware.JobScheduler.Controllers
                 Content = JsonConvert.SerializeObject(config)
             };
             var result = await _repository.SaveConfig(model);
-            return result > 0 ? DResult.Success : DResult.Error("保存配置失败");
+            if (result > 0)
+            {
+                await _configHub.Clients.Group($"{ProjectCode}_{module}_{env}").SendAsync("UPDATE", config);
+                return DResult.Success;
+            }
+            return DResult.Error("保存配置失败");
         }
 
         /// <summary> 项目登录 </summary>
@@ -172,7 +212,7 @@ namespace Acb.Middleware.JobScheduler.Controllers
             var client = new ConfigTicket
             {
                 Code = model.Code,
-                ExpiredTime = Clock.Now.AddDays(7)
+                //ExpiredTime = Clock.Now.AddDays(7)
             };
             var ticket = client.Ticket();
             return DResult.Succ(ticket);

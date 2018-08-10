@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Acb.Core;
 
 namespace Acb.WebApi.ViewModels
 {

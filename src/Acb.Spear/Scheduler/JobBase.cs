@@ -4,14 +4,14 @@ using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
-using Acb.Middleware.JobScheduler.Domain;
-using Acb.Middleware.JobScheduler.Domain.Dtos;
-using Acb.Middleware.JobScheduler.Domain.Entities;
+using Acb.Spear.Domain;
+using Acb.Spear.Domain.Dtos;
+using Acb.Spear.Domain.Entities;
 using Quartz;
 using System;
 using System.Threading.Tasks;
 
-namespace Acb.Middleware.JobScheduler.Scheduler
+namespace Acb.Spear.Scheduler
 {
     public abstract class JobBase<T> : IJob where T : JobDetailDto
     {
@@ -53,7 +53,6 @@ namespace Acb.Middleware.JobScheduler.Scheduler
                 record.CompleteTime = Clock.Now;
                 var repository = CurrentIocManager.Resolve<JobRepository>();
                 await repository.InsertRecord(record);
-                await repository.UpdateTriggerTimes(record.JobId);
             }
         }
     }

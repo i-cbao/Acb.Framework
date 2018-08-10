@@ -3,7 +3,7 @@ using Acb.Core.Serialize;
 using System;
 using Newtonsoft.Json.Linq;
 
-namespace Acb.Middleware.JobScheduler.Domain.Entities
+namespace Acb.Spear.Domain.Entities
 {
     /// <summary> 配置表 </summary>
     [Naming("t_config")]

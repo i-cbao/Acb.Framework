@@ -20,6 +20,7 @@ namespace Acb.Dapper.PostgreSql
         /// <returns></returns>
         public string FormatSql(string sql)
         {
+            //:In => ANY
             return sql.Replace("@", ":").Replace("?", ":").Replace("[", "\"").Replace("]", "\"");
         }
 

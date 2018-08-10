@@ -5,6 +5,7 @@ using System;
 
 namespace Acb.Framework
 {
+    /// <summary> 默认程序集查找器 </summary>
     public class DAssemblyFinder : DefaultAssemblyFinder, ISingleDependency
     {
         private const string FrameworkName = "Acb.";

@@ -1,14 +1,14 @@
 ﻿using Acb.Core;
-using Acb.Middleware.JobScheduler.Domain;
-using Acb.Middleware.JobScheduler.Domain.Dtos;
-using Acb.Middleware.JobScheduler.Domain.Enums;
-using Acb.Middleware.JobScheduler.Scheduler;
+using Acb.Spear.Domain;
+using Acb.Spear.Domain.Dtos;
+using Acb.Spear.Domain.Enums;
+using Acb.Spear.Scheduler;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Acb.Middleware.JobScheduler.Controllers
+namespace Acb.Spear.Controllers
 {
     /// <summary> 任务控制器 </summary>
     [ApiController]
@@ -37,12 +37,12 @@ namespace Acb.Middleware.JobScheduler.Controllers
 
         /// <summary> 获取所有任务 </summary>
         [HttpGet("")]
-        public async Task<DResults<JobDto>> JobList(string keyword = null, JobStatus status = JobStatus.All)
+        public async Task<DResults<JobDto>> JobList(string keyword = null, JobStatus status = JobStatus.All, int page = 1, int size = 10)
         {
-            var list = await _repository.QueryJobs(keyword, status);
-            var triggers = list.SelectMany(t => t.Triggers);
+            var pagedList = await _repository.QueryJobs(keyword, status, page, size);
+            var triggers = pagedList.List.SelectMany(t => t.Triggers);
             await _scheduler.SchedulerTriggers(triggers);
-            return DResult.Succ(list, -1);
+            return DResult.Succ(pagedList);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Acb.Middleware.JobScheduler.Controllers
             return DResult.Succ(dto);
         }
 
-        /// <summary> 修改 </summary>
+        /// <summary> 修改任务 </summary>
         /// <param name="jobId"></param>
         /// <param name="dto"></param>
         /// <returns></returns>
@@ -120,13 +120,15 @@ namespace Acb.Middleware.JobScheduler.Controllers
             return await _scheduler.TriggerJob(jobId) ? DResult.Success : DResult.Error("执行失败");
         }
 
-        /// <summary> 获取job日志 </summary>
+        /// <summary> 获取任务日志 </summary>
         /// <param name="jobId"></param>
+        /// <param name="page"></param>
+        /// <param name="size"></param>
         /// <returns></returns>
         [HttpGet("logs/{jobId}")]
-        public async Task<DResults<JobRecordDto>> GetJobLogs(string jobId)
+        public async Task<DResults<JobRecordDto>> GetJobLogs(string jobId, int page = 1, int size = 10)
         {
-            var list = await _repository.QueryRecords(jobId);
+            var list = await _repository.QueryRecords(jobId, page, size);
             return DResult.Succ(list);
         }
 

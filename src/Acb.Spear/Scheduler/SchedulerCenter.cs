@@ -1,9 +1,9 @@
 ﻿using Acb.Core;
 using Acb.Core.Dependency;
 using Acb.Core.Logging;
-using Acb.Middleware.JobScheduler.Domain;
-using Acb.Middleware.JobScheduler.Domain.Dtos;
-using Acb.Middleware.JobScheduler.Domain.Enums;
+using Acb.Spear.Domain;
+using Acb.Spear.Domain.Dtos;
+using Acb.Spear.Domain.Enums;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -12,7 +12,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Acb.Middleware.JobScheduler.Scheduler
+namespace Acb.Spear.Scheduler
 {
     public class SchedulerCenter
     {
@@ -32,8 +32,8 @@ namespace Acb.Middleware.JobScheduler.Scheduler
             };
             var factory = new StdSchedulerFactory(props);
             _scheduler = await factory.GetScheduler();
-            var jobs = await CurrentIocManager.Resolve<JobRepository>().QueryJobs();
-            foreach (var dto in jobs)
+            var jobs = await CurrentIocManager.Resolve<JobRepository>().QueryJobs(size: 1000);
+            foreach (var dto in jobs.List)
             {
                 await RunJob(dto);
             }

@@ -1,4 +1,4 @@
-﻿namespace Acb.Middleware.JobScheduler.Domain
+﻿namespace Acb.Spear.Domain
 {
     internal static class Constant
     {

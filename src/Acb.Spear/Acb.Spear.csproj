@@ -35,6 +35,7 @@
     <ProjectReference Include="..\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
     <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
+    <ProjectReference Include="..\Acb.Redis\Acb.Redis.csproj" />
     <ProjectReference Include="..\Acb.WebApi\Acb.WebApi.csproj" />
   </ItemGroup>
 

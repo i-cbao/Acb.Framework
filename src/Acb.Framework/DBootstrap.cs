@@ -4,10 +4,12 @@ using Acb.Core.Dependency;
 using Acb.Core.Logging;
 using Acb.Framework.Logging;
 using Autofac;
+using System;
 using System.Linq;
 
 namespace Acb.Framework
 {
+    /// <summary> 启动器 </summary>
     public class DBootstrap : Bootstrap
     {
         private bool _init;
@@ -16,12 +18,13 @@ namespace Acb.Framework
 
         private IContainer _container;
 
+        /// <summary> Ioc容器 </summary>
         public IContainer Container => _container ?? (_container = Builder.Build());
 
-        public delegate void BuilderAction(ContainerBuilder builderAction);
+        /// <summary> Ioc构建事件 </summary>
+        public event Action<ContainerBuilder> BuilderHandler;
 
-        public event BuilderAction BuilderHandler;
-
+        /// <summary> 初始化 </summary>
         public override void Initialize()
         {
             if (_init) return;
@@ -36,6 +39,7 @@ namespace Acb.Framework
             ModulesInstaller();
         }
 
+        /// <summary> Ioc注册 </summary>
         public override void IocRegisters()
         {
             Builder = new ContainerBuilder();

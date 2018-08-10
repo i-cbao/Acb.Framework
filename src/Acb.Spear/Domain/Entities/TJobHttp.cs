@@ -1,7 +1,7 @@
 ﻿using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
 
-namespace Acb.Middleware.JobScheduler.Domain.Entities
+namespace Acb.Spear.Domain.Entities
 {
     /// <summary> Http任务 </summary>
     [Naming("t_job_http")]

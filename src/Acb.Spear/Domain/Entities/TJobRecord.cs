@@ -2,7 +2,7 @@
 using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
 
-namespace Acb.Middleware.JobScheduler.Domain.Entities
+namespace Acb.Spear.Domain.Entities
 {
     [Naming("t_job_record")]
     public class TJobRecord : BaseEntity<string>

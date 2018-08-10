@@ -1,8 +1,8 @@
-﻿using Acb.Middleware.JobScheduler.Domain.Enums;
+﻿using Acb.Spear.Domain.Enums;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Acb.Middleware.JobScheduler.ViewModels
+namespace Acb.Spear.ViewModels
 {
     public class VConfigProjectEditInput : IValidatableObject
     {

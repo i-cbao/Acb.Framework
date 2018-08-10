@@ -1,4 +1,6 @@
-﻿using Acb.Middleware.JobScheduler.Scheduler;
+﻿using Acb.Redis;
+using Acb.Spear.Hubs;
+using Acb.Spear.Scheduler;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,13 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 
-namespace Acb.Middleware.JobScheduler
+namespace Acb.Spear
 {
     /// <summary> 启动类 </summary>
     public class Startup : DStartup
     {
         /// <summary> 构造函数 </summary>
-        public Startup() : base("任务调度中心文档") { }
+        public Startup() : base("分布式管理中心接口文档") { }
 
         protected override void UseServices(IServiceProvider provider)
         {
@@ -21,11 +23,18 @@ namespace Acb.Middleware.JobScheduler
             base.UseServices(provider);
         }
 
+        protected override void MapServices(IServiceCollection services)
+        {
+            services.UseRedisEventBus();
+            base.MapServices(services);
+        }
+
         /// <summary> 注册服务 </summary>
         /// <param name="services"></param>
         /// <returns></returns>
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddSignalR();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.TryAddSingleton<SchedulerCenter>();
             return base.ConfigureServices(services);
@@ -45,6 +54,7 @@ namespace Acb.Middleware.JobScheduler
                 app.UseHsts();
             }
             //app.UseHttpsRedirection();
+            app.UseSignalR(route => { route.MapHub<ConfigHub>("/config_hub"); });
             base.Configure(app, env);
         }
     }

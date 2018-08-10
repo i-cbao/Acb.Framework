@@ -2,7 +2,7 @@
 using Acb.Core.Serialize;
 using System;
 
-namespace Acb.Middleware.JobScheduler.Domain.Entities
+namespace Acb.Spear.Domain.Entities
 {
     /// <summary> 任务触发器 </summary>
     [Naming("t_job_trigger")]

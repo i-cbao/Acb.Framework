@@ -1,8 +1,8 @@
 ﻿using Acb.Core;
 using Acb.Core.Dependency;
-using Acb.Core.Timing;
-using Acb.Middleware.JobScheduler.Domain;
-using Acb.Middleware.JobScheduler.Domain.Enums;
+using Acb.Spear.Controllers;
+using Acb.Spear.Domain;
+using Acb.Spear.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Acb.Middleware.JobScheduler.Filters
+namespace Acb.Spear.Filters
 {
     /// <summary> 配置获取权限 </summary>
     public class ConfigGetAttribute : ActionFilterAttribute { }
@@ -34,7 +34,9 @@ namespace Acb.Middleware.JobScheduler.Filters
                     };
             }
 
-            context.HttpContext.Request.Headers.TryGetValue("project", out var code);
+            if (!(context.Controller is ConfigController controller))
+                return;
+            var code = controller.ProjectCode;
             if (string.IsNullOrWhiteSpace(code))
             {
                 Forbidden();
@@ -64,8 +66,8 @@ namespace Acb.Middleware.JobScheduler.Filters
                 }
             }
 
-            var ticket = context.HttpContext.Request.GetTicket();
-            if (ticket == null || ticket.Code != code || (ticket.ExpiredTime.HasValue && ticket.ExpiredTime.Value < Clock.Now))
+            var ticket = controller.Ticket;
+            if (ticket == null)
             {
                 Forbidden();
                 return;

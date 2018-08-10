@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using Acb.Core.Helper.Http;
-using Acb.Middleware.JobScheduler.Domain.Dtos;
-using Acb.Middleware.JobScheduler.Domain.Entities;
+using Acb.Spear.Domain.Dtos;
+using Acb.Spear.Domain.Entities;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Acb.Middleware.JobScheduler.Scheduler
+namespace Acb.Spear.Scheduler
 {
     public class JobHttp : JobBase<HttpDetailDto>
     {

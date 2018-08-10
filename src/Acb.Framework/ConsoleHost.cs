@@ -5,11 +5,16 @@ using System;
 
 namespace Acb.Framework
 {
+    /// <summary> 控制台宿主机 </summary>
     public class ConsoleHost
     {
+        /// <summary> 命令事件 </summary>
         protected static event Action<string, IContainer> Command;
+        /// <summary> 注册服务 </summary>
         protected static event Action<ContainerBuilder> MapServices;
+        /// <summary> 使用服务 </summary>
         protected static event Action<IContainer> UseServices;
+        /// <summary> 启动项 </summary>
         protected static DBootstrap Bootstrap { get; private set; }
 
         /// <summary> 开启服务 </summary>
