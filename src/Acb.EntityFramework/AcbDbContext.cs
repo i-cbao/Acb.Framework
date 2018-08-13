@@ -9,7 +9,7 @@ namespace Acb.EntityFramework
 {
     public abstract class AcbDbContext : DbContext, IUnitOfWork
     {
-        private const string Prefix = "dapper:";
+        private const string Prefix = "database:";
         private const string DefaultConfigName = "dapperDefault";
         private const string DefaultName = "default";
         private static readonly ILogger Logger = LogManager.Logger<AcbDbContext>();

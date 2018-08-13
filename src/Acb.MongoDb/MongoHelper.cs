@@ -7,20 +7,21 @@ using MongoDB.Driver.GridFS;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Acb.MongoDb
 {
     public class MongoHelper
     {
-        private readonly string _database;
-        private const string Prefix = "acb";
+        private readonly string _prefix;
         private readonly MongoConfig _config;
 
-        internal MongoHelper(MongoConfig config, string database = Prefix)
+
+        public MongoHelper(MongoConfig config = null, string prefix = "acb")
         {
-            _database = database;
-            _config = config;
+            _prefix = prefix;
+            _config = config ?? MongoConfig.Config();
         }
 
         /// <summary> Mongo服务器 </summary>
@@ -42,20 +43,31 @@ namespace Acb.MongoDb
             return client;
         }
 
-        public static string GetName<T>()
+        protected virtual string GetTypeName(MemberInfo type)
         {
-            return string.Format("{0}_{1}", Prefix, typeof(T).Name.ToUrlCase());
+            var name = type.Name.ToUrlCase();
+            return string.IsNullOrWhiteSpace(_prefix) ? name : $"{_prefix}_{name}";
         }
 
-        public IMongoDatabase Database => Client().GetDatabase(_database);
+        public IMongoDatabase Database => GetDatabase(_config.Database);
 
-        public IMongoDatabase GetDatabase(string database) => Client().GetDatabase(database);
+        public IMongoDatabase GetDatabase(string database, MongoDatabaseSettings settings = null)
+        {
+            if (string.IsNullOrWhiteSpace(database))
+                throw new ArgumentException("数据库名称不能为空", nameof(database));
+            return Client().GetDatabase(database, settings);
+        }
 
         private IGridFSBucket _gridFs;
         public IGridFSBucket GridFs
         {
             get => _gridFs ?? (_gridFs = new GridFSBucket(Database));
             set => _gridFs = value;
+        }
+
+        public IGridFSBucket GetGridFs(string database)
+        {
+            return new GridFSBucket(GetDatabase(database));
         }
 
         /// <summary> 获取Mongo集合 </summary>
@@ -65,7 +77,7 @@ namespace Acb.MongoDb
         {
             if (string.IsNullOrWhiteSpace(collection))
             {
-                collection = GetName<T>();
+                collection = GetTypeName(typeof(T));
             }
             return Database.GetCollection<T>(collection);
         }
@@ -74,7 +86,7 @@ namespace Acb.MongoDb
         /// <returns></returns>
         public IMongoCollection<BsonDocument> BsonCollection<T>()
         {
-            var collection = GetName<T>();
+            var collection = GetTypeName(typeof(T));
             return BsonCollection(collection);
         }
 
@@ -83,10 +95,7 @@ namespace Acb.MongoDb
         public IMongoCollection<BsonDocument> BsonCollection(string collection)
         {
             if (string.IsNullOrWhiteSpace(collection))
-            {
-                throw new ArgumentException("未指定collection");
-            }
-
+                throw new ArgumentException("集合名称不能为空", nameof(collection));
             return Database.GetCollection<BsonDocument>(collection);
         }
 

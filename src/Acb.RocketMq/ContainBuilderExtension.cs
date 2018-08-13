@@ -1,22 +1,23 @@
-﻿using Acb.Core.EventBus;
+﻿using System;
+using Acb.Core.EventBus;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
 
-namespace Acb.Redis
+namespace Acb.RocketMq
 {
     public static class ContainBuilderExtension
     {
-        /// <summary> 使用Redis事件总线 </summary>
+        /// <summary> 使用RabbitMQ事件总线 </summary>
         /// <param name="services"></param>
-        /// <param name="configName"></param>
+        /// <param name="config"></param>
         /// <returns></returns>
-        public static IServiceCollection AddRedisEventBus(this IServiceCollection services, string configName = null)
+        public static IServiceCollection UseRocketMqEventBus(this IServiceCollection services, RocketMqConfig config = null)
         {
             services.TryAddSingleton<IEventBus>(provider =>
             {
                 var manager = provider.GetService<ISubscriptionManager>();
-                return new EventBusRedis(manager, configName);
+                var connection = new DefaultRocketMqConnection(config);
+                return new EventBusRocketMq(manager, connection);
             });
             return services;
         }

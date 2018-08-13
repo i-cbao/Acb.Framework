@@ -19,9 +19,13 @@ namespace Acb.RabbitMq
 
         private readonly object _syncRoot = new object();
 
+        public DefaultRabbitMqConnection(string configName) : this(RabbitMqConfig.Config(configName))
+        {
+        }
+
         public DefaultRabbitMqConnection(RabbitMqConfig config = null)
         {
-            config = config ?? new RabbitMqConfig();
+            config = config ?? RabbitMqConfig.Config();
             if (string.IsNullOrWhiteSpace(config.Host))
                 throw new ArgumentException(nameof(config));
             _connectionFactory = new ConnectionFactory { HostName = config.Host, Port = config.Port };

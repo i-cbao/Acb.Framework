@@ -9,9 +9,24 @@ namespace Acb.RabbitMq
     {
         /// <summary> 使用RabbitMQ事件总线 </summary>
         /// <param name="services"></param>
+        /// <param name="configName"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddRabbitMqEventBus(this IServiceCollection services, string configName = null)
+        {
+            services.TryAddSingleton<IEventBus>(provider =>
+            {
+                var manager = provider.GetService<ISubscriptionManager>();
+                var connection = new DefaultRabbitMqConnection(configName);
+                return new EventBusRabbitMq(connection, manager);
+            });
+            return services;
+        }
+
+        /// <summary> 使用RabbitMQ事件总线 </summary>
+        /// <param name="services"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static IServiceCollection UseRabbitMqEventBus(this IServiceCollection services, RabbitMqConfig config = null)
+        public static IServiceCollection AddRabbitMqEventBus(this IServiceCollection services, RabbitMqConfig config = null)
         {
             services.TryAddSingleton<IEventBus>(provider =>
             {

@@ -1,14 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using Acb.Core.Extensions;
 
 namespace Acb.MongoDb
 {
-    /// <summary>
-    /// MongoDB配置文件
-    /// </summary>
+    /// <summary> MongoDB配置文件 </summary>
     [Serializable]
     public class MongoConfig
     {
+        private const string Region = "mongo";
+        private const string DefaultName = "default";
+        private const string DefaultConfigName = "mongoDefault";
+        public static MongoConfig Config(string name = null)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                name = DefaultConfigName.Config(DefaultName);
+            return $"{Region}:{name}".Config<MongoConfig>();
+        }
+
+        /// <summary> 数据库 </summary>
+        public string Database { get; set; }
+
         /// <summary> 服务器列表 </summary>
         public List<DServer> Servers { get; set; }
 

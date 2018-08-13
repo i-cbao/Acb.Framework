@@ -5,27 +5,19 @@ namespace Acb.RabbitMq
     public class RabbitMqConfig
     {
         private const string Region = "rabbit";
+        private const string DefaultName = "default";
 
-        private static T Config<T>(string name, T def = default(T))
+        public static RabbitMqConfig Config(string name = null)
         {
-            return $"{Region}:{name}".Config(def);
-        }
-
-        public RabbitMqConfig()
-        {
-            Host = Config<string>("host");
-            Port = Config("port", -1);
-            UserName = Config<string>("user");
-            Password = Config<string>("password");
-            Broker = Config("broker", "icb_broker");
-            VirtualHost = Config("virtualHost", "/");
+            name = string.IsNullOrWhiteSpace(name) ? DefaultName : name;
+            return $"{Region}:{name}".Config<RabbitMqConfig>();
         }
 
         public string Host { get; set; }
-        public int Port { get; set; }
+        public int Port { get; set; } = -1;
         public string UserName { get; set; }
         public string Password { get; set; }
         public string Broker { get; set; }
-        public string VirtualHost { get; set; }
+        public string VirtualHost { get; set; } = "/";
     }
 }
