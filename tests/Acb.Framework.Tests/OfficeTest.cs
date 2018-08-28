@@ -1,9 +1,8 @@
-﻿using Acb.Core.Data;
-using Acb.Core.Dependency;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Dapper;
-using Acb.Framework.Tests.Repositories;
+using Acb.Demo.Business.Domain.Entities;
 using Acb.Office;
 using Dapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

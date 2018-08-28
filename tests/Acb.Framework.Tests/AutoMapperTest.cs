@@ -1,5 +1,6 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core.Extensions;
+using Acb.Core.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Acb.Framework.Tests
@@ -39,6 +40,17 @@ namespace Acb.Framework.Tests
             };
             var m = t.MapTo<MyClass>(MapperType.FromUrl);
             Print(m);
+            var r1 = CodeTimer.Time("no cache", 1000, () =>
+            {
+                var m1 = t.MapTo<MyClass>(MapperType.FromUrl, false);
+            }, 2);
+            var r2 = CodeTimer.Time("cache", 1000, () =>
+            {
+                var m1 = t.MapTo<MyClass>(MapperType.FromUrl);
+            }, 2);
+
+            Print(r1.ToString());
+            Print(r2.ToString());
         }
     }
 }

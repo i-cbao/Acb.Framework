@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 namespace Acb.Spear.Controllers
 {
     /// <summary> 任务控制器 </summary>
-    [ApiController]
     [Route("api/job")]
     public class JobController : Controller
     {

@@ -1,5 +1,5 @@
-﻿using Acb.Core.Data.Adapters;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
+using Acb.Dapper.Adapters;
 using Npgsql;
 using System;
 using System.Data;

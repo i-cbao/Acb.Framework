@@ -1,5 +1,4 @@
-﻿using System;
-using Acb.Backgrounder.Test.Jobs;
+﻿using Acb.Backgrounder.Test.Jobs;
 using Acb.Core.EventBus;
 using Acb.Core.Logging;
 using Acb.Demo.Contracts.EventBus;
@@ -9,9 +8,9 @@ using Autofac;
 using Microsoft.AspNetCore.SignalR.Client;
 using Quartz;
 using Quartz.Impl;
+using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
-using Acb.Core.Exceptions;
 using ILogger = Acb.Core.Logging.ILogger;
 
 namespace Acb.Backgrounder.Test
@@ -22,13 +21,14 @@ namespace Acb.Backgrounder.Test
         private static ILogger _logger;
         private static void Main(string[] args)
         {
+            //const string url = "http://localhost:53454/config_hub";
+            const string url = "http://192.168.0.252:6306/config_hub";
             _hubConnection = new HubConnectionBuilder()
-                .WithUrl("http://localhost:53454/config_hub",
-                    opts =>
-                    {
-                        opts.Headers.Add("Authorization",
-                            "acb 7SmYLfS0+/6pjdeTWZ8hW0ye1S30iVEjr/BuPkhXzdNXt3+LgRLr9YFQsXI7gobeFEK4YqxxdJhWhuUiBrbbwM7ETcIP1ANrL8xAsjxpcCtjdGYk32KYqme8oN9/n05h6rf05OZRBAoUq8z2fk5+84YucZ7tUJCORJRrN1IB4c6MWWz7SMOyHW31xfpVUo3vKAAKIyZHXRh8Ugaq7XmtNxPxhKgKfXwq");
-                    })
+                .WithUrl(url, opts =>
+                {
+                    opts.Headers.Add("Authorization",
+                        "acb EQS9LTGKzNOHiCn0+8avXJIDCiLW/KtraWRAnl1874nNBAcZ0nPd8KZXUXLC+OnCevPWKVQzju/ZLcSExoq+ps3pwpBGpKtK0ZMOfQoPsu4uvhyRvbuU66eaYaH6w1sPMDLpmxHwBi3C8Mc3bdk4Bi1EC8SYlPct22K+gLG6vAM=");
+                })
                 .Build();
             _logger = LogManager.Logger<Program>();
             Command += OnCommand;
@@ -39,19 +39,19 @@ namespace Acb.Backgrounder.Test
 
         private static void OnUseServices(IContainer provider)
         {
-            //_hubConnection.On<object>("UPDATE", config =>
-            //{
-            //    _logger.Info(config);
-            //});
-            //try
-            //{
-            //    _hubConnection.StartAsync().Wait();
-            //    _hubConnection.SendAsync("Subscript", new[] { "basic" }, "dev");
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.Error(ex.Message, ex);
-            //}
+            _hubConnection.On<object>("UPDATE", config =>
+            {
+                _logger.Info(config);
+            });
+            try
+            {
+                _hubConnection.StartAsync().Wait();
+                _hubConnection.SendAsync("Subscript", new[] { "basic" }, "dev");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex.Message, ex);
+            }
             //开启订阅
             provider.Resolve<ISubscriptionAdapter>().SubscribeAt();
 

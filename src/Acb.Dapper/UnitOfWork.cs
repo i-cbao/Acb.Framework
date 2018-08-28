@@ -4,7 +4,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Acb.Core.Data
+namespace Acb.Dapper
 {
     public class UnitOfWork : IUnitOfWork
     {

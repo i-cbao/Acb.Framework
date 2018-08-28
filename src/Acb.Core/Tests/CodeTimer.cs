@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Core.Tests
 {
@@ -81,8 +82,9 @@ namespace Acb.Core.Tests
                                 action.Invoke();
                                 succ++;
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                Console.WriteLine(ex.Format());
                                 fail++;
                             }
                         }

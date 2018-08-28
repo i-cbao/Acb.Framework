@@ -60,7 +60,8 @@ namespace Acb.WebApi.Test.Controllers
         {
             const string id = "70d8f270f4784d599b9425783bfdea67";
             var t = await _accountContract.QueryById(id);
-            LogManager.Logger<DemoController>().Info(t);
+            var logger = LogManager.Logger<DemoController>();
+            logger.Info(t);
             await _accountContract.Update(id, "罗勇", null);
             t = await _accountContract.QueryById(id);
             return DResult.Succ(t);

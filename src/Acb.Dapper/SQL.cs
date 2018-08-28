@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Acb.Core.Data.Adapters;
+using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper
 {

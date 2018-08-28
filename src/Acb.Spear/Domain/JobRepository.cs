@@ -1,6 +1,5 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
-using Acb.Core.Data.Adapters;
 using Acb.Core.Domain;
 using Acb.Core.Helper;
 using Acb.Core.Timing;
@@ -13,6 +12,7 @@ using Dapper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Dapper.Adapters;
 
 namespace Acb.Spear.Domain
 {

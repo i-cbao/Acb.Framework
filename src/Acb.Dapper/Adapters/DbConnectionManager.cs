@@ -3,7 +3,7 @@ using Acb.Core.Logging;
 using System.Collections.Concurrent;
 using System.Data;
 
-namespace Acb.Core.Data.Adapters
+namespace Acb.Dapper.Adapters
 {
     public static class DbConnectionManager
     {
@@ -13,6 +13,7 @@ namespace Acb.Core.Data.Adapters
         static DbConnectionManager()
         {
             Adapters = new ConcurrentDictionary<string, IDbConnectionAdapter>();
+            AddAdapter(new SqlServerAdapter());
             Logger = LogManager.Logger(nameof(DbConnectionManager));
         }
 

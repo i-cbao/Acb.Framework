@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Data.Adapters;
 using Acb.Core.Extensions;
 using Acb.Core.Serialize;
 using Dapper;
@@ -11,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper
 {

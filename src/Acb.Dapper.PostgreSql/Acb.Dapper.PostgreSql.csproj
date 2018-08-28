@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
 using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using Acb.Spear.Domain;
 using Acb.Spear.Domain.Dtos;
 using Acb.Spear.Domain.Entities;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,11 +31,13 @@ namespace Acb.Spear.Controllers
     {
         private readonly ConfigRepository _repository;
         private readonly IHubContext<ConfigHub> _configHub;
+        private readonly ILogger _logger;
 
         public ConfigController(ConfigRepository repository, IHubContext<ConfigHub> configHub)
         {
             _repository = repository;
             _configHub = configHub;
+            _logger = LogManager.Logger<ConfigController>();
         }
 
         private ConfigTicket _ticket;
@@ -77,7 +81,22 @@ namespace Acb.Spear.Controllers
                 var config = await _repository.QueryConfig(ProjectCode, model, env);
                 if (config == null)
                     continue;
-                dict.Add(model, JsonConvert.DeserializeObject(config));
+                if (model == "basic")
+                {
+                    var obj = JsonConvert.DeserializeObject<JObject>(config);
+                    var tokens = obj.Children();
+                    foreach (var item in tokens)
+                    {
+                        if (item is JProperty prop)
+                        {
+                            dict.AddOrUpdate(prop.Name, prop.Value);
+                        }
+                    }
+                }
+                else
+                {
+                    dict.Add(model, JsonConvert.DeserializeObject(config));
+                }
             }
             return dict;
         }
@@ -222,7 +241,9 @@ namespace Acb.Spear.Controllers
             var result = await _repository.SaveConfig(model);
             if (result > 0)
             {
-                await _configHub.Clients.Group($"{ProjectCode}_{module}_{env}").SendAsync("UPDATE", config);
+                var group = $"{ProjectCode}_{module}_{env}";
+                _logger.Info($"Hub Group:{group} Update");
+                await _configHub.Clients.Group(group).SendAsync("UPDATE", config);
                 return DResult.Success;
             }
             return DResult.Error("保存配置失败");

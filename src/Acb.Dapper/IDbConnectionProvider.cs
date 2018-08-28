@@ -1,8 +1,8 @@
-﻿using Acb.Core.Dependency;
-using System;
+﻿using System;
 using System.Data;
+using Acb.Core.Dependency;
 
-namespace Acb.Core.Data
+namespace Acb.Dapper
 {
     /// <summary> 数据库连接提供者接口 </summary>
     public interface IDbConnectionProvider : ISingleDependency

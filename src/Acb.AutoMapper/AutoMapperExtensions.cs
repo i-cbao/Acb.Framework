@@ -1,8 +1,11 @@
 ﻿using Acb.Core;
 using AutoMapper;
+using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace Acb.AutoMapper
 {
@@ -19,30 +22,23 @@ namespace Acb.AutoMapper
     /// <summary> AutoMapper扩展 </summary>
     public static class AutoMapperExtensions
     {
-        /// <summary> 映射实体 </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="mapperType"></param>
-        /// <returns></returns>
-        public static T MapTo<T>(this object source, MapperType mapperType = MapperType.Normal)
+        private static readonly ConcurrentDictionary<MapperType, IMapper> Mappers =
+            new ConcurrentDictionary<MapperType, IMapper>();
+
+        private static IMapper Create(MapperType mapperType, Type sourceType, Type destinationType,
+            TypeMap[] maps = null)
         {
-            if (source == null)
-                return default(T);
             var cfg = new MapperConfiguration(config =>
             {
-                if (source is IEnumerable listSource)
+                if (maps != null && maps.Any())
                 {
-                    foreach (var item in listSource)
+                    foreach (var map in maps)
                     {
-                        config.CreateMap(item.GetType(), typeof(T));
-                        break;
+                        config.CreateMap(map.SourceType, map.DestinationType);
                     }
                 }
-                else
-                {
-                    config.CreateMap(source.GetType(), typeof(T));
-                }
 
+                config.CreateMap(sourceType, destinationType);
                 config.CreateMissingTypeMaps = true;
                 config.ValidateInlineMaps = false;
                 switch (mapperType)
@@ -55,7 +51,50 @@ namespace Acb.AutoMapper
                         break;
                 }
             });
-            var mapper = cfg.CreateMapper();
+            return cfg.CreateMapper();
+        }
+
+        private static IMapper CreateFromCache(Type sourceType, Type destinationType, MapperType mapperType = MapperType.Normal)
+        {
+            if (Mappers.TryGetValue(mapperType, out var mapper))
+            {
+                var m = mapper.ConfigurationProvider.FindTypeMapFor(sourceType, destinationType);
+                if (m != null)
+                    return mapper;
+            }
+
+            return Mappers.AddOrUpdate(mapperType, type => Create(type, sourceType, destinationType),
+                (type, old) =>
+                {
+                    var maps = old.ConfigurationProvider.GetAllTypeMaps();
+                    return Create(type, sourceType, destinationType, maps);
+                });
+        }
+
+        /// <summary> 映射实体 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="mapperType"></param>
+        /// <param name="fromCache"></param>
+        /// <returns></returns>
+        public static T MapTo<T>(this object source, MapperType mapperType = MapperType.Normal, bool fromCache = true)
+        {
+            if (source == null)
+                return default(T);
+            Type sourceType = source.GetType(), destinationType = typeof(T);
+            if (source is IEnumerable listSource)
+            {
+                foreach (var item in listSource)
+                {
+                    sourceType = item.GetType();
+                    break;
+                }
+            }
+
+            var mapper = fromCache
+                ? CreateFromCache(sourceType, destinationType, mapperType)
+                : Create(mapperType, sourceType, destinationType);
+
             return mapper.Map<T>(source);
         }
 

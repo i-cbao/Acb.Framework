@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Data.Adapters;
 using Acb.Core.Domain;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
@@ -11,6 +10,7 @@ using Acb.Spear.Domain.Enums;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Acb.Dapper.Adapters;
 using IdentityHelper = Acb.Core.Helper.IdentityHelper;
 
 namespace Acb.Spear.Domain

@@ -1,12 +1,12 @@
-﻿using Acb.Core.Data.Adapters;
-using Acb.Core.Data.Config;
-using Acb.Core.Logging;
+﻿using Acb.Core.Logging;
+using Acb.Dapper.Adapters;
+using Acb.Dapper.Config;
 using System;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
 
-namespace Acb.Core.Data
+namespace Acb.Dapper
 {
     /// <summary> 数据库连接管理 </summary>
     public class DefaultDbConnectionProvider : IDbConnectionProvider

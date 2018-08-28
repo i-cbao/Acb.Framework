@@ -17,13 +17,12 @@ namespace Acb.WebApi.Test.Repositories
 
         public async Task<int> Update(string id, string name, string email)
         {
-            await Repository.UnitOfWork.BeginTransaction(async () =>
+            return await Repository.UnitOfWork.BeginTransaction(async () =>
             {
                 var count = await Repository.UpdateName(id, name);
                 count += await Repository.UpdateEmail(id, email);
-                //return count;
+                return count;
             });
-            return await Task.FromResult(1);
         }
     }
 }

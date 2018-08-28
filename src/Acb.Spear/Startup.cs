@@ -4,7 +4,6 @@ using Acb.Spear.Scheduler;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -35,7 +34,6 @@ namespace Acb.Spear
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.TryAddSingleton<SchedulerCenter>();
             return base.ConfigureServices(services);
         }
@@ -48,10 +46,6 @@ namespace Acb.Spear
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
             }
             //app.UseHttpsRedirection();
             app.UseSignalR(route => { route.MapHub<ConfigHub>("/config_hub"); });

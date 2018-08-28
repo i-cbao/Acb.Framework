@@ -1,4 +1,4 @@
-﻿using Acb.Core.Data;
+﻿using Acb.Dapper;
 
 namespace Acb.Middleware.Monitor.Domain
 {

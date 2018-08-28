@@ -1,11 +1,11 @@
 ﻿using Acb.Core;
-using Acb.Core.Data.Adapters;
 using Acb.Core.Extensions;
 using Dapper;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper
 {

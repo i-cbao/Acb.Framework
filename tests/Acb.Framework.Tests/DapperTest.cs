@@ -1,8 +1,10 @@
-﻿using Acb.Core;
-using Acb.Core.Data;
+﻿using System.Threading;
+using Acb.Core;
 using Acb.Core.Dependency;
+using Acb.Core.Tests;
 using Acb.Dapper;
-using Acb.Framework.Tests.Repositories;
+using Acb.Demo.Business.Domain;
+using Acb.Demo.Business.Domain.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
@@ -13,14 +15,6 @@ namespace Acb.Framework.Tests
     {
         private readonly AreaRepository _areaRepository;
         private readonly IDbConnectionProvider _factory;
-
-        public class AreaDto
-        {
-            public string city_code { get; set; }
-            public string city_name { get; set; }
-            public string parent_code { get; set; }
-            public int deep { get; set; }
-        }
 
         public DapperTest()
         {
@@ -49,15 +43,16 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public async Task QueryTest()
         {
-            //var sql = string.Empty;
-            //var result = CodeTimer.Time("sql test", 20000, () =>
-            //{
-            //    sql = typeof(TAreas).InsertSql(new[] { nameof(TAreas.CityCode) });
-            //}, 10);
-            //Print(result.ToString());
-            //Print(sql);
-            var model = await _areaRepository.Get("110108");
-            Print(model);
+            var r = CodeTimer.Time("thread test", 5, async () =>
+             {
+                 var model = await _areaRepository.Get("110108");
+                 Print($"Thread Id:{Thread.CurrentThread.ManagedThreadId}");
+                 Print(model);
+             });
+            Print(r.ToString());
+            var t = await _areaRepository.Get("110108");
+            Print(t);
+            Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
         }
 
         [TestMethod]
@@ -101,6 +96,7 @@ AND u.create_time >=""2018 / 05 / 10""
             {
                 sql.Paged(1, 15, conn);
                 var t = sql.ToString();
+                Print(t);
             }
 
         }

@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace Acb.Core.Data.Adapters
+namespace Acb.Dapper.Adapters
 {
     public class XDataSet : DataSet
     {

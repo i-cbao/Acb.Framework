@@ -1,5 +1,4 @@
-﻿using Acb.Core.Data;
-using Acb.Core.Dependency;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using System;
 using System.Data;
