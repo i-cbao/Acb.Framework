@@ -1,16 +1,17 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Monitor;
 using Acb.Core.Timing;
-using Acb.Dapper;
-using Acb.Dapper.Domain;
+using Acb.Middleware.Monitor.Domain;
+using Acb.Middleware.Monitor.Domain.Entities;
 using System;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Acb.Middleware.Monitor
 {
-    internal class AcbMonitor : DapperRepository<TMonitor>, IMonitor
+    internal class AcbMonitor : IMonitor
     {
         /// <summary> unescape </summary>
         /// <param name="value"></param>
@@ -39,7 +40,7 @@ namespace Acb.Middleware.Monitor
             return sb.ToString();
         }
 
-        public async Task Record(string service, string url, string from, long milliseconds, string data = null, string userAgent = null,
+        public async Task Record(string service, string url, string @from, long milliseconds, string data = null, string userAgent = null,
             string clientIp = null)
         {
             var model = new TMonitor
@@ -54,10 +55,7 @@ namespace Acb.Middleware.Monitor
                 Time = milliseconds,
                 CreateTime = Clock.Now
             };
-            using (var conn = GetConnection("statistic"))
-            {
-                await conn.InsertAsync(model);
-            }
+            await CurrentIocManager.Resolve<MonitorRepository>().InsertAsync(model);
         }
     }
 }

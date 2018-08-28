@@ -9,47 +9,48 @@ namespace Acb.Core.EventBus
     public class DefaultSubscriptionManager : ISubscriptionManager
     {
         private readonly ConcurrentDictionary<string, List<Delegate>> _handlers;
-        private readonly List<Type> _eventTypes;
+        private readonly ConcurrentDictionary<string, Type> _eventTypes;
 
         public event EventHandler<string> OnEventRemoved;
 
         public DefaultSubscriptionManager()
         {
             _handlers = new ConcurrentDictionary<string, List<Delegate>>();
-            _eventTypes = new List<Type>();
+            _eventTypes = new ConcurrentDictionary<string, Type>();
         }
 
         public bool IsEmpty => !_handlers.Keys.Any();
         public void Clear() => _handlers.Clear();
 
-        public void AddSubscription<T, TH>(Func<TH> handler)
+        public void AddSubscription<T, TH>(Func<TH> handler, string eventKey = null)
             where TH : IEventHandler<T>
         {
-            var key = GetEventKey<T>();
-            if (!HasSubscriptionsForEvent<T>())
+            var key = string.IsNullOrWhiteSpace(eventKey) ? GetEventKey<T>() : eventKey;
+            if (!HasSubscriptionsForEvent(key))
             {
                 _handlers.TryAdd(key, new List<Delegate>());
             }
+
             _handlers[key].Add(handler);
-            if (!_eventTypes.Contains(typeof(T)))
-                _eventTypes.Add(typeof(T));
+            if (!_eventTypes.ContainsKey(key))
+                _eventTypes.TryAdd(key, typeof(T));
         }
 
-        public void RemoveSubscription<T, TH>()
+        public void RemoveSubscription<T, TH>(string eventKey = null)
             where TH : IEventHandler<T>
         {
-            var handlerToRemove = FindHandlerToRemove<T, TH>();
+            var key = string.IsNullOrWhiteSpace(eventKey) ? GetEventKey<T>() : eventKey;
+            var handlerToRemove = FindHandlerToRemove<T, TH>(key);
             if (handlerToRemove != null)
             {
-                var key = GetEventKey<T>();
                 _handlers[key].Remove(handlerToRemove);
                 if (!_handlers[key].Any())
                 {
                     _handlers.TryRemove(key, out _);
-                    var eventType = _eventTypes.SingleOrDefault(e => e.Name == key);
+                    _eventTypes.TryGetValue(key, out var eventType);
                     if (eventType != null)
                     {
-                        _eventTypes.Remove(eventType);
+                        _eventTypes.TryRemove(key, out _);
                         RaiseOnEventRemoved(eventType.Name);
                     }
                 }
@@ -62,9 +63,9 @@ namespace Acb.Core.EventBus
             var key = GetEventKey<T>();
             return GetHandlersForEvent(key);
         }
-        public IEnumerable<Delegate> GetHandlersForEvent(string eventName)
+        public IEnumerable<Delegate> GetHandlersForEvent(string eventKey)
         {
-            return _handlers.TryGetValue(eventName, out var events) ? events : new List<Delegate>();
+            return _handlers.TryGetValue(eventKey, out var events) ? events : new List<Delegate>();
         }
 
         private void RaiseOnEventRemoved(string eventName)
@@ -76,15 +77,15 @@ namespace Acb.Core.EventBus
             }
         }
 
-        private Delegate FindHandlerToRemove<T, TH>()
+        private Delegate FindHandlerToRemove<T, TH>(string eventKey = null)
             where TH : IEventHandler<T>
         {
-            if (!HasSubscriptionsForEvent<T>())
+            var key = string.IsNullOrWhiteSpace(eventKey) ? GetEventKey<T>() : eventKey;
+            if (!HasSubscriptionsForEvent(key))
             {
                 return null;
             }
 
-            var key = GetEventKey<T>();
             foreach (var func in _handlers[key])
             {
                 var genericArgs = func.GetType().GetGenericArguments();
@@ -102,9 +103,13 @@ namespace Acb.Core.EventBus
             var key = GetEventKey<T>();
             return HasSubscriptionsForEvent(key);
         }
-        public bool HasSubscriptionsForEvent(string eventName) => _handlers.ContainsKey(eventName);
+        public bool HasSubscriptionsForEvent(string eventKey) => _handlers.ContainsKey(eventKey);
 
-        public Type GetEventTypeByName(string eventName) => _eventTypes.Single(t => GetEventKey(t) == eventName);
+        public Type GetEventTypeByName(string eventKey)
+        {
+            _eventTypes.TryGetValue(eventKey, out var type);
+            return type;
+        }
 
         private static string GetEventKey<T>()
         {

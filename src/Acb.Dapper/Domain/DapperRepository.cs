@@ -1,5 +1,5 @@
-﻿using Acb.Core.Domain.Entities;
-using System;
+﻿using Acb.Core.Domain;
+using Acb.Core.Domain.Entities;
 using System.Collections.Generic;
 
 namespace Acb.Dapper.Domain
@@ -10,14 +10,8 @@ namespace Acb.Dapper.Domain
         where T : IEntity
     {
         /// <summary> 构造 </summary>
-        /// <param name="connectionName"></param>
-        public DapperRepository(string connectionName = null) : base(connectionName)
-        {
-        }
-
-        /// <summary> 构造 </summary>
-        /// <param name="enumType"></param>
-        public DapperRepository(Enum enumType) : this(enumType.ToString())
+        /// <param name="unitOfWork"></param>
+        public DapperRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
         }
 
@@ -42,7 +36,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Insert(T model, string[] excepts = null)
         {
-            return Connection.Insert(model, excepts);
+            return Connection.Insert(model, excepts, Trans);
         }
 
         /// <summary> 批量插入 </summary>
@@ -51,7 +45,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Insert(IEnumerable<T> models, string[] excepts = null)
         {
-            return Connection.Insert<T>(models, excepts);
+            return Connection.Insert<T>(models, excepts, Trans);
         }
 
         /// <summary> 删除 </summary>
@@ -60,7 +54,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Delete(object key, string keyColumn = null)
         {
-            return Connection.Delete<T>(key, keyColumn);
+            return Connection.Delete<T>(key, keyColumn, Trans);
         }
     }
 }

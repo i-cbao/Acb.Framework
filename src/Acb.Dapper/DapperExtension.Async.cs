@@ -1,6 +1,6 @@
 ﻿using Acb.Core;
+using Acb.Core.Data.Adapters;
 using Acb.Core.Extensions;
-using Acb.Dapper.Adapters;
 using Dapper;
 using System.Collections.Generic;
 using System.Data;

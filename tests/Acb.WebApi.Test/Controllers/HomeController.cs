@@ -1,13 +1,15 @@
 ﻿using Acb.Core;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
+using Acb.Office;
+using Acb.WebApi.Test.Hubs;
 using Acb.WebApi.Test.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading.Tasks;
-using Acb.WebApi.Test.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using System;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -72,6 +74,17 @@ namespace Acb.WebApi.Test.Controllers
         {
             await _messageHub.Clients.All.SendAsync("send", input.Code);
             return Success;
+        }
+
+        /// <summary> 导出 </summary>
+        /// <returns></returns>
+        [HttpGet("export")]
+        public async Task Export()
+        {
+            var dt = new DataTable("sheet");
+            dt.Columns.Add("姓名", typeof(string));
+            dt.Rows.Add("shay");
+            await ExcelHelper.Export(new DataSet{ Tables = { dt } }, "在口袋里的.xls");
         }
     }
 }

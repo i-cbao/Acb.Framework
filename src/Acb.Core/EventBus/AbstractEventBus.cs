@@ -36,15 +36,6 @@ namespace Acb.Core.EventBus
             return attr == null ? eventType.Name : attr.Key;
         }
 
-        /// <summary> 获取订阅的队列信息 </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        protected SubscriptionAttribute GetSubscription(Type type)
-        {
-            var attr = type.GetCustomAttribute<SubscriptionAttribute>() ?? new SubscriptionAttribute();
-            if (string.IsNullOrWhiteSpace(attr.Queue))
-                attr.Queue = type.FullName;
-            return attr;
-        }
+        
     }
 }

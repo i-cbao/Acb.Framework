@@ -27,7 +27,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public Task<int> InsertAsync(T model, string[] excepts = null)
         {
-            return Connection.InsertAsync(model, excepts);
+            return Connection.InsertAsync(model, excepts, Trans);
         }
 
         /// <summary> 批量插入 </summary>
@@ -36,7 +36,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public Task<int> InsertAsync(IEnumerable<T> models, string[] excepts = null)
         {
-            return Connection.InsertAsync(models, excepts);
+            return Connection.InsertAsync(models, excepts, Trans);
         }
 
         /// <summary> 删除 </summary>
@@ -45,7 +45,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public Task<int> DeleteAsync(object key, string keyColumn = null)
         {
-            return Connection.DeleteAsync<T>(key, keyColumn);
+            return Connection.DeleteAsync<T>(key, keyColumn, Trans);
         }
     }
 }

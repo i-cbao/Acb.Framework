@@ -11,30 +11,32 @@ namespace Acb.Core.EventBus
         bool IsEmpty { get; }
 
         event EventHandler<string> OnEventRemoved;
+
         /// <summary> 添加订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TH"></typeparam>
         /// <param name="handler"></param>
-        void AddSubscription<T, TH>(Func<TH> handler)
+        /// <param name="eventKey"></param>
+        void AddSubscription<T, TH>(Func<TH> handler, string eventKey = null)
             where TH : IEventHandler<T>;
 
         /// <summary> 删除订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TH"></typeparam>
-        void RemoveSubscription<T, TH>()
+        void RemoveSubscription<T, TH>(string eventKey = null)
             where TH : IEventHandler<T>;
         /// <summary> 是否已订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         bool HasSubscriptionsForEvent<T>();
         /// <summary> 是否已订阅 </summary>
-        /// <param name="eventName"></param>
+        /// <param name="eventKey"></param>
         /// <returns></returns>
-        bool HasSubscriptionsForEvent(string eventName);
+        bool HasSubscriptionsForEvent(string eventKey);
         /// <summary> 获取订阅 </summary>
-        /// <param name="eventName"></param>
+        /// <param name="eventKey"></param>
         /// <returns></returns>
-        Type GetEventTypeByName(string eventName);
+        Type GetEventTypeByName(string eventKey);
         /// <summary> 清空订阅 </summary>
         void Clear();
         /// <summary> 获取订阅事件 </summary>
@@ -42,8 +44,8 @@ namespace Acb.Core.EventBus
         /// <returns></returns>
         IEnumerable<Delegate> GetHandlersForEvent<T>() where T : DEvent;
         /// <summary> 获取订阅事件 </summary>
-        /// <param name="eventName"></param>
+        /// <param name="eventKey"></param>
         /// <returns></returns>
-        IEnumerable<Delegate> GetHandlersForEvent(string eventName);
+        IEnumerable<Delegate> GetHandlersForEvent(string eventKey);
     }
 }

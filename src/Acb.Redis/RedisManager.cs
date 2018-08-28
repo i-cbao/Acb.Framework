@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
@@ -14,12 +13,9 @@ namespace Acb.Redis
     /// <summary> Redis管理器 </summary>
     public class RedisManager : IDisposable
     {
-        private const string Prefix = "redis:";
-        private const string DefaultConfigName = "redisDefault";
-        private const string DefaultDbConfigName = "redisDefaultDb";
-        private const string DefaultName = "default";
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, ConnectionMultiplexer> _connections;
+
         private RedisManager()
         {
             _connections = new ConcurrentDictionary<string, ConnectionMultiplexer>();
@@ -38,18 +34,12 @@ namespace Acb.Redis
         public static RedisManager Instance => Singleton<RedisManager>.Instance ??
                                                (Singleton<RedisManager>.Instance = new RedisManager());
 
-        private static string GetConfigName(string configName)
+        private static RedisConfig GetConfig(string configName)
         {
-            var defaultName = DefaultConfigName.Config(DefaultName);
-            return string.IsNullOrWhiteSpace(configName) ? defaultName : configName;
-        }
-
-        private static string GetConnectionString(string configName)
-        {
-            var connectionString = $"{Prefix}{configName}".Config(string.Empty);
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new BusiException($"{Prefix}{configName}配置异常");
-            return connectionString;
+            var config = RedisConfig.Config(configName);
+            if (string.IsNullOrWhiteSpace(config.ConnectionString))
+                throw new ArgumentException($"Redis:{config.Name}配置异常", nameof(configName));
+            return config;
         }
 
         private ConnectionMultiplexer Connect(string connectionString)
@@ -80,15 +70,13 @@ namespace Acb.Redis
 
         private ConnectionMultiplexer GetConnection(string configName)
         {
-            configName = GetConfigName(configName);
-            var connectionString = GetConnectionString(configName);
-            var opts = ConfigurationOptions.Parse(connectionString);
-            return GetConnection(configName, opts);
+            var config = GetConfig(configName);
+            var opts = ConfigurationOptions.Parse(config.ConnectionString);
+            return GetConnection(config.Name, opts);
         }
 
         private ConnectionMultiplexer GetConnection(string configName, ConfigurationOptions configOpts)
         {
-            configName = GetConfigName(configName);
             var conn = _connections.GetOrAdd(configName, p => Connect(configOpts));
             if (conn != null && conn.IsConnected)
                 return conn;
@@ -98,17 +86,20 @@ namespace Acb.Redis
             return conn;
         }
 
+        public IDatabase GetDatabase(RedisConfig config, int defaultDb = -1)
+        {
+            if (string.IsNullOrWhiteSpace(config.Name))
+                return Connect(config.ConnectionString).GetDatabase();
+            return GetConnection(config.Name, ConfigurationOptions.Parse(config.ConnectionString))
+                .GetDatabase(defaultDb);
+        }
+
         /// <summary> 获取Database </summary>
         /// <param name="configName"></param>
         /// <param name="defaultDb"></param>
         /// <returns></returns>
         public IDatabase GetDatabase(string configName = null, int defaultDb = -1)
         {
-            if (defaultDb < 0)
-            {
-                defaultDb = DefaultDbConfigName.Config(-1);
-            }
-
             var conn = GetConnection(configName);
             return conn.GetDatabase(defaultDb);
         }
@@ -119,12 +110,9 @@ namespace Acb.Redis
         /// <returns></returns>
         public IServer GetServer(string configName = null, int endPointsIndex = 0)
         {
-            configName = GetConfigName(configName);
-
-            var connectionString = GetConnectionString(configName);
-            var confOption = ConfigurationOptions.Parse(connectionString);
-
-            return GetConnection(configName, confOption).GetServer(confOption.EndPoints[endPointsIndex]);
+            var config = GetConfig(configName);
+            var confOption = ConfigurationOptions.Parse(config.ConnectionString);
+            return GetConnection(config.Name, confOption).GetServer(confOption.EndPoints[endPointsIndex]);
         }
 
         /// <summary> 获取Server </summary>

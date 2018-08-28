@@ -33,7 +33,14 @@
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.RabbitMq\Acb.RabbitMq.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
+    <ProjectReference Include="..\..\src\Acb.RocketMq\Acb.RocketMq.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Dockerfile">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 ﻿using Acb.Core.EventBus;
 using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Newtonsoft.Json;
 using Polly;
@@ -33,6 +34,17 @@ namespace Acb.RabbitMq
             _brokerName = connection.Broker;
             _logger = LogManager.Logger<EventBusRabbitMq>();
             SubscriptionManager.OnEventRemoved += SubsManager_OnEventRemoved;
+        }
+
+        /// <summary> 获取订阅的队列信息 </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        private static SubscriptionAttribute GetSubscription(Type type)
+        {
+            var attr = type.GetCustomAttribute<SubscriptionAttribute>() ?? new SubscriptionAttribute();
+            if (string.IsNullOrWhiteSpace(attr.Queue))
+                attr.Queue = type.FullName;
+            return attr;
         }
 
         private void SubsManager_OnEventRemoved(object sender, string eventName)
@@ -70,7 +82,9 @@ namespace Acb.RabbitMq
                 {
                     //声明Exchange
                     channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
-                    var message = JsonConvert.SerializeObject(@event);
+                    var message = @event.GetType().IsSimpleType()
+                        ? @event.ToString()
+                        : JsonConvert.SerializeObject(@event);
                     var body = Encoding.UTF8.GetBytes(message);
                     var prop = channel.CreateBasicProperties();
                     prop.DeliveryMode = 2;
@@ -84,16 +98,21 @@ namespace Acb.RabbitMq
         public override Task Subscribe<T, TH>(Func<TH> handler)
         {
             _consumerChannel = _consumerChannel ?? CreateConsumerChannel();
-            var key = GetEventKey(typeof(T));
+
             var subscription = GetSubscription(typeof(TH));
             var queue = subscription.Queue;
-            var containsKey = SubscriptionManager.HasSubscriptionsForEvent<T>();
+            var key = !string.IsNullOrWhiteSpace(subscription.RouteKey)
+                ? subscription.RouteKey
+                : GetEventKey(typeof(T));
+
+            var containsKey = SubscriptionManager.HasSubscriptionsForEvent(key);
             if (!containsKey)
             {
                 if (!_connection.IsConnected)
                 {
                     _connection.TryConnect();
                 }
+
                 var consumer = new EventingBasicConsumer(_consumerChannel);
                 consumer.Received += async (model, ea) =>
                 {
@@ -132,27 +151,15 @@ namespace Acb.RabbitMq
 
                 _consumerChannel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
                 //声明队列
-                _consumerChannel.QueueDeclare(queue, subscription.Durable, subscription.Exclusive, subscription.AutoDelete, args);
+                _consumerChannel.QueueDeclare(queue, subscription.Durable, subscription.Exclusive,
+                    subscription.AutoDelete, args);
                 _consumerChannel.QueueBind(queue, _brokerName, key, null);
 
                 _consumerChannel.BasicConsume(queue, false, consumer);
             }
 
-            SubscriptionManager.AddSubscription<T, TH>(handler);
+            SubscriptionManager.AddSubscription<T, TH>(handler, key);
             return Task.CompletedTask;
-        }
-
-        private static Func<IEventHandler> FindHandlerByType(Type handlerType, IEnumerable<Func<IEventHandler>> handlers)
-        {
-            foreach (var func in handlers)
-            {
-                if (func.GetMethodInfo().ReturnType == handlerType)
-                {
-                    return func;
-                }
-            }
-
-            return null;
         }
 
         public void Dispose()
@@ -183,11 +190,12 @@ namespace Acb.RabbitMq
 
         private async Task ProcessEvent(string eventName, string message)
         {
-
             if (SubscriptionManager.HasSubscriptionsForEvent(eventName))
             {
                 var eventType = SubscriptionManager.GetEventTypeByName(eventName);
-                var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
+                var integrationEvent = eventType.IsSimpleType()
+                    ? message.CastTo(eventType)
+                    : JsonConvert.DeserializeObject(message, eventType);
                 var handlers = SubscriptionManager.GetHandlersForEvent(eventName);
 
                 foreach (var handlerfactory in handlers)

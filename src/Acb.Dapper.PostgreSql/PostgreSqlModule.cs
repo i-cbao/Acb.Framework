@@ -1,6 +1,6 @@
 ﻿using Acb.Core;
+using Acb.Core.Data.Adapters;
 using Acb.Core.Modules;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper.PostgreSql
 {

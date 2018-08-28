@@ -4,6 +4,7 @@ using Acb.Core.Serialize;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using System.Threading.Tasks;
+using Acb.Core.Domain;
 
 namespace Acb.Framework.Tests.Repositories
 {
@@ -28,9 +29,15 @@ namespace Acb.Framework.Tests.Repositories
 
     internal class AreaRepository : DapperRepository<TAreas>
     {
+        public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
+        {
+        }
+
         public async Task<TAreas> Get(string code)
         {
             return await Connection.QueryByIdAsync<TAreas>(code);
         }
+
+
     }
 }

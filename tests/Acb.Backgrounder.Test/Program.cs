@@ -1,16 +1,17 @@
-﻿using Acb.Backgrounder.Test.Jobs;
+﻿using System;
+using Acb.Backgrounder.Test.Jobs;
 using Acb.Core.EventBus;
 using Acb.Core.Logging;
 using Acb.Demo.Contracts.EventBus;
 using Acb.Framework;
-using Acb.Redis;
+using Acb.RabbitMq;
 using Autofac;
 using Microsoft.AspNetCore.SignalR.Client;
 using Quartz;
 using Quartz.Impl;
-using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using Acb.Core.Exceptions;
 using ILogger = Acb.Core.Logging.ILogger;
 
 namespace Acb.Backgrounder.Test
@@ -38,30 +39,58 @@ namespace Acb.Backgrounder.Test
 
         private static void OnUseServices(IContainer provider)
         {
-            _hubConnection.On<object>("UPDATE", config =>
-            {
-                _logger.Info(config);
-            });
-            try
-            {
-                _hubConnection.StartAsync().Wait();
-                _hubConnection.SendAsync("Subscript", new[] { "basic" }, "dev");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                throw;
-            }
+            //_hubConnection.On<object>("UPDATE", config =>
+            //{
+            //    _logger.Info(config);
+            //});
+            //try
+            //{
+            //    _hubConnection.StartAsync().Wait();
+            //    _hubConnection.SendAsync("Subscript", new[] { "basic" }, "dev");
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.Error(ex.Message, ex);
+            //}
             //开启订阅
             provider.Resolve<ISubscriptionAdapter>().SubscribeAt();
-            StartScheduler().GetAwaiter().GetResult();
+
+            //gps
+            var queue = provider.Resolve<IMessageQueue>();
+            //var list = queue.Receive<string>(2).Result;
+            //_logger.Info(list);
+            queue.Subscibe<string>(t =>
+            {
+                _logger.Info(t);
+                //throw new Exception("dds");
+            });
         }
 
         private static void OnMapServices(ContainerBuilder builder)
         {
             //注册事件总线
-            //builder.RegisterType<EventBusRabbitMq>().As<IEventBus>().SingleInstance();
-            builder.RegisterType<EventBusRedis>().As<IEventBus>().SingleInstance();
+            //RabbitMQ
+            builder.RegisterType<EventBusRabbitMq>().As<IEventBus>().SingleInstance();
+            builder.Register(provider =>
+            {
+                var conn = new DefaultRabbitMqConnection("gps");
+                return new RabbitMessageQueue(conn, "testDcpProductId");
+            }).As<IMessageQueue>().SingleInstance();
+            //Redis
+            //builder.RegisterType<EventBusRedis>().As<IEventBus>().SingleInstance();
+            //RocketMQ
+            //builder.Register(provider =>
+            //{
+            //    var manager = provider.Resolve<ISubscriptionManager>();
+            //    //var config = new RocketMqConfig
+            //    //{
+            //    //    Host = "220.167.101.49:9876",
+            //    //    Topic = "icb_topic",
+            //    //    ProducerId = "icb_producer",
+            //    //    ConsumerId = "icb_consumer"
+            //    //};
+            //    return new EventBusRocketMq(manager, RocketMqConfig.Config());
+            //}).As<IEventBus>().SingleInstance();
         }
 
         private static void OnCommand(string cmd, IContainer provider)
@@ -69,6 +98,8 @@ namespace Acb.Backgrounder.Test
             var bus = provider.Resolve<IEventBus>();
             bus.Publish(new UserEvent { Name = cmd });
             bus.Publish(new TestEvent { Content = cmd });
+            var queue = provider.Resolve<IMessageQueue>();
+            queue.Send(cmd);
         }
 
         private static async Task StartScheduler()

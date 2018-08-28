@@ -17,9 +17,7 @@ namespace Acb.EntityFramework
         where TEntity : BaseEntity<TKey>
         where TDbContext : DbContext, IUnitOfWork
     {
-
-        public EfRepository(IDbContextProvider<TDbContext> unitOfWork)
-            : base(unitOfWork.DbContext)
+        public EfRepository(TDbContext unitOfWork) : base(unitOfWork)
         {
         }
 
@@ -29,6 +27,7 @@ namespace Acb.EntityFramework
         public virtual DbSet<TEntity> Table => ((DbContext)UnitOfWork).Set<TEntity>();
 
         public override IQueryable<TEntity> GetAll() => Table.AsNoTracking();
+
         public override TKey Insert(TEntity entity)
         {
             var item = Table.Add(entity);
@@ -147,7 +146,7 @@ namespace Acb.EntityFramework
 
         private int SaveChanges()
         {
-            return UnitOfWork.IsTransaction ? 0 : UnitOfWork.SaveChanges();
+            return UnitOfWork.IsTransaction ? 0 : ((DbContext)UnitOfWork).SaveChanges();
         }
     }
 }

@@ -8,7 +8,6 @@ namespace Acb.MongoDb
     public class MongoManager
     {
         private readonly ConcurrentDictionary<string, MongoHelper> _mongoCaches;
-        private const string DefaultConfigName = "mongoDefault";
 
         private MongoManager()
         {
@@ -27,7 +26,7 @@ namespace Acb.MongoDb
         {
             if (_mongoCaches.ContainsKey(database) && _mongoCaches.TryGetValue(database, out var helper))
                 return helper;
-            var config = MongoConfig.Config(DefaultConfigName.Config<string>());
+            var config = MongoConfig.Config(configName);
             config.Database = database;
             helper = new MongoHelper(config);
             _mongoCaches.TryAdd(database, helper);

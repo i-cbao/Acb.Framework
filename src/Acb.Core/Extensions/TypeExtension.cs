@@ -209,5 +209,51 @@ namespace Acb.Core.Extensions
             var assName = assembly.GetName();
             return $"{assName.Name}_{assName.Version}";
         }
+
+        public static object DefaultValue(this Type type)
+        {
+            return type.IsValueType ? Activator.CreateInstance(type) : null;
+        }
+
+        /// <summary> 检查属性值变化 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <param name="reset"></param>
+        /// <returns></returns>
+        public static PropertyInfo[] CheckProps<T>(this T source, object target, bool reset = false)
+        {
+            if (source == null || target == null)
+                return new PropertyInfo[] { };
+            var type = source.GetType();
+            var targetType = target.GetType();
+            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var list = new List<PropertyInfo>();
+            foreach (var prop in props)
+            {
+                var p = targetType.GetProperty(prop.Name,
+                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                if (p == null || p.PropertyType != prop.PropertyType)
+                    continue;
+                //获取默认值
+                var def = prop.PropertyType.DefaultValue();
+                var s = prop.GetValue(source).CastTo(prop.PropertyType);
+                var t = p.GetValue(target).CastTo(prop.PropertyType);
+
+                if (s == def)
+                {
+                    if (!reset)
+                        continue;
+                    if (t != def)
+                        list.Add(prop);
+                }
+                else if (!s.Equals(t))
+                {
+                    list.Add(prop);
+                }
+            }
+
+            return list.ToArray();
+        }
     }
 }

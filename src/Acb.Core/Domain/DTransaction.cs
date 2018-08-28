@@ -1,5 +1,5 @@
-﻿using Acb.Core.Exceptions;
-using System;
+﻿using System;
+using System.Threading.Tasks;
 using System.Transactions;
 
 namespace Acb.Core.Domain
@@ -31,6 +31,8 @@ namespace Acb.Core.Domain
             using (var trans = new DTransaction(level, timeout))
             {
                 var result = action();
+                var task = result as Task;
+                task?.GetAwaiter().GetResult();
                 trans.SaveChanges();
                 return result;
             }

@@ -22,20 +22,13 @@ namespace Acb.Redis
             }
             var type = obj.GetType();
             return type == typeof(string) || type.IsValueType ? obj.ToString() : JsonHelper.ToJson(obj);
-
-            //var binaryFormatter = new BinaryFormatter();
-            //using (MemoryStream memoryStream = new MemoryStream())
-            //{
-            //    binaryFormatter.Serialize(memoryStream, obj);
-            //    return memoryStream.ToArray();
-            //}
         }
 
         /// <summary>
         /// 反序列化对象
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="stream"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
         private static T Deserialize<T>(RedisValue value)
         {
@@ -45,11 +38,6 @@ namespace Acb.Redis
             }
             var type = typeof(T);
             return type == typeof(string) || type.IsValueType ? value.ToString().CastTo<T>() : JsonHelper.Json<T>(value);
-            //var binaryFormatter = new BinaryFormatter();
-            //using (MemoryStream memoryStream = new MemoryStream(stream))
-            //{
-            //    return binaryFormatter.Deserialize(memoryStream).CastTo<T>();
-            //}
         }
         #endregion
 

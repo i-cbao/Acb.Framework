@@ -1,5 +1,5 @@
-﻿using Acb.Core.Extensions;
-using Acb.Dapper.Config;
+﻿using Acb.Core.Data.Config;
+using Acb.Core.Extensions;
 using Acb.Framework.Tests.EfCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

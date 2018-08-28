@@ -1,4 +1,5 @@
-﻿using Acb.Core.Exceptions;
+﻿using Acb.Core.Data.Adapters;
+using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using System;
 using System.Data;

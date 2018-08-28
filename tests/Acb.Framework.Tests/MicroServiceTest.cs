@@ -19,6 +19,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Acb.Core.Data;
 
 namespace Acb.Framework.Tests
 {

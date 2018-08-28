@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Data;
 using Acb.Core.Dependency;
 using Acb.Dapper;
 using Acb.Framework.Tests.Repositories;
@@ -33,7 +34,7 @@ namespace Acb.Framework.Tests
 
             var columns = typeof(TAreas).Columns();
             var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
-            using (var conn = _factory.Connection("default", false))
+            using (var conn = _factory.Connection("default"))
             {
                 //var set = conn.QueryDataSet(conn.FormatSql(sql), new { code = "510100" });
                 //Print(set);
@@ -62,7 +63,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void UpdateTest()
         {
-            using (var conn = _factory.Connection(threadCache: false))
+            using (var conn = _factory.Connection())
             {
                 var result = conn.Update(new TAreas
                 {
@@ -96,7 +97,7 @@ AND u.create_time >=""2018 / 05 / 10""
             ORDER BY
             Count(u.`id`) DESC";
             SQL sql = str;
-            using (var conn = _factory.Connection(threadCache: false))
+            using (var conn = _factory.Connection())
             {
                 sql.Paged(1, 15, conn);
                 var t = sql.ToString();

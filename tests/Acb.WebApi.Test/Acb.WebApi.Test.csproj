@@ -37,6 +37,7 @@
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.MicroService.Client\Acb.MicroService.Client.csproj" />
     <ProjectReference Include="..\..\src\Acb.Middleware.Monitor\Acb.Middleware.Monitor.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Office\Acb.Office.csproj" />
     <ProjectReference Include="..\..\src\Acb.Payment\Acb.Payment.csproj" />
     <ProjectReference Include="..\..\src\Acb.RabbitMq\Acb.RabbitMq.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />

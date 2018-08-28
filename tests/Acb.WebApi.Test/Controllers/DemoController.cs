@@ -2,18 +2,17 @@
 using Acb.Core.Dependency;
 using Acb.Core.EventBus;
 using Acb.Core.Helper;
-using Acb.Core.Serialize;
+using Acb.Core.Helper.Http;
+using Acb.Core.Logging;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.EventBus;
-using Acb.WebApi.Test.Connections;
+using Acb.WebApi.Test.Repositories;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
-using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Acb.Core.Helper.Http;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -21,14 +20,14 @@ namespace Acb.WebApi.Test.Controllers
     public class DemoController : BaseController
     {
         private readonly IDemoService _demoService;
-        private readonly IConnectionStruct _connection;
+        private readonly IAccountContract _accountContract;
 
-        public DemoController(IDemoService demoService, IConnectionStruct conn)
+        public DemoController(IDemoService demoService, IAccountContract accountContract)
         {
             //sendCom
             //_demoService = ProxyService.Proxy<IDemoService>();
             _demoService = demoService;
-            _connection = conn;
+            _accountContract = accountContract;
         }
 
         /// <summary> Test </summary>
@@ -57,21 +56,27 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         [HttpGet("token"), AllowAnonymous]
-        public DResult<string> Token()
+        public async Task<DResult<TAccount>> Token()
         {
-            var dto = _connection.Connection("icb_main").QueryFirstOrDefault(
-                "select * from t_account order by create_time desc");
+            const string id = "70d8f270f4784d599b9425783bfdea67";
+            var t = await _accountContract.QueryById(id);
+            LogManager.Logger<DemoController>().Info(t);
+            await _accountContract.Update(id, "罗勇", null);
+            t = await _accountContract.QueryById(id);
+            return DResult.Succ(t);
+            //var dto = _connection.Connection("icb_main").QueryFirstOrDefault(
+            //    "select * from t_account order by create_time desc");
 
-            var ticket = new DemoClientTicket
-            {
-                Id = 1001L,
-                Name = dto.name,
-                Role = 999
-            };
-            var token = ticket.Ticket();
-            //var cacheKey = $"ticket:{ticket.Id}";
-            //AuthorizeCache.Set(cacheKey, ticket.Ticket, TimeSpan.FromMinutes(30));
-            return DResult.Succ(JsonHelper.ToJson(ticket));
+            //var ticket = new DemoClientTicket
+            //{
+            //    Id = 1001L,
+            //    Name = dto.name,
+            //    Role = 999
+            //};
+            //var token = ticket.Ticket();
+            ////var cacheKey = $"ticket:{ticket.Id}";
+            ////AuthorizeCache.Set(cacheKey, ticket.Ticket, TimeSpan.FromMinutes(30));
+            //return DResult.Succ(JsonHelper.ToJson(ticket));
         }
 
         [HttpGet("kafak"), AllowAnonymous]

@@ -82,6 +82,17 @@ namespace Acb.Spear.Controllers
             return dict;
         }
 
+        /// <summary> 删除配置 </summary>
+        /// <param name="module"></param>
+        /// <param name="env"></param>
+        /// <returns></returns>
+        [HttpDelete("{module}/{env}")]
+        public async Task<DResult> RemoveConfig(string module, string env)
+        {
+            var result = await _repository.DeleteConfig(ProjectCode, module, env);
+            return result > 0 ? DResult.Success : DResult.Error("删除失败");
+        }
+
         /// <summary> 获取配置 </summary>
         /// <param name="modules">多个以,分割</param>
         /// <param name="env">模式</param>
@@ -104,7 +115,7 @@ namespace Acb.Spear.Controllers
         public async Task<DResults<string>> Configs()
         {
             var names = await _repository.QueryNames(ProjectCode);
-            return DResult.Succ(names, -1);
+            return DResult.Succ(names.OrderBy(t => t), -1);
         }
 
         /// <summary> 获取配置历史版本 </summary>
@@ -142,6 +153,21 @@ namespace Acb.Spear.Controllers
             await _configHub.Clients.Group($"{ProjectCode}_{result.Name}_{result.Mode}")
                 .SendAsync("UPDATE", config);
             return DResult.Success;
+        }
+
+        /// <summary> 删除历史版本 </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("history/{id}")]
+        public async Task<DResult> RemoveHistory(string id)
+        {
+            var dto = await _repository.QueryByIdAsync(id);
+            if (dto == null)
+                return DResult.Error("版本不存在");
+            if (dto.Status != (byte)ConfigStatus.History)
+                return DResult.Error("只能删除历史版本");
+            var result = await _repository.DeleteAsync(id);
+            return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
 
         /// <summary> 添加项目 </summary>

@@ -1,8 +1,8 @@
 ﻿using Acb.Core;
+using Acb.Core.Data.Config;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
-using Acb.Dapper.Config;
 using Acb.MongoDb;
 using log4net.Appender;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

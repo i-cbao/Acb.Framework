@@ -1,4 +1,6 @@
-﻿using Acb.Core.Helper.Http;
+﻿using Acb.Core.Data;
+using Acb.Core.Dependency;
+using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Dapper;
 using Acb.Framework.Tests.Repositories;
@@ -12,13 +14,18 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Core.Dependency;
 
 namespace Acb.Framework.Tests
 {
     [TestClass]
     public class OfficeTest : DTest
     {
+        private readonly IDbConnectionProvider _connectionProvider;
+
+        public OfficeTest()
+        {
+            _connectionProvider = CurrentIocManager.Resolve<IDbConnectionProvider>();
+        }
         [TestMethod]
         public void CreateTest()
         {
@@ -28,7 +35,7 @@ namespace Acb.Framework.Tests
             //{
             //    dt.Rows.Add($"姓名{i}", RandomHelper.Random().Next(10000, 30000));
             //}
-            using (var conn = CurrentIocManager.Resolve<IDbConnectionProvider>().Connection(threadCache: false))
+            using (var conn = _connectionProvider.Connection())
             {
                 var excepts = new[] { nameof(TAreas.Deep) };
                 var columns = typeof(TAreas).Columns(excepts);

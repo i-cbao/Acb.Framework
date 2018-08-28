@@ -25,7 +25,7 @@ namespace Acb.Spear
 
         protected override void MapServices(IServiceCollection services)
         {
-            services.UseRedisEventBus();
+            services.AddRedisEventBus();
             base.MapServices(services);
         }
 

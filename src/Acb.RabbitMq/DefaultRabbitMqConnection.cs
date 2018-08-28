@@ -33,9 +33,9 @@ namespace Acb.RabbitMq
             {
                 _connectionFactory.VirtualHost = config.VirtualHost;
             }
-            if (!string.IsNullOrWhiteSpace(config.UserName))
+            if (!string.IsNullOrWhiteSpace(config.User))
             {
-                _connectionFactory.UserName = config.UserName;
+                _connectionFactory.UserName = config.User;
                 _connectionFactory.Password = config.Password;
             }
             _logger = LogManager.Logger<DefaultRabbitMqConnection>();

@@ -1,5 +1,5 @@
-﻿using Acb.Core.Extensions;
-using Acb.Dapper.Adapters;
+﻿using Acb.Core.Data.Adapters;
+using Acb.Core.Extensions;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;

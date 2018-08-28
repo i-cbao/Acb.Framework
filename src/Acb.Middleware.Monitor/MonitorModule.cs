@@ -11,8 +11,8 @@ namespace Acb.Middleware.Monitor
     {
         public override void Initialize()
         {
-            if (Environment.GetEnvironmentVariable("ENABLE_MONITOR").CastTo(false))
-            //if (Consts.Mode != ProductMode.Dev)
+            var enable = Environment.GetEnvironmentVariable("ENABLE_MONITOR").CastTo(false);
+            if (enable)
             {
                 MonitorManager.Add(new AcbMonitor());
             }

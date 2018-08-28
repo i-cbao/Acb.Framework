@@ -8,10 +8,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
@@ -166,6 +168,30 @@ namespace Acb.Framework.Tests
                     Console.WriteLine(title);
                 }
             }
+        }
+
+        private async Task RunTask()
+        {
+            Print("run start");
+            Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            Print("run complete");
+        }
+
+        [TestMethod]
+        public async Task TaskTest()
+        {
+            var watcher = Stopwatch.StartNew();
+            Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            await RunTask();
+            Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            watcher.Stop();
+            Print($"await ºÄÊ±:{watcher.ElapsedMilliseconds}ms");
+            watcher.Restart();
+            RunTask().GetAwaiter().GetResult();
+            Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            watcher.Stop();
+            Print($"run ºÄÊ±:{watcher.ElapsedMilliseconds}ms");
         }
     }
 }

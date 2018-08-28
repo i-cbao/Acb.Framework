@@ -38,7 +38,7 @@ namespace Acb.Core.EventBus
                 }
                 catch (Exception ex)
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }

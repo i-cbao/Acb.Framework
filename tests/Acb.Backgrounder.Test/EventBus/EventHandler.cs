@@ -1,7 +1,8 @@
 ﻿using Acb.Core.EventBus;
+using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts.EventBus;
-using System;
+using Acb.RabbitMq;
 using System.Threading.Tasks;
 
 namespace Acb.Backgrounder.Test.EventBus
@@ -9,9 +10,16 @@ namespace Acb.Backgrounder.Test.EventBus
     [Subscription("icb_handler_user_01")]
     public class MessageHandler : IEventHandler<UserEvent>
     {
+        private readonly ILogger _logger;
+
+        public MessageHandler()
+        {
+            _logger = LogManager.Logger<MessageHandler>();
+        }
+
         public Task Handle(UserEvent @event)
         {
-            Console.WriteLine("one:" + JsonHelper.ToJson(@event));
+            _logger.Info(JsonHelper.ToJson(@event));
             return Task.CompletedTask;
         }
     }
@@ -19,9 +27,16 @@ namespace Acb.Backgrounder.Test.EventBus
     [Subscription("icb_handler_test")]
     public class MessageHandlerTwo : IEventHandler<TestEvent>
     {
+        private readonly ILogger _logger;
+
+        public MessageHandlerTwo()
+        {
+            _logger = LogManager.Logger<MessageHandler>();
+        }
+
         public Task Handle(TestEvent @event)
         {
-            Console.WriteLine("two:" + JsonHelper.ToJson(@event));
+            _logger.Info(JsonHelper.ToJson(@event));
             return Task.CompletedTask;
         }
     }

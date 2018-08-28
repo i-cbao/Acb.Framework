@@ -16,7 +16,7 @@ namespace Acb.WebApi.Test
         /// <param name="services"></param>
         protected override void MapServices(IServiceCollection services)
         {
-            services.UseRedisEventBus();
+            services.AddRedisEventBus();
             services.AddPayment();
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
@@ -26,7 +26,7 @@ namespace Acb.WebApi.Test
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.SubscriptAt();
+            //provider.SubscriptAt();
             base.UseServices(provider);
         }
 

@@ -1,42 +1,26 @@
 ﻿using Acb.Core.Domain;
-using Acb.Core.Extensions;
 using Acb.Core.Logging;
-using Acb.EntityFramework.Config;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Data;
 
 namespace Acb.EntityFramework
 {
     public abstract class AcbDbContext : DbContext, IUnitOfWork
     {
-        private const string Prefix = "database:";
-        private const string DefaultConfigName = "dapperDefault";
-        private const string DefaultName = "default";
         private static readonly ILogger Logger = LogManager.Logger<AcbDbContext>();
-        private readonly string _configName;
 
-        protected ConnectionConfig Connection
-        {
-            get
-            {
-                var name = string.Empty;
-                if (string.IsNullOrWhiteSpace(_configName))
-                    name = DefaultConfigName.Config<string>();
-                if (string.IsNullOrWhiteSpace(name))
-                    name = DefaultName;
-                return $"{Prefix}{name}".Config<ConnectionConfig>();
-            }
-        }
-
-        protected AcbDbContext(DbContextOptions options) : base(options)
-        {
-        }
-
+        public IDbConnection Conntection { get; }
+        public IDbTransaction Transaction { get; }
         public bool IsTransaction { get; set; }
-
-        public TResult Transaction<TResult>(Func<TResult> action)
+        public void BeginTransaction(Action action, IsolationLevel? level = null)
         {
-            return default(TResult);
+            throw new NotImplementedException();
+        }
+
+        public T BeginTransaction<T>(Func<T> func, IsolationLevel? level = null)
+        {
+            throw new NotImplementedException();
         }
 
         #region 私有方法

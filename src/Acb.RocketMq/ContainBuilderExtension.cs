@@ -16,8 +16,8 @@ namespace Acb.RocketMq
             services.TryAddSingleton<IEventBus>(provider =>
             {
                 var manager = provider.GetService<ISubscriptionManager>();
-                var connection = new DefaultRocketMqConnection(config);
-                return new EventBusRocketMq(manager, connection);
+                config = config ?? RocketMqConfig.Config();
+                return new EventBusRocketMq(manager, config);
             });
             return services;
         }

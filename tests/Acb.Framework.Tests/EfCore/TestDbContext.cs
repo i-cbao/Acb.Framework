@@ -9,7 +9,7 @@ namespace Acb.Framework.Tests.EfCore
 
         public DbSet<TAreas> TAreas { get; set; }
 
-        public TestDbContext(DbContextOptions options) : base(options)
+        public TestDbContext(DbContextOptions options)
         {
         }
 
