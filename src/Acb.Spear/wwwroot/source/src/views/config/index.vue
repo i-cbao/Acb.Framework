@@ -25,23 +25,23 @@
         <el-col :span="4">
           <!-- <el-input type="text" placeholder="请输入配置项" v-model="configKey"></el-input> -->
           <el-select v-model="configKey" filterable allow-create placeholder="请输入配置项" @change="envChange">
-            <el-option v-for="item in list" :key="item" :label="item" :value="item"/>
+            <el-option v-for="item in list" :key="item" :label="item" :value="item" />
           </el-select>
         </el-col>
         <el-col :span="4">
           <el-select v-model="configEnv" placeholder="请选择环境" @change="envChange">
-            <el-option v-for="env in envs" :key="env" :label="env" :value="env"/>
+            <el-option v-for="env in envs" :key="env" :label="env" :value="env" />
           </el-select>
         </el-col>
         <el-col :span="4">
           <el-select v-model="configMode" placeholder="请选择编辑模式" @change="modeChange">
-            <el-option v-for="mode in modes" :key="mode" :label="mode" :value="mode"/>
+            <el-option v-for="mode in modes" :key="mode" :label="mode" :value="mode" />
           </el-select>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="16">
-          <div id="jsoneditor"/>
+          <div id="jsoneditor" />
         </el-col>
       </el-row>
       <el-row>
@@ -53,7 +53,6 @@
 </template>
 <script>
 import { list, config, save, remove } from '@/api/config'
-import { isJson } from '@/utils'
 import JSONEditor from 'jsoneditor'
 import 'jsoneditor/dist/jsoneditor.min.css'
 export default {
@@ -101,7 +100,9 @@ export default {
           this.configMode === 'tree' ||
           this.configMode === 'view' ||
           this.configMode === 'form'
-        ) { this.editor.expandAll() }
+        ) {
+          this.editor.expandAll()
+        }
       })
     },
     selectKey(key) {
@@ -115,8 +116,14 @@ export default {
       this.editor.setMode(this.configMode)
     },
     save() {
-      this.config = this.editor.getText()
-      if (!isJson(this.config)) {
+      this.config = this.editor.getText() || '{}'
+      var confObj
+      try {
+        confObj = JSON.parse(this.config)
+      } catch (e) {
+        console.log(e)
+      }
+      if (typeof confObj !== 'object') {
         this.$message({
           message: '配置信息必须为Json格式',
           type: 'warning'
@@ -124,20 +131,14 @@ export default {
         return false
       }
       this.isLoading = true
-      save(this.configKey, this.configEnv, JSON.parse(this.config))
-        .then(json => {
-          if (json && json.ok) {
-            this.$message({
-              message: '配置文件保存成功',
-              type: 'success'
-            })
-            this.loadList()
-            this.isLoading = false
-          }
+      save(this.configKey, this.configEnv, confObj).then(json => {
+        this.$message({
+          message: '配置文件保存成功',
+          type: 'success'
         })
-        .catch(() => {
-          this.isLoading = false
-        })
+        this.loadList()
+        this.isLoading = false
+      })
     },
     remove() {
       this.$confirm('此操作将删除该配置文件, 是否继续?', '提示', {
@@ -146,14 +147,12 @@ export default {
         type: 'warning'
       }).then(() => {
         remove(this.configKey, this.configEnv).then(json => {
-          if (json && json.ok) {
-            this.$message({
-              message: '配置文件删除成功',
-              type: 'success'
-            })
-            this.loadList()
-            this.loadConfig()
-          }
+          this.$message({
+            message: '配置文件删除成功',
+            type: 'success'
+          })
+          this.loadList()
+          this.loadConfig()
         })
       })
     }

@@ -4,13 +4,13 @@ using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Timing;
 using Acb.Dapper;
+using Acb.Dapper.Adapters;
 using Acb.Dapper.Domain;
 using Acb.Spear.Domain.Entities;
 using Acb.Spear.Domain.Enums;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Acb.Dapper.Adapters;
 using IdentityHelper = Acb.Core.Helper.IdentityHelper;
 
 namespace Acb.Spear.Domain
@@ -210,9 +210,19 @@ namespace Acb.Spear.Domain
         public async Task<int> DeleteConfig(string code, string module, string env)
         {
             //更新之前版本为历史版本
-            const string updateSql =
-                "UPDATE [t_config] SET [Status]=1 WHERE [ProjectCode]=@code AND [Name]=@name AND [Mode]=@mode AND [Status]=0";
-            return await Connection.ExecuteAsync(Connection.FormatSql(updateSql), new { code, name = module, mode = env },
+            SQL updateSql =
+                "UPDATE [t_config] SET [Status]=1 WHERE [ProjectCode]=@code AND [Name]=@name AND [Status]=0";
+            if (string.IsNullOrWhiteSpace(env))
+            {
+                updateSql += "AND [Mode] IS NULL";
+            }
+            else
+            {
+                updateSql += "AND [Mode]=@mode";
+            }
+
+            var sql = Connection.FormatSql(updateSql.ToString());
+            return await Connection.ExecuteAsync(sql, new { code, name = module, mode = env },
                 Trans);
         }
     }

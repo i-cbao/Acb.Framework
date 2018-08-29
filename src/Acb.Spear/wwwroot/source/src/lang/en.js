@@ -1,6 +1,8 @@
 export default {
   route: {
-
+    home: 'Home',
+    config: 'Config Center',
+    job: 'Job Sheduler'
   },
   navbar: {
     logOut: 'Log Out',
@@ -10,7 +12,7 @@ export default {
     theme: 'theme'
   },
   login: {
-    title: 'Login Form',
+    title: 'Distributed Management System',
     logIn: 'Log in',
     username: 'Username',
     password: 'Password',

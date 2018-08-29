@@ -81,21 +81,14 @@ namespace Acb.Spear.Controllers
                 var config = await _repository.QueryConfig(ProjectCode, model, env);
                 if (config == null)
                     continue;
-                if (model == "basic")
+                var obj = JsonConvert.DeserializeObject<JObject>(config);
+                var tokens = obj.Children();
+                foreach (var item in tokens)
                 {
-                    var obj = JsonConvert.DeserializeObject<JObject>(config);
-                    var tokens = obj.Children();
-                    foreach (var item in tokens)
+                    if (item is JProperty prop)
                     {
-                        if (item is JProperty prop)
-                        {
-                            dict.AddOrUpdate(prop.Name, prop.Value);
-                        }
+                        dict.AddOrUpdate(prop.Name, prop.Value);
                     }
-                }
-                else
-                {
-                    dict.Add(model, JsonConvert.DeserializeObject(config));
                 }
             }
             return dict;
@@ -105,9 +98,10 @@ namespace Acb.Spear.Controllers
         /// <param name="module"></param>
         /// <param name="env"></param>
         /// <returns></returns>
-        [HttpDelete("{module}/{env}")]
+        [HttpDelete("{module}/{env=default}")]
         public async Task<DResult> RemoveConfig(string module, string env)
         {
+            if (env == "default") env = null;
             var result = await _repository.DeleteConfig(ProjectCode, module, env);
             return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
