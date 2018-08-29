@@ -1,5 +1,4 @@
-﻿using Acb.Redis;
-using Acb.Spear.Hubs;
+﻿using Acb.Spear.Hubs;
 using Acb.Spear.Scheduler;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Builder;
@@ -24,7 +23,6 @@ namespace Acb.Spear
 
         protected override void MapServices(IServiceCollection services)
         {
-            services.AddRedisEventBus();
             base.MapServices(services);
         }
 
@@ -48,7 +46,9 @@ namespace Acb.Spear
                 app.UseDeveloperExceptionPage();
             }
             //app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseSignalR(route => { route.MapHub<ConfigHub>("/config_hub"); });
+            app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
             base.Configure(app, env);
         }
     }

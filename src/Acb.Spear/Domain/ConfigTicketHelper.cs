@@ -20,17 +20,24 @@ namespace Acb.Spear.Domain
         /// <returns></returns>
         public static ConfigTicket GetTicket(this HttpRequest request, string scheme = "acb")
         {
-            if (!request.Headers.TryGetValue("Authorization", out var authorize) ||
-                string.IsNullOrWhiteSpace(authorize))
+            try
+            {
+                if (!request.Headers.TryGetValue("Authorization", out var authorize) ||
+                    string.IsNullOrWhiteSpace(authorize))
+                    return null;
+                var arr = authorize.ToString()?.Split(' ');
+                if (arr == null || arr.Length != 2 || arr[0] != scheme)
+                    return null;
+                var ticket = arr[1];
+                var client = ticket.Client<ConfigTicket>();
+                if (client.ExpiredTime.HasValue && client.ExpiredTime.Value < Clock.Now)
+                    return null;
+                return client;
+            }
+            catch
+            {
                 return null;
-            var arr = authorize.ToString()?.Split(' ');
-            if (arr == null || arr.Length != 2 || arr[0] != scheme)
-                return null;
-            var ticket = arr[1];
-            var client = ticket.Client<ConfigTicket>();
-            if (client.ExpiredTime.HasValue && client.ExpiredTime.Value < Clock.Now)
-                return null;
-            return client;
+            }
         }
 
         public static string GetProjectCode(this HttpRequest request)

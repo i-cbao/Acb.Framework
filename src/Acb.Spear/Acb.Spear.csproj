@@ -11,18 +11,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\source\build\**" />
+    <Compile Remove="wwwroot\source\config\**" />
     <Compile Remove="_logs\**" />
+    <Content Remove="wwwroot\source\build\**" />
+    <Content Remove="wwwroot\source\config\**" />
     <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="wwwroot\source\build\**" />
+    <EmbeddedResource Remove="wwwroot\source\config\**" />
     <EmbeddedResource Remove="_logs\**" />
+    <None Remove="wwwroot\source\build\**" />
+    <None Remove="wwwroot\source\config\**" />
     <None Remove="_logs\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\source\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Quartz" Version="3.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.1.0" />
   </ItemGroup>
@@ -31,8 +36,11 @@
     <ProjectReference Include="..\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
     <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
-    <ProjectReference Include="..\Acb.Redis\Acb.Redis.csproj" />
     <ProjectReference Include="..\Acb.WebApi\Acb.WebApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\source\" />
   </ItemGroup>
 
 </Project>
