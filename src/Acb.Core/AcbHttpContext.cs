@@ -55,7 +55,15 @@ namespace Acb.Core
         {
             get
             {
-                return Current == null ? DefaultIp : Current.Connection.LocalIpAddress.ToString();
+                if (Current == null)
+                    return DefaultIp;
+                var ip = Current.Connection.LocalIpAddress.ToString();
+                if (string.IsNullOrEmpty(ip) || !RegexHelper.IsIp(ip))
+                {
+                    return DefaultIp;
+                }
+
+                return ip;
             }
         }
         /// <summary> 请求类型 </summary>

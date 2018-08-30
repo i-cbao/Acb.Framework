@@ -11,7 +11,7 @@ namespace Acb.Payment.Gateways.Alipay
     /// <summary>
     /// 支付宝网关
     /// </summary>
-    public sealed class AlipayGateway : DGateway, IPaymentApp, IPaymentUrl, IPaymentForm, IActionQuery, IActionCancel,
+    public sealed class AlipayGateway : DGateway, IPaymentApp, IPaymentUrl, IPaymentForm, IPaymentScan, IActionQuery, IActionCancel,
         IActionRefund
     {
         #region 私有字段
@@ -310,6 +310,33 @@ namespace Acb.Payment.Gateways.Alipay
             InitActionParameter(ActionType.Cancel, dataAction);
         }
 
+        #endregion
+
+        #region 扫码支付
+        public string BuildScanPayment()
+        {
+            PreCreate();
+
+            return Notify.QrCode;
+        }
+
+        /// <summary>
+        /// 预创建订单
+        /// </summary>
+        /// <returns></returns>
+        private void PreCreate()
+        {
+            InitScanPayment();
+
+            Commit(Constant.ALIPAY_TRADE_PRECREATE_RESPONSE);
+        }
+
+        public void InitScanPayment()
+        {
+            Merchant.Method = Constant.SCAN;
+
+            InitOrderParameter();
+        }
         #endregion
     }
 }

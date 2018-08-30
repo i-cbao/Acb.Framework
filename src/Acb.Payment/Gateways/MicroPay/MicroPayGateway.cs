@@ -146,9 +146,10 @@ namespace Acb.Payment.Gateways.MicroPay
         private bool IsSuccessReturn()
         {
             if (Notify.ReturnCode == FAIL)
-            {
                 throw new BusiException(Notify.ReturnMsg);
-            }
+
+            if (Notify.ResultCode == FAIL)
+                throw new BusiException(Notify.ErrCodeDes);
             return true;
         }
 
@@ -311,11 +312,10 @@ namespace Acb.Payment.Gateways.MicroPay
         public void InitScanPayment()
         {
             Order.TradeType = Constant.NATIVE;
-            Order.SpbillCreateIp = AcbHttpContext.LocalIpAddress;
+            Order.SpbillCreateIp = AcbHttpContext.ClientIp;
         }
 
         #endregion
-
 
         #region 退款
         public IDataNotify BuildRefund(IDataAction dataAction)
