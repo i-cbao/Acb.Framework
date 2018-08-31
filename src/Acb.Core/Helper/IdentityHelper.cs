@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Acb.Core.Dependency;
 
 namespace Acb.Core.Helper
 {
@@ -44,15 +45,20 @@ namespace Acb.Core.Helper
             return new Guid(secuentialGuid);
         }
 
+        /// <summary> Guid32位 </summary>
         public static string Guid32 => NewSequentialGuid().ToString("N");
 
+        /// <summary> Guid16位 </summary>
         public static string Guid16
         {
             get
             {
                 var i = Guid.NewGuid().ToByteArray().Aggregate<byte, long>(1, (current, b) => current * (b + 1));
-                return string.Format("{0:x}", i - DateTimeOffset.Now.Ticks);
+                return $"{i - DateTimeOffset.Now.Ticks:x}";
             }
         }
+
+        /// <summary> 长整型ID </summary>
+        public static long LongId => CurrentIocManager.Resolve<IdWorker>().NextId();
     }
 }

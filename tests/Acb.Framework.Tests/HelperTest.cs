@@ -3,6 +3,7 @@ using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
+using Acb.Core.Tests;
 using Acb.Core.Timing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -22,25 +23,10 @@ namespace Acb.Framework.Tests
     public class HelperTest : DTest
     {
         private readonly ILogger _logger = LogManager.Logger<HelperTest>();
-
+        
         [TestMethod]
         public void Md5Test()
         {
-            var dict = new Dictionary<string, object>
-            {
-                {"Account", "17313040610"},
-                {"Password", "a123456"}
-            };
-            var timestamp = Clock.Now.ToMillisecondsTimestamp();
-            const string signKey = "85653b8832ad55cd";
-            var array = new SortedDictionary<string, object>(dict).Select(t => $"{t.Key}={t.Value.UnEscape()}");
-
-            // 规则 Sign=时间戳(毫秒) + Md532(除Sign外所有参数的url拼接(如：a=1&b=2,不编码) + key + 时间戳(毫秒)).ToLower()
-            var unSigned = string.Concat(string.Join("&", array), signKey, timestamp);
-            var sign = timestamp + EncryptHelper.MD5(unSigned);
-            Print(sign);
-            //Print("L7iBVV52RCs0IuWcvrnSRwQpVqOyz9y3KFONd5ZhBc5/ev84j27711veJ/Pj82UveRsV4zq7EcN7H+JABWBZBy71agOv2xDB3Oous/1TSCQwax3CBcaWliooj78Z037JeYsXd4BM2HCihhUsEwXvJHgHJFfCLF/f3yEMyKRvEL+MKLyW+CBD/tKdaxJMkZ2fZGoVDR2+K7QlNNmX704T6mFg5nlxKXny4mwHz7taYz6TQgzrvRpkAooV65VPN32uA5XDibmQaAo=".UrlEncode());
-            //return;
             var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
             Print(str);
             var time = DateTime.Parse(str);
@@ -172,10 +158,11 @@ namespace Acb.Framework.Tests
 
         private async Task RunTask()
         {
-            Print("run start");
-            Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
-            await Task.Delay(TimeSpan.FromSeconds(5));
-            Print("run complete");
+
+            //Print("run start");
+            //Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            //await Task.Delay(TimeSpan.FromSeconds(5));
+            //Print("run complete");
         }
 
         [TestMethod]
@@ -192,6 +179,17 @@ namespace Acb.Framework.Tests
             Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
             watcher.Stop();
             Print($"run 耗时:{watcher.ElapsedMilliseconds}ms");
+        }
+
+        [TestMethod]
+        public void LongIdTest()
+        {
+            var result = CodeTimer.Time("long id", 5, () =>
+            {
+                var id = IdentityHelper.LongId;
+                Print(id);
+            });
+            Print(result.ToString());
         }
     }
 }

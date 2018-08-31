@@ -11,17 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="wwwroot\source\build\**" />
-    <Compile Remove="wwwroot\source\config\**" />
+    <Compile Remove="wwwroot\source\**" />
     <Compile Remove="_logs\**" />
-    <Content Remove="wwwroot\source\build\**" />
-    <Content Remove="wwwroot\source\config\**" />
+    <Content Remove="wwwroot\source\**" />
     <Content Remove="_logs\**" />
-    <EmbeddedResource Remove="wwwroot\source\build\**" />
-    <EmbeddedResource Remove="wwwroot\source\config\**" />
+    <EmbeddedResource Remove="wwwroot\source\**" />
     <EmbeddedResource Remove="_logs\**" />
-    <None Remove="wwwroot\source\build\**" />
-    <None Remove="wwwroot\source\config\**" />
+    <None Remove="wwwroot\source\**" />
     <None Remove="_logs\**" />
   </ItemGroup>
 
@@ -37,10 +33,6 @@
     <ProjectReference Include="..\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
     <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\Acb.WebApi\Acb.WebApi.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\source\" />
   </ItemGroup>
 
 </Project>
