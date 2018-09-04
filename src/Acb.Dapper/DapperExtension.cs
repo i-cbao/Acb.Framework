@@ -1,6 +1,10 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
+using Acb.Core.Domain;
 using Acb.Core.Extensions;
 using Acb.Core.Serialize;
+using Acb.Dapper.Adapters;
+using Acb.Dapper.Domain;
 using Dapper;
 using System;
 using System.Collections.Concurrent;
@@ -10,7 +14,6 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper
 {
@@ -24,8 +27,10 @@ namespace Acb.Dapper
     public static partial class DapperExtension
     {
         #region 私有属性
+
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypePropsCache =
-           new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
+            new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
+
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IDictionary<string, string>> FieldsCache =
             new ConcurrentDictionary<RuntimeTypeHandle, IDictionary<string, string>>();
 
@@ -34,9 +39,11 @@ namespace Acb.Dapper
 
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, KeyValuePair<string, string>> KeyCache =
             new ConcurrentDictionary<RuntimeTypeHandle, KeyValuePair<string, string>>();
+
         #endregion
 
         #region 私有方法
+
         private static List<PropertyInfo> Props(Type modelType)
         {
             if (TypePropsCache.TryGetValue(modelType.TypeHandle, out var props))
@@ -82,8 +89,10 @@ namespace Acb.Dapper
 
             return type;
         }
+
         #endregion
 
+        #region SQL
         /// <summary> 查询到DataSet </summary>
         /// <param name="conn"></param>
         /// <param name="sql"></param>
@@ -91,7 +100,8 @@ namespace Acb.Dapper
         /// <param name="commandTimeout"></param>
         /// <param name="commandType"></param>
         /// <returns></returns>
-        public static DataSet QueryDataSet(this IDbConnection conn, string sql, object param = null, int? commandTimeout = null,
+        public static DataSet QueryDataSet(this IDbConnection conn, string sql, object param = null,
+            int? commandTimeout = null,
             CommandType? commandType = null)
         {
             var reader = conn.ExecuteReader(sql, param, null, commandTimeout, commandType);
@@ -121,7 +131,8 @@ namespace Acb.Dapper
         /// <param name="includes">包含的字段</param>
         /// <param name="tableAlias"></param>
         /// <returns></returns>
-        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null, string tableAlias = null)
+        public static string Columns(this Type modelType, string[] excepts = null, string[] includes = null,
+            string tableAlias = null)
         {
             var props = modelType.TypeProperties();
             var sb = new StringBuilder();
@@ -141,6 +152,7 @@ namespace Acb.Dapper
                             ? "[{0}] AS [{1}],"
                             : string.Concat(tableAlias, ".[{0}] AS [{1}],"), prop.Value, prop.Key);
             }
+
             return sb.ToString().TrimEnd(',');
         }
 
@@ -200,8 +212,10 @@ namespace Acb.Dapper
         {
             return PropValue<string>(model, propName);
         }
+        #endregion
 
         #region Query
+
         private static string QueryAllSql<T>()
         {
             var type = typeof(T);
@@ -259,6 +273,7 @@ namespace Acb.Dapper
         #endregion
 
         #region Insert
+
         /// <summary> 插入单条数据,不支持有自增列 </summary>
         /// <param name="conn"></param>
         /// <param name="model"></param>
@@ -266,7 +281,8 @@ namespace Acb.Dapper
         /// <param name="trans"></param>
         /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null, IDbTransaction trans = null, int? commandTimeout = null)
+        public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
@@ -281,16 +297,25 @@ namespace Acb.Dapper
         /// <param name="trans"></param>
         /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static int Insert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null, int? commandTimeout = null)
+        public static int Insert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, models.ToArray(), trans, commandTimeout);
         }
+
+        public static int BatchInsert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
+        {
+            return conn.Insert(models, excepts, trans, commandTimeout);
+        }
+
         #endregion
 
         #region Update
+
         private static string UpdateSql<T>(string[] updateProps = null)
         {
             var type = GetInnerType<T>();
@@ -328,9 +353,11 @@ namespace Acb.Dapper
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, entityToUpdate, trans, commandTimeout);
         }
+
         #endregion
 
         #region Delete
+
         private static string DeleteSql<T>(string keyColumn = null)
         {
             var type = typeof(T);
@@ -346,7 +373,8 @@ namespace Acb.Dapper
         /// <param name="keyColumn">列名</param>
         /// <param name="trans">事务</param>
         /// <returns></returns>
-        public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = null, IDbTransaction trans = null)
+        public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = null,
+            IDbTransaction trans = null)
         {
             var sql = DeleteSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
@@ -360,13 +388,15 @@ namespace Acb.Dapper
         /// <param name="param"></param>
         /// <param name="trans"></param>
         /// <returns></returns>
-        public static int DeleteWhere<T>(this IDbConnection conn, string where, object param = null, IDbTransaction trans = null)
+        public static int DeleteWhere<T>(this IDbConnection conn, string where, object param = null,
+            IDbTransaction trans = null)
         {
             var tableName = typeof(T).PropName();
             var sql = $"DELETE FROM [{tableName}] WHERE {where}";
             sql = conn.FormatSql(sql);
             return conn.Execute(sql, param, trans);
         }
+
         #endregion
 
         #region Common
@@ -521,5 +551,14 @@ namespace Acb.Dapper
         }
 
         #endregion
+
+        /// <summary> 获取仓储对象 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="service"></param>
+        /// <returns></returns>
+        public static T Repository<T>(this DService service) where T : DRepository
+        {
+            return CurrentIocManager.Resolve<T>();
+        }
     }
 }

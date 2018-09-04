@@ -1,11 +1,11 @@
 ﻿using Acb.Core;
 using Acb.Core.Extensions;
+using Acb.Dapper.Adapters;
 using Dapper;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper
 {
@@ -50,13 +50,15 @@ namespace Acb.Dapper
         /// <param name="model"></param>
         /// <param name="excepts">过滤项(如：自增ID)</param>
         /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static async Task<int> InsertAsync<T>(this IDbConnection conn, T model, string[] excepts = null, IDbTransaction trans = null)
+        public static async Task<int> InsertAsync<T>(this IDbConnection conn, T model, string[] excepts = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
-            return await conn.ExecuteAsync(sql, model, trans);
+            return await conn.ExecuteAsync(sql, model, trans, commandTimeout);
         }
 
         /// <summary> 批量插入 </summary>
@@ -64,13 +66,21 @@ namespace Acb.Dapper
         /// <param name="models"></param>
         /// <param name="excepts"></param>
         /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static async Task<int> InsertAsync<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null, IDbTransaction trans = null)
+        public static async Task<int> InsertAsync<T>(this IDbConnection conn, IEnumerable<T> models,
+            string[] excepts = null, IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
             sql = conn.FormatSql(sql);
-            return await conn.ExecuteAsync(sql, models.ToArray(), trans);
+            return await conn.ExecuteAsync(sql, models.ToArray(), trans, commandTimeout);
+        }
+
+        public static async Task<int> BatchInsertAsync<T>(this IDbConnection conn, IEnumerable<T> models,
+            string[] excepts = null, IDbTransaction trans = null, int? commandTimeout = null)
+        {
+            return await conn.InsertAsync(models, excepts, trans, commandTimeout);
         }
 
         /// <summary> 更新数据 </summary>
@@ -81,7 +91,8 @@ namespace Acb.Dapper
         /// <param name="trans"></param>
         /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static async Task<int> UpdateAsync<T>(this IDbConnection conn, T entityToUpdate, string[] updateProps = null,
+        public static async Task<int> UpdateAsync<T>(this IDbConnection conn, T entityToUpdate,
+            string[] updateProps = null,
             IDbTransaction trans = null, int? commandTimeout = null)
         {
             var sql = UpdateSql<T>(updateProps);
@@ -94,13 +105,14 @@ namespace Acb.Dapper
         /// <param name="value">列值</param>
         /// <param name="keyColumn">列名</param>
         /// <param name="trans">事务</param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
         public static async Task<int> DeleteAsync<T>(this IDbConnection conn, object value, string keyColumn = null,
-            IDbTransaction trans = null)
+            IDbTransaction trans = null, int? commandTimeout = null)
         {
             var sql = DeleteSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
-            return await conn.ExecuteAsync(sql, new { value }, trans);
+            return await conn.ExecuteAsync(sql, new { value }, trans, commandTimeout);
         }
 
         /// <summary> 删除 </summary>
@@ -109,14 +121,15 @@ namespace Acb.Dapper
         /// <param name="where"></param>
         /// <param name="param"></param>
         /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
         public static async Task<int> DeleteWhereAsync<T>(this IDbConnection conn, string where, object param = null,
-            IDbTransaction trans = null)
+            IDbTransaction trans = null, int? commandTimeout = null)
         {
             var tableName = typeof(T).PropName();
             var sql = $"DELETE FROM [{tableName}] WHERE {where}";
             sql = conn.FormatSql(sql);
-            return await conn.ExecuteAsync(sql, param, trans);
+            return await conn.ExecuteAsync(sql, param, trans, commandTimeout);
         }
 
         /// <summary> 统计数量 </summary>
@@ -139,7 +152,8 @@ namespace Acb.Dapper
         /// <param name="where"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<long> CountWhereAsync<T>(this IDbConnection conn, string where = null, object param = null)
+        public static async Task<long> CountWhereAsync<T>(this IDbConnection conn, string where = null,
+            object param = null)
         {
             var tableName = typeof(T).PropName();
             SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
@@ -166,7 +180,8 @@ namespace Acb.Dapper
         /// <param name="where"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<bool> ExistsWhereAsync<T>(this IDbConnection conn, string where = null, object param = null)
+        public static async Task<bool> ExistsWhereAsync<T>(this IDbConnection conn, string where = null,
+            object param = null)
         {
             return await conn.CountWhereAsync<T>(where, param) > 0;
         }
@@ -178,7 +193,8 @@ namespace Acb.Dapper
         /// <param name="where"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<long> MinAsync<T>(this IDbConnection conn, string column, string where = null, object param = null)
+        public static async Task<long> MinAsync<T>(this IDbConnection conn, string column, string where = null,
+            object param = null)
         {
             var tableName = typeof(T).PropName();
             SQL sql = $"SELECT MIN([{column}]) FROM [{tableName}]";
@@ -195,7 +211,8 @@ namespace Acb.Dapper
         /// <param name="where"></param>
         /// <param name="param"></param>
         /// <returns></returns>
-        public static async Task<long> MaxAsync<T>(this IDbConnection conn, string column, string where = null, object param = null)
+        public static async Task<long> MaxAsync<T>(this IDbConnection conn, string column, string where = null,
+            object param = null)
         {
             var tableName = typeof(T).PropName();
             SQL sql = $"SELECT MAX([{column}]) FROM [{tableName}]";
@@ -212,16 +229,17 @@ namespace Acb.Dapper
         /// <param name="keyColumn"></param>
         /// <param name="count"></param>
         /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
         /// <returns></returns>
-        public static async Task<int> IncrementAsync<T>(this IDbConnection conn, string column, object key, string keyColumn = null,
-            int count = 1, IDbTransaction trans = null)
+        public static async Task<int> IncrementAsync<T>(this IDbConnection conn, string column, object key,
+            string keyColumn = null, int count = 1, IDbTransaction trans = null, int? commandTimeout = null)
         {
             var type = typeof(T);
             var tableName = type.PropName();
             var keyName = string.IsNullOrWhiteSpace(keyColumn) ? GetKey(type).Value : keyColumn;
             var sql = $"UPDATE [{tableName}] SET [{column}]=[{column}] + @count WHERE [{keyName}]=@id";
             sql = conn.FormatSql(sql);
-            return await conn.ExecuteAsync(sql, new { id = key, count }, trans);
+            return await conn.ExecuteAsync(sql, new { id = key, count }, trans, commandTimeout);
         }
     }
 }

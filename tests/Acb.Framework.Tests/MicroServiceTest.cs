@@ -1,8 +1,10 @@
-﻿using Acb.Core.Dependency;
+﻿using Acb.Core;
+using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
+using Acb.Core.Reflection;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
 using Acb.Dapper;
@@ -10,9 +12,8 @@ using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
 using Acb.MicroService.Client;
+using Autofac;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Net;
@@ -27,6 +28,24 @@ namespace Acb.Framework.Tests
     {
         private readonly IDemoService _microService;
         private readonly IDemoService _localService;
+
+        protected override void MapServices(ContainerBuilder builder)
+        {
+            builder.Register(provider =>
+            {
+                var types = provider.Resolve<ITypeFinder>()
+                    .Find(t => t.IsAssignableFrom(typeof(IMicroService)) && !t.IsAbstract);
+                Print(types.Length);
+                foreach (var type in types)
+                {
+                    //if (provider.IsRegistered(type))
+                    //    continue;
+                    builder.Register(p => ProxyService.Proxy(type)).Keyed("proxy", type).As(type).SingleInstance();
+                }
+                return ProxyService.Proxy<IMicroService>();
+            });
+            base.MapServices(builder);
+        }
 
         public MicroServiceTest()
         {
@@ -158,10 +177,12 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void JsonTest()
         {
-            const string json = "[510100]";
-            var array = JsonConvert.DeserializeObject<JArray>(json);
-            var value = array[0].Value<string>().CastTo(typeof(int));
-            Print(value);
+            var service = Bootstrap.Container.ResolveKeyed<IDemoService>("proxy"); //(IDemoService)ProxyService.Proxy(typeof(IDemoService));
+            Print(service.Areas("1").Result);
+            //const string json = "[510100]";
+            //var array = JsonConvert.DeserializeObject<JArray>(json);
+            //var value = array[0].Value<string>().CastTo(typeof(int));
+            //Print(value);
         }
         //[TestMethod]
         //public void LifeServiceTest()

@@ -1,11 +1,11 @@
-﻿using System.Threading;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Dependency;
 using Acb.Core.Tests;
 using Acb.Dapper;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Business.Domain.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests

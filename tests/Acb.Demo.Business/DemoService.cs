@@ -1,23 +1,28 @@
 ﻿using Acb.Core;
 using Acb.Core.Exceptions;
 using Acb.Core.Logging;
+using Acb.Core.Timing;
+using Acb.Dapper;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
+using Acb.MicroService.Client;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Core.Timing;
+using DService = Acb.Core.Domain.DService;
 
 namespace Acb.Demo.Business
 {
-    public class DemoService : IDemoService
+    public class DemoService : DService, IDemoService
     {
         private readonly ILogger _logger = LogManager.Logger<DemoService>();
         public AreaRepository AreaRepository { private get; set; }
 
         public async Task<DemoDto> Hello(string id, DemoInputDto dto)
         {
+            this.Repository<AreaRepository>();
+            this.Proxy<IDemoService>();
             var t = new DemoDto
             {
                 Id = id,

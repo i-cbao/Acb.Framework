@@ -18,11 +18,17 @@ using System.Threading.Tasks;
 
 namespace Acb.MicroService.Client.Proxy
 {
-    /// <summary> Http代理调用 </summary>
-    /// <typeparam name="T"></typeparam>
-    public class HttpProxy<T> : ProxyAsync where T : IMicroService
+    public class HttpProxy<T> : HttpProxy where T : IMicroService
     {
-        private readonly ILogger _logger = LogManager.Logger(typeof(HttpProxy<>));
+        public HttpProxy() : base(typeof(T))
+        {
+        }
+    }
+
+    /// <summary> Http代理调用 </summary>
+    public class HttpProxy : ProxyAsync
+    {
+        private readonly ILogger _logger = LogManager.Logger(typeof(HttpProxy));
         private readonly MicroServiceConfig _config;
         private readonly ICache _serviceCache;
 
@@ -31,11 +37,11 @@ namespace Acb.MicroService.Client.Proxy
 
         /// <inheritdoc />
         /// <summary> 构造函数 </summary>
-        public HttpProxy()
+        public HttpProxy(Type type)
         {
-            _type = typeof(T);
+            _type = type;
             _config = Constans.MicroSreviceKey.Config<MicroServiceConfig>();
-            _serviceCache = CacheManager.GetCacher(typeof(HttpProxy<>));
+            _serviceCache = CacheManager.GetCacher(typeof(HttpProxy));
         }
 
         private IServiceFinder GetServiceFinder()

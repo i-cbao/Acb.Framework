@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using Acb.MicroService.Client;
 
 namespace Acb.WebApi.Test
 {
@@ -21,6 +22,7 @@ namespace Acb.WebApi.Test
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
             services.AddSignalR();
+            services.AddProxy();
             base.MapServices(services);
         }
 
