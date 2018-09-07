@@ -1,13 +1,18 @@
-﻿using Acb.Payment;
+﻿using Acb.Core;
+using Acb.Core.Dependency;
+using Acb.Core.Reflection;
+using Acb.Framework;
+using Acb.MicroService.Client;
+using Acb.Payment;
 using Acb.Redis;
 using Acb.WebApi.Test.Hubs;
+using Autofac;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using Acb.MicroService.Client;
 
 namespace Acb.WebApi.Test
 {
@@ -22,12 +27,22 @@ namespace Acb.WebApi.Test
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
             services.AddSignalR();
-            services.AddProxy();
             base.MapServices(services);
         }
 
         protected override void UseServices(IServiceProvider provider)
         {
+            //var ioc = (IocManager)provider.GetService<IIocManager>();
+            //ioc.MapService(b =>
+            //{
+            //    var serviceType = typeof(IMicroService);
+            //    var types = provider.GetService<ITypeFinder>()
+            //        .Find(t => serviceType.IsAssignableFrom(t) && t != serviceType);
+            //    foreach (var type in types)
+            //    {
+            //        b.RegisterInstance(ProxyService.Proxy(type)).AsImplementedInterfaces().SingleInstance();
+            //    }
+            //});
             //provider.SubscriptAt();
             base.UseServices(provider);
         }

@@ -2,6 +2,7 @@
 using Acb.Core.Cache;
 using Acb.Core.Dependency;
 using Acb.Core.Logging;
+using Acb.Core.Reflection;
 using Acb.Framework.Logging;
 using Autofac;
 using System;
@@ -24,6 +25,13 @@ namespace Acb.Framework
         /// <summary> Ioc构建事件 </summary>
         public event Action<ContainerBuilder> BuilderHandler;
 
+        internal void ReBuild(Action<ContainerBuilder> builderAction)
+        {
+            var updater = new ContainerBuilder();
+            builderAction.Invoke(updater);
+            updater.Update(_container);
+        }
+
         /// <summary> 初始化 </summary>
         public override void Initialize()
         {
@@ -43,7 +51,10 @@ namespace Acb.Framework
         public override void IocRegisters()
         {
             Builder = new ContainerBuilder();
-            var assemblies = new DAssemblyFinder().FindAll().ToArray();
+            //注入程序集查找器
+            var finder = new DAssemblyFinder();
+            Builder.RegisterInstance(finder).As<IAssemblyFinder>().SingleInstance();
+            var assemblies = finder.FindAll().ToArray();
             Builder.RegisterAssemblyTypes(assemblies)
                 .Where(type => typeof(IScopedDependency).IsAssignableFrom(type) && !type.IsAbstract)
                 .AsSelf() //自身服务，用于没有接口的类
@@ -65,7 +76,7 @@ namespace Acb.Framework
                 .SingleInstance(); //保证单例注入
 
             IocManager = new IocManager(this);
-            Builder.Register(context => IocManager).SingleInstance();
+            Builder.RegisterInstance(IocManager).AsSelf().As<IIocManager>().SingleInstance();
         }
 
         public override void CacheInit()

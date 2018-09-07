@@ -56,15 +56,19 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         [HttpGet("token"), AllowAnonymous]
-        public async Task<DResult<TAccount>> Token()
+        public async Task<IActionResult> Token()
         {
-            const string id = "70d8f270f4784d599b9425783bfdea67";
-            var t = await _accountContract.QueryById(id);
-            var logger = LogManager.Logger<DemoController>();
-            logger.Info(t);
-            await _accountContract.Update(id, "罗勇", null);
-            t = await _accountContract.QueryById(id);
-            return DResult.Succ(t);
+            var ticket =
+                "lGn6zHw7xLIgvL1zIUE8W3/xf9LKgLY4TO9HsMfAaBmnZDDmPTIuInBm0W0toN9X5fRcoSm1tBSxPqyQRB45B1rLmoCANocrYoAU/fhk2fGRN2Yv6XG7Pu2EtATJhTOo3pkijgmq1T/0GLIWiLIA1F4+/ydMZv64suytHaw8xrCFzTgQML00GQ9CUS+OBVbnXbUoiiR3dSCgHFvNENR1+QfF9+c1oo/yoVE6Bk6WcnR1MFd0J9Zh08OYHDdcTgiv";
+            var client = ticket.Client<DClientTicket<string>>();
+            return await Task.FromResult(Json(client));
+            //const string id = "70d8f270f4784d599b9425783bfdea67";
+            //var t = await _accountContract.QueryById(id);
+            //var logger = LogManager.Logger<DemoController>();
+            //logger.Info(t);
+            //await _accountContract.Update(id, "罗勇", null);
+            //t = await _accountContract.QueryById(id);
+            //return DResult.Succ(t);
             //var dto = _connection.Connection("icb_main").QueryFirstOrDefault(
             //    "select * from t_account order by create_time desc");
 

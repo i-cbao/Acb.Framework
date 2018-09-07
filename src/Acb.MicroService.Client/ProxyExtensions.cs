@@ -2,7 +2,6 @@
 using Acb.Core.Domain;
 using Acb.Core.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
 
 namespace Acb.MicroService.Client
 {
@@ -17,19 +16,20 @@ namespace Acb.MicroService.Client
             return ProxyService.Proxy<T>();
         }
 
-        public static IServiceCollection AddProxy(this IServiceCollection services)
+        public static IServiceCollection AddProxy(IServiceCollection services)
         {
-            services.AddSingleton(provider =>
-            {
-                var types = provider.GetService<ITypeFinder>()
-                    .Find(t => t.IsAssignableFrom(typeof(IMicroService)) && t.IsInterface);
-                var list = new List<object>();
-                foreach (var type in types)
-                {
-                    list.Add(ProxyService.Proxy(type));
-                }
-                return list;
-            });
+            //services.Add(provider =>
+            //{
+            //    var serviceType = typeof(IMicroService);
+            //    var types = provider.GetService<ITypeFinder>()
+            //        .Find(t => serviceType.IsAssignableFrom(t) && t != serviceType);
+            //    foreach (var type in types)
+            //    {
+            //        services.AddSingleton(type, ProxyService.Proxy(type));
+            //    }
+
+            //    return services;
+            //});
             return services;
         }
     }

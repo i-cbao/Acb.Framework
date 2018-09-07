@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Core.Timing;
 using Microsoft.AspNetCore.Http;
@@ -97,15 +98,18 @@ namespace Acb.WebApi
                 if (string.IsNullOrWhiteSpace(str))
                     return default(TTicket);
                 var list = str.Split('_');
-                if (list.Length != 2)
+                //fixed json字符串中包含下划线时报错
+                if (list.Length < 2)
                     return default(TTicket);
-                var client = JsonHelper.Json<TTicket>(list[1]);
+                var json = str.Substring(list[0].Length + 1);
+                var client = JsonHelper.Json<TTicket>(json);
                 return !string.Equals(list[0], client.Ticket, StringComparison.CurrentCultureIgnoreCase)
                     ? default(TTicket)
                     : client;
             }
-            catch
+            catch (Exception ex)
             {
+                LogManager.Logger(typeof(ClientTicketHelper)).Error(ex.Message, ex);
                 return default(TTicket);
             }
         }
