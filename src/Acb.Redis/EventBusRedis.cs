@@ -3,6 +3,7 @@ using Acb.Core.Logging;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,7 +45,7 @@ namespace Acb.Redis
             return Task.CompletedTask;
         }
 
-        public override Task Publish(string key, object @event)
+        public override Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null)
         {
             var message = JsonConvert.SerializeObject(@event);
             var body = Encoding.UTF8.GetBytes(message);
@@ -54,23 +55,6 @@ namespace Acb.Redis
         public void Dispose()
         {
             _subscriber.UnsubscribeAll();
-        }
-
-        private async Task ProcessEvent(string eventName, string message)
-        {
-            if (SubscriptionManager.HasSubscriptionsForEvent(eventName))
-            {
-                var eventType = SubscriptionManager.GetEventTypeByName(eventName);
-                var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
-                var handlers = SubscriptionManager.GetHandlersForEvent(eventName);
-
-                foreach (var handlerfactory in handlers)
-                {
-                    var handler = handlerfactory.DynamicInvoke();
-                    var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
-                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
-                }
-            }
         }
     }
 }

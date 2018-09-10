@@ -1,11 +1,11 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.EventBus;
+﻿using Acb.Core.EventBus;
 using Acb.Core.Exceptions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using Newtonsoft.Json;
 using ons;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Acb.RocketMq
@@ -71,13 +71,14 @@ namespace Acb.RocketMq
             return Task.CompletedTask;
         }
 
-        public override Task Publish(string key, object @event)
+        public override Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null)
         {
             CreateProducer();
             var message = JsonConvert.SerializeObject(@event);
             using (var msg = new Message(_config.Topic, key, message))
             {
                 msg.setMsgID(IdentityHelper.Guid32);
+                msg.setStartDeliverTime(delay);
                 var ons = _producer.send(msg);
             }
 
@@ -114,25 +115,6 @@ namespace Acb.RocketMq
                     logger.Error(ex.Message, ex);
                     return ons.Action.ReconsumeLater;
 
-                }
-            }
-
-            private static async Task ProcessEvent(string eventName, string message)
-            {
-                var manager = CurrentIocManager.Resolve<ISubscriptionManager>();
-
-                if (manager.HasSubscriptionsForEvent(eventName))
-                {
-                    var eventType = manager.GetEventTypeByName(eventName);
-                    var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
-                    var handlers = manager.GetHandlersForEvent(eventName);
-
-                    foreach (var handlerfactory in handlers)
-                    {
-                        var handler = handlerfactory.DynamicInvoke();
-                        var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
-                        await (Task)concreteType.GetMethod("Handle").Invoke(handler, new[] { integrationEvent });
-                    }
                 }
             }
         }

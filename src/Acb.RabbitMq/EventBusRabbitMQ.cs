@@ -23,9 +23,9 @@ namespace Acb.RabbitMq
         private readonly IRabbitMqConnection _connection;
         private readonly ILogger _logger;
 
-
         private IModel _consumerChannel;
         private string _queueName;
+        private const string DelayTimesKey = "delay_times";
 
         public EventBusRabbitMq(IRabbitMqConnection connection, ISubscriptionManager subsManager) : base(subsManager)
         {
@@ -41,7 +41,7 @@ namespace Acb.RabbitMq
         /// <returns></returns>
         private static SubscriptionAttribute GetSubscription(Type type)
         {
-            var attr = type.GetCustomAttribute<SubscriptionAttribute>() ?? new SubscriptionAttribute();
+            var attr = type.GetCustomAttribute<SubscriptionAttribute>() ?? new SubscriptionAttribute(type.FullName);
             if (string.IsNullOrWhiteSpace(attr.Queue))
                 attr.Queue = type.FullName;
             return attr;
@@ -65,7 +65,7 @@ namespace Acb.RabbitMq
             }
         }
 
-        public override async Task Publish(string key, object @event)
+        public override async Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null)
         {
             if (!_connection.IsConnected)
             {
@@ -80,19 +80,111 @@ namespace Acb.RabbitMq
             {
                 using (var channel = _connection.CreateModel())
                 {
-                    //声明Exchange
-                    channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
                     var message = @event.GetType().IsSimpleType()
                         ? @event.ToString()
                         : JsonConvert.SerializeObject(@event);
                     var body = Encoding.UTF8.GetBytes(message);
                     var prop = channel.CreateBasicProperties();
                     prop.DeliveryMode = 2;
-                    channel.BasicPublish(_brokerName, key, prop, body);
+                    if (headers != null)
+                    {
+                        if (prop.Headers == null)
+                            prop.Headers = new Dictionary<string, object>();
+                        foreach (var header in headers)
+                        {
+                            prop.Headers.AddOrUpdate(header.Key, header.Value);
+                        }
+                    }
+                    //声明Exchange
+                    channel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
+                    if (delay > 0)
+                    {
+                        channel.DelayPublish(_brokerName, key, body, delay, prop);
+                    }
+                    else
+                    {
+                        channel.BasicPublish(_brokerName, key, prop, body);
+                    }
                 }
 
                 await Task.CompletedTask;
             });
+        }
+
+        private static TimeSpan DelayRule(int times)
+        {
+            if (times <= 3)
+                return TimeSpan.FromSeconds(Math.Pow(10, times));
+            return TimeSpan.FromHours(times == 4 ? 12 : 24);
+        }
+
+        /// <summary> 定义并绑定队列 </summary>
+        /// <param name="queue"></param>
+        /// <param name="key"></param>
+        private void DeclareAndBindQueue(string queue, string key)
+        {
+            _consumerChannel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
+            _consumerChannel.DeclareWithDlx(queue, _brokerName, key);
+        }
+
+        /// <summary> 接收消息 </summary>
+        /// <param name="queue">队列</param>
+        /// <param name="ea"></param>
+        /// <returns></returns>
+        private async Task ReceiveMessage(string queue, BasicDeliverEventArgs ea)
+        {
+            //var name = ea.RoutingKey;
+            var message = Encoding.UTF8.GetString(ea.Body);
+            try
+            {
+                await ProcessEvent(queue, message);
+                _consumerChannel.BasicAck(ea.DeliveryTag, false);
+            }
+            catch (Exception ex)
+            {
+                //非业务异常,可重新入队
+                if (ex is BusiException)
+                {
+                    _consumerChannel.BasicNack(ea.DeliveryTag, false, false);
+                    return;
+                }
+
+                var times = 0;
+                if (ea.BasicProperties.Headers != null &&
+                    ea.BasicProperties.Headers.TryGetValue(DelayTimesKey, out var t))
+                {
+                    times = t.CastTo(0);
+                }
+
+                if (times > 5)
+                {
+                    _consumerChannel.BasicNack(ea.DeliveryTag, false, true);
+                    return;
+                }
+
+                //延时入列
+                times++;
+                _consumerChannel.BasicAck(ea.DeliveryTag, false);
+
+                if (!_connection.IsConnected)
+                    _connection.TryConnect();
+                using (var channel = _connection.CreateModel())
+                {
+                    var prop = _consumerChannel.CreateBasicProperties();
+                    prop.DeliveryMode = 2;
+                    prop.Headers = prop.Headers ?? new Dictionary<string, object>();
+                    prop.Headers.Add(DelayTimesKey, times);
+                    var delay = (long)DelayRule(times).TotalMilliseconds;
+                    //绑定队列路由
+                    channel.QueueBind(queue, _brokerName, queue);
+
+                    channel.DelayPublish(_brokerName, queue, ea.Body, delay, prop);
+                }
+
+                //_logger.Error(ex.Message, ex);
+                _logger.Warn(ex.GetBaseException().Message);
+
+            }
         }
 
         public override Task Subscribe<T, TH>(Func<TH> handler)
@@ -101,64 +193,32 @@ namespace Acb.RabbitMq
 
             var subscription = GetSubscription(typeof(TH));
             var queue = subscription.Queue;
-            var key = !string.IsNullOrWhiteSpace(subscription.RouteKey)
-                ? subscription.RouteKey
-                : GetEventKey(typeof(T));
-
-            var containsKey = SubscriptionManager.HasSubscriptionsForEvent(key);
-            if (!containsKey)
+            var dataType = typeof(T);
+            string key;
+            if (typeof(DEvent).IsAssignableFrom(dataType))
             {
-                if (!_connection.IsConnected)
-                {
-                    _connection.TryConnect();
-                }
-
-                var consumer = new EventingBasicConsumer(_consumerChannel);
-                consumer.Received += async (model, ea) =>
-                {
-                    var name = ea.RoutingKey;
-                    var message = Encoding.UTF8.GetString(ea.Body);
-                    try
-                    {
-                        await ProcessEvent(name, message);
-                        _consumerChannel.BasicAck(ea.DeliveryTag, false);
-                    }
-                    catch (Exception ex)
-                    {
-                        //非业务异常,可重新入队
-                        _consumerChannel.BasicNack(ea.DeliveryTag, false, !(ex is BusiException));
-                        _logger.Error(ex.Message, ex);
-                    }
-                };
-
-                var dlxExchange = $"{_brokerName}_dlx";
-                var dlxQueue = $"{queue}_dlx";
-                var args = new Dictionary<string, object>
-                {
-                    {"x-dead-letter-exchange", dlxExchange},
-                    {"x-dead-letter-routing-key", key}
-                };
-
-                //死信队列
-                //1.消息被拒绝，并且设置ReQueue参数false；
-                //2.消息过期；
-                //3.队列打到最大长度；
-                _consumerChannel.ExchangeDeclare(dlxExchange, ExchangeType.Direct, true);
-                //声明死信队列
-                _consumerChannel.QueueDeclare(dlxQueue, true, false, false, args);
-                _consumerChannel.QueueBind(dlxQueue, dlxExchange, key, null);
-
-
-                _consumerChannel.ExchangeDeclare(_brokerName, ExchangeType.Topic, true);
-                //声明队列
-                _consumerChannel.QueueDeclare(queue, subscription.Durable, subscription.Exclusive,
-                    subscription.AutoDelete, args);
-                _consumerChannel.QueueBind(queue, _brokerName, key, null);
-
-                _consumerChannel.BasicConsume(queue, false, consumer);
+                key = !string.IsNullOrWhiteSpace(subscription.RouteKey)
+                    ? subscription.RouteKey
+                    : GetEventKey(typeof(T));
+            }
+            else
+            {
+                key = string.IsNullOrWhiteSpace(subscription.RouteKey) ? subscription.Queue : subscription.RouteKey;
             }
 
-            SubscriptionManager.AddSubscription<T, TH>(handler, key);
+            DeclareAndBindQueue(queue, key);
+            if (!_connection.IsConnected)
+            {
+                _connection.TryConnect();
+            }
+
+            var consumer = new EventingBasicConsumer(_consumerChannel);
+
+            consumer.Received += async (model, ea) => await ReceiveMessage(queue, ea);
+
+            _consumerChannel.BasicConsume(queue, false, consumer);
+
+            SubscriptionManager.AddSubscription<T, TH>(handler, queue);
             return Task.CompletedTask;
         }
 
@@ -186,25 +246,6 @@ namespace Acb.RabbitMq
             };
 
             return channel;
-        }
-
-        private async Task ProcessEvent(string eventName, string message)
-        {
-            if (SubscriptionManager.HasSubscriptionsForEvent(eventName))
-            {
-                var eventType = SubscriptionManager.GetEventTypeByName(eventName);
-                var integrationEvent = eventType.IsSimpleType()
-                    ? message.CastTo(eventType)
-                    : JsonConvert.DeserializeObject(message, eventType);
-                var handlers = SubscriptionManager.GetHandlersForEvent(eventName);
-
-                foreach (var handlerfactory in handlers)
-                {
-                    var handler = handlerfactory.DynamicInvoke();
-                    var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
-                    await (Task)concreteType.GetMethod("Handle").Invoke(handler, new object[] { integrationEvent });
-                }
-            }
         }
     }
 }

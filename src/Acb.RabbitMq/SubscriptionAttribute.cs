@@ -7,20 +7,17 @@ namespace Acb.RabbitMq
     [AttributeUsage(AttributeTargets.Class)]
     public class SubscriptionAttribute : Attribute
     {
-        public SubscriptionAttribute(string queue = null)
+        /// <summary> 订阅属性 </summary>
+        /// <param name="queue">队列名称</param>
+        /// <param name="routeKey">路由键,默认为事件属性的RouteKey</param>
+        public SubscriptionAttribute(string queue, string routeKey = null)
         {
             Queue = queue;
+            RouteKey = routeKey;
         }
         /// <summary> 队列名称 </summary>
         public string Queue { get; set; }
 
         public string RouteKey { get; set; }
-        /// <summary> 持久化(默认：true) </summary>
-        public bool Durable { get; set; } = true;
-
-        /// <summary> 自动删除 </summary>
-        public bool AutoDelete { get; set; }
-        /// <summary> 专用的 </summary>
-        public bool Exclusive { get; set; }
     }
 }

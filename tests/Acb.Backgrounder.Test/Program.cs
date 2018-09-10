@@ -5,7 +5,6 @@ using Acb.Demo.Contracts.EventBus;
 using Acb.Framework;
 using Acb.RabbitMq;
 using Autofac;
-using Microsoft.AspNetCore.SignalR.Client;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -17,19 +16,19 @@ namespace Acb.Backgrounder.Test
 {
     internal class Program : ConsoleHost
     {
-        private static HubConnection _hubConnection;
+        //private static HubConnection _hubConnection;
         private static ILogger _logger;
         private static void Main(string[] args)
         {
             //const string url = "http://localhost:53454/config_hub";
-            const string url = "http://192.168.0.252:6306/config_hub";
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(url, opts =>
-                {
-                    opts.Headers.Add("Authorization",
-                        "acb EQS9LTGKzNOHiCn0+8avXJIDCiLW/KtraWRAnl1874nNBAcZ0nPd8KZXUXLC+OnCevPWKVQzju/ZLcSExoq+ps3pwpBGpKtK0ZMOfQoPsu4uvhyRvbuU66eaYaH6w1sPMDLpmxHwBi3C8Mc3bdk4Bi1EC8SYlPct22K+gLG6vAM=");
-                })
-                .Build();
+            //const string url = "http://192.168.0.252:6306/config_hub";
+            //_hubConnection = new HubConnectionBuilder()
+            //    .WithUrl(url, opts =>
+            //    {
+            //        opts.Headers.Add("Authorization",
+            //            "acb EQS9LTGKzNOHiCn0+8avXJIDCiLW/KtraWRAnl1874nNBAcZ0nPd8KZXUXLC+OnCevPWKVQzju/ZLcSExoq+ps3pwpBGpKtK0ZMOfQoPsu4uvhyRvbuU66eaYaH6w1sPMDLpmxHwBi3C8Mc3bdk4Bi1EC8SYlPct22K+gLG6vAM=");
+            //    })
+            //    .Build();
             _logger = LogManager.Logger<Program>();
             Command += OnCommand;
             MapServices += OnMapServices;
@@ -39,31 +38,31 @@ namespace Acb.Backgrounder.Test
 
         private static void OnUseServices(IContainer provider)
         {
-            _hubConnection.On<object>("UPDATE", config =>
-            {
-                _logger.Info(config);
-            });
-            try
-            {
-                _hubConnection.StartAsync().Wait();
-                _hubConnection.SendAsync("Subscript", new[] { "basic" }, "dev");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex.Message, ex);
-            }
+            //_hubConnection.On<object>("UPDATE", config =>
+            //{
+            //    _logger.Info(config);
+            //});
+            //try
+            //{
+            //    _hubConnection.StartAsync().Wait();
+            //    _hubConnection.SendAsync("Subscript", new[] { "basic" }, "dev");
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.Error(ex.Message, ex);
+            //}
             //开启订阅
             provider.Resolve<ISubscriptionAdapter>().SubscribeAt();
 
             //gps
-            var queue = provider.Resolve<IMessageQueue>();
-            //var list = queue.Receive<string>(2).Result;
-            //_logger.Info(list);
-            queue.Subscibe<string>(t =>
-            {
-                _logger.Info(t);
-                //throw new Exception("dds");
-            });
+            //var queue = provider.Resolve<IMessageQueue>();
+            ////var list = queue.Receive<string>(2).Result;
+            ////_logger.Info(list);
+            //queue.Subscibe<string>(t =>
+            //{
+            //    _logger.Info(t);
+            //    //throw new Exception("dds");
+            //});
         }
 
         private static void OnMapServices(ContainerBuilder builder)
@@ -96,10 +95,12 @@ namespace Acb.Backgrounder.Test
         private static void OnCommand(string cmd, IContainer provider)
         {
             var bus = provider.Resolve<IEventBus>();
-            bus.Publish(new UserEvent { Name = cmd });
-            bus.Publish(new TestEvent { Content = cmd });
-            var queue = provider.Resolve<IMessageQueue>();
-            queue.Send(cmd);
+            bus.Publish(new UserEvent { Name = cmd }, TimeSpan.FromSeconds(2));
+            //bus.Publish("icb_framework_simple_queue", cmd, 2 * 1000);
+            _logger.Info($"Send Message:{cmd}");
+            bus.Publish(new TestEvent { Content = cmd }, TimeSpan.FromSeconds(5));
+            //var queue = provider.Resolve<IMessageQueue>();
+            //queue.Send(cmd);
         }
 
         private static async Task StartScheduler()
