@@ -1,12 +1,7 @@
-﻿using Acb.Core;
-using Acb.Core.Dependency;
-using Acb.Core.Reflection;
-using Acb.Framework;
-using Acb.MicroService.Client;
+﻿using Acb.MicroService.Client;
 using Acb.Payment;
-using Acb.Redis;
+using Acb.RabbitMq;
 using Acb.WebApi.Test.Hubs;
-using Autofac;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,11 +17,17 @@ namespace Acb.WebApi.Test
         /// <param name="services"></param>
         protected override void MapServices(IServiceCollection services)
         {
-            services.AddRedisEventBus();
+            services.AddRabbitMqEventBus();
             services.AddPayment();
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
             services.AddSignalR();
+            //services.AddSingleton(provider =>
+            //{
+            //    var finder = provider.GetService<ITypeFinder>();
+            //    return ProxyService.Proxy<IDemoService>();
+            //});
+            services.AddMicroClient();
             base.MapServices(services);
         }
 

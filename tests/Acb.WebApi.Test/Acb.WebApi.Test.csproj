@@ -47,12 +47,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Confluent.Kafka">
-      <HintPath>C:\Users\shay\.nuget\packages\confluent.kafka\0.11.5\lib\netstandard1.3\Confluent.Kafka.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

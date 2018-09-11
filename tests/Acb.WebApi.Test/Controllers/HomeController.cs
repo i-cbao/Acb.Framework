@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.Core.Dependency;
+using Acb.Core.EventBus;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -23,6 +25,7 @@ namespace Acb.WebApi.Test.Controllers
         {
             _messageHub = mhub;
             _logger = LogManager.Logger<HomeController>();
+            var bus = CurrentIocManager.Resolve<IEventBus>();
         }
         // GET api/values
         [HttpGet]
@@ -84,7 +87,7 @@ namespace Acb.WebApi.Test.Controllers
             var dt = new DataTable("sheet");
             dt.Columns.Add("姓名", typeof(string));
             dt.Rows.Add("shay");
-            await ExcelHelper.Export(new DataSet{ Tables = { dt } }, "在口袋里的.xls");
+            await ExcelHelper.Export(new DataSet { Tables = { dt } }, "在口袋里的.xls");
         }
     }
 }

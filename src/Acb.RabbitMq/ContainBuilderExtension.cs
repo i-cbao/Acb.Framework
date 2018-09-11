@@ -26,7 +26,7 @@ namespace Acb.RabbitMq
         /// <param name="services"></param>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static IServiceCollection AddRabbitMqEventBus(this IServiceCollection services, RabbitMqConfig config = null)
+        public static IServiceCollection AddRabbitMqEventBus(this IServiceCollection services, RabbitMqConfig config)
         {
             services.TryAddSingleton<IEventBus>(provider =>
             {

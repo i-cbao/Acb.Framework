@@ -1,12 +1,10 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
-using Acb.Core.Reflection;
+﻿using Acb.Core.Extensions;
 using System;
 
-namespace Acb.Framework
+namespace Acb.Core.Reflection
 {
     /// <summary> 默认程序集查找器 </summary>
-    public class DAssemblyFinder : DefaultAssemblyFinder, ISingleDependency
+    public class DAssemblyFinder : DefaultAssemblyFinder
     {
         private const string FrameworkName = "Acb.";
         private static readonly string BaseAssemblyName;
