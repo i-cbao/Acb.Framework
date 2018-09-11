@@ -1,6 +1,6 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
-using Acb.Core.Domain;
+using Acb.Core.Data;
 using Acb.Core.Helper;
 using Acb.Core.Timing;
 using Acb.Dapper;
@@ -12,17 +12,12 @@ using Dapper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Spear.Domain
 {
     /// <summary> 任务仓储 </summary>
     public class JobRepository : DapperRepository<TJob>
     {
-        public JobRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
-        {
-        }
-
         /// <summary> 查询所有任务 </summary>
         /// <returns></returns>
         public async Task<PagedList<JobDto>> QueryJobs(string keyword = null, JobStatus status = JobStatus.All, int page = 1, int size = 10)

@@ -9,6 +9,9 @@ namespace Acb.Dapper.Domain
     public partial class DapperRepository<T> : DRepository
         where T : IEntity
     {
+        /// <summary> 默认构造函数 </summary>
+        public DapperRepository() : base() { }
+
         /// <summary> 构造 </summary>
         /// <param name="unitOfWork"></param>
         public DapperRepository(IUnitOfWork unitOfWork) : base(unitOfWork)

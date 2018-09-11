@@ -1,4 +1,5 @@
-﻿using Acb.Core.Dependency;
+﻿using Acb.Core.Data;
+using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using System;
 using System.Data;
@@ -20,6 +21,10 @@ namespace Acb.Dapper.Domain
         protected DRepository(IUnitOfWork unitOfWork)
         {
             UnitOfWork = unitOfWork;
+        }
+
+        protected DRepository() : this(CurrentIocManager.Resolve<IUnitOfWork>())
+        {
         }
 
         /// <summary> 建议使用Ioc注入的方式 </summary>

@@ -1,9 +1,9 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Data;
+using Acb.Core.Extensions;
 using MySql.Data.MySqlClient;
 using System;
 using System.Data;
 using System.Text.RegularExpressions;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Dapper.Mysql
 {

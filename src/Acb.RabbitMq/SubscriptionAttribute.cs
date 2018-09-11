@@ -17,7 +17,7 @@ namespace Acb.RabbitMq
         }
         /// <summary> 队列名称 </summary>
         public string Queue { get; set; }
-
+        /// <summary> 路由键 </summary>
         public string RouteKey { get; set; }
     }
 }

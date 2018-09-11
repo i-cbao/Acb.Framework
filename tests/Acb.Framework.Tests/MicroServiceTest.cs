@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Data;
 using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
@@ -7,7 +8,6 @@ using Acb.Core.Logging;
 using Acb.Core.Reflection;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
-using Acb.Dapper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
@@ -67,32 +67,33 @@ namespace Acb.Framework.Tests
         {
 
             var logger = LogManager.Logger<MicroServiceTest>();
-            var localResult = CodeTimer.Time("local", 100, async () =>
+            var localResult = CodeTimer.Time("local", 1, async () =>
              {
                  try
                  {
                      var dict = await _localService.Areas("510100");
+                     Print(dict);
                  }
                  catch (Exception ex)
                  {
                      logger.Error(ex.Message, ex);
                      throw;
                  }
-             }, 10);
-            var result = CodeTimer.Time("micro", 100, async () =>
-            {
-                try
-                {
-                    var dict = await _microService.Areas("510100");
-                }
-                catch (Exception ex)
-                {
-                    logger.Error(ex.Message, ex);
-                    throw;
-                }
-            }, 10);
+             }, 1);
+            //var result = CodeTimer.Time("micro", 100, async () =>
+            //{
+            //    try
+            //    {
+            //        var dict = await _microService.Areas("510100");
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        logger.Error(ex.Message, ex);
+            //        throw;
+            //    }
+            //}, 10);
             Print(localResult.ToString());
-            Print(result.ToString());
+            //Print(result.ToString());
 
             Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
         }

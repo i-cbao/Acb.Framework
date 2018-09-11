@@ -10,6 +10,7 @@ using Quartz.Impl;
 using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
+using Acb.Core.Timing;
 using ILogger = Acb.Core.Logging.ILogger;
 
 namespace Acb.Backgrounder.Test
@@ -98,7 +99,7 @@ namespace Acb.Backgrounder.Test
             bus.Publish(new UserEvent { Name = cmd }, TimeSpan.FromSeconds(2));
             //bus.Publish("icb_framework_simple_queue", cmd, 2 * 1000);
             _logger.Info($"Send Message:{cmd}");
-            bus.Publish(new TestEvent { Content = cmd }, TimeSpan.FromSeconds(5));
+            bus.Publish(new TestEvent { Content = cmd }, Clock.Now.AddMinutes(5));
             //var queue = provider.Resolve<IMessageQueue>();
             //queue.Send(cmd);
         }

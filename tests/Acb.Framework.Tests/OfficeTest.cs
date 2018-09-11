@@ -13,6 +13,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Core.Data;
 
 namespace Acb.Framework.Tests
 {

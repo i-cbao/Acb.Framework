@@ -21,8 +21,6 @@ namespace Acb.Demo.Business
 
         public async Task<DemoDto> Hello(string id, DemoInputDto dto)
         {
-            this.Repository<AreaRepository>();
-            this.Proxy<IDemoService>();
             var t = new DemoDto
             {
                 Id = id,

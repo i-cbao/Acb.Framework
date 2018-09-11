@@ -7,12 +7,13 @@
     <Product>爱车保 - Office组件辅助类</Product>
     <Description>爱车保 - Office组件辅助类</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.4.0</Version>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
+    <Version>1.5.0</Version>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Acb.Office.xml</DocumentationFile>
+    <DocumentationFile>..\..\_pkgs\netstandard2.0\Acb.Office.xml</DocumentationFile>
+    <OutputPath>..\..\_pkgs\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

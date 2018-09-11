@@ -1,4 +1,4 @@
-﻿using Acb.Core.Domain;
+﻿using Acb.Core.Data;
 using Acb.Core.Extensions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
@@ -6,13 +6,12 @@ using Acb.Demo.Business.Domain.Entities;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Acb.Dapper.Adapters;
 
 namespace Acb.Demo.Business.Domain
 {
     public class AreaRepository : DapperRepository<TAreas>
     {
-        public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork) { }
+        //public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork) { }
         public async Task<IEnumerable<TAreas>> QueryAreaAsync(string parentCode = null)
         {
             var type = typeof(TAreas);

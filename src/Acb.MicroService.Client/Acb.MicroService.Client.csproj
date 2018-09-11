@@ -7,16 +7,17 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - 微服务框架服务消费者</Product>
     <Description>爱车保 - 微服务框架服务消费者</Description>
-    <Version>1.4.2</Version>
+    <Version>1.5.0</Version>
     <Title>爱车保 - 微服务框架服务消费者</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
-    <AssemblyVersion>1.4.2.0</AssemblyVersion>
-    <FileVersion>1.4.2.0</FileVersion>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Acb.MicroService.Client.xml</DocumentationFile>
+    <DocumentationFile>..\..\_pkgs\netstandard2.0\Acb.MicroService.Client.xml</DocumentationFile>
+    <OutputPath>..\..\_pkgs\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

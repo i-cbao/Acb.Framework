@@ -1,7 +1,7 @@
-﻿using Acb.Core.Extensions;
-using System;
+﻿using System;
+using Acb.Core.Extensions;
 
-namespace Acb.Dapper.Config
+namespace Acb.Core.Data.Config
 {
 
     [Serializable]

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
 
-namespace Acb.Dapper.Adapters
+namespace Acb.Core.Data
 {
     public interface IDbConnectionAdapter
     {

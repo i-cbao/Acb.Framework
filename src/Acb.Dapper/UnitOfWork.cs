@@ -1,4 +1,5 @@
-﻿using Acb.Core.Domain;
+﻿using Acb.Core.Data;
+using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
 using System.Data;
@@ -73,27 +74,47 @@ namespace Acb.Dapper
             var wasCloesd = Conntection.State == ConnectionState.Closed;
             if (wasCloesd)
                 Conntection.Open();
-            _transaction = level.HasValue ? Conntection.BeginTransaction(level.Value) : Conntection.BeginTransaction();
+            var disposed = false;
+            if (_transaction == null)
+            {
+                disposed = true;
+                _transaction = level.HasValue
+                    ? Conntection.BeginTransaction(level.Value)
+                    : Conntection.BeginTransaction();
+            }
+
             try
             {
                 var result = func.Invoke();
                 var task = result as Task;
                 task?.GetAwaiter().GetResult();
-                _transaction.Commit();
-                _logger.Debug("UnitOfWork Transaction Commit");
+                if (disposed)
+                {
+                    _transaction.Commit();
+                    _logger.Debug("UnitOfWork Transaction Commit");
+                }
+
                 return result;
             }
             catch
             {
-                _transaction.Rollback();
-                _logger.Warn("UnitOfWork Transaction Rollback");
+                if (disposed)
+                {
+                    _transaction.Rollback();
+                    _logger.Warn("UnitOfWork Transaction Rollback");
+                }
+
                 throw;
             }
             finally
             {
-                _transaction.Dispose();
-                _transaction = null;
-                _logger.Debug("UnitOfWork Transaction Dispose");
+                if (disposed)
+                {
+                    _transaction.Dispose();
+                    _transaction = null;
+                    _logger.Debug("UnitOfWork Transaction Dispose");
+                }
+
                 if (wasCloesd)
                     Conntection.Close();
             }

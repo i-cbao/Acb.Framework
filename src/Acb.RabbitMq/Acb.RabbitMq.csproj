@@ -7,8 +7,15 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - RabbitMQ</Product>
     <Description>爱车保 - RabbitMQ</Description>
-    <Version>1.4.2</Version>
+    <Version>1.5.0</Version>
     <Copyright>爱车保 © 2018</Copyright>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>..\..\_pkgs\netstandard2.0\Acb.RabbitMq.xml</DocumentationFile>
+    <OutputPath>..\..\_pkgs\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

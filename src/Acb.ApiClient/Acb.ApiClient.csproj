@@ -10,6 +10,12 @@
     <Title>Api接口客户端项目</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
+    <Version>1.5.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>..\..\_pkgs\netstandard2.0\Acb.ApiClient.xml</DocumentationFile>
+    <OutputPath>..\..\_pkgs\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
