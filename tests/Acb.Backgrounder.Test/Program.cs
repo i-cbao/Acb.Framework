@@ -44,7 +44,7 @@ namespace Acb.Backgrounder.Test
         private static void OnUseServiceProvider(IServiceProvider provider)
         {
             //开启订阅
-            provider.SubscriptAt();
+            provider.SubscribeAt();
         }
 
         private static void OnUseServices(IContainer provider)

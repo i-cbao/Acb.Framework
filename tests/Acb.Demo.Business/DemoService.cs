@@ -1,12 +1,9 @@
 ﻿using Acb.Core;
-using Acb.Core.Exceptions;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
-using Acb.Dapper;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
-using Acb.MicroService.Client;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,7 +38,7 @@ namespace Acb.Demo.Business
 
         public async Task<Dictionary<string, object>> Dict(string[] ids)
         {
-            throw new BusiException("dist error");
+            //throw new BusiException("dist error");
             return await Task.FromResult(ids.ToDictionary(k => k, v => (object)v));
         }
 

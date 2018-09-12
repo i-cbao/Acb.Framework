@@ -19,6 +19,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Acb.Dapper;
 
 namespace Acb.Framework.Tests
 {
@@ -54,19 +55,19 @@ namespace Acb.Framework.Tests
         {
 
             var logger = LogManager.Logger<MicroServiceTest>();
-            var localResult = CodeTimer.Time("local", 1, async () =>
-             {
-                 try
-                 {
-                     var dict = await _localService.Areas("510100");
-                     Print(dict);
-                 }
-                 catch (Exception ex)
-                 {
-                     logger.Error(ex.Message, ex);
-                     throw;
-                 }
-             }, 1);
+            var localResult = CodeTimer.Time("local", 1, () =>
+            {
+                try
+                {
+                    var dict = _localService.Areas("510100").GetAwaiter().GetResult();
+                    Print(dict);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.Message, ex);
+                    throw;
+                }
+            }, 5);
             //var result = CodeTimer.Time("micro", 100, async () =>
             //{
             //    try
@@ -82,7 +83,7 @@ namespace Acb.Framework.Tests
             Print(localResult.ToString());
             //Print(result.ToString());
 
-            Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
+            Print(CurrentIocManager.Resolve<ConnectionFactory>().ToString());
         }
 
         private async Task<WebResponse> Request(HttpMethod method, string url, object data = null)

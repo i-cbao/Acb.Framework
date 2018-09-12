@@ -20,14 +20,5 @@ namespace Acb.Redis
             });
             return services;
         }
-
-        /// <summary> 开启订阅 </summary>
-        /// <param name="provider"></param>
-        /// <returns></returns>
-        public static IServiceProvider SubscriptAt(this IServiceProvider provider)
-        {
-            provider.GetService<ISubscriptionAdapter>().SubscribeAt();
-            return provider;
-        }
     }
 }

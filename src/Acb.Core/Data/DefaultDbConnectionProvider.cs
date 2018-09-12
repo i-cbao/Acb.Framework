@@ -4,7 +4,6 @@ using System;
 using System.Data;
 using System.Diagnostics;
 using System.Text;
-using Acb.Core.Data.Adapters;
 
 namespace Acb.Core.Data
 {

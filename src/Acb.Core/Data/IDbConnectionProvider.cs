@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Acb.Core.Dependency;
+using System;
 using System.Data;
-using Acb.Core.Dependency;
 
 namespace Acb.Core.Data
 {

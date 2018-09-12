@@ -32,6 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Data\CacheDbConnectionProvider.cs" />
+    <Compile Remove="Data\ConnectionStruct.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Helper\RegexHelper.cs~RFf13479.TMP" />
   </ItemGroup>
 

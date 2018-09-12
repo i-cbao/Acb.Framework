@@ -2,6 +2,7 @@
 using Acb.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Acb.Core.EventBus;
 
 namespace Acb.Demo.MicroService
 {
@@ -15,7 +16,7 @@ namespace Acb.Demo.MicroService
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.SubscriptAt();
+            provider.SubscribeAt();
             base.UseServices(provider);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Data;
+using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
@@ -9,11 +10,12 @@ namespace Acb.Dapper
 {
     public class UnitOfWork : IUnitOfWork
     {
+        /// <summary> 连接提供者 </summary>
         public IDbConnectionProvider ConnectionProvider { private get; set; }
         private readonly string _configName;
         private readonly string _connectionString;
         private readonly string _providerName;
-
+        private static readonly object LockObj = new object();
 
         private readonly ILogger _logger;
 
@@ -30,17 +32,35 @@ namespace Acb.Dapper
         }
 
         private IDbConnection _connection;
+
         /// <summary> 当前数据库连接 </summary>
         public IDbConnection Conntection
         {
             get
             {
-                if (_connection != null)
-                    return _connection;
-                _logger.Debug($"UnitOfWork Create Connection [{GetType().Name}]");
+                var factory = CurrentIocManager.Resolve<ConnectionFactory>();
                 if (!string.IsNullOrWhiteSpace(_connectionString))
-                    return _connection = ConnectionProvider.Connection(_connectionString, _providerName);
-                return _connection = ConnectionProvider.Connection(_configName);
+                    return _connection = factory.Connection(_connectionString, _providerName);
+                return _connection = factory.Connection(_configName);
+                //if (_connection == null)
+                //{
+                //    lock (LockObj)
+                //    {
+                //        if (_connection == null)
+                //        {
+                //            //_logger.Debug($"UnitOfWork Create Connection [{GetType().Name}]");
+                //            var factory = CurrentIocManager.Resolve<ConnectionFactory>();
+                //            if (!string.IsNullOrWhiteSpace(_connectionString))
+                //                return _connection = factory.Connection(_connectionString, _providerName);
+                //            return _connection = factory.Connection(_configName);
+                //            //if (!string.IsNullOrWhiteSpace(_connectionString))
+                //            //    return _connection = ConnectionProvider.Connection(_connectionString, _providerName);
+                //            //return _connection = ConnectionProvider.Connection(_configName);
+                //        }
+                //    }
+                //}
+
+                //return _connection;
             }
         }
 

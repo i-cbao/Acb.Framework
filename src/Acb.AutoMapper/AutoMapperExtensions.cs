@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace Acb.AutoMapper
 {
+    /// <summary> 转换类型 </summary>
     public enum MapperType
     {
         /// <summary> 普通 </summary>
@@ -77,7 +78,7 @@ namespace Acb.AutoMapper
         /// <param name="mapperType"></param>
         /// <param name="fromCache"></param>
         /// <returns></returns>
-        public static T MapTo<T>(this object source, MapperType mapperType = MapperType.Normal, bool fromCache = true)
+        public static T MapTo<T>(this object source, MapperType mapperType = MapperType.Normal, bool fromCache = false)
         {
             if (source == null)
                 return default(T);
@@ -102,10 +103,11 @@ namespace Acb.AutoMapper
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <param name="mapperType"></param>
+        /// <param name="fromCache"></param>
         /// <returns></returns>
-        public static List<T> MapTo<T>(this IEnumerable source, MapperType mapperType = MapperType.Normal)
+        public static List<T> MapTo<T>(this IEnumerable source, MapperType mapperType = MapperType.Normal, bool fromCache = false)
         {
-            return ((object)source).MapTo<List<T>>(mapperType);
+            return ((object)source).MapTo<List<T>>(mapperType, fromCache);
         }
 
         /// <summary> 映射成分页类型 </summary>
@@ -113,12 +115,13 @@ namespace Acb.AutoMapper
         /// <typeparam name="TSource"></typeparam>
         /// <param name="pagedList"></param>
         /// <param name="mapperType"></param>
+        /// <param name="fromCache"></param>
         /// <returns></returns>
-        public static PagedList<T> MapPagedList<T, TSource>(this PagedList<TSource> pagedList, MapperType mapperType = MapperType.Normal)
+        public static PagedList<T> MapPagedList<T, TSource>(this PagedList<TSource> pagedList, MapperType mapperType = MapperType.Normal, bool fromCache = false)
         {
             if (pagedList == null)
                 return new PagedList<T>(new List<T>(), 0);
-            var list = pagedList.List.MapTo<T>(mapperType);
+            var list = pagedList.List.MapTo<T>(mapperType, fromCache);
             return new PagedList<T>(list, pagedList.Index, pagedList.Size, pagedList.Total);
         }
 

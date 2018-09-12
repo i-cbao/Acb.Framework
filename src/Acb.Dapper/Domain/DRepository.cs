@@ -24,7 +24,7 @@ namespace Acb.Dapper.Domain
             UnitOfWork = unitOfWork;
         }
 
-        protected DRepository() : this(CurrentIocManager.Resolve<IUnitOfWork>())
+        protected DRepository() : this(CurrentIocManager.Resolve<UnitOfWork>())
         {
         }
 

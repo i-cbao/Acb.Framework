@@ -1,7 +1,6 @@
 ﻿using Acb.Core.EventBus;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
 
 namespace Acb.RabbitMq
 {
@@ -35,15 +34,6 @@ namespace Acb.RabbitMq
                 return new EventBusRabbitMq(connection, manager);
             });
             return services;
-        }
-
-        /// <summary> 开启订阅 </summary>
-        /// <param name="provider"></param>
-        /// <returns></returns>
-        public static IServiceProvider SubscriptAt(this IServiceProvider provider)
-        {
-            provider.GetService<ISubscriptionAdapter>().SubscribeAt();
-            return provider;
         }
     }
 }
