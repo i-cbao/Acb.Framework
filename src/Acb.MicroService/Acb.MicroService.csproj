@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
@@ -16,12 +16,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>..\..\_pkgs\netcoreapp2.0\Acb.MicroService.xml</DocumentationFile>
+    <DocumentationFile>..\..\_pkgs\netstandard2.0\Acb.MicroService.xml</DocumentationFile>
     <OutputPath>..\..\_pkgs\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
     <PackageReference Include="Consul" Version="0.7.2.4" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.3" />

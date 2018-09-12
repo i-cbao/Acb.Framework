@@ -3,6 +3,8 @@ using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Framework.Logging;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Acb.Framework
@@ -17,13 +19,36 @@ namespace Acb.Framework
         {
         }
 
+        protected virtual void MapServices(IServiceCollection services)
+        {
+
+        }
+
+        protected virtual void UseServices(IServiceProvider provider)
+        {
+
+        }
+
         /// <summary> 默认构造函数 </summary>
         protected DTest()
         {
             LogManager.AddAdapter(new ConsoleAdapter());
+            Init();
+        }
+
+        private void Init()
+        {
+            var services = new ServiceCollection();
+            MapServices(services);
             Bootstrap = new DBootstrap();
-            Bootstrap.BuilderHandler += MapServices;
+            Bootstrap.BuilderHandler += builder =>
+            {
+                builder.Populate(services);
+                MapServices(builder);
+            };
             Bootstrap.Initialize();
+            var provider = new AutofacServiceProvider(Bootstrap.Container);
+            UseServices(provider);
         }
 
         /// <summary> 打印数据 </summary>

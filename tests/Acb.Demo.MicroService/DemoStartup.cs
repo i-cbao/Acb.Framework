@@ -1,23 +1,21 @@
-﻿using System;
-using Acb.Core.EventBus;
-using Acb.MicroService;
+﻿using Acb.MicroService;
 using Acb.Redis;
-using Autofac;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Acb.Demo.MicroService
 {
     public class DemoStartup : MicroServiceStartup
     {
-        protected override void MapServices(ContainerBuilder builder)
+        protected override void MapServices(IServiceCollection services)
         {
-            builder.RegisterType<EventBusRedis>().As<IEventBus>().SingleInstance();
-            base.MapServices(builder);
+            services.AddRedisEventBus();
+            base.MapServices(services);
         }
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.GetService<ISubscriptionAdapter>().SubscribeAt();
+            provider.SubscriptAt();
             base.UseServices(provider);
         }
     }

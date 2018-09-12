@@ -1,16 +1,17 @@
 ﻿using Acb.Backgrounder.Test.Jobs;
 using Acb.Core.EventBus;
 using Acb.Core.Logging;
+using Acb.Core.Timing;
 using Acb.Demo.Contracts.EventBus;
 using Acb.Framework;
 using Acb.RabbitMq;
 using Autofac;
+using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Impl;
 using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
-using Acb.Core.Timing;
 using ILogger = Acb.Core.Logging.ILogger;
 
 namespace Acb.Backgrounder.Test
@@ -33,8 +34,17 @@ namespace Acb.Backgrounder.Test
             _logger = LogManager.Logger<Program>();
             Command += OnCommand;
             MapServices += OnMapServices;
+            MapServiceCollection += OnMapServiceCollection;
+
             UseServices += OnUseServices;
+            UseServiceProvider += OnUseServiceProvider;
             Start(args);
+        }
+
+        private static void OnUseServiceProvider(IServiceProvider provider)
+        {
+            //开启订阅
+            provider.SubscriptAt();
         }
 
         private static void OnUseServices(IContainer provider)
@@ -52,8 +62,6 @@ namespace Acb.Backgrounder.Test
             //{
             //    _logger.Error(ex.Message, ex);
             //}
-            //开启订阅
-            provider.Resolve<ISubscriptionAdapter>().SubscribeAt();
 
             //gps
             //var queue = provider.Resolve<IMessageQueue>();
@@ -66,18 +74,23 @@ namespace Acb.Backgrounder.Test
             //});
         }
 
-        private static void OnMapServices(ContainerBuilder builder)
+        private static void OnMapServiceCollection(IServiceCollection services)
         {
             //注册事件总线
             //RabbitMQ
-            builder.RegisterType<EventBusRabbitMq>().As<IEventBus>().SingleInstance();
+            services.AddRabbitMqEventBus();
+            //Redis
+            //services.AddRedisEventBus();
+        }
+
+        private static void OnMapServices(ContainerBuilder builder)
+        {
             builder.Register(provider =>
             {
                 var conn = new DefaultRabbitMqConnection("gps");
                 return new RabbitMessageQueue(conn, "testDcpProductId");
             }).As<IMessageQueue>().SingleInstance();
-            //Redis
-            //builder.RegisterType<EventBusRedis>().As<IEventBus>().SingleInstance();
+
             //RocketMQ
             //builder.Register(provider =>
             //{

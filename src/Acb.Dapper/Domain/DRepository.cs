@@ -3,6 +3,7 @@ using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using System;
 using System.Data;
+using System.Threading.Tasks;
 
 namespace Acb.Dapper.Domain
 {
@@ -52,7 +53,7 @@ namespace Acb.Dapper.Domain
             return ConnectionProvider.Connection(connectionName);
         }
 
-        /// <summary> 执行数据库事务 </summary>
+        /// <summary> 执行事务(当前连接) </summary>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="action"></param>
         /// <param name="level"></param>
@@ -62,13 +63,59 @@ namespace Acb.Dapper.Domain
             return UnitOfWork.BeginTransaction(action, level);
         }
 
-        /// <summary> 执行数据库事务 </summary>
+        /// <summary> 执行事务(当前连接) </summary>
         /// <param name="action"></param>
         /// <param name="level"></param>
         /// <returns></returns>
         protected void Transaction(Action action, IsolationLevel? level = null)
         {
             UnitOfWork.BeginTransaction(action, level);
+        }
+
+        /// <summary> 执行事务(新开连接) </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="action"></param>
+        /// <param name="level"></param>
+        /// <param name="connectionName"></param>
+        /// <returns></returns>
+        protected TResult Transaction<TResult>(Func<IDbConnection, IDbTransaction, TResult> action,
+             string connectionName = null, IsolationLevel? level = null)
+        {
+            using (var conn = GetConnection(connectionName))
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+                using (var trans = level.HasValue ? conn.BeginTransaction(level.Value) : conn.BeginTransaction())
+                {
+                    try
+                    {
+                        var result = action.Invoke(conn, trans);
+                        var task = result as Task;
+                        task?.GetAwaiter().GetResult();
+                        trans.Commit();
+                        return result;
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        /// <summary> 执行事务(新开连接) </summary>
+        /// <param name="action"></param>
+        /// <param name="level"></param>
+        /// <param name="connectionName"></param>
+        protected void Transaction(Action<IDbConnection, IDbTransaction> action, string connectionName = null,
+            IsolationLevel? level = null)
+        {
+            Transaction((conn, trans) =>
+            {
+                action.Invoke(conn, trans);
+                return true;
+            }, connectionName, level);
         }
 
         /// <summary> 更新数量 </summary>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Acb.Core.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,7 +64,10 @@ namespace Acb.MicroService
         {
             if (config.StoreName != null && config.StoreLocation != null)
             {
-                using (var store = new X509Store(config.StoreName, Enum.Parse<StoreLocation>(config.StoreLocation)))
+
+                //new X509Store(config.StoreName, Enum.Parse<StoreLocation>(config.StoreLocation))
+                using (var store = new X509Store(config.StoreName.CastTo(StoreName.Root),
+                    config.StoreLocation.CastTo(StoreLocation.CurrentUser)))
                 {
                     store.Open(OpenFlags.ReadOnly);
                     var certificate = store.Certificates.Find(

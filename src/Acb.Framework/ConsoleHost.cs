@@ -1,6 +1,8 @@
 ﻿using Acb.Core.Logging;
 using Acb.Framework.Logging;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Acb.Framework
@@ -11,9 +13,15 @@ namespace Acb.Framework
         /// <summary> 命令事件 </summary>
         protected static event Action<string, IContainer> Command;
         /// <summary> 注册服务 </summary>
+        protected static event Action<IServiceCollection> MapServiceCollection;
+        /// <summary> 注册服务 </summary>
         protected static event Action<ContainerBuilder> MapServices;
+
+        /// <summary> 使用服务 </summary>
+        protected static event Action<IServiceProvider> UseServiceProvider;
         /// <summary> 使用服务 </summary>
         protected static event Action<IContainer> UseServices;
+
         /// <summary> 启动项 </summary>
         protected static DBootstrap Bootstrap { get; private set; }
 
@@ -23,8 +31,20 @@ namespace Acb.Framework
         {
             LogManager.AddAdapter(new ConsoleAdapter());
             Bootstrap = new DBootstrap();
-            Bootstrap.BuilderHandler += b => MapServices?.Invoke(b);
+            var services = new ServiceCollection();
+            MapServiceCollection?.Invoke(services);
+            Bootstrap.BuilderHandler += b =>
+            {
+                b.Populate(services);
+                MapServices?.Invoke(b);
+            };
             Bootstrap.Initialize();
+            if (UseServiceProvider != null)
+            {
+                var provider = new AutofacServiceProvider(Bootstrap.Container);
+                UseServiceProvider.Invoke(provider);
+            }
+
             UseServices?.Invoke(Bootstrap.Container);
             while (true)
             {

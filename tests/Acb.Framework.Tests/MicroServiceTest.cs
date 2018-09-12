@@ -1,11 +1,9 @@
-﻿using Acb.Core;
-using Acb.Core.Data;
+﻿using Acb.Core.Data;
 using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
-using Acb.Core.Reflection;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
 using Acb.Demo.Contracts;
@@ -13,6 +11,7 @@ using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
 using Acb.MicroService.Client;
 using Autofac;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
@@ -29,22 +28,10 @@ namespace Acb.Framework.Tests
         private readonly IDemoService _microService;
         private readonly IDemoService _localService;
 
-        protected override void MapServices(ContainerBuilder builder)
+        protected override void MapServices(IServiceCollection services)
         {
-            builder.Register(provider =>
-            {
-                var types = provider.Resolve<ITypeFinder>()
-                    .Find(t => t.IsAssignableFrom(typeof(IMicroService)) && !t.IsAbstract);
-                Print(types.Length);
-                foreach (var type in types)
-                {
-                    //if (provider.IsRegistered(type))
-                    //    continue;
-                    builder.Register(p => ProxyService.Proxy(type)).Keyed("proxy", type).As(type).SingleInstance();
-                }
-                return ProxyService.Proxy<IMicroService>();
-            });
-            base.MapServices(builder);
+            services.AddMicroClient();
+            base.MapServices(services);
         }
 
         public MicroServiceTest()
