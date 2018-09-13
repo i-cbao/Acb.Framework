@@ -19,5 +19,7 @@ namespace Acb.Demo.Contracts
         void Load(string id);
 
         Task LoadAsync();
+
+        Task<int> Update();
     }
 }

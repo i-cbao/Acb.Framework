@@ -15,6 +15,12 @@ namespace Acb.Demo.Business
     {
         private readonly ILogger _logger = LogManager.Logger<DemoService>();
         public AreaRepository AreaRepository { private get; set; }
+        public AnotherAreaRepository AnotherAreaRepository { private get; set; }
+
+        public DemoService()
+        {
+            _logger.Info("DemoService Create");
+        }
 
         public async Task<DemoDto> Hello(string id, DemoInputDto dto)
         {
@@ -57,6 +63,16 @@ namespace Acb.Demo.Business
         {
             _logger.Info("loadasync");
             return Task.CompletedTask;
+        }
+
+        public async Task<int> Update()
+        {
+            return await AreaRepository.UnitOfWork.BeginTransaction(async () =>
+            {
+                var count = await AreaRepository.UpdateName();
+                count += await AnotherAreaRepository.UpdateParent();
+                return count;
+            });
         }
     }
 }

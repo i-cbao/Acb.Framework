@@ -1,19 +1,20 @@
 ﻿using Acb.Core.Data;
 using Acb.Core.Dependency;
 using Acb.Core.Domain;
+using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
 
 namespace Acb.Dapper.Domain
 {
-    public abstract class DRepository : IScopedDependency
+    public abstract class DRepository : IDependency
     {
         /// <summary> 数据库连接提供者 </summary>
         public IUnitOfWork UnitOfWork { get; }
 
         /// <summary> 获取默认连接 </summary>
-        protected IDbConnection Connection => UnitOfWork.Conntection;
+        protected IDbConnection Connection => UnitOfWork.Connection;
         /// <summary> 当前事务 </summary>
         protected IDbTransaction Trans => UnitOfWork.Transaction;
 
@@ -22,9 +23,10 @@ namespace Acb.Dapper.Domain
         protected DRepository(IUnitOfWork unitOfWork)
         {
             UnitOfWork = unitOfWork;
+            LogManager.Logger<DRepository>().Info("DRepository Create");
         }
 
-        protected DRepository() : this(CurrentIocManager.Resolve<UnitOfWork>())
+        protected DRepository() : this(CurrentIocManager.ProviderResolve<UnitOfWork>())
         {
         }
 

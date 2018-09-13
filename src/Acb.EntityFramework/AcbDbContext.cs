@@ -10,7 +10,7 @@ namespace Acb.EntityFramework
     {
         private static readonly ILogger Logger = LogManager.Logger<AcbDbContext>();
 
-        public IDbConnection Conntection { get; }
+        public IDbConnection Connection { get; }
         public IDbTransaction Transaction { get; }
         public bool IsTransaction { get; set; }
         public void BeginTransaction(Action action, IsolationLevel? level = null)

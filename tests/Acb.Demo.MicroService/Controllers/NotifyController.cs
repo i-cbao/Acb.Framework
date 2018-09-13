@@ -1,10 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Acb.Demo.Contracts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Acb.Demo.MicroService.Controllers
 {
     [Route("notify")]
     public class NotifyController : Controller
     {
+        public NotifyController(IDemoService demoService)
+        {
+
+        }
+
         [HttpGet, HttpPost]
         public string Index()
         {

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Acb.Core.Timing;
+using System;
 using System.Data;
-using Acb.Core.Timing;
 
 namespace Acb.Core.Data
 {
@@ -47,7 +47,7 @@ namespace Acb.Core.Data
         {
             var time = _aliveTime - (Clock.Now - _lasteUsedTime);
             return
-                $"{_connection.Database}_{_connection.GetHashCode()},{_createTime:MM-dd HH:mm},{_useCount}次,{time.TotalMilliseconds}ms";
+                $"{_connection.Database}_{_connection.GetHashCode()},{_createTime:MM-dd HH:mm},{_lasteUsedTime:MM-dd HH:mm},{_useCount}次,{time.TotalMilliseconds}ms";
         }
 
         public void Dispose()

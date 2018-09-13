@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
+using Acb.Core.Dependency;
 
 namespace Acb.MicroService
 {
@@ -64,7 +65,7 @@ namespace Acb.MicroService
 
             MicroServiceRegister.Regist();
             LogManager.AddAdapter(new ConsoleAdapter());
-            return new AutofacServiceProvider(_bootstrap.Container);
+            return CurrentIocManager.Provider = new AutofacServiceProvider(_bootstrap.Container);
         }
 
 

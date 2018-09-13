@@ -5,12 +5,12 @@ using System.Data;
 namespace Acb.Core.Domain
 {
     /// <summary> 业务单元操作接口 </summary>
-    public interface IUnitOfWork : IDependency, IDisposable
+    public interface IUnitOfWork : IScopedDependency, IDisposable
     {
-        /// <summary> 获取数据库连接 </summary>
-        IDbConnection Conntection { get; }
+        /// <summary> 获取当前连接 </summary>
+        IDbConnection Connection { get; }
 
-        /// <summary> 当前事务 </summary>
+        /// <summary> 获取当前事务 </summary>
         IDbTransaction Transaction { get; }
 
         /// <summary> 是否开启了事务 </summary>

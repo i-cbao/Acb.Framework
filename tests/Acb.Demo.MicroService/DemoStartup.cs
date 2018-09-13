@@ -10,13 +10,13 @@ namespace Acb.Demo.MicroService
     {
         protected override void MapServices(IServiceCollection services)
         {
-            services.AddRedisEventBus();
+            //services.AddRedisEventBus();
             base.MapServices(services);
         }
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.SubscribeAt();
+            //provider.SubscribeAt();
             base.UseServices(provider);
         }
     }

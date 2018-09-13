@@ -33,7 +33,6 @@
 
   <ItemGroup>
     <Compile Remove="Data\CacheDbConnectionProvider.cs" />
-    <Compile Remove="Data\ConnectionStruct.cs" />
   </ItemGroup>
 
   <ItemGroup>

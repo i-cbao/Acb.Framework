@@ -3,15 +3,16 @@ using Acb.Core.Dependency;
 using Acb.Core.EventBus;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
-using Acb.Core.Logging;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.EventBus;
+using Acb.MicroService.Client;
 using Acb.WebApi.Test.Repositories;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
@@ -25,9 +26,23 @@ namespace Acb.WebApi.Test.Controllers
         public DemoController(IDemoService demoService, IAccountContract accountContract)
         {
             //sendCom
-            //_demoService = ProxyService.Proxy<IDemoService>();
-            _demoService = demoService;
+            _demoService = ProxyService.Proxy<IDemoService>();
+            //_demoService = demoService;
             _accountContract = accountContract;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            var list = new List<Dictionary<string, object>>();
+            for (int i = 0; i < 3; i++)
+            {
+                var dict = await _demoService.Areas("510100");
+                list.Add(dict);
+            }
+            var result = await _demoService.Update();
+
+            return Json(DResult.Succ(result));
         }
 
         /// <summary> Test </summary>

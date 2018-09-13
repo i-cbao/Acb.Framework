@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
@@ -19,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace Acb.WebApi
 {
@@ -143,7 +143,7 @@ namespace Acb.WebApi
             };
             Bootstrap.Initialize();
             LogManager.AddAdapter(new ConsoleAdapter());
-            return new AutofacServiceProvider(Bootstrap.Container);
+            return CurrentIocManager.Provider = new AutofacServiceProvider(Bootstrap.Container);
         }
 
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -1,11 +1,11 @@
-﻿using Acb.Core.Data;
-using Acb.Core.Dependency;
+﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
+using Acb.Dapper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
@@ -19,7 +19,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Acb.Dapper;
 
 namespace Acb.Framework.Tests
 {
@@ -59,7 +58,8 @@ namespace Acb.Framework.Tests
             {
                 try
                 {
-                    var dict = _localService.Areas("510100").GetAwaiter().GetResult();
+                    var service = CurrentIocManager.Resolve<IDemoService>();
+                    var dict = service.Areas("510100").Result;
                     Print(dict);
                 }
                 catch (Exception ex)

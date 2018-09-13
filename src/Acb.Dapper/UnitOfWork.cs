@@ -1,6 +1,4 @@
-﻿using Acb.Core.Data;
-using Acb.Core.Dependency;
-using Acb.Core.Domain;
+﻿using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
 using System.Data;
@@ -11,11 +9,13 @@ namespace Acb.Dapper
     public class UnitOfWork : IUnitOfWork
     {
         /// <summary> 连接提供者 </summary>
-        public IDbConnectionProvider ConnectionProvider { private get; set; }
+        //public IDbConnectionProvider ConnectionProvider { private get; set; }
+
+        public ConnectionFactory ConnectionFactory { private get; set; }
+
         private readonly string _configName;
         private readonly string _connectionString;
         private readonly string _providerName;
-        private static readonly object LockObj = new object();
 
         private readonly ILogger _logger;
 
@@ -23,39 +23,40 @@ namespace Acb.Dapper
         {
             _configName = configName;
             _logger = LogManager.Logger<UnitOfWork>();
+            _logger.Info("Create UnitOfWork");
         }
 
         public UnitOfWork(string connectionString, string providerName)
         {
             _connectionString = connectionString;
             _providerName = providerName;
+            _logger.Info("Create UnitOfWork");
         }
 
         private IDbConnection _connection;
 
+        /// <inheritdoc />
         /// <summary> 当前数据库连接 </summary>
-        public IDbConnection Conntection
+        public IDbConnection Connection
         {
             get
             {
-                var factory = CurrentIocManager.Resolve<ConnectionFactory>();
                 if (!string.IsNullOrWhiteSpace(_connectionString))
-                    return _connection = factory.Connection(_connectionString, _providerName);
-                return _connection = factory.Connection(_configName);
+                    return _connection = ConnectionFactory.Connection(_connectionString, _providerName);
+                return _connection = ConnectionFactory.Connection(_configName);
                 //if (_connection == null)
                 //{
                 //    lock (LockObj)
                 //    {
                 //        if (_connection == null)
                 //        {
-                //            //_logger.Debug($"UnitOfWork Create Connection [{GetType().Name}]");
-                //            var factory = CurrentIocManager.Resolve<ConnectionFactory>();
-                //            if (!string.IsNullOrWhiteSpace(_connectionString))
-                //                return _connection = factory.Connection(_connectionString, _providerName);
-                //            return _connection = factory.Connection(_configName);
+                //            //var factory = CurrentIocManager.Resolve<ConnectionFactory>();
                 //            //if (!string.IsNullOrWhiteSpace(_connectionString))
-                //            //    return _connection = ConnectionProvider.Connection(_connectionString, _providerName);
-                //            //return _connection = ConnectionProvider.Connection(_configName);
+                //            //    _connection = factory.Connection(_connectionString, _providerName);
+                //            //_connection = factory.Connection(_configName);
+                //            if (!string.IsNullOrWhiteSpace(_connectionString))
+                //                return _connection = ConnectionProvider.Connection(_connectionString, _providerName);
+                //            return _connection = ConnectionProvider.Connection(_configName);
                 //        }
                 //    }
                 //}
@@ -64,12 +65,10 @@ namespace Acb.Dapper
             }
         }
 
-        private IDbTransaction _transaction;
-
         /// <summary> 当前事务 </summary>
-        public IDbTransaction Transaction => _transaction;
+        public IDbTransaction Transaction { get; private set; }
 
-        public bool IsTransaction => _transaction != null;
+        public bool IsTransaction => Transaction != null;
 
         /// <summary> 执行事务 </summary>
         /// <param name="action"></param>
@@ -90,17 +89,17 @@ namespace Acb.Dapper
         /// <returns></returns>
         public T BeginTransaction<T>(Func<T> func, IsolationLevel? level = null)
         {
-            _logger.Debug("UnitOfWork Create Transaction");
-            var wasCloesd = Conntection.State == ConnectionState.Closed;
+            var wasCloesd = Connection.State == ConnectionState.Closed;
             if (wasCloesd)
-                Conntection.Open();
+                Connection.Open();
             var disposed = false;
-            if (_transaction == null)
+            if (Transaction == null)
             {
                 disposed = true;
-                _transaction = level.HasValue
-                    ? Conntection.BeginTransaction(level.Value)
-                    : Conntection.BeginTransaction();
+                Transaction = level.HasValue
+                    ? Connection.BeginTransaction(level.Value)
+                    : Connection.BeginTransaction();
+                _logger.Debug("UnitOfWork Create Transaction");
             }
 
             try
@@ -110,7 +109,7 @@ namespace Acb.Dapper
                 task?.GetAwaiter().GetResult();
                 if (disposed)
                 {
-                    _transaction.Commit();
+                    Transaction.Commit();
                     _logger.Debug("UnitOfWork Transaction Commit");
                 }
 
@@ -120,7 +119,7 @@ namespace Acb.Dapper
             {
                 if (disposed)
                 {
-                    _transaction.Rollback();
+                    Transaction.Rollback();
                     _logger.Warn("UnitOfWork Transaction Rollback");
                 }
 
@@ -130,13 +129,13 @@ namespace Acb.Dapper
             {
                 if (disposed)
                 {
-                    _transaction.Dispose();
-                    _transaction = null;
+                    Transaction.Dispose();
+                    Transaction = null;
                     _logger.Debug("UnitOfWork Transaction Dispose");
                 }
 
                 if (wasCloesd)
-                    Conntection.Close();
+                    Connection.Close();
             }
         }
 
@@ -144,8 +143,8 @@ namespace Acb.Dapper
         {
             if (_connection == null) return;
             _logger.Debug("UnitOfWork Dispose");
+            Transaction?.Dispose();
             _connection?.Dispose();
-            _transaction?.Dispose();
         }
     }
 }

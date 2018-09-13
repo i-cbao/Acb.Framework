@@ -4,20 +4,12 @@ using System;
 
 namespace Acb.Framework
 {
-    public class IocManager : IIocManager
+    public class LifetimeScopeManager : IIocManager, IDisposable
     {
-        private readonly DBootstrap _bootstrap;
-
-        internal IContainer Current => _bootstrap.Container;
-
-        public IocManager(DBootstrap bootstrap)
+        private readonly ILifetimeScope _scope;
+        public LifetimeScopeManager()
         {
-            _bootstrap = bootstrap;
-        }
-
-        public void MapService(Action<ContainerBuilder> buidlerAction)
-        {
-            _bootstrap.ReBuild(buidlerAction);
+            _scope = Resolve<IocManager>().Current.BeginLifetimeScope();
         }
 
         /// <summary> 获取Ioc注入实例 </summary>
@@ -25,7 +17,7 @@ namespace Acb.Framework
         /// <returns></returns>
         public T Resolve<T>()
         {
-            return Current.Resolve<T>();
+            return _scope.Resolve<T>();
         }
 
         /// <summary> 获取Ioc注入实例 </summary>
@@ -33,17 +25,17 @@ namespace Acb.Framework
         /// <returns></returns>
         public object Resolve(Type type)
         {
-            return Current.Resolve(type);
+            return _scope.Resolve(type);
         }
 
         public T Resolve<T>(string key)
         {
-            return Current.ResolveKeyed<T>(key);
+            return _scope.ResolveKeyed<T>(key);
         }
 
         public object Resolve(string key, Type type)
         {
-            return Current.ResolveKeyed(key, type);
+            return _scope.ResolveKeyed(key, type);
         }
 
         /// <summary> 是否注册Ioc注入 </summary>
@@ -51,22 +43,27 @@ namespace Acb.Framework
         /// <returns></returns>
         public bool IsRegistered(Type type)
         {
-            return Current.IsRegistered(type);
+            return _scope.IsRegistered(type);
         }
 
         public bool IsRegistered(string key, Type type)
         {
-            return Current.IsRegisteredWithKey(key, type);
+            return _scope.IsRegisteredWithKey(key, type);
         }
 
         public bool IsRegistered<T>(string key)
         {
-            return Current.IsRegisteredWithKey<T>(key);
+            return _scope.IsRegisteredWithKey<T>(key);
         }
 
         public bool IsRegistered<T>()
         {
-            return Current.IsRegistered<T>();
+            return _scope.IsRegistered<T>();
+        }
+
+        public void Dispose()
+        {
+            _scope?.Dispose();
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using Acb.Core.Data;
-using Acb.Core.Data.Config;
+﻿using Acb.Core.Data.Config;
 using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
 using System;
@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading;
 using Timer = System.Timers.Timer;
 
-namespace Acb.Dapper
+namespace Acb.Core.Data
 {
     /// <summary> 数据库连接管理 </summary>
     public class ConnectionFactory : ISingleDependency
@@ -83,38 +83,35 @@ namespace Acb.Dapper
             _logger.Info(ToString());
         }
 
-        /// <summary> 创建数据库连接 </summary>
-        /// <param name="config"></param>
-        /// <returns></returns>
-        private IDbConnection Create(ConnectionConfig config)
+        private IDbConnection CreateConnection(string providerName, string connectionString)
         {
-
-            //DbProviderFactories.GetFactory(connectionConfig.ProviderName).CreateConnection();
+            //新开连接
             _createCount++;
-            var adapter = DbConnectionManager.Create(config.ProviderName);
+            var adapter = DbConnectionManager.Create(providerName);
             var connection = adapter.Create();
             if (connection == null)
                 throw new Exception("创建数据库连接失败");
-            connection.ConnectionString = config.ConnectionString;
-            _logger.Debug($"Create Connection: {config.ConnectionString}");
+            connection.ConnectionString = connectionString;
+            _logger.Debug($"Create Connection: {connectionString}");
             return connection;
         }
 
-
-        /// <summary> 获取数据库连接 </summary>
-        /// <param name="connectionName">连接名称</param>
-        /// <param name="threadCache">是否启用线程缓存</param>
+        /// <summary> 创建数据库连接 </summary>
+        /// <param name="config"></param>
+        /// <param name="fromCache"></param>
         /// <returns></returns>
-        public IDbConnection Connection(string connectionName = null, bool threadCache = true)
+        private IDbConnection GetConnection(ConnectionConfig config, bool fromCache = true)
         {
             lock (LockObj)
             {
-                var config = ConnectionConfig.Config(connectionName);
                 if (config == null || string.IsNullOrWhiteSpace(config.ConnectionString))
-                    throw new ArgumentException($"未找到的数据库配置");
-                var key = config.Name;
-                if (!threadCache)
-                    return Create(config);
+                    throw new ArgumentException($"未找到的数据库配置[{config?.Name}]");
+
+                if (!fromCache)
+                {
+                    return CreateConnection(config.ProviderName, config.ConnectionString);
+                }
+                var key = config.ConnectionString.Md5();
                 var connectionKey = Thread.CurrentThread;
 
                 if (!_connectionCache.TryGetValue(connectionKey, out var connDict))
@@ -125,37 +122,48 @@ namespace Acb.Dapper
                         throw new Exception("Can not set db connection!");
                     }
                 }
-
                 if (connDict.ContainsKey(key))
                 {
                     _cacheCount++;
                     return connDict[key].GetConnection();
                 }
+                //新开连接
+                var connection = CreateConnection(config.ProviderName, config.ConnectionString);
 
-                connDict.Add(key, new ConnectionStruct(Create(config)));
+                connDict.Add(key, new ConnectionStruct(connection));
 
-                if (!_clearTimerRun)
-                {
-                    _clearTimer.Start();
-                    _clearTimerRun = true;
-                }
-
-                return connDict[key].GetConnection();
+                if (_clearTimerRun) return connection;
+                //开启定时清理任务
+                _clearTimer.Start();
+                _clearTimerRun = true;
+                return connection;
             }
+        }
+
+
+        /// <summary> 获取数据库连接 </summary>
+        /// <param name="connectionName">连接名称</param>
+        /// <param name="fromCache">是否启用线程缓存</param>
+        /// <returns></returns>
+        public IDbConnection Connection(string connectionName = null, bool fromCache = true)
+        {
+            var config = ConnectionConfig.Config(connectionName);
+            return GetConnection(config, fromCache);
         }
 
         /// <summary> 获取数据库连接 </summary>
         /// <param name="connectionName">连接名称</param>
-        /// <param name="threadCache">是否启用线程缓存</param>
+        /// <param name="fromCache">是否启用线程缓存</param>
         /// <returns></returns>
-        public IDbConnection Connection(Enum connectionName, bool threadCache = true)
+        public IDbConnection Connection(Enum connectionName, bool fromCache = true)
         {
-            return Connection(connectionName.ToString(), threadCache);
+            return Connection(connectionName.ToString(), fromCache);
         }
 
-        public IDbConnection Connection(string connectionString, string provider)
+        public IDbConnection Connection(string connectionString, string provider, bool fromCache = true)
         {
-            return Create(new ConnectionConfig { ProviderName = provider, ConnectionString = connectionString });
+            return GetConnection(new ConnectionConfig { ProviderName = provider, ConnectionString = connectionString },
+                fromCache);
         }
 
         /// <summary> 缓存总数/// </summary>

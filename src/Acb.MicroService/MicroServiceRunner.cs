@@ -17,6 +17,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Acb.Core.Logging;
 
 namespace Acb.MicroService
 {
@@ -63,7 +64,7 @@ namespace Acb.MicroService
 
                     i++;
                 }
-                var instance = CurrentIocManager.Resolve(m.DeclaringType);
+                var instance = CurrentIocManager.ProviderResolve(m.DeclaringType);
                 var result = m.Invoke(instance, args.ToArray());
                 await WriteJsonAsync(response, result);
             }
@@ -108,10 +109,10 @@ namespace Acb.MicroService
         public static async Task Methods(HttpContext ctx)
         {
             var methods = MicroServiceRegister.Methods.Select(t => new
-                {
-                    url = t.Key,
-                    param = t.Value.GetParameters().ToDictionary(k => k.Name, v => v.ParameterType.Name)
-                }).OrderBy(t => t.url)
+            {
+                url = t.Key,
+                param = t.Value.GetParameters().ToDictionary(k => k.Name, v => v.ParameterType.Name)
+            }).OrderBy(t => t.url)
                 .ToDictionary(t => t.url, v => v.param);
             await WriteJsonAsync(ctx.Response, methods);
         }
