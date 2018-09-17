@@ -3,6 +3,7 @@ using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.Core.Data;
 
 namespace Acb.Dapper
 {
