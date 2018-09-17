@@ -19,7 +19,7 @@ namespace Acb.Demo.Business
 
         public DemoService()
         {
-            _logger.Info("DemoService Create");
+            _logger.Debug($"{GetType().Name} Create");
         }
 
         public async Task<DemoDto> Hello(string id, DemoInputDto dto)

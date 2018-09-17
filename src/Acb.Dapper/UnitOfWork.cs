@@ -1,37 +1,38 @@
-﻿using Acb.Core.Domain;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using Acb.Core.Data;
 
 namespace Acb.Dapper
 {
     public class UnitOfWork : IUnitOfWork
     {
-        /// <summary> 连接提供者 </summary>
-        //public IDbConnectionProvider ConnectionProvider { private get; set; }
-
-        public ConnectionFactory ConnectionFactory { private get; set; }
+        private readonly ConnectionFactory _factory;
 
         private readonly string _configName;
         private readonly string _connectionString;
         private readonly string _providerName;
+        private static readonly object SyncLock = new object();
 
         private readonly ILogger _logger;
 
         public UnitOfWork(string configName = null)
         {
+            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
             _configName = configName;
-            _logger = LogManager.Logger<UnitOfWork>();
-            _logger.Info("Create UnitOfWork");
+            _logger = LogManager.Logger(GetType());
+            _logger.Debug($"{GetType().Name} Create");
         }
 
         public UnitOfWork(string connectionString, string providerName)
         {
+            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
             _connectionString = connectionString;
             _providerName = providerName;
-            _logger.Info("Create UnitOfWork");
+            _logger = LogManager.Logger(GetType());
+            _logger.Debug($"{GetType().Name} Create");
         }
 
         private IDbConnection _connection;
@@ -42,27 +43,23 @@ namespace Acb.Dapper
         {
             get
             {
-                if (!string.IsNullOrWhiteSpace(_connectionString))
-                    return _connection = ConnectionFactory.Connection(_connectionString, _providerName);
-                return _connection = ConnectionFactory.Connection(_configName);
-                //if (_connection == null)
-                //{
-                //    lock (LockObj)
-                //    {
-                //        if (_connection == null)
-                //        {
-                //            //var factory = CurrentIocManager.Resolve<ConnectionFactory>();
-                //            //if (!string.IsNullOrWhiteSpace(_connectionString))
-                //            //    _connection = factory.Connection(_connectionString, _providerName);
-                //            //_connection = factory.Connection(_configName);
-                //            if (!string.IsNullOrWhiteSpace(_connectionString))
-                //                return _connection = ConnectionProvider.Connection(_connectionString, _providerName);
-                //            return _connection = ConnectionProvider.Connection(_configName);
-                //        }
-                //    }
-                //}
+                //if (!string.IsNullOrWhiteSpace(_connectionString))
+                //    return _connection = ConnectionFactory.Connection(_connectionString, _providerName);
+                //return _connection = ConnectionFactory.Connection(_configName);
+                if (_connection == null)
+                {
+                    lock (SyncLock)
+                    {
+                        if (_connection == null)
+                        {
+                            if (!string.IsNullOrWhiteSpace(_connectionString))
+                                return _connection = _factory.Connection(_connectionString, _providerName, false);
+                            return _connection = _factory.Connection(_configName, false);
+                        }
+                    }
+                }
 
-                //return _connection;
+                return _connection;
             }
         }
 

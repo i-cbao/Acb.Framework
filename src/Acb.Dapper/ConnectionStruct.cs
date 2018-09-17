@@ -2,7 +2,7 @@
 using System;
 using System.Data;
 
-namespace Acb.Core.Data
+namespace Acb.Dapper
 {
     /// <summary> 连接管理类 </summary>
     internal class ConnectionStruct : IDisposable

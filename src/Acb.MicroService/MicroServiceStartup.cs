@@ -14,7 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
-using Acb.Core.Dependency;
 
 namespace Acb.MicroService
 {
@@ -87,13 +86,13 @@ namespace Acb.MicroService
                     ConfigHelper.Instance.Reload();
                     await ctx.Response.WriteAsync("ok");
                 });
-                routes.MapGet("micro", async ctx => await MicroServiceRunner.Methods(ctx));
-                routes.MapPost("micro/{contract}/{method}", (request, response, route) =>
-                {
-                    route.Values.TryGetValue("contract", out var contract);
-                    route.Values.TryGetValue("method", out var method);
-                    return MicroServiceRunner.MicroTask(request, response, $"{contract}/{method}");
-                });
+                //routes.MapGet("micro", async ctx => await MicroServiceRunner.Methods(ctx));
+                //routes.MapPost("micro/{contract}/{method}", (request, response, route) =>
+                //{
+                //    route.Values.TryGetValue("contract", out var contract);
+                //    route.Values.TryGetValue("method", out var method);
+                //    return MicroServiceRunner.MicroTask(request, response, $"{contract}/{method}");
+                //});
                 //普通路由
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 //区域路由

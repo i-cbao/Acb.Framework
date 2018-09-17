@@ -5,14 +5,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
-    <Version>1.5.3</Version>
+    <Version>1.5.5</Version>
     <Product>爱车保 - 微服务框架服务提供者</Product>
     <Description>爱车保 - 微服务框架服务提供者</Description>
     <Title>爱车保 - 微服务框架服务提供者</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
-    <AssemblyVersion>1.5.3.0</AssemblyVersion>
-    <FileVersion>1.5.3.0</FileVersion>
+    <AssemblyVersion>1.5.5.0</AssemblyVersion>
+    <FileVersion>1.5.5.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

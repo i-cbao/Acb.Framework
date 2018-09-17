@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using System.Threading.Tasks;
+using Acb.Core.Dependency;
 
 namespace Acb.MicroService
 {
@@ -26,7 +28,9 @@ namespace Acb.MicroService
                 context.Handler = async ctx => await ctx.Response.WriteAsync("ok");
                 return Task.CompletedTask;
             }
-            context.Handler = async ctx => await MicroServiceRunner.MicroTask(ctx.Request, ctx.Response, requestedUrl);
+
+            context.Handler = async ctx => await MicroServiceRunner.MicroTask(ctx.Request, ctx.Response, requestedUrl,
+                CurrentIocManager.Resolve<IServiceProvider>());
 
             return Task.CompletedTask;
         }

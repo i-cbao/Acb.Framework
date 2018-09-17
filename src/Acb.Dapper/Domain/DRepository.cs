@@ -23,7 +23,7 @@ namespace Acb.Dapper.Domain
         protected DRepository(IUnitOfWork unitOfWork)
         {
             UnitOfWork = unitOfWork;
-            LogManager.Logger<DRepository>().Info("DRepository Create");
+            LogManager.Logger<DRepository>().Debug($"{GetType().Name} Create");
         }
 
         protected DRepository() : this(CurrentIocManager.Resolve<UnitOfWork>())

@@ -1,9 +1,4 @@
-﻿using Acb.Core.Data.Config;
-using Acb.Core.Dependency;
-using Acb.Core.Extensions;
-using Acb.Core.Helper;
-using Acb.Core.Logging;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -11,9 +6,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Acb.Core.Data;
+using Acb.Core.Data.Config;
+using Acb.Core.Dependency;
+using Acb.Core.Extensions;
+using Acb.Core.Helper;
+using Acb.Core.Logging;
 using Timer = System.Timers.Timer;
 
-namespace Acb.Core.Data
+namespace Acb.Dapper
 {
     /// <summary> 数据库连接管理 </summary>
     public class ConnectionFactory : ISingleDependency
@@ -72,15 +73,14 @@ namespace Acb.Core.Data
                     if (connDict.Remove(name))
                     {
                         _removeCount++;
-                        _logger.Info($"Connection Dispose:{conn}");
+                        _logger.Debug($"Connection Dispose:{conn}");
                         conn?.Dispose();
                     }
                 }
                 if (connDict.Count == 0)
                     _connectionCache.TryRemove(key, out connDict);
             }
-
-            _logger.Info(ToString());
+            _logger.Debug(ToString());
         }
 
         private IDbConnection CreateConnection(string providerName, string connectionString)

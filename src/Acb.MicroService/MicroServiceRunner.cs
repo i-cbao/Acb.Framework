@@ -17,14 +17,13 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Acb.Core.Logging;
 
 namespace Acb.MicroService
 {
     /// <summary> 微服务路由 </summary>
     internal class MicroServiceRunner
     {
-        private static async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response)
+        private static async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response, IServiceProvider provider)
         {
             string requestBody = null;
             var watcher = new Stopwatch();
@@ -64,7 +63,8 @@ namespace Acb.MicroService
 
                     i++;
                 }
-                var instance = CurrentIocManager.Resolve(m.DeclaringType);
+
+                var instance = provider.GetService(m.DeclaringType); //CurrentIocManager.Resolve(m.DeclaringType);
                 var result = m.Invoke(instance, args.ToArray());
                 await WriteJsonAsync(response, result);
             }
@@ -112,25 +112,25 @@ namespace Acb.MicroService
             {
                 url = t.Key,
                 param = t.Value.GetParameters().ToDictionary(k => k.Name, v => v.ParameterType.Name)
-            }).OrderBy(t => t.url)
-                .ToDictionary(t => t.url, v => v.param);
+            }).OrderBy(t => t.url).ToDictionary(t => t.url, v => v.param);
             await WriteJsonAsync(ctx.Response, methods);
         }
 
-        public static Task MicroTask(HttpRequest req, HttpResponse resp, string contract, string method)
+        public static Task MicroTask(HttpRequest req, HttpResponse resp, string contract, string method, IServiceProvider provider)
         {
             var path = $"{contract}/{method}";
-            return MicroTask(req, resp, path);
+            return MicroTask(req, resp, path, provider);
         }
 
-        public static Task MicroTask(HttpRequest req, HttpResponse resp, string path)
+        public static Task MicroTask(HttpRequest req, HttpResponse resp, string path, IServiceProvider provider)
         {
             var key = path.ToLower();
             if (!MicroServiceRegister.Methods.TryGetValue(key, out var m))
             {
                 return WriteJsonAsync(resp, DResult.Error($"{path} not found"), (int)HttpStatusCode.NotFound);
             }
-            return RunMethod(m, req, resp);
+
+            return RunMethod(m, req, resp, provider);
         }
 
 
