@@ -45,12 +45,15 @@ namespace Acb.MicroService
         /// <summary> 初始化服务 </summary>
         internal static void InitServices()
         {
-            var services = CurrentIocManager.Resolve<ITypeFinder>()
-                .Find(t => typeof(IMicroService).IsAssignableFrom(t) && t.IsInterface && t != typeof(IMicroService))
+            var finder = CurrentIocManager.Resolve<ITypeFinder>();
+            var serviceType = typeof(IMicroService);
+            var services = finder.Find(t => serviceType.IsAssignableFrom(t) && t.IsInterface && t != serviceType)
                 .ToList();
             foreach (var service in services)
             {
-                if (!CurrentIocManager.IsRegisted(service))
+                //过滤本地未实现的微服务
+                var resolved = finder.Find(t => service.IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                if (!resolved.Any())
                     continue;
                 if (!ServiceAssemblies.Contains(service.Assembly))
                     ServiceAssemblies.Add(service.Assembly);

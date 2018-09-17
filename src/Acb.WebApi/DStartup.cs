@@ -143,7 +143,7 @@ namespace Acb.WebApi
             };
             Bootstrap.Initialize();
             LogManager.AddAdapter(new ConsoleAdapter());
-            return CurrentIocManager.Provider = new AutofacServiceProvider(Bootstrap.Container);
+            return new AutofacServiceProvider(Bootstrap.Container);
         }
 
         public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)

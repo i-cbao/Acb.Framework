@@ -26,7 +26,7 @@ namespace Acb.Dapper.Domain
             LogManager.Logger<DRepository>().Info("DRepository Create");
         }
 
-        protected DRepository() : this(CurrentIocManager.ProviderResolve<UnitOfWork>())
+        protected DRepository() : this(CurrentIocManager.Resolve<UnitOfWork>())
         {
         }
 

@@ -64,7 +64,7 @@ namespace Acb.MicroService
 
                     i++;
                 }
-                var instance = CurrentIocManager.ProviderResolve(m.DeclaringType);
+                var instance = CurrentIocManager.Resolve(m.DeclaringType);
                 var result = m.Invoke(instance, args.ToArray());
                 await WriteJsonAsync(response, result);
             }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using Acb.WebApi.Test.OAuth;
 
 namespace Acb.WebApi.Test
 {
@@ -28,6 +29,14 @@ namespace Acb.WebApi.Test
             //    return ProxyService.Proxy<IDemoService>();
             //});
             services.AddMicroClient();
+            //IdentityServer4
+            services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddInMemoryIdentityResources(OAuthData.GetIdentityResourceResources())
+                .AddInMemoryApiResources(OAuthData.GetApiResources())
+                .AddInMemoryClients(OAuthData.GetClients())
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+                .AddProfileService<ProfileService>();
             base.MapServices(services);
         }
 
@@ -76,7 +85,7 @@ namespace Acb.WebApi.Test
             });
             app.UseWebSockets();
             app.UseStaticFiles();
-            Mapper.Initialize(cfg => cfg.CreateMissingTypeMaps = true);
+            app.UseIdentityServer();
             base.Configure(app, env);
         }
     }

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 
 namespace Acb.Core.Dependency
 {
@@ -8,17 +7,6 @@ namespace Acb.Core.Dependency
     {
         /// <summary> 依赖注入管理器 </summary>
         public static IIocManager IocManager { get; internal set; }
-        public static IServiceProvider Provider { get; set; }
-
-        public static T ProviderResolve<T>()
-        {
-            return Provider == null ? Resolve<T>() : Provider.GetService<T>();
-        }
-
-        public static object ProviderResolve(Type type)
-        {
-            return Provider == null ? Resolve(type) : Provider.GetService(type);
-        }
 
         /// <summary> 获取注入 </summary>
         /// <typeparam name="T"></typeparam>

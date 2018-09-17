@@ -65,7 +65,7 @@ namespace Acb.MicroService
 
             MicroServiceRegister.Regist();
             LogManager.AddAdapter(new ConsoleAdapter());
-            return CurrentIocManager.Provider = new AutofacServiceProvider(_bootstrap.Container);
+            return new AutofacServiceProvider(_bootstrap.Container);
         }
 
 
