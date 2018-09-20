@@ -6,7 +6,7 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - Redis基础类</Product>
     <Description>爱车保 - Redis基础类</Description>
-    <Version>1.5.0</Version>
+    <Version>1.5.2</Version>
     <Title>爱车保 - Redis基础类</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
+    <PackageReference Include="StackExchange.Redis.StrongName" Version="1.2.6" />
   </ItemGroup>
 
   <ItemGroup>

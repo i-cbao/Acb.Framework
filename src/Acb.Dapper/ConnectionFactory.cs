@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Acb.Core.Data;
+using Acb.Core.Data.Config;
+using Acb.Core.Dependency;
+using Acb.Core.Extensions;
+using Acb.Core.Helper;
+using Acb.Core.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -6,12 +12,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Acb.Core.Data;
-using Acb.Core.Data.Config;
-using Acb.Core.Dependency;
-using Acb.Core.Extensions;
-using Acb.Core.Helper;
-using Acb.Core.Logging;
 using Timer = System.Timers.Timer;
 
 namespace Acb.Dapper
@@ -20,7 +20,7 @@ namespace Acb.Dapper
     public class ConnectionFactory : ISingleDependency
     {
         private readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> _connectionCache;
-        private static readonly object LockObj = new object();
+        private static readonly object SyncObj = new object();
         private int _createCount;
         private int _removeCount;
         private int _cacheCount;
@@ -102,7 +102,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         private IDbConnection GetConnection(ConnectionConfig config, bool fromCache = true)
         {
-            lock (LockObj)
+            lock (SyncObj)
             {
                 if (config == null || string.IsNullOrWhiteSpace(config.ConnectionString))
                     throw new ArgumentException($"未找到的数据库配置[{config?.Name}]");
@@ -160,6 +160,11 @@ namespace Acb.Dapper
             return Connection(connectionName.ToString(), fromCache);
         }
 
+        /// <summary> 获取数据库连接 </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="provider"></param>
+        /// <param name="fromCache"></param>
+        /// <returns></returns>
         public IDbConnection Connection(string connectionString, string provider, bool fromCache = true)
         {
             return GetConnection(new ConnectionConfig { ProviderName = provider, ConnectionString = connectionString },

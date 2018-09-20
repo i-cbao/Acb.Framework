@@ -7,12 +7,12 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - 微服务框架服务消费者</Product>
     <Description>爱车保 - 微服务框架服务消费者</Description>
-    <Version>1.5.0</Version>
+    <Version>1.5.2</Version>
     <Title>爱车保 - 微服务框架服务消费者</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
+    <AssemblyVersion>1.5.2.0</AssemblyVersion>
+    <FileVersion>1.5.2.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspectCore.Extensions.Reflection" Version="1.0.1" />
     <PackageReference Include="Consul" Version="0.7.2.4" />
     <PackageReference Include="Polly" Version="5.8.0" />
   </ItemGroup>

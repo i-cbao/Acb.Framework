@@ -2,6 +2,7 @@
 using Acb.Core.Serialize;
 using StackExchange.Redis;
 using System;
+using System.Threading.Tasks;
 
 namespace Acb.Redis
 {
@@ -21,7 +22,7 @@ namespace Acb.Redis
                 return RedisValue.Null;
             }
             var type = obj.GetType();
-            return type == typeof(string) || type.IsValueType ? obj.ToString() : JsonHelper.ToJson(obj);
+            return type == typeof(string) || type.IsSimpleType() ? obj.ToString() : JsonHelper.ToJson(obj);
         }
 
         /// <summary>
@@ -37,7 +38,7 @@ namespace Acb.Redis
                 return default(T);
             }
             var type = typeof(T);
-            return type == typeof(string) || type.IsValueType ? value.ToString().CastTo<T>() : JsonHelper.Json<T>(value);
+            return type == typeof(string) || type.IsSimpleType() ? value.ToString().CastTo<T>() : JsonHelper.Json<T>(value);
         }
         #endregion
 
@@ -53,12 +54,32 @@ namespace Acb.Redis
         }
 
         /// <summary> 获取缓存 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="database"></param>
+        /// <param name="key">缓存键</param>
+        /// <returns></returns>
+        public static async Task<T> GetAsync<T>(this IDatabase database, string key)
+        {
+            var value = await database.StringGetAsync(key);
+            return Deserialize<T>(value);
+        }
+
+        /// <summary> 获取缓存 </summary>
         /// <param name="database"></param>
         /// <param name="key">缓存键</param>
         /// <returns></returns>
         public static object Get(this IDatabase database, string key)
         {
             return database.Get<object>(key);
+        }
+
+        /// <summary> 获取缓存 </summary>
+        /// <param name="database"></param>
+        /// <param name="key">缓存键</param>
+        /// <returns></returns>
+        public static async Task<object> GetAsync(this IDatabase database, string key)
+        {
+            return await database.GetAsync<object>(key);
         }
 
         /// <summary> 设置缓存 </summary>
@@ -70,6 +91,17 @@ namespace Acb.Redis
         public static void Set<T>(this IDatabase database, string key, T value, TimeSpan? expired = null)
         {
             database.StringSet(key, Serialize(value), expired);
+        }
+
+        /// <summary> 设置缓存 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="database"></param>
+        /// <param name="key">缓存键</param>
+        /// <param name="value">缓存值</param>
+        /// <param name="expired">过期时间</param>
+        public static async Task SetAsync<T>(this IDatabase database, string key, T value, TimeSpan? expired = null)
+        {
+            await database.StringSetAsync(key, Serialize(value), expired);
         }
     }
 }

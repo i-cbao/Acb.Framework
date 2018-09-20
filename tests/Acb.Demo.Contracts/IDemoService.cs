@@ -1,4 +1,6 @@
-﻿using Acb.Core;
+﻿using System;
+using Acb.Core;
+using Acb.Core.Cache;
 using Acb.Core.Dependency;
 using Acb.Demo.Contracts.Dtos;
 using System.Collections.Generic;
@@ -8,6 +10,9 @@ namespace Acb.Demo.Contracts
 {
     public interface IDemoService : IDependency, IMicroService
     {
+        [InterceptCache(Time = 100)]
+        Task<DateTime> Now();
+
         Task<DemoDto> Hello(string id, DemoInputDto dto);
 
         IList<string> List(IEnumerable<string> ids);

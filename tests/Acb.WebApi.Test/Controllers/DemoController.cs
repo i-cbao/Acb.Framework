@@ -34,15 +34,17 @@ namespace Acb.WebApi.Test.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var list = new List<Dictionary<string, object>>();
-            for (int i = 0; i < 3; i++)
-            {
-                var dict = await _demoService.Areas("510100");
-                list.Add(dict);
-            }
-            var result = await _demoService.Update();
+            var time = await _demoService.Now();
+            return Content(time.ToString("yyyy-MM-dd HH:mm:ss"));
+            //var list = new List<Dictionary<string, object>>();
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    var dict = await _demoService.Areas("510100");
+            //    list.Add(dict);
+            //}
+            //var result = await _demoService.Update();
 
-            return Json(DResult.Succ(result));
+            //return Json(DResult.Succ(result));
         }
 
         /// <summary> Test </summary>

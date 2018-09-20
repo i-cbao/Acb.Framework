@@ -4,6 +4,7 @@ using Acb.Core.Timing;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,12 @@ namespace Acb.Demo.Business
         public DemoService()
         {
             _logger.Debug($"{GetType().Name} Create");
+        }
+
+        public Task<DateTime> Now()
+        {
+            _logger.Debug(Clock.Now);
+            return Task.FromResult(Clock.Now);
         }
 
         public async Task<DemoDto> Hello(string id, DemoInputDto dto)

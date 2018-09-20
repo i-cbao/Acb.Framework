@@ -12,7 +12,6 @@ namespace Acb.Dapper.Domain
     {
         /// <summary> 数据库连接提供者 </summary>
         public IUnitOfWork UnitOfWork { get; }
-
         /// <summary> 获取默认连接 </summary>
         protected IDbConnection Connection => UnitOfWork.Connection;
         /// <summary> 当前事务 </summary>
@@ -52,7 +51,9 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected IDbConnection GetConnection(string connectionName = null)
         {
-            return ConnectionProvider.Connection(connectionName);
+            return ConnectionProvider.Connection(string.IsNullOrWhiteSpace(connectionName)
+                ? UnitOfWork.ConfigName
+                : connectionName);
         }
 
         /// <summary> 执行事务(当前连接) </summary>

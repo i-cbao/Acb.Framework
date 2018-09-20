@@ -42,13 +42,13 @@ namespace Acb.Redis
             return config;
         }
 
-        private ConnectionMultiplexer Connect(string connectionString)
+        public ConnectionMultiplexer Connect(string connectionString)
         {
             var opts = ConfigurationOptions.Parse(connectionString);
             return Connect(opts);
         }
 
-        private ConnectionMultiplexer Connect(ConfigurationOptions configOpts)
+        public ConnectionMultiplexer Connect(ConfigurationOptions configOpts)
         {
             var points = string.Join<EndPoint>(",", configOpts.EndPoints.ToArray());
             _logger.Info($"Create Redis: {points}");
@@ -68,7 +68,7 @@ namespace Acb.Redis
             return conn;
         }
 
-        private ConnectionMultiplexer GetConnection(string configName)
+        public ConnectionMultiplexer GetConnection(string configName)
         {
             var config = GetConfig(configName);
             var opts = ConfigurationOptions.Parse(config.ConnectionString);

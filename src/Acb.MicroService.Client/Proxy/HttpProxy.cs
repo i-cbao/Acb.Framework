@@ -72,7 +72,7 @@ namespace Acb.MicroService.Client.Proxy
             return services.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
         }
 
-        private Task<object> BaseInvoke(MethodInfo targetMethod, IEnumerable args)
+        protected override async Task<object> BasicInvokeAsync(MethodInfo targetMethod, object[] args)
         {
             var services = GetTypeService();
             var service = string.Empty;
@@ -103,31 +103,14 @@ namespace Acb.MicroService.Client.Proxy
                 var url = string.Concat(service, targetMethod.Name);
                 return await InvokeAsync(url, args);
             });
-            var type = targetMethod.ReturnType;
-            if (type == typeof(void) || type == typeof(Task))
-                return Task.FromResult<object>(0);
-            return ResultAsync(resp, type);
-        }
 
-        /// <inheritdoc />
-        /// <summary> 接口调用 </summary>
-        /// <param name="targetMethod"></param>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        public override object Invoke(MethodInfo targetMethod, object[] args)
-        {
-            return BaseInvoke(targetMethod, args).GetAwaiter().GetResult();
-        }
+            //获取拦截
+            var returnType = GetReturnType(targetMethod);
+            if (returnType == typeof(void) || returnType == typeof(Task))
+                return null;
+            var value = await ResultAsync(resp, returnType);
 
-        public override Task InvokeAsync(MethodInfo method, object[] args)
-        {
-            return BaseInvoke(method, args);
-        }
-
-        public override async Task<TR> InvokeAsyncT<TR>(MethodInfo method, object[] args)
-        {
-            var result = await BaseInvoke(method, args);
-            return result.CastTo<TR>();
+            return value;
         }
 
         /// <summary> 执行请求 </summary>
@@ -163,10 +146,6 @@ namespace Acb.MicroService.Client.Proxy
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var html = await resp.Content.ReadAsStringAsync();
-                if (typeof(Task<>).IsGenericAssignableFrom(returnType))
-                {
-                    returnType = returnType.GenericTypeArguments[0];
-                }
                 return JsonConvert.DeserializeObject(html, returnType);
             }
             else

@@ -19,6 +19,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -30,7 +31,7 @@ namespace Acb.Framework.Tests
 
         protected override void MapServices(IServiceCollection services)
         {
-            services.AddMicroClient();
+            //services.AddMicroClient();
             base.MapServices(services);
         }
 
@@ -38,6 +39,16 @@ namespace Acb.Framework.Tests
         {
             _microService = ProxyService.Proxy<IDemoService>();
             _localService = CurrentIocManager.Resolve<IDemoService>();
+        }
+
+        [TestMethod]
+        public async Task NowTest()
+        {
+            //var dict = await _microService.Areas("510100");
+            //Print(dict);
+            var time = await _microService.Now();
+            Print(time);
+            Print(Clock.Now);
         }
 
         [TestMethod]
@@ -52,36 +63,39 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Test()
         {
-
             var logger = LogManager.Logger<MicroServiceTest>();
-            var localResult = CodeTimer.Time("local", 1, () =>
+            var localResult = CodeTimer.Time("local", 1000, async () =>
             {
                 try
                 {
-                    var service = CurrentIocManager.Resolve<IDemoService>();
-                    var dict = service.Areas("510100").Result;
-                    Print(dict);
+                    var time = await _localService.Now();
+                    var date = time.Date;
+                    //var dict = _localService.Areas("510100").Result;
+                    //Print(dict);
                 }
                 catch (Exception ex)
                 {
                     logger.Error(ex.Message, ex);
                     throw;
                 }
-            }, 5);
-            //var result = CodeTimer.Time("micro", 100, async () =>
-            //{
-            //    try
-            //    {
-            //        var dict = await _microService.Areas("510100");
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        logger.Error(ex.Message, ex);
-            //        throw;
-            //    }
-            //}, 10);
+            }, 2);
+            var microResult = CodeTimer.Time("micro", 1000, async () =>
+            {
+                try
+                {
+                    var time = await _microService.Now();
+                    var date = time.Date;
+                    //var dict = _microService.Areas("510100").Result;
+                    //Print(dict);
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex.Message, ex);
+                    throw;
+                }
+            }, 2);
             Print(localResult.ToString());
-            //Print(result.ToString());
+            Print(microResult.ToString());
 
             Print(CurrentIocManager.Resolve<ConnectionFactory>().ToString());
         }

@@ -62,7 +62,7 @@ namespace Acb.MicroService.Client.Proxy
             Debug.Assert(baseType != null);
             Debug.Assert(interfaceType != null);
 
-            Type proxiedType = GetProxyType(baseType, interfaceType);
+            var proxiedType = GetProxyType(baseType, interfaceType);
             return Activator.CreateInstance(proxiedType, new ProxyHandler());
         }
 
@@ -122,14 +122,14 @@ namespace Acb.MicroService.Client.Proxy
             //}
 
             // Create a type that derives from 'baseType' provided by caller
-            ProxyBuilder pb = s_proxyAssembly.CreateProxy("generatedProxy", baseType);
+            var pb = s_proxyAssembly.CreateProxy("generatedProxy", baseType);
 
-            foreach (Type t in interfaceType.GetTypeInfo().ImplementedInterfaces)
+            foreach (var t in interfaceType.GetTypeInfo().ImplementedInterfaces)
                 pb.AddInterfaceImpl(t);
 
             pb.AddInterfaceImpl(interfaceType);
 
-            Type generatedProxyType = pb.CreateType();
+            var generatedProxyType = pb.CreateType();
             return generatedProxyType;
         }
 
@@ -147,8 +147,8 @@ namespace Acb.MicroService.Client.Proxy
 
         private static ProxyMethodResolverContext Resolve(object[] args)
         {
-            PackedArgs packed = new PackedArgs(args);
-            MethodBase method = s_proxyAssembly.ResolveMethodToken(packed.DeclaringType, packed.MethodToken);
+            var packed = new PackedArgs(args);
+            var method = s_proxyAssembly.ResolveMethodToken(packed.DeclaringType, packed.MethodToken);
             if (method.IsGenericMethodDefinition)
                 method = ((MethodInfo)method).MakeGenericMethod(packed.GenericTypes);
 
@@ -164,8 +164,9 @@ namespace Acb.MicroService.Client.Proxy
             try
             {
                 Debug.Assert(s_dispatchProxyInvokeMethod != null);
+
                 returnValue = s_dispatchProxyInvokeMethod.Invoke(context.Packed.DispatchProxy,
-                                                                       new object[] { context.Method, context.Packed.Args });
+                    new object[] { context.Method, context.Packed.Args });
                 context.Packed.ReturnValue = returnValue;
             }
             catch (TargetInvocationException tie)

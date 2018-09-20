@@ -11,7 +11,8 @@ namespace Acb.Dapper
     {
         private readonly ConnectionFactory _factory;
 
-        private readonly string _configName;
+        public string ConfigName { get; }
+
         private readonly string _connectionString;
         private readonly string _providerName;
         private static readonly object SyncLock = new object();
@@ -21,7 +22,7 @@ namespace Acb.Dapper
         public UnitOfWork(string configName = null)
         {
             _factory = CurrentIocManager.Resolve<ConnectionFactory>();
-            _configName = configName;
+            ConfigName = configName;
             _logger = LogManager.Logger(GetType());
             _logger.Debug($"{GetType().Name} Create");
         }
@@ -43,23 +44,23 @@ namespace Acb.Dapper
         {
             get
             {
-                //if (!string.IsNullOrWhiteSpace(_connectionString))
-                //    return _connection = ConnectionFactory.Connection(_connectionString, _providerName);
-                //return _connection = ConnectionFactory.Connection(_configName);
-                if (_connection == null)
-                {
-                    lock (SyncLock)
-                    {
-                        if (_connection == null)
-                        {
-                            if (!string.IsNullOrWhiteSpace(_connectionString))
-                                return _connection = _factory.Connection(_connectionString, _providerName, false);
-                            return _connection = _factory.Connection(_configName, false);
-                        }
-                    }
-                }
+                if (!string.IsNullOrWhiteSpace(_connectionString))
+                    return _connection = _factory.Connection(_connectionString, _providerName);
+                return _connection = _factory.Connection(ConfigName);
+                //if (_connection == null)
+                //{
+                //    lock (SyncLock)
+                //    {
+                //        if (_connection == null)
+                //        {
+                //            if (!string.IsNullOrWhiteSpace(_connectionString))
+                //                return _connection = _factory.Connection(_connectionString, _providerName, false);
+                //            return _connection = _factory.Connection(_configName, false);
+                //        }
+                //    }
+                //}
 
-                return _connection;
+                //return _connection;
             }
         }
 
@@ -139,10 +140,10 @@ namespace Acb.Dapper
 
         public void Dispose()
         {
-            if (_connection == null) return;
+            //if (_connection == null) return;
             _logger.Debug("UnitOfWork Dispose");
             Transaction?.Dispose();
-            _connection?.Dispose();
+            //_connection?.Dispose();
         }
     }
 }

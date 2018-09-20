@@ -25,13 +25,13 @@ namespace Acb.Framework.Tests
             Print($"最小线程数：{min},{compt}");
             //ThreadPool.SetMinThreads(300, compt);
             const string key = "shay";
-            var redis = _manager.GetDatabase("local", 4);
+            var redis = _manager.GetDatabase(defaultDb: 3);
             redis.Set(key, "test", TimeSpan.FromMinutes(2));
             var result = CodeTimer.Time("redis test", 100, () =>
             {
                 try
                 {
-                    var ritem = _manager.GetDatabase("local", 4);
+                    var ritem = _manager.GetDatabase(defaultDb: 3);
                     var tmp = ritem.Get<string>(key);
                 }
                 catch (Exception ex)
