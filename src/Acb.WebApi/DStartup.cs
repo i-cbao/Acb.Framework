@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
@@ -154,15 +153,17 @@ namespace Acb.WebApi
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc(routes =>
             {
-                routes.MapGet("reload", async ctx =>
-                {
-                    ConfigHelper.Instance.Reload();
-                    await ctx.Response.WriteAsync("ok");
-                });
                 //普通路由
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 //区域路由
                 routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
+
+                //刷新配置
+                routes.MapGet("config/reload", async ctx =>
+                {
+                    ConfigHelper.Instance.Reload();
+                    await ctx.Response.WriteAsync("ok");
+                });
             });
             UseServices(provider);
             var liftscope = provider.GetService<IApplicationLifetime>();

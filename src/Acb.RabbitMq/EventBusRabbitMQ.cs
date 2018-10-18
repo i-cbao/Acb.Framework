@@ -143,9 +143,10 @@ namespace Acb.RabbitMq
             catch (Exception ex)
             {
                 //非业务异常,可重新入队
-                if (ex is BusiException)
+                if (ex.GetBaseException() is BusiException busi)
                 {
                     _consumerChannel.BasicNack(ea.DeliveryTag, false, false);
+                    _logger.Warn($"{queue},busi:{busi.Message}");
                     return;
                 }
 
@@ -158,7 +159,8 @@ namespace Acb.RabbitMq
 
                 if (times > 5)
                 {
-                    _consumerChannel.BasicNack(ea.DeliveryTag, false, true);
+                    _consumerChannel.BasicNack(ea.DeliveryTag, false, false);
+                    _logger.Warn($"{queue},retry times > 5");
                     return;
                 }
 

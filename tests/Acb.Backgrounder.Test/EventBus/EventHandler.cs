@@ -1,4 +1,5 @@
 ﻿using Acb.Core.EventBus;
+using Acb.Core.Exceptions;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts.EventBus;
@@ -37,28 +38,28 @@ namespace Acb.Backgrounder.Test.EventBus
         {
             _logger.Info("icb_handler_user_01");
             _logger.Info(JsonHelper.ToJson(@event));
-            //throw new Exception("exception Test");
+            throw new BusiException("exception Test");
             return Task.CompletedTask;
         }
     }
 
-    [Subscription("icb_handler_user_02")]
-    public class AnotherMessageHandler : IEventHandler<UserEvent>
-    {
-        private readonly ILogger _logger;
+    //[Subscription("icb_handler_user_02")]
+    //public class AnotherMessageHandler : IEventHandler<UserEvent>
+    //{
+    //    private readonly ILogger _logger;
 
-        public AnotherMessageHandler()
-        {
-            _logger = LogManager.Logger<AnotherMessageHandler>();
-        }
+    //    public AnotherMessageHandler()
+    //    {
+    //        _logger = LogManager.Logger<AnotherMessageHandler>();
+    //    }
 
-        public Task Handle(UserEvent @event)
-        {
-            _logger.Info("icb_handler_user_02");
-            _logger.Info(JsonHelper.ToJson(@event));
-            return Task.CompletedTask;
-        }
-    }
+    //    public Task Handle(UserEvent @event)
+    //    {
+    //        _logger.Info("icb_handler_user_02");
+    //        _logger.Info(JsonHelper.ToJson(@event));
+    //        return Task.CompletedTask;
+    //    }
+    //}
 
     [Subscription("icb_handler_test")]
     public class MessageHandlerTwo : IEventHandler<TestEvent>

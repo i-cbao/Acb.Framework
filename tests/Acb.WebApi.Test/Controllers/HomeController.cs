@@ -27,6 +27,7 @@ namespace Acb.WebApi.Test.Controllers
             _logger = LogManager.Logger<HomeController>();
             var bus = CurrentIocManager.Resolve<IEventBus>();
         }
+
         // GET api/values
         [HttpGet]
         public DResults<string> Get()
