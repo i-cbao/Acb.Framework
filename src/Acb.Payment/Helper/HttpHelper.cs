@@ -5,6 +5,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Payment.Helper
 {
@@ -28,12 +29,7 @@ namespace Acb.Payment.Helper
         {
             var resp = AcbHttpContext.Current.Response;
             resp.ContentType = "text/html;charset=utf-8";
-            Task.Run(async () =>
-            {
-                await resp.WriteAsync(text);
-            })
-            .GetAwaiter()
-            .GetResult();
+            resp.WriteAsync(text).SyncRun();
         }
 
         /// <summary>

@@ -7,6 +7,7 @@ using ons;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.RocketMq
 {
@@ -99,7 +100,7 @@ namespace Acb.RocketMq
                 var tag = value.getTag();
                 try
                 {
-                    ProcessEvent(tag, body).GetAwaiter().GetResult();
+                    ProcessEvent(tag, body).SyncRun();
                     return ons.Action.CommitMessage;
                 }
                 catch (Exception ex)

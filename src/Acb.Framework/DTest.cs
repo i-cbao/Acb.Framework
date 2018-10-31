@@ -51,6 +51,11 @@ namespace Acb.Framework
             UseServices(provider);
         }
 
+        protected T Resolve<T>()
+        {
+            return Bootstrap.Container.Resolve<T>();
+        }
+
         /// <summary> 打印数据 </summary>
         /// <param name="result"></param>
         protected void Print(object result)

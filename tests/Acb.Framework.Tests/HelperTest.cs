@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Framework.Tests
 {
@@ -21,7 +22,7 @@ namespace Acb.Framework.Tests
     public class HelperTest : DTest
     {
         private readonly ILogger _logger = LogManager.Logger<HelperTest>();
-        
+
         [TestMethod]
         public void Md5Test()
         {
@@ -156,11 +157,10 @@ namespace Acb.Framework.Tests
 
         private async Task RunTask()
         {
-
-            //Print("run start");
-            //Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
-            //await Task.Delay(TimeSpan.FromSeconds(5));
-            //Print("run complete");
+            Print("run start");
+            Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            Print("run complete");
         }
 
         [TestMethod]
@@ -173,7 +173,7 @@ namespace Acb.Framework.Tests
             watcher.Stop();
             Print($"await ºÄÊ±:{watcher.ElapsedMilliseconds}ms");
             watcher.Restart();
-            RunTask().GetAwaiter().GetResult();
+            RunTask().SyncRun();
             Print($"thread: {Thread.CurrentThread.ManagedThreadId}");
             watcher.Stop();
             Print($"run ºÄÊ±:{watcher.ElapsedMilliseconds}ms");

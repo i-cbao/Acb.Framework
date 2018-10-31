@@ -10,6 +10,9 @@
 
   <ItemGroup>
     <PackageReference Include="aliyun.oss.sdk.core" Version="2.5.3" />
+    <PackageReference Include="AspectCore.Extensions.Autofac" Version="1.0.1" />
+    <PackageReference Include="AspectCore.Extensions.Configuration" Version="1.0.1" />
+    <PackageReference Include="Autofac.Extras.DynamicProxy" Version="4.5.0" />
     <PackageReference Include="AutoMapper" Version="6.2.2" />
     <PackageReference Include="Consul" Version="0.7.2.4" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />

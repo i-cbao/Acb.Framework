@@ -121,7 +121,7 @@ namespace Acb.MicroService.Client.Proxy
 
         public virtual object Invoke(MethodInfo method, object[] args)
         {
-            return AopInvokeAsync(method, args).GetAwaiter().GetResult();
+            return AopInvokeAsync(method, args).SyncRun();
         }
 
         public virtual Task InvokeAsync(MethodInfo method, object[] args)

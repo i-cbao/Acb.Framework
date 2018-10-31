@@ -203,7 +203,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public PagedList<T> PagedList<T>(IDbConnection conn, int page, int size, object param = null)
         {
-            return PagedListAsync<T>(conn, page, size, param).GetAwaiter().GetResult();
+            return PagedListAsync<T>(conn, page, size, param).SyncRun();
         }
 
         /// <summary> 分页列表 </summary>

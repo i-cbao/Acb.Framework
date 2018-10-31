@@ -7,6 +7,7 @@ using Acb.Payment.Enum;
 using Acb.Payment.Interfaces;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 using HttpHelper = Acb.Payment.Helper.HttpHelper;
 
 namespace Acb.Payment.Gateways.MicroPay
@@ -118,13 +119,7 @@ namespace Acb.Payment.Gateways.MicroPay
         {
             var cert = isCert ? new X509Certificate2(Merchant.SslCertPath, Merchant.SslCertPassword) : null;
 
-            string result = null;
-            Task.Run(async () =>
-            {
-                result = await HttpHelper.PostAsync(GatewayUrl, GatewayData.ToXml(), cert);
-            })
-            .GetAwaiter()
-            .GetResult();
+            var result = HttpHelper.PostAsync(GatewayUrl, GatewayData.ToXml(), cert).SyncRun();
             ReadReturnResult(result);
         }
 
@@ -159,17 +154,11 @@ namespace Acb.Payment.Gateways.MicroPay
         /// <param name="code"></param>
         private OAuth GetAccessTokenByCode(string code)
         {
-            string result = null;
-            Task.Run(async () =>
-            {
-                result = await HttpHelper.GetAsync(string.Format(ACCESSTOKENURL, Merchant.AppId, Merchant.AppSecret, code));
-            })
-            .GetAwaiter()
-            .GetResult();
+            var result = HttpHelper.GetAsync(string.Format(ACCESSTOKENURL, Merchant.AppId, Merchant.AppSecret, code)).SyncRun();
             GatewayData.FromJson(result);
 
-            int _code = GatewayData.GetValue<int>(Constant.ERRCODE);
-            int _msg = GatewayData.GetValue<int>(Constant.ERRMSG);
+            var _code = GatewayData.GetValue<int>(Constant.ERRCODE);
+            var _msg = GatewayData.GetValue<int>(Constant.ERRMSG);
             if (_code == 40029)
             {
                 throw new BusiException($"{_code} {_msg}");

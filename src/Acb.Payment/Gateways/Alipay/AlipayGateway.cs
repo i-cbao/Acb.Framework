@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Serialize;
 using Acb.Payment.Enum;
@@ -157,11 +158,7 @@ namespace Acb.Payment.Gateways.Alipay
         /// <param name="type">结果类型</param>
         private void Commit(string type)
         {
-            string result = null;
-            Task.Run(async () => { result = await Helper.HttpHelper.PostAsync(GatewayUrl, GatewayData.ToUrl()); })
-                .GetAwaiter()
-                .GetResult();
-
+            var result = Helper.HttpHelper.PostAsync(GatewayUrl, GatewayData.ToUrl()).SyncRun();
             ReadReturnResult(result, type);
         }
 

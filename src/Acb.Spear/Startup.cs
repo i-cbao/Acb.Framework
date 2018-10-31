@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.IO;
+using Acb.Core.Extensions;
+using Microsoft.Extensions.FileProviders;
 
 namespace Acb.Spear
 {
@@ -17,7 +20,7 @@ namespace Acb.Spear
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.GetService<SchedulerCenter>().StartScheduler().GetAwaiter().GetResult();
+            provider.GetService<SchedulerCenter>().StartScheduler().SyncRun();
             base.UseServices(provider);
         }
 
@@ -46,7 +49,13 @@ namespace Acb.Spear
                 app.UseDeveloperExceptionPage();
             }
             //app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            //app.UseStaticFiles();
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                EnableDefaultFiles = true,
+                DefaultFilesOptions = { DefaultFileNames = new[] { "index.html" } }
+            });
             app.UseSignalR(route => { route.MapHub<ConfigHub>("/config_hub"); });
             app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
             base.Configure(app, env);

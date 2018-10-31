@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Transactions;
+using Acb.Core.Extensions;
 
 namespace Acb.Core.Domain
 {
@@ -32,7 +33,7 @@ namespace Acb.Core.Domain
             {
                 var result = action();
                 var task = result as Task;
-                task?.GetAwaiter().GetResult();
+                task?.SyncRun();
                 trans.SaveChanges();
                 return result;
             }

@@ -4,6 +4,7 @@ using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Dapper
 {
@@ -105,7 +106,7 @@ namespace Acb.Dapper
             {
                 var result = func.Invoke();
                 var task = result as Task;
-                task?.GetAwaiter().GetResult();
+                task?.SyncRun();
                 if (disposed)
                 {
                     Transaction.Commit();

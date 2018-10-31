@@ -9,22 +9,23 @@ namespace Acb.Aop
 {
     public class AopProxy
     {
-        public static TInterface Create<TInterface, TImp>(Type interceptorType = null,
-            Type actionType = null) where TImp : class, new() where TInterface : class
+        public static TInterface Create<TInterface, TImp>(Type interceptorAttributeType = null,
+            Type actionAttributeType = null) where TImp : class, new() where TInterface : class
         {
-            return Invoke<TInterface, TImp>(false, interceptorType, actionType);
+            return Invoke<TInterface, TImp>(false, interceptorAttributeType, actionAttributeType);
         }
 
-        public static TProxyClass Create<TProxyClass>(Type interceptorType = null,
-            Type actionType = null) where TProxyClass : class, new()
+        public static TProxyClass Create<TProxyClass>(Type interceptorAttributeType = null,
+            Type actionAttributeType = null) where TProxyClass : class, new()
         {
-            return Invoke<TProxyClass, TProxyClass>(true, interceptorType, actionType);
+            return Invoke<TProxyClass, TProxyClass>(true, interceptorAttributeType, actionAttributeType);
         }
 
-        private static TInterface Invoke<TInterface, TImp>(bool inheritMode = false, Type interceptorType = null,
-        Type actionType = null) where TImp : class, new() where TInterface : class
+        private static TInterface Invoke<TInterface, TImp>(bool inheritMode = false, Type interceptorAttributeType = null,
+        Type actionAttributeType = null) where TImp : class, new() where TInterface : class
         {
             var impType = typeof(TImp);
+            var interfaceType = typeof(TInterface);
 
             var nameOfAssembly = impType.Name + "ProxyAssembly";
             var nameOfModule = impType.Name + "ProxyModule";
@@ -37,11 +38,13 @@ namespace Acb.Aop
 
             var typeBuilder = inheritMode
                 ? moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, impType)
-                : moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { typeof(TInterface) });
-            interceptorType = interceptorType ??
-                              impType.GetReflector().GetCustomAttribute(typeof(AopInterceptorAttribute))?.GetType();
+                : moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { interfaceType });
 
-            InjectInterceptor<TImp>(typeBuilder, interceptorType, actionType, inheritMode);
+            //拦截器类型
+            interceptorAttributeType = interceptorAttributeType ??
+                                       impType.GetReflector().GetCustomAttribute(typeof(AopInterceptorAttribute))?.GetType();
+
+            InjectInterceptor<TImp>(typeBuilder, interceptorAttributeType, actionAttributeType, inheritMode);
 
             var t = typeBuilder.CreateTypeInfo();
 
@@ -69,7 +72,7 @@ namespace Acb.Aop
 
             var methodsOfType = impType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
-            string[] ignoreMethodName = new[] { "GetType", "ToString", "GetHashCode", "Equals" };
+            var ignoreMethodName = new[] { "GetType", "ToString", "GetHashCode", "Equals" };
 
             foreach (var method in methodsOfType)
             {

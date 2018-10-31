@@ -5,6 +5,7 @@ using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Dapper.Domain
 {
@@ -94,7 +95,7 @@ namespace Acb.Dapper.Domain
                     {
                         var result = action.Invoke(conn, trans);
                         var task = result as Task;
-                        task?.GetAwaiter().GetResult();
+                        task?.SyncRun();
                         trans.Commit();
                         return result;
                     }

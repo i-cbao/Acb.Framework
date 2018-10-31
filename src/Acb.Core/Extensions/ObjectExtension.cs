@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Dynamic;
+using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Acb.Core.Extensions
 {
@@ -179,6 +181,31 @@ namespace Acb.Core.Extensions
             }
 
             return sb.ToString();
+        }
+
+        /// <summary> 获取异步Task结果 </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static async Task<object> TaskResult(this object result)
+        {
+            if (result == null)
+                return null;
+            var resultType = result.GetType();
+            if (resultType == typeof(void) || resultType == typeof(Task))
+                return result;
+
+            if (!(result is Task task))
+                return result;
+            await task;
+            var taskType = task.GetType().GetTypeInfo();
+            if (taskType.IsGenericType)
+            {
+                var prop = taskType.GetProperty("Result");
+                if (prop != null)
+                    return prop.GetValue(task);
+            }
+
+            return result;
         }
     }
 }

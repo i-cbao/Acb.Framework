@@ -47,8 +47,8 @@ namespace Acb.Framework.Tests
             //var dict = await _microService.Areas("510100");
             //Print(dict);
             var time = await _microService.Now();
-            Print(time);
-            Print(Clock.Now);
+            Print($"result:{time}");
+            Print($"now:{Clock.Now}");
         }
 
         [TestMethod]

@@ -26,28 +26,34 @@ namespace Acb.Core
                 var context = Current;
                 if (context == null)
                     return DefaultIp;
+
+                string GetIpFromHeader(string key)
+                {
+
+                    if (!context.Request.Headers.TryGetValue(key, out var ips))
+                        return string.Empty;
+                    foreach (var ip in ips)
+                    {
+                        if (RegexHelper.IsIp(ip)) return ip;
+                    }
+
+                    return string.Empty;
+                }
                 //获取代理IP
-                context.Request.Headers.TryGetValue("X-Forwarded-For", out var userHostAddress);
-                if (string.IsNullOrWhiteSpace(userHostAddress))
-                {
-                    context.Request.Headers.TryGetValue("HTTP_X_FORWARDED_FOR", out userHostAddress);
-                }
-                if (string.IsNullOrEmpty(userHostAddress))
-                {
-                    context.Request.Headers.TryGetValue("REMOTE_ADDR", out userHostAddress);
-                }
-
-                if (string.IsNullOrEmpty(userHostAddress))
-                {
-                    userHostAddress = context.Connection.RemoteIpAddress.ToString();
-                }
-
-                if (string.IsNullOrEmpty(userHostAddress) || !RegexHelper.IsIp(userHostAddress))
-                {
-                    return DefaultIp;
-                }
-
-                return userHostAddress;
+                var userHostAddress = GetIpFromHeader("X-Forwarded-For");
+                if (!string.IsNullOrWhiteSpace(userHostAddress))
+                    return userHostAddress;
+                userHostAddress = GetIpFromHeader("X-Real-IP");
+                if (!string.IsNullOrWhiteSpace(userHostAddress))
+                    return userHostAddress;
+                userHostAddress = GetIpFromHeader("HTTP_X_FORWARDED_FOR");
+                if (!string.IsNullOrWhiteSpace(userHostAddress))
+                    return userHostAddress;
+                userHostAddress = GetIpFromHeader("REMOTE_ADDR");
+                if (!string.IsNullOrWhiteSpace(userHostAddress))
+                    return userHostAddress;
+                userHostAddress = context.Connection.RemoteIpAddress.ToString();
+                return RegexHelper.IsIp(userHostAddress) ? userHostAddress : DefaultIp;
             }
         }
         /// <summary> 本地IP </summary>
@@ -76,7 +82,7 @@ namespace Acb.Core
         public static Stream Body => Current.Request.Body;
 
         /// <summary> 用户代理 </summary>
-        public static string UserAgent => Current.Request.Headers["User-Agent"];
+        public static string UserAgent => Current?.Request.Headers["User-Agent"];
 
         /// <summary> 内容类型 </summary>
         public static string ContentType => Current.Request.ContentType;
@@ -84,7 +90,7 @@ namespace Acb.Core
         /// <summary> 参数 </summary>
         public static string QueryString => Current.Request.QueryString.ToString();
 
-        public static string RawUrl => Utils.RawUrl();
+        public static string RawUrl => Utils.RawUrl(Current?.Request);
 
         /// <summary> 配置HttpContext </summary>
         /// <param name="accessor"></param>
