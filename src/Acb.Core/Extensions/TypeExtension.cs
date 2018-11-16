@@ -72,11 +72,7 @@ namespace Acb.Core.Extensions
         /// <returns></returns>
         public static bool IsSimpleType(this Type type)
         {
-            var actualType = type;
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                actualType = type.GetGenericArguments()[0];
-            }
+            var actualType = type.GetUnNullableType();
             return SimpleTypes.Contains(actualType);
         }
 
@@ -217,11 +213,12 @@ namespace Acb.Core.Extensions
 
         /// <summary> 检查属性值变化 </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="target"></param>
-        /// <param name="reset"></param>
+        /// <param name="source">当前对象</param>
+        /// <param name="target">目标对象</param>
+        /// <param name="keyColumn">主键名称</param>
+        /// <param name="reset">是否重置</param>
         /// <returns></returns>
-        public static PropertyInfo[] CheckProps<T>(this T source, object target, bool reset = false)
+        public static PropertyInfo[] CheckProps<T>(this T source, object target, string keyColumn = "id", bool reset = false)
         {
             if (source == null || target == null)
                 return new PropertyInfo[] { };
@@ -231,6 +228,9 @@ namespace Acb.Core.Extensions
             var list = new List<PropertyInfo>();
             foreach (var prop in props)
             {
+                if (!string.IsNullOrWhiteSpace(keyColumn) &&
+                    prop.Name.Equals(keyColumn, StringComparison.CurrentCultureIgnoreCase))
+                    continue;
                 var p = targetType.GetProperty(prop.Name,
                     BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
                 if (p == null || p.PropertyType != prop.PropertyType)
@@ -240,7 +240,7 @@ namespace Acb.Core.Extensions
                 var s = prop.GetValue(source).CastTo(prop.PropertyType);
                 var t = p.GetValue(target).CastTo(prop.PropertyType);
 
-                if (s == def)
+                if (s == null || s.Equals(def))
                 {
                     if (!reset)
                         continue;

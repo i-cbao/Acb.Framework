@@ -26,13 +26,13 @@ namespace Acb.Framework.Tests
         public void GetTest()
         {
             var config = "dapper:default".Config<ConnectionConfig>();
-            Print(config);
+            //Print(config);
             _logger.Debug(config);
             var redis = "redis:default".Config<string>();
-            Print(redis);
+            //Print(redis);
             _logger.Info(redis);
             var mongo = "mongo:default".Config<MongoConfig>();
-            Print(mongo);
+            //Print(mongo);
             _logger.Warn(mongo);
             try
             {
@@ -42,9 +42,9 @@ namespace Acb.Framework.Tests
             {
                 _logger.Error(ex.Message, ex);
             }
-            Print(Consts.Mode);
+            //Print(Consts.Mode);
             var name = "name".Config<string>();
-            Print(name);
+            //Print(name);
             _logger.Fatal(name);
         }
 

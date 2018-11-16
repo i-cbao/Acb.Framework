@@ -38,7 +38,7 @@ namespace Acb.Core.Logging
                 logLevel = level.Value;
             else
             {
-                var mode = Environment.GetEnvironmentVariable(ConfigLevelEnvironmentName);
+                var mode = ConfigLevelEnvironmentName.Env();
                 if (string.IsNullOrWhiteSpace(mode))
                     mode = ConfigLevel.Config<string>();
                 logLevel = mode.CastTo(Logging.LogLevel.Info);
@@ -47,8 +47,8 @@ namespace Acb.Core.Logging
             _logLevel = logLevel;
             foreach (var adapter in LoggerAdapters)
             {
-                if (adapter.Value == Logging.LogLevel.Off || !IsEnableLevel(adapter.Value))
-                    LoggerAdapters[adapter.Key] = _logLevel;
+                //if (adapter.Value == Logging.LogLevel.Off || !IsEnableLevel(adapter.Value))
+                LoggerAdapters[adapter.Key] = _logLevel;
             }
         }
 

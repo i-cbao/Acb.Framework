@@ -4,7 +4,6 @@ using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Reflection;
 using Acb.MicroService.Register;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,13 +67,13 @@ namespace Acb.MicroService
         private static void LoadConfig()
         {
             _config = MicroSreviceKey.Config<MicroServiceConfig>();
-            var host = Environment.GetEnvironmentVariable(HostEnvironmentName);
-            var port = Environment.GetEnvironmentVariable(PortEnvironmentName).CastTo(0);
+            var host = HostEnvironmentName.Env();
+            var port = PortEnvironmentName.Env(0);
             if (!string.IsNullOrWhiteSpace(host))
                 _config.Host = host;
             if (port > 0)
                 _config.Port = port;
-            var autoDeregist = Environment.GetEnvironmentVariable(AutoDeregistEnvironmentName).CastTo<bool?>(null);
+            var autoDeregist = AutoDeregistEnvironmentName.Env<bool?>(null);
             if (autoDeregist.HasValue)
                 _config.AutoDeregist = autoDeregist.Value;
         }

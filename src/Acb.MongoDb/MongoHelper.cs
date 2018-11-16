@@ -32,8 +32,11 @@ namespace Acb.MongoDb
             {
                 Servers = _config.Servers.Select(t => new MongoServerAddress(t.Host, t.Port)),
                 SocketTimeout = TimeSpan.FromSeconds(_config.Timeout),
+                MaxConnectionPoolSize = _config.PoolSize, //default 100
                 ConnectTimeout = TimeSpan.FromSeconds(_config.Timeout)
             };
+            if (_config.WaitSize > _config.PoolSize)
+                settings.WaitQueueSize = _config.WaitSize;
             var cred = _config.Credentials.FirstOrDefault();
             if (cred != null)
             {

@@ -18,7 +18,7 @@ namespace Acb.Core
         {
             get
             {
-                var mode = Environment.GetEnvironmentVariable(ModeEnvironmentName);
+                var mode = ModeEnvironmentName.Env();
                 if (string.IsNullOrWhiteSpace(mode))
                     mode = ModeConfigName.Config<string>();
                 return mode.CastTo(ProductMode.Dev);

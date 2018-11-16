@@ -27,6 +27,10 @@ namespace Acb.MongoDb
         /// <summary> 数据库认证列表 </summary>
         public List<DCredential> Credentials { get; set; }
 
+        /// <summary> 最大连接池数 </summary>
+        public int PoolSize { get; set; } = 200;
+        /// <summary> 等待列表数 </summary>
+        public int WaitSize { get; set; }
         /// <summary> 超时时间 (s) </summary>
         public int Timeout { get; set; }
 

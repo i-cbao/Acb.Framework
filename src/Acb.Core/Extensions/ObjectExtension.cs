@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Dynamic;
-using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Acb.Core.Extensions
 {
@@ -61,6 +59,7 @@ namespace Acb.Core.Extensions
                         ? Enum.Parse(conversionType, s)
                         : Enum.ToObject(conversionType, obj);
                 }
+
                 if (!conversionType.IsInterface && conversionType.IsGenericType)
                 {
                     var innerType = conversionType.GetGenericArguments()[0];
@@ -68,12 +67,18 @@ namespace Acb.Core.Extensions
                     return Activator.CreateInstance(conversionType, innerValue);
                 }
 
-                switch (obj)
+                if (conversionType == typeof(Guid))
                 {
-                    case string _ when conversionType == typeof(Guid):
-                        return new Guid(obj as string);
-                    case string _ when conversionType == typeof(Version):
-                        return new Version(obj as string);
+                    if (Guid.TryParse(obj.ToString(), out var guid))
+                        return guid;
+                    return null;
+                }
+
+                if (conversionType == typeof(Version))
+                {
+                    if (Version.TryParse(obj.ToString(), out var version))
+                        return version;
+                    return null;
                 }
 
                 return !(obj is IConvertible) ? obj : Convert.ChangeType(obj, conversionType);
@@ -95,7 +100,7 @@ namespace Acb.Core.Extensions
             foreach (PropertyDescriptor property in properties)
             {
                 var val = property.GetValue(value);
-                if (property.PropertyType.FullName.StartsWith("<>f__AnonymousType"))
+                if (property.PropertyType.FullName != null && property.PropertyType.FullName.StartsWith("<>f__AnonymousType"))
                 {
                     var dval = val.ToDynamic();
                     expando.Add(property.Name, dval);
@@ -105,12 +110,11 @@ namespace Acb.Core.Extensions
                     expando.Add(property.Name, val);
                 }
             }
+
             return (ExpandoObject)expando;
         }
 
-        /// <summary>
-        /// 异常信息格式化
-        /// </summary>
+        /// <summary> 异常信息格式化 </summary>
         /// <param name="ex"></param>
         /// <param name="isHideStackTrace"></param>
         /// <returns></returns>
@@ -181,31 +185,6 @@ namespace Acb.Core.Extensions
             }
 
             return sb.ToString();
-        }
-
-        /// <summary> 获取异步Task结果 </summary>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        public static async Task<object> TaskResult(this object result)
-        {
-            if (result == null)
-                return null;
-            var resultType = result.GetType();
-            if (resultType == typeof(void) || resultType == typeof(Task))
-                return result;
-
-            if (!(result is Task task))
-                return result;
-            await task;
-            var taskType = task.GetType().GetTypeInfo();
-            if (taskType.IsGenericType)
-            {
-                var prop = taskType.GetProperty("Result");
-                if (prop != null)
-                    return prop.GetValue(task);
-            }
-
-            return result;
         }
     }
 }

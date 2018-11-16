@@ -2,16 +2,16 @@
 using Acb.Core.Extensions;
 using Acb.Core.Modules;
 using Acb.Core.Monitor;
-using System;
 
 namespace Acb.Middleware.Monitor
 {
     [DependsOn(typeof(CoreModule))]
     public class MonitorModule : DModule
     {
+        private const string EnableMonitor = "ENABLE_MONITOR";
         public override void Initialize()
         {
-            var enable = Environment.GetEnvironmentVariable("ENABLE_MONITOR").CastTo(false);
+            var enable = EnableMonitor.Env(false);
             if (enable)
             {
                 MonitorManager.Add(new AcbMonitor());

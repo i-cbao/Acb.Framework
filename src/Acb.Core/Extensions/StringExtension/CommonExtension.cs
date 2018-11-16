@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Helper;
+﻿using Acb.Core.Helper;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
@@ -420,6 +419,29 @@ namespace Acb.Core.Extensions
             if (string.IsNullOrWhiteSpace(url) || url.IsMatch("^(http(s)?://)|(data:[^;]+;base64,)", RegexOptions.IgnoreCase))
                 return url;
             return new Uri(new Uri(host), url).AbsoluteUri;
+        }
+
+        /// <summary> 获取环境变量 </summary>
+        /// <param name="name">变量名称</param>
+        /// <param name="target">存储目标</param>
+        /// <returns></returns>
+        public static string Env(this string name, EnvironmentVariableTarget? target = null)
+        {
+            return target.HasValue
+                ? Environment.GetEnvironmentVariable(name, target.Value)
+                : Environment.GetEnvironmentVariable(name);
+        }
+
+        /// <summary> 获取环境变量 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="name">变量名称</param>
+        /// <param name="def">默认值</param>
+        /// <param name="target">存储目标</param>
+        /// <returns></returns>
+        public static T Env<T>(this string name, T def = default(T), EnvironmentVariableTarget? target = null)
+        {
+            var env = name.Env(target);
+            return string.IsNullOrWhiteSpace(env) ? def : env.CastTo(def);
         }
     }
 }

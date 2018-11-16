@@ -67,7 +67,7 @@ namespace Acb.WebApi.Filters
             filterContext.HttpContext.Request.Headers.TryGetValue("referer", out var from);
             var monitor = MonitorManager.Monitor();
             monitor.Record("gateway", url, from, actionTimer.ElapsedMilliseconds, data, AcbHttpContext.UserAgent,
-                AcbHttpContext.ClientIp).Wait();
+                AcbHttpContext.ClientIp).SyncRun();
             base.OnResultExecuted(filterContext);
         }
     }

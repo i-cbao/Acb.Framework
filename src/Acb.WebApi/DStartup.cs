@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Acb.WebApi
 {
@@ -165,6 +166,10 @@ namespace Acb.WebApi
                     await ctx.Response.WriteAsync("ok");
                 });
             });
+            //app.UseForwardedHeaders(new ForwardedHeadersOptions
+            //{
+            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            //});
             UseServices(provider);
             var liftscope = provider.GetService<IApplicationLifetime>();
             liftscope.ApplicationStopping.Register(Bootstrap.Dispose);
