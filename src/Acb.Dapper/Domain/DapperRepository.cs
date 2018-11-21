@@ -1,4 +1,5 @@
-﻿using Acb.Core.Domain;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Domain;
 using Acb.Core.Domain.Entities;
 using System.Collections.Generic;
 
@@ -9,8 +10,7 @@ namespace Acb.Dapper.Domain
     public partial class DapperRepository<T> : DRepository
         where T : IEntity
     {
-        /// <summary> 默认构造函数 </summary>
-        public DapperRepository() : base() { }
+        public DapperRepository() : base(CurrentIocManager.Resolve<IUnitOfWork>()) { }
 
         /// <summary> 构造 </summary>
         /// <param name="unitOfWork"></param>

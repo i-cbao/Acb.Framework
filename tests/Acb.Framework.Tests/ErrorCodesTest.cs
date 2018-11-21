@@ -1,5 +1,5 @@
 ﻿using Acb.Core.Exceptions;
-using Acb.Framework.Tests.Domain;
+using Acb.Demo.Business.Domain;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Acb.Framework.Tests

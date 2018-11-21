@@ -7,10 +7,17 @@ namespace Acb.Redis
     public class RedisCacheProvider : ICacheProvider
     {
         private static readonly ConcurrentDictionary<string, ICache> Caches;
+        private readonly RedisConfig _config;
 
         static RedisCacheProvider()
         {
             Caches = new ConcurrentDictionary<string, ICache>();
+        }
+
+
+        public RedisCacheProvider(RedisConfig config = null)
+        {
+            _config = config;
         }
 
         /// <summary>
@@ -29,7 +36,7 @@ namespace Acb.Redis
             {
                 return cache;
             }
-            cache = new RedisCache(regionName);
+            cache = _config != null ? new RedisCache(regionName, _config) : new RedisCache(regionName);
             Caches[regionName] = cache;
             return cache;
         }

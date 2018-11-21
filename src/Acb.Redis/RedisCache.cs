@@ -12,6 +12,7 @@ namespace Acb.Redis
     {
         private readonly string _region;
         private readonly string _configName;
+        private readonly RedisConfig _config;
         private readonly RedisManager _redisManager;
         public RedisCache(string region, string configName = null)
         {
@@ -20,16 +21,23 @@ namespace Acb.Redis
             _redisManager = RedisManager.Instance;
         }
 
+        public RedisCache(string region, RedisConfig config)
+        {
+            _region = region;
+            _config = config;
+            _redisManager = RedisManager.Instance;
+        }
+
         public override string Region => _region;
 
         private IDatabase GetDatabase()
         {
-            return _redisManager.GetDatabase(_configName);
+            return _config != null ? _redisManager.GetDatabase(_config) : _redisManager.GetDatabase(_configName);
         }
 
         private IServer GetServer()
         {
-            return _redisManager.GetServer(_configName);
+            return _config != null ? _redisManager.GetServer(_config) : _redisManager.GetServer(_configName);
         }
 
         private void SetValue(string key, object value, TimeSpan? expired = null)

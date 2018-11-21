@@ -1,11 +1,11 @@
 ﻿using Acb.Core.Data;
 using Acb.Core.Dependency;
 using Acb.Core.Domain;
+using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using Acb.Core.Extensions;
 
 namespace Acb.Dapper.Domain
 {
@@ -24,10 +24,6 @@ namespace Acb.Dapper.Domain
         {
             UnitOfWork = unitOfWork;
             LogManager.Logger<DRepository>().Debug($"{GetType().Name} Create");
-        }
-
-        protected DRepository() : this(CurrentIocManager.Resolve<UnitOfWork>())
-        {
         }
 
         /// <summary> 建议使用Ioc注入的方式 </summary>

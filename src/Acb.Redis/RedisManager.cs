@@ -126,6 +126,14 @@ namespace Acb.Redis
             return conn.GetServer(host, port);
         }
 
+        public IServer GetServer(RedisConfig config, int endPointsIndex = 0)
+        {
+            var confOption = ConfigurationOptions.Parse(config.ConnectionString);
+            if (string.IsNullOrWhiteSpace(config.Name))
+                return Connect(confOption).GetServer(confOption.EndPoints[endPointsIndex]);
+            return GetConnection(config.Name, confOption).GetServer(confOption.EndPoints[endPointsIndex]);
+        }
+
         /// <summary> 获取订阅 </summary>
         /// <param name="configName">配置名称</param>
         /// <returns></returns>

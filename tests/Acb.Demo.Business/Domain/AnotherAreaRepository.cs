@@ -1,4 +1,5 @@
-﻿using Acb.Core.Exceptions;
+﻿using Acb.Core.Domain;
+using Acb.Core.Exceptions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Demo.Business.Domain.Entities;
@@ -8,7 +9,10 @@ namespace Acb.Demo.Business.Domain
 {
     public class AnotherAreaRepository : DapperRepository<TAreas>
     {
-        public AnotherAreaRepository(UnitOfWork unitOfWork) : base(unitOfWork) { }
+        public AnotherAreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
+        {
+        }
+
         public async Task<int> UpdateParent()
         {
             return await Transaction(async () =>
@@ -19,5 +23,7 @@ namespace Acb.Demo.Business.Domain
                 return count;
             });
         }
+
+
     }
 }

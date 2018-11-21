@@ -5,6 +5,7 @@ using Acb.Core.Tests;
 using Acb.Dapper;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Business.Domain.Entities;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,8 +20,18 @@ namespace Acb.Framework.Tests
 
         public DapperTest()
         {
-            _areaRepository = CurrentIocManager.Resolve<AreaRepository>();
-            _factory = CurrentIocManager.Resolve<IDbConnectionProvider>();
+            _areaRepository = Resolve<AreaRepository>();
+            _factory = Resolve<IDbConnectionProvider>();
+        }
+
+        protected override void MapServices(IServiceCollection services)
+        {
+            services.AddDapper(config =>
+            {
+                config.ConnectionString =
+                    "server=192.168.0.250;user=root;database=icbv2db1;port=3306;password=icb@888;Pooling=true;SslMode=none;Charset=utf8;";
+                config.ProviderName = "mysql";
+            });
         }
 
         [TestMethod]

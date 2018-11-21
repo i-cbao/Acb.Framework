@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Acb.Core.Exceptions;
 
-namespace Acb.Framework.Tests.Domain
+namespace Acb.Demo.Business.Domain
 {
     public class UserErroCodes : ErrorCodes
     {

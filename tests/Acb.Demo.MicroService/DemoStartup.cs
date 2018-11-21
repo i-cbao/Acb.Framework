@@ -1,8 +1,7 @@
-﻿using Acb.MicroService;
-using Acb.Redis;
+﻿using Acb.Dapper;
+using Acb.MicroService;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Acb.Core.EventBus;
 
 namespace Acb.Demo.MicroService
 {
@@ -10,6 +9,11 @@ namespace Acb.Demo.MicroService
     {
         protected override void MapServices(IServiceCollection services)
         {
+            services.AddDapper(config =>
+            {
+                config.ConnectionString = "";
+                config.ProviderName = "";
+            });
             //services.AddRedisEventBus();
             base.MapServices(services);
         }
