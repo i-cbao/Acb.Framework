@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Microsoft.AspNetCore.HttpOverrides;
 
 namespace Acb.WebApi
 {
@@ -132,7 +131,8 @@ namespace Acb.WebApi
                 {
                     //json序列化处理
                     opts.SerializerSettings.Converters.Add(new DateTimeConverter());
-                });
+                })
+                .AddControllersAsServices();
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             MapServices(services);

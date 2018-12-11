@@ -1,0 +1,118 @@
+﻿@using Acb.Middleware.DatabaseManager.Domain.Models
+@model IEnumerable<Table>
+
+@{
+    ViewBag.Title = "title";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="//cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>数据库管理</title>
+    <style>
+        header {
+            position: fixed;
+            /* line-height: 45px; */
+            background-color: #f2f2f2;
+            font-size: 2rem;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+            left: 0;
+            bottom: 15px;
+            padding: 15px;
+        }
+
+            header span {
+                margin-right: 1rem;
+            }
+
+            header small {
+                color: #999;
+                margin-left: 1rem;
+            }
+
+        caption {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+            caption span {
+                margin-right: 1rem;
+            }
+
+            caption small {
+                font-size: 85%;
+                color: #999;
+                margin-left: 2rem;
+            }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="label label-info">@ViewBag.Provider</span>
+            @ViewBag.DbName
+            <small>@(Model.Count() + "张表")</small>
+        </header>
+        @foreach (var table in Model)
+        {
+            <div class="t-item">
+                <table class="table table-striped table-hover">
+                    <caption>
+                        <span class="label @(table.Type == TableType.Table ? "label-info" : "label-success")">@table.Type</span>
+                        @table.Name<small>@table.Description</small>
+                    </caption>
+                    <colgroup>
+                        <col style="width: 18%" />
+                        <col style="width: 12%" />
+                        <col style="width: 12%" />
+                        <col style="width: 10%" />
+                        <col style="width: 10%" />
+                        <col style="width: 10%" />
+                        <col />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>字段名称</th>
+                            <th>字段类型</th>
+                            <th>字段长度</th>
+                            <th>是否自增</th>
+                            <th>可为空</th>
+                            <th>主键</th>
+                            <th>描述</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var col in table.Columns)
+                        {
+                            <tr>
+                                <td>@col.Name</td>
+                                <td>@col.DbType</td>
+                                <td>@col.DataLength</td>
+                                <td>
+                                    <span class="label @(col.AutoIncrement ? "label-success" : "label-default")">@col.AutoIncrement</span>
+                                </td>
+                                <td>
+                                    <span class="label @(col.IsNullable ? "label-success" : "label-default")">@col.IsNullable</span>
+                                </td>
+                                <td>
+                                    <span class="label @(col.IsPrimaryKey ? "label-primary" : "label-default")">@col.IsPrimaryKey</span>
+                                </td>
+                                <td>@col.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</body>
+</html>
+
+

@@ -50,7 +50,7 @@ namespace Acb.MicroService
             {
                 //自定义异常捕获
                 options.Filters.Add<DExceptionFilter>();
-            });
+            }).AddControllersAsServices();
 
             //services.TryAddSingleton<IRegister, ConsulRegister>();
             MapServices(services);

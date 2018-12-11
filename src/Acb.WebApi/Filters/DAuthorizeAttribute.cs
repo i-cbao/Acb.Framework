@@ -24,7 +24,6 @@ namespace Acb.WebApi.Filters
             var controller = context.Controller as DController;
 
             controller?.AuthorizeValidate(context.HttpContext);
-
             base.OnActionExecuting(context);
         }
 

@@ -27,7 +27,7 @@ namespace Acb.Framework.Tests
             const string key = "shay";
             var redis = _manager.GetDatabase(defaultDb: 3);
             redis.Set(key, "test", TimeSpan.FromMinutes(2));
-            var result = CodeTimer.Time("redis test", 100, () =>
+            var result = CodeTimer.Time("redis test", 10000, () =>
             {
                 try
                 {
@@ -39,7 +39,7 @@ namespace Acb.Framework.Tests
                     //Print(ex.Format());
                     throw;
                 }
-            }, 100);
+            }, 10);
             Print(result.ToString());
             var value = redis.Get<string>(key);
             Print(value);

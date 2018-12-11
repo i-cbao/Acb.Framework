@@ -141,7 +141,7 @@ namespace Acb.Core.Helper
         /// </summary>
         /// <param name="num"></param>
         /// <returns></returns>
-        public static string ToBigNumber(int num)
+        public static string ToBigNumber(long num)
         {
             var word = new[] { "零", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
             var dw = new[] { "十", "百", "千", "万", "亿" };

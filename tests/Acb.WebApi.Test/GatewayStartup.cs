@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using Acb.WebApi.Test.OAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace Acb.WebApi.Test
 {
@@ -18,10 +19,13 @@ namespace Acb.WebApi.Test
         /// <param name="services"></param>
         protected override void MapServices(IServiceCollection services)
         {
+            services.AddDbContext<DbContext>(options => { });
             services.AddRabbitMqEventBus();
             services.AddPayment();
+
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+
             services.AddSignalR();
             //services.AddSingleton(provider =>
             //{

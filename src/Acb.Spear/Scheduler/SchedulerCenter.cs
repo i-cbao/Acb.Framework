@@ -102,7 +102,6 @@ namespace Acb.Spear.Scheduler
                         });
                     break;
             }
-
             return triggerBuilder;
         }
 

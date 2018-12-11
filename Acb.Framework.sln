@@ -73,7 +73,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Spear", "src\Acb.Spear\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.RocketMq", "src\Acb.RocketMq\Acb.RocketMq.csproj", "{0C00A2BA-423D-4A11-93D4-44339E9BD632}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Aop", "src\Acb.Aop\Acb.Aop.csproj", "{372B41F6-AB2A-49F5-88B5-945B2A0A9413}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Aop", "src\Acb.Aop\Acb.Aop.csproj", "{372B41F6-AB2A-49F5-88B5-945B2A0A9413}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Middleware.DatabaseManager", "src\Acb.Middleware.DatabaseManager\Acb.Middleware.DatabaseManager.csproj", "{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -201,6 +203,10 @@ Global
 		{372B41F6-AB2A-49F5-88B5-945B2A0A9413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{372B41F6-AB2A-49F5-88B5-945B2A0A9413}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{372B41F6-AB2A-49F5-88B5-945B2A0A9413}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,6 +242,7 @@ Global
 		{099A2DD5-9012-4AF3-9D19-2383095B12CD} = {25C460A4-BA63-46E5-8C79-B6FB0A3677C8}
 		{0C00A2BA-423D-4A11-93D4-44339E9BD632} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 		{372B41F6-AB2A-49F5-88B5-945B2A0A9413} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
+		{50623D9A-9469-4BAC-BC50-ADB12DDCE34A} = {25C460A4-BA63-46E5-8C79-B6FB0A3677C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}
