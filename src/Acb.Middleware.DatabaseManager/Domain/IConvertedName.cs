@@ -4,6 +4,6 @@
     public interface IConvertedName
     {
         string Name { get; set; }
-        string ConvertedName { get; set; }
+        string ConvertedName { get; }
     }
 }

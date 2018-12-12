@@ -3,6 +3,7 @@ using Acb.Middleware.DatabaseManager.Domain.Models;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Acb.Middleware.DatabaseManager.Domain.Enums;
 
 namespace Acb.Middleware.DatabaseManager.Domain.Services
 {
@@ -13,7 +14,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
         public PostgreSqlService(IUnitOfWork unitOfWork, string dbSchema = null) : base(unitOfWork)
         {
             _dbSchema = dbSchema ?? "public";
-            Provider = "PostgreSQL";
+            Provider = DbProvider.PostgreSql;
         }
 
         protected override Task<IEnumerable<Table>> QueryTableAsync()

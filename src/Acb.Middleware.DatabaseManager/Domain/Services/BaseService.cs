@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Middleware.DatabaseManager.Domain.Enums;
 
 namespace Acb.Middleware.DatabaseManager.Domain.Services
 {
@@ -19,7 +20,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
         }
 
         public string DbName => Connection.Database;
-        public string Provider { get; protected set; }
+        public DbProvider Provider { get; protected set; }
 
         public virtual async Task<IEnumerable<Table>> GetTablesAsync()
         {

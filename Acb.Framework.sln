@@ -75,7 +75,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.RocketMq", "src\Acb.Roc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Aop", "src\Acb.Aop\Acb.Aop.csproj", "{372B41F6-AB2A-49F5-88B5-945B2A0A9413}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Middleware.DatabaseManager", "src\Acb.Middleware.DatabaseManager\Acb.Middleware.DatabaseManager.csproj", "{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Middleware.DatabaseManager", "src\Acb.Middleware.DatabaseManager\Acb.Middleware.DatabaseManager.csproj", "{50623D9A-9469-4BAC-BC50-ADB12DDCE34A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

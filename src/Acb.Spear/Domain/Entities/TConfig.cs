@@ -1,7 +1,6 @@
 ﻿using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
 using System;
-using Newtonsoft.Json.Linq;
 
 namespace Acb.Spear.Domain.Entities
 {

@@ -147,7 +147,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public IDbConnection Connection(string connectionName = null, bool fromCache = true)
         {
-            var config = ConnectionConfig.Config(connectionName);
+            var config = ConnectionConfig.Config(connectionName) ?? new ConnectionConfig { Name = connectionName };
             return GetConnection(config, fromCache);
         }
 
@@ -167,7 +167,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public IDbConnection Connection(string connectionString, string provider, bool fromCache = true)
         {
-            return GetConnection(new ConnectionConfig { ProviderName = provider, ConnectionString = connectionString },
+            return GetConnection(new ConnectionConfig { Name = connectionString, ProviderName = provider, ConnectionString = connectionString },
                 fromCache);
         }
 

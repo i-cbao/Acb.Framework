@@ -33,6 +33,8 @@ namespace Acb.Middleware.DatabaseManager
             {
                 app.UseHsts();
             }
+
+            app.UseStaticFiles();
             base.Configure(app, env);
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Domain;
+using Acb.Middleware.DatabaseManager.Domain.Enums;
 using Acb.Middleware.DatabaseManager.Domain.Models;
 using Dapper;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
     {
         public SqliteService(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            Provider = "Sqlite";
+            Provider = DbProvider.SQLite;
         }
 
         protected override Task<IEnumerable<Table>> QueryTableAsync()

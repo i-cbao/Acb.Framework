@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Acb.Middleware.DatabaseManager.Domain.Enums;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Acb.Middleware.DatabaseManager.Domain.Models
 {
-    public class Table : IConvertedName
+    public class Table : DConverted
     {
         /// <summary>
         /// 编号
@@ -11,7 +13,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Models
         public int? Id { get; set; }
 
         /// <summary> 表名 </summary>
-        public string Name { get; set; }
+        public override string Name { get; set; }
 
         public TableType Type { get; set; }
 
@@ -28,7 +30,5 @@ namespace Acb.Middleware.DatabaseManager.Domain.Models
         public string Description { get; set; }
 
         public IEnumerable<Column> Columns { get; set; }
-
-        public string ConvertedName { get; set; }
     }
 }

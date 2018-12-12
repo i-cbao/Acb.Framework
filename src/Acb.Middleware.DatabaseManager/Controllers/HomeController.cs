@@ -1,4 +1,6 @@
-﻿using Acb.Core;
+﻿using System;
+using System.Collections.Generic;
+using Acb.Core;
 using Acb.Middleware.DatabaseManager.Domain;
 using Acb.Middleware.DatabaseManager.Domain.Models;
 using Acb.WebApi;
@@ -26,11 +28,21 @@ namespace Acb.Middleware.DatabaseManager.Controllers
         [HttpGet("/tables/{name?}")]
         public async Task<IActionResult> Tables(string name = null)
         {
-            var service = name.GetService();
-            var tables = await service.GetTablesAsync();
-            ViewBag.DbName = service.DbName;
-            ViewBag.Provider = service.Provider;
-            return View(tables);
+            try
+            {
+                var service = name.GetService();
+                var tables = await service.GetTablesAsync();
+                ViewBag.DbName = service.DbName;
+                ViewBag.Provider = service.Provider;
+                ViewBag.Name = name;
+                return View(tables);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.DbName = ex.Message;
+                ViewBag.Name = name;
+                return View(new List<Table>());
+            }
         }
     }
 }

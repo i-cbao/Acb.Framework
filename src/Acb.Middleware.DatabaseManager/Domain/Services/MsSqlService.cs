@@ -3,6 +3,7 @@ using Acb.Middleware.DatabaseManager.Domain.Models;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Acb.Middleware.DatabaseManager.Domain.Enums;
 using Column = Acb.Middleware.DatabaseManager.Domain.Models.Column;
 
 namespace Acb.Middleware.DatabaseManager.Domain.Services
@@ -11,7 +12,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
     {
         public MsSqlService(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            Provider = "SQLServer";
+            Provider = DbProvider.SqlServer;
         }
 
         protected override Task<IEnumerable<Table>> QueryTableAsync()

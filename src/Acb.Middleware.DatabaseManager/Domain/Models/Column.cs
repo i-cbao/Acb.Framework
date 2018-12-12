@@ -1,11 +1,14 @@
-﻿namespace Acb.Middleware.DatabaseManager.Domain.Models
+﻿using Acb.Middleware.DatabaseManager.Domain.Converter;
+using Acb.Middleware.DatabaseManager.Domain.Enums;
+
+namespace Acb.Middleware.DatabaseManager.Domain.Models
 {
-    public class Column : IConvertedName
+    public class Column : DConverted
     {
         /// <summary> 编号 </summary>
         public int Id { get; set; }
         /// <summary> 列名 </summary>
-        public string Name { get; set; }
+        public override string Name { get; set; }
 
         /// <summary> 类型 </summary>
         public string DbType { get; set; }
@@ -22,8 +25,9 @@
         /// <summary> 是否自增 </summary>
         public bool AutoIncrement { get; set; }
 
-        public string ConvertedName { get; set; }
+        public override string ConvertedName => IsPrimaryKey ? "Id" : base.ConvertedName;
 
-        public string LanguageType { get; set; }
+        public string LanguageType(DbProvider provider, Language language) =>
+            DbTypeConverter.Instance.LanguageType(provider, language, DbType);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Acb.Middleware.DatabaseManager.Domain.Models
+﻿namespace Acb.Middleware.DatabaseManager.Domain.Enums
 {
     public enum TableType
     {

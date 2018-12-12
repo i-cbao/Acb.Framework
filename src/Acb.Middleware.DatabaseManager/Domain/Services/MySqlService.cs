@@ -3,6 +3,7 @@ using Acb.Middleware.DatabaseManager.Domain.Models;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Acb.Middleware.DatabaseManager.Domain.Enums;
 
 namespace Acb.Middleware.DatabaseManager.Domain.Services
 {
@@ -10,7 +11,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
     {
         public MySqlService(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            Provider = "MySQL";
+            Provider = DbProvider.MySql;
         }
 
         protected override Task<IEnumerable<Table>> QueryTableAsync()
