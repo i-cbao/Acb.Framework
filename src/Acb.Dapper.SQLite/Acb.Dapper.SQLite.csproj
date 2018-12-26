@@ -6,13 +6,18 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - SQLite基础类</Product>
     <Description>爱车保 - SQLite基础类</Description>
-    <Version>1.0.1</Version>
+    <Version>1.6.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
     <Title>爱车保 - SQLite基础类</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\_pkgs\</OutputPath>
+    <DocumentationFile>..\..\_pkgs\netstandard2.0\Acb.Dapper.SQLite.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

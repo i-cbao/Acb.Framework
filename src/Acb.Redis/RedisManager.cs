@@ -1,13 +1,12 @@
 ﻿using Acb.Core;
+using Acb.Core.Config;
 using Acb.Core.Extensions;
-using Acb.Core.Helper;
 using Acb.Core.Logging;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
-using Acb.Core.Config;
 
 namespace Acb.Redis
 {

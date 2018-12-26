@@ -1,10 +1,9 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
-using Acb.Core.Helper;
+﻿using Acb.Core.Extensions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Acb.Core.Logging
 {
@@ -157,14 +156,17 @@ namespace Acb.Core.Logging
 
         internal static void EachAdapter(this string loggerName, LogLevel level, Action<ILog> action)
         {
-            if (string.IsNullOrWhiteSpace(loggerName) || !IsEnableLevel(level))
-                return;
-            var logs = GetLogs(loggerName, level);
-            foreach (var log in logs)
+            Task.Factory.StartNew(() =>
             {
-                log.LoggerName = loggerName;
-                action(log);
-            }
+                if (string.IsNullOrWhiteSpace(loggerName) || !IsEnableLevel(level))
+                    return;
+                var logs = GetLogs(loggerName, level);
+                foreach (var log in logs)
+                {
+                    log.LoggerName = loggerName;
+                    action(log);
+                }
+            });
         }
     }
 }

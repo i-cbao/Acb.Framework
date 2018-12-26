@@ -31,7 +31,6 @@
     <PackageReference Include="Moq" Version="4.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.2.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.2.0" />
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>

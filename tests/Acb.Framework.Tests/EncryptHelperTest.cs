@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Helper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Acb.Core.Extensions;
 
 namespace Acb.Framework.Tests
 {
@@ -8,6 +9,14 @@ namespace Acb.Framework.Tests
     public class EncryptHelperTest : DTest
     {
         private const string Content = "a=1&b=2&c=3";
+
+        [TestMethod]
+        public void Md5Test()
+        {
+            var str = EncryptHelper.MD5(Content);
+            Print(str);
+        }
+
         [TestMethod]
         public void RsaTest()
         {

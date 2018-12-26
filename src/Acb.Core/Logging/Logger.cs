@@ -5,7 +5,7 @@ namespace Acb.Core.Logging
     /// <summary> 日志的记录者 </summary>
     public sealed class Logger : ILogger
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
         public Logger(Type type) : this(type.FullName) { }
 
