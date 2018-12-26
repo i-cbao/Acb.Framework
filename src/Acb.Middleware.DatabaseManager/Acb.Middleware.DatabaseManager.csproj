@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
     <ProjectReference Include="..\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
     <ProjectReference Include="..\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
+    <ProjectReference Include="..\Acb.Dapper.SQLite\Acb.Dapper.SQLite.csproj" />
     <ProjectReference Include="..\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\Acb.WebApi\Acb.WebApi.csproj" />
   </ItemGroup>

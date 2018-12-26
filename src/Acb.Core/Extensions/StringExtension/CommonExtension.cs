@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using Acb.Core.Config;
 
 namespace Acb.Core.Extensions
 {

@@ -70,8 +70,7 @@ namespace Acb.Core.Extensions
 
             protected override Expression VisitParameter(ParameterExpression node)
             {
-                ParameterExpression replacement;
-                if (_map.TryGetValue(node, out replacement))
+                if (_map.TryGetValue(node, out var replacement))
                 {
                     node = replacement;
                 }

@@ -7,9 +7,7 @@ using System.IO;
 
 namespace Acb.Core
 {
-    /// <summary>
-    /// 模拟 HttpContext
-    /// </summary>
+    /// <summary> 模拟 HttpContext </summary>
     public static class AcbHttpContext
     {
         private static IHttpContextAccessor _accessor;
@@ -73,22 +71,22 @@ namespace Acb.Core
             }
         }
         /// <summary> 请求类型 </summary>
-        public static string RequestType => Current.Request.Method;
+        public static string RequestType => Current?.Request.Method;
 
         /// <summary> 表单 </summary>
-        public static IFormCollection Form => Current.Request.Form;
+        public static IFormCollection Form => Current?.Request.Form;
 
         /// <summary> 请求体 </summary>
-        public static Stream Body => Current.Request.Body;
+        public static Stream Body => Current?.Request.Body;
 
         /// <summary> 用户代理 </summary>
         public static string UserAgent => Current?.Request.Headers["User-Agent"];
 
         /// <summary> 内容类型 </summary>
-        public static string ContentType => Current.Request.ContentType;
+        public static string ContentType => Current?.Request.ContentType;
 
         /// <summary> 参数 </summary>
-        public static string QueryString => Current.Request.QueryString.ToString();
+        public static string QueryString => Current?.Request.QueryString.ToString();
 
         public static string RawUrl => Utils.RawUrl(Current?.Request);
 

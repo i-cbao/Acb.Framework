@@ -77,8 +77,10 @@ namespace Acb.Core.EventBus
                 {
                     var handler = handlerfactory.DynamicInvoke();
                     var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
-                    await (Task)concreteType.GetMethod("Handle")
-                        .Invoke(handler, new[] { integrationEvent });
+                    var method = concreteType.GetMethod("Handle");
+                    if (method == null)
+                        continue;
+                    await (Task)method.Invoke(handler, new[] { integrationEvent });
                 }
             }
         }

@@ -1,7 +1,8 @@
-﻿using Acb.Core.Dependency;
+﻿using Acb.Core.Config;
+using Acb.Core.Config.Center;
+using Acb.Core.Dependency;
 using Acb.Core.EventBus;
 using Acb.Core.Extensions;
-using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Modules;
@@ -27,42 +28,16 @@ namespace Acb.Core
 
             //中心配置
             var configHelper = ConfigHelper.Instance;
-            LoadLocalConfig(configHelper);
-            var provider = new ConfigCenterProvider();
-            configHelper.Build(b => b.Add(provider));
-            configHelper.ConfigChanged += provider.Reload;
+            configHelper.UseLocal();
+            configHelper.UseCenter();
             base.Initialize();
         }
 
-        /// <summary> 加载本地配置 </summary>
-        private void LoadLocalConfig(ConfigHelper configHelper)
-        {
-            //本地文件配置
-            var configPath = "configPath".Config<string>();
-            if (string.IsNullOrWhiteSpace(configPath))
-                return;
-            configPath = Path.Combine(Directory.GetCurrentDirectory(), configPath);
-            if (!Directory.Exists(configPath))
-                return;
-            LogManager.Logger<CoreModule>().Info($"正在加载本地配置[{configPath}]");
-            var jsons = Directory.GetFiles(configPath, "*.json");
-            if (jsons.Any())
-            {
-                configHelper.Build(b =>
-                {
-                    foreach (var json in jsons)
-                    {
-                        b.AddJsonFile(json, false, true);
-                    }
-                });
-            }
-        }
-
+        /// <inheritdoc />
         /// <summary> 应用程序关闭 </summary>
         public override void Shutdown()
         {
             HttpHelper.Instance.Dispose();
-            // EventBus Dispose
             if (IocManager.IsRegistered<IEventBus>())
             {
                 var bus = IocManager.Resolve<IEventBus>();

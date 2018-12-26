@@ -18,14 +18,14 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
         protected override Task<IEnumerable<Table>> QueryTableAsync()
         {
             const string sql =
-                "SELECT name As Name,(CASE WHEN upper(TYPE) = 'VIEW' THEN 'V' ELSE 'T' END ) AS TypeName,'' AS Description FROM sqlite_master";
+                "SELECT name As Name,(CASE WHEN upper(TYPE) = 'VIEW' THEN 'View' ELSE 'Table' END ) AS Type,'' AS Description FROM sqlite_master WHERE TYPE='table' OR TYPE = 'view'";
             return Connection.QueryAsync<Table>(sql);
         }
 
         protected override Task<IEnumerable<Column>> QueryColumnAsync(string table, int? tableId = null)
         {
             const string sql =
-                "Select name as Name, Lower(type) AS DbType,[NotNull] AS IsNullable, PK AS IsPrimaryKey,'' as Description From Pragma_Table_Info($table)";
+                "Select name as Name, Lower(type) AS DbType,NOT [NotNull] AS IsNullable, PK AS IsPrimaryKey,'' as Description From Pragma_Table_Info(@table)";
             return Connection.QueryAsync<Column>(sql, new { table });
         }
     }

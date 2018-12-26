@@ -60,7 +60,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected TResult Transaction<TResult>(Func<TResult> action, IsolationLevel? level = null)
         {
-            return UnitOfWork.BeginTransaction(action, level);
+            return UnitOfWork.Trans(action, level);
         }
 
         /// <summary> 执行事务(当前连接) </summary>
@@ -69,7 +69,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected void Transaction(Action action, IsolationLevel? level = null)
         {
-            UnitOfWork.BeginTransaction(action, level);
+            UnitOfWork.Trans(action, level);
         }
 
         /// <summary> 执行事务(新开连接) </summary>

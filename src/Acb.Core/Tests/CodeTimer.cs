@@ -1,11 +1,11 @@
-﻿using Acb.Core.Logging;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Acb.Core.Extensions;
 
 namespace Acb.Core.Tests
 {
@@ -35,6 +35,104 @@ namespace Acb.Core.Tests
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
+        }
+
+        public static async Task<CodeTimerResult> Time(string name, int iteration, Func<Task> action, int thread = 1)
+        {
+            if (string.IsNullOrEmpty(name) || action == null)
+            {
+                return null;
+            }
+
+            var result = new CodeTimerResult();
+            result = result.Reset();
+            result.Name = name;
+            result.Iteration = iteration;
+            result.ThreadCount = thread;
+
+            GC.Collect(GC.MaxGeneration);
+            var gcCounts = new int[GC.MaxGeneration + 1];
+            for (var i = 0; i <= GC.MaxGeneration; i++)
+            {
+                gcCounts[i] = GC.CollectionCount(i);
+            }
+
+            // 3. Run action
+            var watch = new Stopwatch();
+            watch.Start();
+            var ticksFst = GetCurrentThreadTimes(); //100 nanosecond one tick
+            if (thread > 1)
+            {
+                var tasks = new List<Task>();
+                for (var i = 0; i < thread; i++)
+                {
+                    var task = await Task.Factory.StartNew(async () =>
+                    {
+                        int succ = 0, fail = 0;
+                        for (var j = 0; j < iteration; j++)
+                        {
+                            try
+                            {
+                                await action.Invoke();
+                                succ++;
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine(ex.Format());
+                                fail++;
+                            }
+                        }
+
+                        return new KeyValuePair<int, int>(succ, fail);
+                    });
+                    tasks.Add(task);
+                }
+
+                Task.WaitAll(tasks.ToArray());
+                foreach (var task1 in tasks)
+                {
+                    var task = (Task<KeyValuePair<int, int>>)task1;
+                    result.SuccessCount += task.Result.Key;
+                    result.FailureCount += task.Result.Value;
+                }
+            }
+            else
+            {
+                try
+                {
+                    for (var i = 0; i < iteration; i++)
+                    {
+                        try
+                        {
+                            await action.Invoke();
+                            result.SuccessCount++;
+                        }
+                        catch
+                        {
+                            result.FailureCount++;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex.Message, ex);
+                }
+            }
+
+            var ticks = GetCurrentThreadTimes() - ticksFst;
+            watch.Stop();
+
+            // 4. Print CPU
+            result.TimeElapsed = watch.ElapsedMilliseconds;
+            result.CpuCycles = ticks * 100;
+
+            // 5. Print GC
+            for (var i = 0; i <= GC.MaxGeneration; i++)
+            {
+                var count = GC.CollectionCount(i) - gcCounts[i];
+                result.GenerationList[i] = count;
+            }
+            return result;
         }
 
         /// <summary> 代码耗时测试 </summary>

@@ -3,148 +3,87 @@ using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
 using System.Data;
-using System.Threading.Tasks;
-using Acb.Core.Extensions;
 
 namespace Acb.Dapper
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ConnectionFactory _factory;
-
-        public string ConfigName { get; }
-
-        private readonly string _connectionString;
-        private readonly string _providerName;
-        private static readonly object SyncLock = new object();
-
         private readonly ILogger _logger;
 
-        public UnitOfWork(string configName = null)
+        private bool _closeabel;
+
+        public Guid Id { get; }
+        public string ConfigName { get; }
+
+        private UnitOfWork()
         {
+            Id = Guid.NewGuid();
             _factory = CurrentIocManager.Resolve<ConnectionFactory>();
+            _logger = LogManager.Logger(GetType());
+            _logger.Debug($"{GetType().Name}:{Id} Create");
+        }
+
+        public UnitOfWork(string configName = null) : this()
+        {
             ConfigName = configName;
-            _logger = LogManager.Logger(GetType());
-            _logger.Debug($"{GetType().Name} Create");
+            Connection = _factory.Connection(configName, false);
         }
 
-        public UnitOfWork(string connectionString, string providerName)
+        public UnitOfWork(string connectionString, string providerName) : this()
         {
-            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
-            _connectionString = connectionString;
-            _providerName = providerName;
-            _logger = LogManager.Logger(GetType());
-            _logger.Debug($"{GetType().Name} Create");
+            Connection = _factory.Connection(connectionString, providerName, false);
         }
-
-        private IDbConnection _connection;
 
         /// <inheritdoc />
         /// <summary> 当前数据库连接 </summary>
-        public IDbConnection Connection
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(_connectionString))
-                    return _connection = _factory.Connection(_connectionString, _providerName);
-                return _connection = _factory.Connection(ConfigName);
-                //if (_connection == null)
-                //{
-                //    lock (SyncLock)
-                //    {
-                //        if (_connection == null)
-                //        {
-                //            if (!string.IsNullOrWhiteSpace(_connectionString))
-                //                return _connection = _factory.Connection(_connectionString, _providerName, false);
-                //            return _connection = _factory.Connection(_configName, false);
-                //        }
-                //    }
-                //}
+        public IDbConnection Connection { get; }
 
-                //return _connection;
-            }
-        }
-
+        /// <inheritdoc />
         /// <summary> 当前事务 </summary>
         public IDbTransaction Transaction { get; private set; }
 
         public bool IsTransaction => Transaction != null;
 
-        /// <summary> 执行事务 </summary>
-        /// <param name="action"></param>
-        /// <param name="level"></param>
-        public void BeginTransaction(Action action, IsolationLevel? level = null)
+        public bool Begin(IsolationLevel? level = null)
         {
-            BeginTransaction(() =>
-            {
-                action();
-                return true;
-            }, level);
+            if (IsTransaction)
+                return false;
+            _closeabel = Connection.State == ConnectionState.Closed;
+            if (_closeabel)
+                Connection.Open();
+            _logger.Debug($"{GetType().Name}[{Id}] Begin");
+            Transaction = level.HasValue
+                ? Connection.BeginTransaction(level.Value)
+                : Connection.BeginTransaction();
+            return true;
         }
 
-        /// <summary> 执行事务 </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="func"></param>
-        /// <param name="level"></param>
-        /// <returns></returns>
-        public T BeginTransaction<T>(Func<T> func, IsolationLevel? level = null)
+        public void Commit()
         {
-            var wasCloesd = Connection.State == ConnectionState.Closed;
-            if (wasCloesd)
-                Connection.Open();
-            var disposed = false;
-            if (Transaction == null)
-            {
-                disposed = true;
-                Transaction = level.HasValue
-                    ? Connection.BeginTransaction(level.Value)
-                    : Connection.BeginTransaction();
-                _logger.Debug("UnitOfWork Create Transaction");
-            }
+            Transaction?.Commit();
+            _logger.Debug($"{GetType().Name}[{Id}] Commit");
+            Dispose();
+        }
 
-            try
-            {
-                var result = func.Invoke();
-                var task = result as Task;
-                task?.SyncRun();
-                if (disposed)
-                {
-                    Transaction.Commit();
-                    _logger.Debug("UnitOfWork Transaction Commit");
-                }
+        public void Rollback()
+        {
+            Transaction?.Rollback();
+            _logger.Debug($"{GetType().Name}[{Id}] Rollback");
 
-                return result;
-            }
-            catch
-            {
-                if (disposed)
-                {
-                    Transaction.Rollback();
-                    _logger.Warn("UnitOfWork Transaction Rollback");
-                }
-
-                throw;
-            }
-            finally
-            {
-                if (disposed)
-                {
-                    Transaction.Dispose();
-                    Transaction = null;
-                    _logger.Debug("UnitOfWork Transaction Dispose");
-                }
-
-                if (wasCloesd)
-                    Connection.Close();
-            }
+            Dispose();
         }
 
         public void Dispose()
         {
-            //if (_connection == null) return;
-            _logger.Debug("UnitOfWork Dispose");
-            Transaction?.Dispose();
-            //_connection?.Dispose();
+            if (Transaction != null)
+            {
+                _logger.Debug($"{GetType().Name}[{Id}] Dispose");
+                Transaction.Dispose();
+                Transaction = null;
+            }
+            if (_closeabel)
+                Connection.Close();
         }
     }
 }

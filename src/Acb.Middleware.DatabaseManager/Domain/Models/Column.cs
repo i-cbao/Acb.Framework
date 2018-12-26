@@ -28,6 +28,6 @@ namespace Acb.Middleware.DatabaseManager.Domain.Models
         public override string ConvertedName => IsPrimaryKey ? "Id" : base.ConvertedName;
 
         public string LanguageType(DbProvider provider, Language language) =>
-            DbTypeConverter.Instance.LanguageType(provider, language, DbType);
+            DbTypeConverter.Instance.LanguageType(provider, language, DbType, IsNullable);
     }
 }

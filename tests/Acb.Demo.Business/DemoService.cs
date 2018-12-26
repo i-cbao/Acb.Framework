@@ -1,4 +1,5 @@
 ﻿using Acb.Core;
+using Acb.Core.Domain;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
 using Acb.Demo.Business.Domain;
@@ -74,12 +75,12 @@ namespace Acb.Demo.Business
 
         public async Task<int> Update()
         {
-            return await AreaRepository.UnitOfWork.BeginTransaction(async () =>
-            {
+            //return await AreaRepository.UnitOfWork.Trans(async () =>
+            //{
                 var count = await AreaRepository.UpdateName();
                 count += await AnotherAreaRepository.UpdateParent();
                 return count;
-            });
+            //});
         }
     }
 }

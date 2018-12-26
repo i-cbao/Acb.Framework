@@ -33,7 +33,7 @@ namespace Acb.Core.Extensions
                 var field = ms.GetFields().FirstOrDefault(t => t.Name == tp.ToString());
                 if (field == null)
                     return "枚举错误";
-                var desc = field.GetCustomAttribute<DescriptionAttribute>();//.GetCustomAttributes(true).FirstOrDefault(t => (t as DescriptionAttribute) != null);
+                var desc = field.GetCustomAttribute<DescriptionAttribute>();
                 return desc != null ? desc.Description : field.Name;
             }
             catch

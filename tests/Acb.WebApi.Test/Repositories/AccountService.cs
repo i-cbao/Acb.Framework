@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Acb.Core.Domain;
 
 namespace Acb.WebApi.Test.Repositories
 {
@@ -17,7 +18,7 @@ namespace Acb.WebApi.Test.Repositories
 
         public async Task<int> Update(string id, string name, string email)
         {
-            return await Repository.UnitOfWork.BeginTransaction(async () =>
+            return await Repository.UnitOfWork.Trans(async () =>
             {
                 var count = await Repository.UpdateName(id, name);
                 count += await Repository.UpdateEmail(id, email);

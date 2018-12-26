@@ -196,10 +196,8 @@ namespace Acb.Core
                 if (pro != null && !pro.HasExited)
                     pro.Kill();
 
-                if (sIn != null)
-                    sIn.Close();
-                if (pro != null)
-                    pro.Close();
+                sIn?.Close();
+                pro?.Close();
             }
         }
     }

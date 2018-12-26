@@ -7,6 +7,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Net;
+using Acb.Core.Config;
 
 namespace Acb.Redis
 {

@@ -10,11 +10,27 @@ namespace Acb.EntityFramework
     {
         private static readonly ILogger Logger = LogManager.Logger<AcbDbContext>();
 
+        public Guid Id { get; }
         public string ConfigName { get; }
 
         public IDbConnection Connection { get; }
         public IDbTransaction Transaction { get; }
         public bool IsTransaction { get; set; }
+        public bool Begin(IsolationLevel? level = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Commit()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Rollback()
+        {
+            throw new NotImplementedException();
+        }
+
         public void BeginTransaction(Action action, IsolationLevel? level = null)
         {
             throw new NotImplementedException();

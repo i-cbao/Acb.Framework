@@ -60,17 +60,15 @@ namespace Acb.Core.Logging
 
         private ILog GetLoggerInternal(string name)
         {
-            ILog log;
-            if (_cacheLoggers.TryGetValue(name, out log))
+            if (_cacheLoggers.TryGetValue(name, out var log))
             {
                 return log;
             }
+
             log = CreateLogger(name);
-            if (log == null)
-            {
-                throw new NotSupportedException("创建名称为“{0}”的日志实例时“{1}”返回空实例。".FormatWith(name, GetType().FullName));
-            }
-            _cacheLoggers[name] = log;
+            _cacheLoggers[name] =
+                log ?? throw new NotSupportedException(
+                    "创建名称为“{0}”的日志实例时“{1}”返回空实例。".FormatWith(name, GetType().FullName));
             return log;
         }
     }

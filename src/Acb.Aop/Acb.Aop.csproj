@@ -5,13 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspectCore.Extensions.Reflection" Version="1.0.1" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
+    <ProjectReference Include="..\Acb.ProxyGenerator\Acb.ProxyGenerator.csproj" />
   </ItemGroup>
 
 </Project>

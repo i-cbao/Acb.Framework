@@ -1,4 +1,5 @@
-﻿using Acb.Core.Domain;
+﻿using System.Data.SQLite;
+using Acb.Core.Domain;
 using Acb.Dapper;
 using Acb.Middleware.DatabaseManager.Domain.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,16 +15,18 @@ namespace Acb.Middleware.DatabaseManager.Domain
             services.AddScoped<IUnitOfWork>(provider => new UnitOfWork(configName));
             services.AddScoped<IDatabaseService>(provider =>
             {
-                var unitOfwork = provider.GetService<IUnitOfWork>();
-                switch (unitOfwork.Connection)
+                var unitOfWork = provider.GetService<IUnitOfWork>();
+                switch (unitOfWork.Connection)
                 {
                     case NpgsqlConnection _:
-                        return new PostgreSqlService(unitOfwork, dbSchema);
+                        return new PostgreSqlService(unitOfWork, dbSchema);
                     case MySqlConnection _:
-                        return new MySqlService(unitOfwork);
+                        return new MySqlService(unitOfWork);
+                    case SQLiteConnection _:
+                        return new SqliteService(unitOfWork);
                 }
 
-                return new MsSqlService(unitOfwork);
+                return new MsSqlService(unitOfWork);
             });
             return services;
         }
@@ -37,6 +40,8 @@ namespace Acb.Middleware.DatabaseManager.Domain
                     return new PostgreSqlService(unitOfWork, dbSchema);
                 case MySqlConnection _:
                     return new MySqlService(unitOfWork);
+                case SQLiteConnection _:
+                    return new SqliteService(unitOfWork);
             }
 
             return new MsSqlService(unitOfWork);

@@ -8,6 +8,16 @@
     <StartupObject />
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="uow\**" />
+    <EmbeddedResource Remove="uow\**" />
+    <None Remove="uow\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="aliyun.oss.sdk.core" Version="2.5.3" />
     <PackageReference Include="AspectCore.Extensions.Autofac" Version="1.0.1" />
@@ -25,7 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Acb.Aop\Acb.Aop.csproj" />
     <ProjectReference Include="..\..\src\Acb.ApiClient\Acb.ApiClient.csproj" />
     <ProjectReference Include="..\..\src\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
@@ -35,6 +44,7 @@
     <ProjectReference Include="..\..\src\Acb.MicroService.Client\Acb.MicroService.Client.csproj" />
     <ProjectReference Include="..\..\src\Acb.MongoDb\Acb.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Acb.Office\Acb.Office.csproj" />
+    <ProjectReference Include="..\..\src\Acb.ProxyGenerator\Acb.ProxyGenerator.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
     <ProjectReference Include="..\Acb.Demo.Business\Acb.Demo.Business.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />

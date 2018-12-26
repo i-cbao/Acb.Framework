@@ -29,7 +29,7 @@ namespace Acb.Core.Extensions
         /// <returns>当前集合</returns>
         public static void Each<T>(this IEnumerable<T> instance, Action<T> action)
         {
-            foreach (T item in instance)
+            foreach (var item in instance)
             {
                 action(item);
             }

@@ -5,9 +5,7 @@ using System.Reflection;
 
 namespace Acb.Core.Helper
 {
-    /// <summary>
-    /// 类型转换辅助
-    /// </summary>
+    /// <summary> 类型转换辅助 </summary>
     public static class ConvertHelper
     {
         private static readonly DateTime DefaultTime = DateTime.Parse("1900-01-01");

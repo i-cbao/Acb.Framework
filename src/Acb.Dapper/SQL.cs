@@ -1,5 +1,5 @@
 ﻿using Acb.Core;
-using Acb.Core.Data.Adapters;
+using Acb.Core.Data;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Dapper;
@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Acb.Core.Data;
 
 namespace Acb.Dapper
 {

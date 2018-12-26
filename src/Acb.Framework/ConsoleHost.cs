@@ -22,6 +22,8 @@ namespace Acb.Framework
         /// <summary> 使用服务 </summary>
         protected static event Action<IContainer> UseServices;
 
+        protected static event Action StopEvent;
+
         /// <summary> 启动项 </summary>
         protected static DBootstrap Bootstrap { get; private set; }
 
@@ -53,6 +55,13 @@ namespace Acb.Framework
                     break;
                 Command?.Invoke(cmd, Bootstrap.Container);
             }
+            StopEvent?.Invoke();
+            Bootstrap.Dispose();
+        }
+
+        protected static T Resolve<T>()
+        {
+            return Bootstrap.IocManager.Resolve<T>();
         }
     }
 }

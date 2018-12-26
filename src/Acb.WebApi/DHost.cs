@@ -8,7 +8,7 @@ namespace Acb.WebApi
     {
     }
 
-    public class DHost<TSTart> where TSTart : DStartup
+    public class DHost<TStart> where TStart : DStartup
     {
         protected static event Action<IWebHostBuilder> Builder;
 
@@ -20,7 +20,7 @@ namespace Acb.WebApi
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
-                .UseStartup<TSTart>();
+                .UseStartup<TStart>();
             Builder?.Invoke(builder);
             using (var host = builder.Build())
             {

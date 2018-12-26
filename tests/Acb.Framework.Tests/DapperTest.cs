@@ -5,10 +5,12 @@ using Acb.Core.Tests;
 using Acb.Dapper;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Business.Domain.Entities;
+using Acb.Demo.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
+using Acb.Core.Extensions;
 
 namespace Acb.Framework.Tests
 {
@@ -29,7 +31,7 @@ namespace Acb.Framework.Tests
             services.AddDapper(config =>
             {
                 config.ConnectionString =
-                    "server=192.168.0.250;user=root;database=icbv2db1;port=3306;password=icb@888;Pooling=true;SslMode=none;Charset=utf8;";
+                    "server=192.168.0.250;user=root;database=icbv2db;port=3306;password=icb@888;Pooling=true;SslMode=none;Charset=utf8;";
                 config.ProviderName = "mysql";
             });
         }
@@ -68,19 +70,27 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public void UpdateTest()
+        public async Task UpdateTest()
         {
-            using (var conn = _factory.Connection())
+            var code = await CodeTimer.Time("dapper", 10, async () =>
             {
-                var result = conn.Update(new TAreas
-                {
-                    Id = "110000",
-                    CityName = "北京市",
-                    ParentCode = "0",
-                    Deep = 1
-                });
-                Print(result);
-            }
+                var demo = Resolve<IDemoService>();
+                var result = await demo.Update();
+                var list = await demo.Areas("510100");
+            }, 2);
+            //Print(list);
+            Print(code.ToString());
+            //using (var conn = _factory.Connection())
+            //{
+            //    var result = conn.Update(new TAreas
+            //    {
+            //        Id = "110000",
+            //        CityName = "北京市",
+            //        ParentCode = "0",
+            //        Deep = 1
+            //    });
+            //    Print(result);
+            //}
         }
 
         [TestMethod]

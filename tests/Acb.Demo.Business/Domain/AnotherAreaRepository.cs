@@ -17,9 +17,9 @@ namespace Acb.Demo.Business.Domain
         {
             return await Transaction(async () =>
             {
-                var count = await Connection.UpdateAsync(new TAreas { Id = "110000", ParentCode = "0" },
+                var count = await Connection.UpdateAsync(new TAreas { Id = "110000", ParentCode = "01" },
                     new[] { nameof(TAreas.ParentCode) }, Trans);
-                throw new BusiException("ex test");
+                //throw new BusiException("ex test");
                 return count;
             });
         }

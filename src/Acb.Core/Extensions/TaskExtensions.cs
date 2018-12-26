@@ -1,49 +1,50 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Acb.Core.Extensions
 {
     public static class TaskExtensions
     {
-        private static IDisposable Enter()
-        {
-            var context = SynchronizationContext.Current;
-            SynchronizationContext.SetSynchronizationContext(null);
-            return new Disposable(context);
-        }
+        // .net core 已取消SynchronizationContext
+        //private static IDisposable Enter()
+        //{
+        //    var context = SynchronizationContext.Current;
+        //    SynchronizationContext.SetSynchronizationContext(null);
+        //    return new Disposable(context);
+        //}
 
-        private struct Disposable : IDisposable
-        {
-            private readonly SynchronizationContext _synchronizationContext;
+        //private struct Disposable : IDisposable
+        //{
+        //    private readonly SynchronizationContext _synchronizationContext;
 
-            public Disposable(SynchronizationContext synchronizationContext)
-            {
-                _synchronizationContext = synchronizationContext;
-            }
+        //    public Disposable(SynchronizationContext synchronizationContext)
+        //    {
+        //        _synchronizationContext = synchronizationContext;
+        //    }
 
-            public void Dispose() =>
-                SynchronizationContext.SetSynchronizationContext(_synchronizationContext);
-        }
+        //    public void Dispose() =>
+        //        SynchronizationContext.SetSynchronizationContext(_synchronizationContext);
+        //}
 
-        /// <summary> 同步执行异步方法(防止死锁) </summary>
+        /// <summary> 同步执行异步方法(返回真实异常;.Result 异常是AggregateException) </summary>
         /// <param name="task"></param>
         public static void SyncRun(this Task task)
         {
-            using (Enter())
+            //using (Enter())
             {
                 task.GetAwaiter().GetResult();
             }
         }
 
-        /// <summary> 同步执行异步方法(防止死锁) </summary>
+        /// <summary> 同步执行异步方法(返回真实异常;.Result 异常是AggregateException) </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="task"></param>
         /// <returns></returns>
         public static T SyncRun<T>(this Task<T> task)
         {
-            using (Enter())
+            //using (Enter())
             {
                 return task.GetAwaiter().GetResult();
             }
@@ -64,14 +65,15 @@ namespace Acb.Core.Extensions
                 return result;
             await task;
             var taskType = task.GetType().GetTypeInfo();
-            if (taskType.IsGenericType)
-            {
-                var prop = taskType.GetProperty("Result");
-                if (prop != null)
-                    return prop.GetValue(task);
-            }
+            if (!taskType.IsGenericType) return result;
+            var prop = taskType.GetProperty("Result");
+            return prop != null ? (Task<object>)prop.GetValue(task) : (Task<object>)result;
+        }
 
-            return result;
+        public static TaskAwaiter GetAwaiter(this Action action)
+        {
+            var task = Task.Run(action);
+            return task.GetAwaiter();
         }
     }
 }

@@ -6,7 +6,6 @@ using Acb.Demo.Business.Domain.Entities;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Acb.Core.Domain;
 
 namespace Acb.Demo.Business.Domain
 {
