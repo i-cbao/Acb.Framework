@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Acb.TimingTask
 {
+    /// <summary> 服务扩展 </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary> 添加定时任务 </summary>

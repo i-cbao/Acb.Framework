@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AssemblyName>Acb.Spear</AssemblyName>
+    <RootNamespace>Acb.Spear</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netcoreapp2.1\Acb.Spear.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="source\**" />
+    <Compile Remove="wwwroot\source\**" />
+    <Compile Remove="_logs\**" />
+    <Content Remove="source\**" />
+    <Content Remove="wwwroot\source\**" />
+    <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="source\**" />
+    <EmbeddedResource Remove="wwwroot\source\**" />
+    <EmbeddedResource Remove="_logs\**" />
+    <None Remove="source\**" />
+    <None Remove="wwwroot\source\**" />
+    <None Remove="_logs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Acb.Core" Version="1.6.0" />
+    <PackageReference Include="Acb.WebApi" Version="1.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
+    <PackageReference Include="Quartz" Version="3.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Acb.Spear.Business\Acb.Spear.Business.csproj" />
+    <ProjectReference Include="..\Acb.Spear.Contracts\Acb.Spear.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>
