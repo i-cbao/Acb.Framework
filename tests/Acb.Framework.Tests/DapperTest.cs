@@ -15,15 +15,17 @@ using Acb.Core.Extensions;
 namespace Acb.Framework.Tests
 {
     [TestClass]
-    public class DapperTest : DTest
+    public partial class DapperTest : DTest
     {
         private readonly AreaRepository _areaRepository;
         private readonly IDbConnectionProvider _factory;
+        private readonly IDemoService _demoService;
 
         public DapperTest()
         {
             _areaRepository = Resolve<AreaRepository>();
             _factory = Resolve<IDbConnectionProvider>();
+            _demoService = Resolve<IDemoService>();
         }
 
         protected override void MapServices(IServiceCollection services)

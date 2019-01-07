@@ -85,7 +85,7 @@ namespace Acb.MicroService.Client.Proxy
                         if (interceptCache.Time > 0)
                             expired = TimeSpan.FromSeconds(interceptCache.Time);
                         else if (interceptCache.Date > 0)
-                            expired = Clock.Now.Date.AddDays(interceptCache.Date) - Clock.Now;
+                            expired = Clock.Now.AddDays(interceptCache.Date) - Clock.Now;
                         await _redis.SetAsync(interceptCache.Key, result, expired);
                     }
 

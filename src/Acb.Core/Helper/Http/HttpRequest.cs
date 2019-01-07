@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -21,6 +22,8 @@ namespace Acb.Core.Helper.Http
         public Dictionary<string, FileStream> Files;
         /// <summary> Body类型 </summary>
         public HttpBodyType BodyType { get; set; }
+        /// <summary> 超时时间 </summary>
+        public TimeSpan? Timeout { get; set; }
 
         /// <summary> ctor </summary>
         public HttpRequest()

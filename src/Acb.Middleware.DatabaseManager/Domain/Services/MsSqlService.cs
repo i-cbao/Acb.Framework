@@ -19,7 +19,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
         {
             const string sql =
                 "Select Obj.object_id As Id,Obj.name As Name,(Case Obj.type When 'V' Then 'View' Else 'Table' End) As Type," +
-                "EPObj.value As[Description] From Sys.Objects Obj " +
+                "EPObj.value As [Description] From Sys.Objects Obj " +
                 "Left Join Sys.Extended_Properties EPObj On EPObj.major_id = Obj.object_id And EPObj.minor_id = 0 And EPObj.name = 'MS_Description' " +
                 "Where Obj.type In('U','V') And Obj.is_ms_shipped = 0";
             return Connection.QueryAsync<Table>(sql);

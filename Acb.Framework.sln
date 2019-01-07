@@ -79,7 +79,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Middleware.DatabaseMana
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Dapper.SQLite", "src\Acb.Dapper.SQLite\Acb.Dapper.SQLite.csproj", "{B89AB513-7F65-494F-B8F0-608124B54395}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.ProxyGenerator", "src\Acb.ProxyGenerator\Acb.ProxyGenerator.csproj", "{F3D4CE57-A617-4CAC-A05B-04979EA20D91}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.ProxyGenerator", "src\Acb.ProxyGenerator\Acb.ProxyGenerator.csproj", "{F3D4CE57-A617-4CAC-A05B-04979EA20D91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.TimingTask", "src\Acb.TimingTask\Acb.TimingTask.csproj", "{C8EDA568-52D7-4E77-8C11-0E133B7B8F50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -219,6 +221,10 @@ Global
 		{F3D4CE57-A617-4CAC-A05B-04979EA20D91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3D4CE57-A617-4CAC-A05B-04979EA20D91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3D4CE57-A617-4CAC-A05B-04979EA20D91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8EDA568-52D7-4E77-8C11-0E133B7B8F50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8EDA568-52D7-4E77-8C11-0E133B7B8F50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8EDA568-52D7-4E77-8C11-0E133B7B8F50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8EDA568-52D7-4E77-8C11-0E133B7B8F50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -257,6 +263,7 @@ Global
 		{50623D9A-9469-4BAC-BC50-ADB12DDCE34A} = {25C460A4-BA63-46E5-8C79-B6FB0A3677C8}
 		{B89AB513-7F65-494F-B8F0-608124B54395} = {5B77030F-2F00-4B20-B99B-A390D47749D9}
 		{F3D4CE57-A617-4CAC-A05B-04979EA20D91} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
+		{C8EDA568-52D7-4E77-8C11-0E133B7B8F50} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

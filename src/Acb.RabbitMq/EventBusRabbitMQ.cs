@@ -113,9 +113,15 @@ namespace Acb.RabbitMq
 
         private static TimeSpan DelayRule(int times)
         {
-            if (times <= 3)
-                return TimeSpan.FromSeconds(Math.Pow(10, times));
-            return TimeSpan.FromHours(times == 4 ? 12 : 24);
+            var spans = new[]
+            {
+                TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10),
+                TimeSpan.FromHours(1), TimeSpan.FromHours(2), TimeSpan.FromHours(6), TimeSpan.FromHours(12)
+            };
+            return times > spans.Length ? spans[spans.Length - 1] : spans[times];
+            //if (times <= 3)
+            //    return TimeSpan.FromSeconds(Math.Pow(10, times));
+            //return TimeSpan.FromHours(times == 4 ? 12 : 24);
         }
 
         /// <summary> 定义并绑定队列 </summary>
@@ -229,6 +235,7 @@ namespace Acb.RabbitMq
         public void Dispose()
         {
             _consumerChannel?.Dispose();
+            _connection?.Dispose();
             SubscriptionManager.Clear();
         }
 

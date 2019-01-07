@@ -79,6 +79,14 @@ namespace Acb.Core.Helper.Http
                     req.Headers.TryAddWithoutValidation(key.Key, key.Value);
                 }
             }
+
+            TimeSpan? currentTimeout = null;
+            if (request.Timeout.HasValue)
+            {
+                currentTimeout = Client.Timeout;
+                Client.Timeout = request.Timeout.Value;
+            }
+
             HttpContent content = null;
             if (request.Data != null && method != HttpMethod.Get)
             {
@@ -132,7 +140,10 @@ namespace Acb.Core.Helper.Http
                 req.Content = content;
             var formData = request.Data == null ? string.Empty : "->" + JsonHelper.ToJson(request.Data);
             Logger.Debug($"HttpHelper：[{method}]{url}{formData}");
-            return await Client.SendAsync(req);
+            var resp = await Client.SendAsync(req);
+            if (currentTimeout.HasValue)
+                Client.Timeout = currentTimeout.Value;
+            return resp;
         }
 
         /// <summary> Get方法 </summary>

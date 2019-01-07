@@ -17,8 +17,8 @@ namespace Acb.Core.Exceptions
         /// <summary> 默认错误码 </summary>
         public const int DefaultCode = -1;
 
-        /// <summary> 服务器心情不好，请稍后重试~ </summary>
-        [Description("服务器心情不好，请稍后重试~")]
+        /// <summary> 系统开小差了，我们正在找他回来~ </summary>
+        [Description("系统开小差了，我们正在找他回来~")]
         public const int SystemError = 10001;
 
         /// <summary> 参数错误 </summary>
@@ -67,8 +67,11 @@ namespace Acb.Core.Exceptions
         /// <returns></returns>
         public static string Message<T>(this int code) where T : ErrorCodes
         {
+            var message = $"errorMsg:{code}".Config<string>();
+            if (message != null)
+                return message;
             var codes = Codes<T>();
-            return codes.TryGetValue(code, out var message) ? message : ErrorCodes.SystemError.Message<ErrorCodes>();
+            return codes.TryGetValue(code, out message) ? message : ErrorCodes.SystemError.Message<ErrorCodes>();
         }
 
         /// <summary> 错误编码对应DResult </summary>

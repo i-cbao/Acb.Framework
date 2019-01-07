@@ -13,6 +13,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
+            Print(IdentityHelper.Guid16);
             var str = EncryptHelper.MD5(Content);
             Print(str);
         }

@@ -75,12 +75,12 @@ namespace Acb.Demo.Business
 
         public async Task<int> Update()
         {
-            //return await AreaRepository.UnitOfWork.Trans(async () =>
-            //{
+            return await AreaRepository.UnitOfWork.Trans(async () =>
+            {
                 var count = await AreaRepository.UpdateName();
                 count += await AnotherAreaRepository.UpdateParent();
                 return count;
-            //});
+            });
         }
     }
 }
