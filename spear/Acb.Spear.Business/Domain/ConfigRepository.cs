@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Data;
 using Acb.Core.Domain;
 using Acb.Core.Exceptions;
@@ -13,8 +10,11 @@ using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
 using Acb.Spear.Domain.Enums;
 using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Acb.Spear.Business.Domain.Repositories
+namespace Acb.Spear.Business.Domain
 {
     /// <summary> 配置中心仓储类 </summary>
     public class ConfigRepository : DapperRepository<TConfig>
@@ -24,28 +24,28 @@ namespace Acb.Spear.Business.Domain.Repositories
         }
 
         /// <summary> 查询项目所有配置名 </summary>
-        /// <param name="code"></param>
+        /// <param name="projectId"></param>
         /// <returns></returns>
-        public async Task<IEnumerable<string>> QueryNames(string code)
+        public async Task<IEnumerable<string>> QueryNamesAsync(Guid projectId)
         {
-            const string sql = "SELECT [Name] FROM [t_config] WHERE [ProjectCode]=@code AND [Status]=0 GROUP BY [Name]";
+            const string sql = "SELECT [Name] FROM [t_config] WHERE [ProjectId]=@projectId AND [Status]=0 GROUP BY [Name]";
 
-            return await Connection.QueryAsync<string>(Connection.FormatSql(sql), new { code });
+            return await Connection.QueryAsync<string>(Connection.FormatSql(sql), new { projectId });
         }
 
         /// <summary> 查询配置 </summary>
-        /// <param name="code"></param>
+        /// <param name="projectId"></param>
         /// <param name="module"></param>
         /// <param name="env"></param>
         /// <returns></returns>
-        public async Task<string> QueryConfig(string code, string module, string env = null)
+        public async Task<string> QueryByModuleAsync(Guid projectId, string module, string env = null)
         {
             const string sql =
-                "SELECT [Content] FROM [t_config] WHERE [Status]=0 AND [ProjectCode]=@code AND [Name]=@name AND ([Mode]=@mode OR [Mode] IS NULL) ORDER BY [Mode]";
+                "SELECT [Content] FROM [t_config] WHERE [Status]=0 AND [ProjectId]=@projectId AND [Name]=@name AND ([Mode]=@mode OR [Mode] IS NULL) ORDER BY [Mode]";
 
             return await Connection.QueryFirstOrDefaultAsync<string>(Connection.FormatSql(sql), new
             {
-                code,
+                projectId,
                 name = module,
                 mode = env
             });
@@ -56,7 +56,7 @@ namespace Acb.Spear.Business.Domain.Repositories
         /// <param name="module"></param>
         /// <param name="env"></param>
         /// <returns></returns>
-        public async Task<string> QueryConfigVersion(Guid projectId, string module, string env = null)
+        public async Task<string> QueryVersionAsync(Guid projectId, string module, string env = null)
         {
             const string sql =
                 "SELECT [Md5] FROM [t_config] WHERE [Status]=0 AND [ProjectId]=@projectId AND [Name]=@name AND ([Mode]=@mode OR [Mode] IS NULL) ORDER BY [Mode]";
@@ -70,24 +70,24 @@ namespace Acb.Spear.Business.Domain.Repositories
         }
 
         /// <summary> 查询配置历史版本 </summary>
-        /// <param name="code"></param>
+        /// <param name="projectId"></param>
         /// <param name="module"></param>
         /// <param name="env"></param>
         /// <param name="page"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public async Task<PagedList<TConfig>> QueryHistory(string code, string module, string env = null, int page = 1, int size = 10)
+        public async Task<PagedList<TConfig>> QueryHistoryAsync(Guid projectId, string module, string env = null, int page = 1, int size = 10)
         {
             const string sql =
-                "SELECT * FROM [t_config] WHERE [Status]=1 AND [ProjectCode]=@code AND [Name]=@name AND [Mode]=@mode ORDER BY [Timestamp] DESC";
+                "SELECT * FROM [t_config] WHERE [Status]=1 AND [ProjectId]=@projectId AND [Name]=@name AND [Mode]=@mode ORDER BY [Timestamp] DESC";
 
-            return await Connection.PagedListAsync<TConfig>(sql, page, size, new { code, name = module, mode = env });
+            return await Connection.PagedListAsync<TConfig>(sql, page, size, new { projectId, name = module, mode = env });
         }
 
         /// <summary> 还原历史版本 </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<TConfig> RecoveryHistory(string id)
+        public async Task<TConfig> RecoveryAsync(Guid id)
         {
             //更新之前版本为历史版本
             const string updateSql = "UPDATE [t_config] SET [Status]=1 WHERE [ProjectId]=@projectId AND [Name]=@name AND [Mode]=@mode AND [Status]=0";
@@ -113,18 +113,18 @@ namespace Acb.Spear.Business.Domain.Repositories
         /// <summary> 保存配置 </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public async Task<int> SaveConfig(TConfig model)
+        public async Task<int> UpdateAsync(TConfig model)
         {
             model.Id = IdentityHelper.NewSequentialGuid();
             model.Timestamp = Clock.Now;
             model.Md5 = model.Content.Md5();
-            var version = await QueryConfigVersion(model.ProjectId, model.Name, model.Mode);
+            var version = await QueryVersionAsync(model.ProjectId, model.Name, model.Mode);
             if (version != null && version == model.Md5)
                 throw new BusiException("配置未更改");
             //更新之前版本为历史版本
             return await Transaction(async () =>
             {
-                var count = await DeleteConfig(model.ProjectId, model.Name, model.Mode);
+                var count = await DeleteByModuleAsync(model.ProjectId, model.Name, model.Mode);
                 count += await Connection.InsertAsync(model, trans: Trans);
                 return count;
             });
@@ -135,7 +135,7 @@ namespace Acb.Spear.Business.Domain.Repositories
         /// <param name="module"></param>
         /// <param name="env"></param>
         /// <returns></returns>
-        public async Task<int> DeleteConfig(Guid projectId, string module, string env)
+        public async Task<int> DeleteByModuleAsync(Guid projectId, string module, string env)
         {
             //更新之前版本为历史版本
             SQL updateSql =

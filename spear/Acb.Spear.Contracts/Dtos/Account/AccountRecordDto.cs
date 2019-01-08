@@ -1,21 +1,16 @@
-﻿using System;
-using Acb.Core.Domain.Entities;
-using Acb.Core.Serialize;
+﻿using Acb.Core.Domain.Dtos;
+using Acb.Spear.Contracts.Enums;
+using System;
 
-namespace Acb.Spear.Business.Domain.Entities
+namespace Acb.Spear.Contracts.Dtos.Account
 {
-    ///<summary> t_account_record </summary>
-    [Naming("t_account_record")]
-    public class TAccountRecord : BaseEntity<Guid>
+    public class AccountRecordDto : DDto
     {
         ///<summary> Id </summary>
-        public override Guid Id { get; set; }
-
-        ///<summary> 帐号ID </summary>
-        public Guid AccountId { get; set; }
+        public Guid Id { get; set; }
 
         ///<summary> 状态 </summary>
-        public short Status { get; set; }
+        public AccountRecordStatus Status { get; set; }
 
         ///<summary> 备注 </summary>
         public string Remark { get; set; }

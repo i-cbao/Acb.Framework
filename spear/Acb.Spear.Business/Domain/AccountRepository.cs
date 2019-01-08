@@ -1,16 +1,22 @@
-﻿using System.Threading.Tasks;
-using Acb.AutoMapper;
+﻿using Acb.AutoMapper;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
 using Acb.Spear.Contracts.Dtos;
+using System.Threading.Tasks;
+using Acb.Spear.Contracts.Dtos.Account;
 
-namespace Acb.Spear.Business.Domain.Repositories
+namespace Acb.Spear.Business.Domain
 {
     public class AccountRepository : DapperRepository<TAccount>
     {
+        public Task<bool> ExistsAccountAsync(string account)
+        {
+            return Connection.ExistsWhereAsync<TAccount>("[Account]=@account", new { account });
+        }
+
         /// <summary> 查询账号 </summary>
         /// <param name="account"></param>
         /// <returns></returns>
@@ -18,11 +24,6 @@ namespace Acb.Spear.Business.Domain.Repositories
         {
             return Connection.QueryByIdAsync<TAccount>(account, nameof(TAccount.Account));
         }
-
-        //public Task<TAccount> RegistAsync(TAccount model)
-        //{
-
-        //}
 
         public async Task<AccountDto> LoginAsync(string account, string password)
         {
@@ -32,6 +33,11 @@ namespace Acb.Spear.Business.Domain.Repositories
             if (!string.Equals($"{model.Password},{model.PasswordSalt}".Md5(), password))
                 throw new BusiException("登录密码不正确");
             return model.MapTo<AccountDto>();
+        }
+
+        public Task<int> UpdateAsync(TAccount model)
+        {
+            return Connection.UpdateAsync(model, new[] { nameof(TAccount.Nick), nameof(TAccount.Avatar) }, Trans);
         }
     }
 }

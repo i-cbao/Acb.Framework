@@ -1,15 +1,12 @@
-﻿using Acb.AutoMapper;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
-using Acb.Spear.Domain;
+using Acb.Spear.Contracts;
+using Acb.Spear.Contracts.Dtos;
 using Acb.Spear.Domain.Enums;
 using Acb.Spear.Filters;
 using Acb.Spear.Hubs;
-using Acb.Spear.ViewModels;
-using Acb.WebApi;
-using Acb.WebApi.Filters;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,10 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Spear.Business.Domain.Entities;
-using Acb.Spear.Business.Domain.Repositories;
-using Acb.Spear.Contracts.Dtos;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Acb.Spear.Controllers
 {
@@ -29,13 +22,13 @@ namespace Acb.Spear.Controllers
     [Route("api/config")]
     public class ConfigController : DController
     {
-        private readonly ConfigRepository _repository;
+        private readonly IConfigContract _contract;
         private readonly IHubContext<ConfigHub> _configHub;
         private readonly ILogger _logger;
 
-        public ConfigController(ConfigRepository repository, IHubContext<ConfigHub> configHub)
+        public ConfigController(IConfigContract contract, IHubContext<ConfigHub> configHub)
         {
-            _repository = repository;
+            _contract = contract;
             _configHub = configHub;
             _logger = LogManager.Logger<ConfigController>();
         }
@@ -51,7 +44,7 @@ namespace Acb.Spear.Controllers
             var dict = new Dictionary<string, object>();
             foreach (var model in list)
             {
-                var config = await _repository.QueryConfig(ProjectCode, model, env);
+                var config = await _contract.GetAsync(Project.Id, model, env);
                 if (config == null)
                     continue;
                 var obj = JsonConvert.DeserializeObject<JObject>(config);
@@ -75,7 +68,7 @@ namespace Acb.Spear.Controllers
         public async Task<DResult> RemoveConfig(string module, string env)
         {
             if (env == "default") env = null;
-            var result = await _repository.DeleteConfig(Project.Id, module, env);
+            var result = await _contract.RemoveAsync(Project.Id, module, env);
             return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
 
@@ -90,7 +83,7 @@ namespace Acb.Spear.Controllers
             var dict = new Dictionary<string, string>();
             foreach (var model in list)
             {
-                var version = await _repository.QueryConfigVersion(Project.Id, model, env);
+                var version = await _contract.GetVersionAsync(Project.Id, model, env);
                 dict.Add(model, version);
             }
             return dict;
@@ -100,7 +93,7 @@ namespace Acb.Spear.Controllers
         [HttpGet("list")]
         public async Task<DResults<string>> Configs()
         {
-            var names = await _repository.QueryNames(ProjectCode);
+            var names = await _contract.GetNamesAsync(Project.Id);
             return DResult.Succ(names.OrderBy(t => t), -1);
         }
 
@@ -113,29 +106,20 @@ namespace Acb.Spear.Controllers
         [HttpGet("history/{module}/{env?}")]
         public async Task<DResults<ConfigDto>> History(string module, string env = null, int page = 1, int size = 10)
         {
-            var histories = await _repository.QueryHistory(ProjectCode, module, env, page, size);
-            var dtos = histories.List.Select(config => new ConfigDto
-            {
-                Id = config.Id,
-                Md5 = config.Md5,
-                Timestamp = config.Timestamp,
-                Name = config.Name,
-                Config = JsonConvert.DeserializeObject(config.Content),
-                Desc = config.Desc
-            });
-            return DResult.Succ(dtos, histories.Total);
+            var histories = await _contract.GetHistoryAsync(Project.Id, module, env, page, size);
+            return Succ(histories.List, histories.Total);
         }
 
         /// <summary> 还原历史版本 </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPut("history/{id}")]
-        public async Task<DResult> RecoveryHistory(string id)
+        public async Task<DResult> RecoveryHistory(Guid id)
         {
-            var result = await _repository.RecoveryHistory(id);
+            var result = await _contract.RecoveryAsync(id);
             if (result == null)
                 return DResult.Error("还原版本失败");
-            var config = JsonConvert.DeserializeObject(result.Content);
+            var config = result.Config;
             await _configHub.Clients.Group($"{ProjectCode}_{result.Name}_{result.Mode}")
                 .SendAsync("UPDATE", config);
             return DResult.Success;
@@ -145,18 +129,18 @@ namespace Acb.Spear.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete("history/{id}")]
-        public async Task<DResult> RemoveHistory(string id)
+        public async Task<DResult> RemoveHistory(Guid id)
         {
-            var dto = await _repository.QueryByIdAsync(id);
+            var dto = await _contract.DetailAsync(id);
             if (dto == null)
                 return DResult.Error("版本不存在");
-            if (dto.Status != (byte)ConfigStatus.History)
+            if (dto.Status != ConfigStatus.History)
                 return DResult.Error("只能删除历史版本");
-            var result = await _repository.DeleteAsync(id);
+            var result = await _contract.RemoveAsync(id);
             return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
 
-        
+
 
         /// <summary> 保存配置 </summary>
         /// <param name="module"></param>
@@ -174,7 +158,7 @@ namespace Acb.Spear.Controllers
                     return DResult.Error($"不支持的配置模式:{env}");
 
             }
-            var model = new TConfig
+            var model = new ConfigDto
             {
                 ProjectId = Project.Id,
                 Name = module,
@@ -182,7 +166,7 @@ namespace Acb.Spear.Controllers
                 Status = (byte)ConfigStatus.Normal,
                 Content = JsonConvert.SerializeObject(config)
             };
-            var result = await _repository.SaveConfig(model);
+            var result = await _contract.SaveAsync(model);
             if (result > 0)
             {
                 var group = $"{ProjectCode}_{module}_{env}";
@@ -193,6 +177,6 @@ namespace Acb.Spear.Controllers
             return DResult.Error("保存配置失败");
         }
 
-        
+
     }
 }

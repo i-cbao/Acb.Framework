@@ -1,7 +1,7 @@
-﻿using System;
-using Acb.Core.Domain.Dtos;
+﻿using Acb.Core.Domain.Dtos;
+using System;
 
-namespace Acb.Spear.Contracts.Dtos
+namespace Acb.Spear.Contracts.Dtos.Account
 {
     public class AccountDto : DDto
     {

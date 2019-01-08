@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Acb.AutoMapper;
+﻿using Acb.AutoMapper;
 using Acb.Core;
 using Acb.Core.Data;
 using Acb.Core.Helper;
@@ -13,8 +9,12 @@ using Acb.Spear.Business.Domain.Entities;
 using Acb.Spear.Contracts.Dtos.Job;
 using Acb.Spear.Domain.Enums;
 using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Acb.Spear.Business.Domain.Repositories
+namespace Acb.Spear.Business.Domain
 {
     /// <summary> 任务仓储 </summary>
     public class JobRepository : DapperRepository<TJob>

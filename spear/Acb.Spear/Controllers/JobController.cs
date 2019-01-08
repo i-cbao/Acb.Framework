@@ -1,15 +1,13 @@
-﻿using System;
-using Acb.Core;
-using Acb.Spear.Domain;
+﻿using Acb.Core;
+using Acb.Spear.Contracts;
+using Acb.Spear.Contracts.Dtos.Job;
 using Acb.Spear.Domain.Enums;
 using Acb.Spear.Scheduler;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Spear.Business.Domain.Repositories;
-using Acb.Spear.Contracts.Dtos;
-using Acb.Spear.Contracts.Dtos.Job;
 
 namespace Acb.Spear.Controllers
 {
@@ -18,12 +16,12 @@ namespace Acb.Spear.Controllers
     public class JobController : Controller
     {
         private readonly SchedulerCenter _scheduler;
-        private readonly JobRepository _repository;
+        private readonly IJobContract _contract;
 
-        public JobController(SchedulerCenter scheduler, JobRepository repository)
+        public JobController(SchedulerCenter scheduler, IJobContract contract)
         {
             _scheduler = scheduler;
-            _repository = repository;
+            _contract = contract;
         }
 
         /// <summary> 添加任务 </summary>
@@ -32,7 +30,7 @@ namespace Acb.Spear.Controllers
         [HttpPost("")]
         public async Task<DResult> AddJob([FromBody]JobDto dto)
         {
-            await _repository.InsertJob(dto);
+            await _contract.CreateAsync(dto);
             await _scheduler.AddJob(dto);
             return DResult.Success;
         }
@@ -41,7 +39,7 @@ namespace Acb.Spear.Controllers
         [HttpGet("")]
         public async Task<DResults<JobDto>> JobList(string keyword = null, JobStatus status = JobStatus.All, int page = 1, int size = 10)
         {
-            var pagedList = await _repository.QueryJobs(keyword, status, page, size);
+            var pagedList = await _contract.PagedListAsync(keyword, status, page, size);
             var triggers = pagedList.List.SelectMany(t => t.Triggers);
             await _scheduler.SchedulerTriggers(triggers);
             return DResult.Succ(pagedList);
@@ -65,7 +63,7 @@ namespace Acb.Spear.Controllers
         [HttpPost("pause/{jobId:guid}")]
         public async Task<DResult> PauseJob(Guid jobId)
         {
-            await _repository.UpdateStatus(jobId, JobStatus.Pause);
+            await _contract.UpdateAsync(jobId, JobStatus.Pause);
             return await _scheduler.StopJob(jobId);
         }
 
@@ -75,7 +73,7 @@ namespace Acb.Spear.Controllers
         [HttpDelete("{jobId}")]
         public async Task<DResult> RemoveJob(Guid jobId)
         {
-            await _repository.DeleteById(jobId);
+            await _contract.RemoveAsync(jobId);
             return await _scheduler.DeleteJob(jobId);
         }
 
@@ -85,7 +83,7 @@ namespace Acb.Spear.Controllers
         [HttpPost("resume/{jobId}")]
         public async Task<DResult> ResumeJob(Guid jobId)
         {
-            await _repository.UpdateStatus(jobId, JobStatus.Start);
+            await _contract.UpdateAsync(jobId, JobStatus.Start);
             return await _scheduler.ResumeJob(jobId);
         }
 
@@ -94,7 +92,7 @@ namespace Acb.Spear.Controllers
         [HttpGet("{jobId}")]
         public async Task<DResult<JobDto>> QueryJob(Guid jobId)
         {
-            var dto = await _repository.QueryByJobId(jobId);
+            var dto = await _contract.GetAsync(jobId);
             await _scheduler.SchedulerTriggers(dto.Triggers);
             return DResult.Succ(dto);
         }
@@ -106,8 +104,8 @@ namespace Acb.Spear.Controllers
         [HttpPut("{jobId}")]
         public async Task<DResult> ModifyJob(Guid jobId, [FromBody]JobDto dto)
         {
-            await _repository.DeleteById(jobId);
-            await _repository.InsertJob(dto);
+            await _contract.RemoveAsync(jobId);
+            await _contract.CreateAsync(dto);
             await _scheduler.DeleteJob(dto.Id);
             await _scheduler.AddJob(dto);
             return DResult.Success;
@@ -130,7 +128,7 @@ namespace Acb.Spear.Controllers
         [HttpGet("logs/{jobId}")]
         public async Task<DResults<JobRecordDto>> GetJobLogs(Guid jobId, int page = 1, int size = 10)
         {
-            var list = await _repository.QueryRecords(jobId, page, size);
+            var list = await _contract.RecordsAsync(jobId, page, size);
             return DResult.Succ(list);
         }
 

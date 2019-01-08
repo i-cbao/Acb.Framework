@@ -4,8 +4,8 @@ using Acb.Spear.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using Acb.Spear.Business.Domain;
 using Acb.Spear.Business.Domain.Entities;
-using Acb.Spear.Business.Domain.Repositories;
 
 namespace Acb.Spear.Controllers
 {

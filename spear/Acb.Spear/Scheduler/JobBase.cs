@@ -8,8 +8,8 @@ using Acb.Spear.Domain;
 using Quartz;
 using System;
 using System.Threading.Tasks;
+using Acb.Spear.Business.Domain;
 using Acb.Spear.Business.Domain.Entities;
-using Acb.Spear.Business.Domain.Repositories;
 using Acb.Spear.Contracts.Dtos;
 using Acb.Spear.Contracts.Dtos.Job;
 
