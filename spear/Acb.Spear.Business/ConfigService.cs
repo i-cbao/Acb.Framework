@@ -25,6 +25,11 @@ namespace Acb.Spear.Business
             return _repository.QueryNamesAsync(projectId);
         }
 
+        public Task<IEnumerable<string>> GetEnvsAsync(Guid projectId, string module)
+        {
+            return _repository.QueryModesAsync(projectId, module);
+        }
+
         public Task<string> GetAsync(Guid projectId, string module, string env = null)
         {
             return _repository.QueryByModuleAsync(projectId, module, env);

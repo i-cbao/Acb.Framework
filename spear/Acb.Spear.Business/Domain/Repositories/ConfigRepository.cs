@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Acb.Core;
+﻿using Acb.Core;
 using Acb.Core.Data;
 using Acb.Core.Domain;
 using Acb.Core.Exceptions;
@@ -13,6 +10,9 @@ using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
 using Acb.Spear.Contracts.Enums;
 using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Acb.Spear.Business.Domain.Repositories
 {
@@ -128,6 +128,18 @@ namespace Acb.Spear.Business.Domain.Repositories
                 count += await Connection.InsertAsync(model, trans: Trans);
                 return count;
             });
+        }
+
+        /// <summary> 查询已配置的环境 </summary>
+        /// <param name="projectId"></param>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<string>> QueryModesAsync(Guid projectId, string module)
+        {
+            const string sql =
+                "SELECT [Mode] FROM [t_config] WHERE [Status=@status AND [ProjectId]=@projectId AND [Name]=@module AND [Mode] IS NOT NULL";
+            var fsql = Connection.FormatSql(sql);
+            return await Connection.QueryAsync<string>(fsql, new { projectId, module, status = ConfigStatus.Normal });
         }
 
         /// <summary> 删除配置 </summary>

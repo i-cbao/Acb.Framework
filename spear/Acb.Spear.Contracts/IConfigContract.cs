@@ -16,6 +16,12 @@ namespace Acb.Spear.Contracts
         /// <returns></returns>
         Task<IEnumerable<string>> GetNamesAsync(Guid projectId);
 
+        /// <summary> 查询已配置的环境 </summary>
+        /// <param name="projectId"></param>
+        /// <param name="module"></param>
+        /// <returns></returns>
+        Task<IEnumerable<string>> GetEnvsAsync(Guid projectId, string module);
+
         /// <summary> 获取配置 </summary>
         /// <param name="projectId"></param>
         /// <param name="module"></param>

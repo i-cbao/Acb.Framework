@@ -3,6 +3,7 @@ using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
+using Acb.Spear.Contracts.Enums;
 using Acb.Spear.Filters;
 using Acb.Spear.Hubs;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.Controllers
 {
@@ -31,6 +31,31 @@ namespace Acb.Spear.Controllers
             _contract = contract;
             _configHub = configHub;
             _logger = LogManager.Logger<ConfigController>();
+        }
+
+        /// <summary> 通知配置更新 </summary>
+        /// <param name="module"></param>
+        /// <param name="env"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        private async Task NotifyConfig(string module, string env, object config)
+        {
+            if (string.IsNullOrWhiteSpace(env))
+            {
+                //default
+                var existsEnvs = (await _contract.GetEnvsAsync(Project.Id, module)).ToList();
+                foreach (ConfigEnv configEnv in Enum.GetValues(typeof(ConfigEnv)))
+                {
+                    var item = configEnv.ToString().ToLower();
+                    if (existsEnvs.Contains(item))
+                        continue;
+                    await _configHub.UpdateAsync(Project.Code, module, item, config);
+                }
+            }
+            else
+            {
+                await _configHub.UpdateAsync(Project.Code, module, env, config);
+            }
         }
 
         /// <summary> 获取配置 </summary>
@@ -69,6 +94,7 @@ namespace Acb.Spear.Controllers
         {
             if (env == "default") env = null;
             var result = await _contract.RemoveAsync(Project.Id, module, env);
+            //:todo 通知删除 1.删除默认的，通知缺省的，2.删除具体的，获取默认再通知
             return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
 
@@ -119,9 +145,7 @@ namespace Acb.Spear.Controllers
             var result = await _contract.RecoveryAsync(id);
             if (result == null)
                 return DResult.Error("还原版本失败");
-            var config = result.Config;
-            await _configHub.Clients.Group($"{ProjectCode}_{result.Name}_{result.Mode}")
-                .SendAsync("UPDATE", config);
+            await NotifyConfig(result.Name, result.Mode, result.Config);
             return DResult.Success;
         }
 
@@ -140,8 +164,6 @@ namespace Acb.Spear.Controllers
             return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
 
-
-
         /// <summary> 保存配置 </summary>
         /// <param name="module"></param>
         /// <param name="config"></param>
@@ -150,13 +172,12 @@ namespace Acb.Spear.Controllers
         [HttpPost("{module}/{env?}")]
         public async Task<DResult> Save(string module, [FromBody]object config, string env = null)
         {
+            var envs = Enum.GetValues(typeof(ConfigEnv)).Cast<ConfigEnv>().Select(t => t.ToString().ToLower()).ToList();
             if (!string.IsNullOrWhiteSpace(env))
             {
                 env = env.ToLower();
-                var envs = Enum.GetValues(typeof(ConfigEnv)).Cast<ConfigEnv>().Select(t => t.ToString().ToLower());
                 if (!envs.Contains(env))
                     return DResult.Error($"不支持的配置模式:{env}");
-
             }
             var model = new ConfigDto
             {
@@ -167,14 +188,10 @@ namespace Acb.Spear.Controllers
                 Content = JsonConvert.SerializeObject(config)
             };
             var result = await _contract.SaveAsync(model);
-            if (result > 0)
-            {
-                var group = $"{ProjectCode}_{module}_{env}";
-                _logger.Info($"Hub Group:{group} Update");
-                await _configHub.Clients.Group(group).SendAsync("UPDATE", config);
-                return DResult.Success;
-            }
-            return DResult.Error("保存配置失败");
+            if (result <= 0)
+                return DResult.Error("保存配置失败");
+            await NotifyConfig(module, env, config);
+            return DResult.Success;
         }
 
 
