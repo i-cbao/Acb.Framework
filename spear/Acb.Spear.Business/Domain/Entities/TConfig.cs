@@ -30,7 +30,7 @@ namespace Acb.Spear.Business.Domain.Entities
         public string Desc { get; set; }
 
         ///<summary> 状态:0,正常;1,历史版本;2,已删除 </summary>
-        public short Status { get; set; }
+        public byte Status { get; set; }
 
         ///<summary> 创建时间 </summary>
         public DateTime Timestamp { get; set; }

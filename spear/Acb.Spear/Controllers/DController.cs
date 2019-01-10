@@ -1,6 +1,9 @@
-﻿using Acb.Spear.Contracts.Dtos;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
+using Acb.Spear.Contracts.Dtos;
 using Acb.Spear.Domain;
 using Acb.Spear.Filters;
+using System;
 
 namespace Acb.Spear.Controllers
 {
@@ -36,6 +39,10 @@ namespace Acb.Spear.Controllers
 
         private ProjectDto _project;
 
+        /// <summary> 项目ID </summary>
+        protected Guid? ProjectId => Ticket?.ProjectId;
+
+        /// <summary> 项目信息 </summary>
         protected ProjectDto Project
         {
             get
@@ -44,6 +51,26 @@ namespace Acb.Spear.Controllers
                     return _project;
                 return _project = HttpContext.GetProject();
             }
+        }
+
+        /// <summary> 转换DResult </summary>
+        /// <param name="result"></param>
+        /// <param name="errorMsg"></param>
+        /// <returns></returns>
+        protected DResult FromResult<T>(T result, string errorMsg = null)
+        where T : struct
+        {
+            bool success;
+            if (typeof(T) == typeof(bool))
+            {
+                success = result.CastTo<bool>();
+            }
+            else
+            {
+                success = result.CastTo(0) > 0;
+            }
+
+            return success ? Success : Error(string.IsNullOrWhiteSpace(errorMsg) ? "操作失败，请重试" : errorMsg);
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using Acb.Core;
+﻿using System;
+using System.Threading.Tasks;
+using Acb.Core;
 using Acb.Core.Extensions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
-using System;
-using System.Threading.Tasks;
 
-namespace Acb.Spear.Business.Domain
+namespace Acb.Spear.Business.Domain.Repositories
 {
     public class AccounrRecordRepository : DapperRepository<TAccountRecord>
     {

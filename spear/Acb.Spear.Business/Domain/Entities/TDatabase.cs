@@ -27,7 +27,7 @@ namespace Acb.Spear.Business.Domain.Entities
         public string ConnectionString { get; set; }
 
         ///<summary> 状态 </summary>
-        public short State { get; set; }
+        public byte State { get; set; }
 
         ///<summary> 创建时间 </summary>
         public DateTime CreateTime { get; set; }

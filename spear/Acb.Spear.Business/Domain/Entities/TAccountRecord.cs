@@ -15,7 +15,7 @@ namespace Acb.Spear.Business.Domain.Entities
         public Guid AccountId { get; set; }
 
         ///<summary> 状态 </summary>
-        public short Status { get; set; }
+        public byte Status { get; set; }
 
         ///<summary> 备注 </summary>
         public string Remark { get; set; }

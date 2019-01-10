@@ -1,4 +1,4 @@
-﻿namespace Acb.Spear.Domain.Enums
+﻿namespace Acb.Spear.Contracts.Enums
 {
     public enum ConfigStatus : byte
     {

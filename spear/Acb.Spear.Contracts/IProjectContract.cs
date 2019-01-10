@@ -25,12 +25,7 @@ namespace Acb.Spear.Contracts
         /// <returns></returns>
         Task<ProjectDto> DetailByCodeAsync(string code);
 
-        /// <summary> 获取项目 </summary>
-        /// <param name="code"></param>
-        /// <returns></returns>
-        ProjectDto DetailByCode(string code);
-
-        ProjectDto Detail(Guid id);
+        Task<ProjectDto> DetailAsync(Guid id);
 
         /// <summary> 项目列表 </summary>
         /// <param name="page"></param>

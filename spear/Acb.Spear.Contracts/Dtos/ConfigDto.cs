@@ -1,7 +1,7 @@
 ﻿using Acb.Core.Domain.Dtos;
-using Acb.Spear.Domain.Enums;
 using Newtonsoft.Json;
 using System;
+using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.Contracts.Dtos
 {

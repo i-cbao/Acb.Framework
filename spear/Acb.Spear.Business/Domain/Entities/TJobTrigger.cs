@@ -1,6 +1,6 @@
-﻿using System;
-using Acb.Core.Domain.Entities;
+﻿using Acb.Core.Domain.Entities;
 using Acb.Core.Serialize;
+using System;
 
 namespace Acb.Spear.Business.Domain.Entities
 {
@@ -15,7 +15,7 @@ namespace Acb.Spear.Business.Domain.Entities
         public Guid JobId { get; set; }
 
         ///<summary> 触发器类型 </summary>
-        public int Type { get; set; }
+        public byte Type { get; set; }
 
         ///<summary> Corn表达式 </summary>
         public string Corn { get; set; }
@@ -35,7 +35,10 @@ namespace Acb.Spear.Business.Domain.Entities
         ///<summary> 上次执行时间 </summary>
         public DateTime? PrevTime { get; set; }
 
-        ///<summary> 下次执行时间 </summary>
-        public DateTime? NextTime { get; set; }
+        ///<summary> 状态 </summary>
+        public byte Status { get; set; }
+
+        /// <summary> 创建时间 </summary>
+        public DateTime CreateTime { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using Acb.Core.Domain.Dtos;
-using Acb.Spear.Domain.Enums;
+using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.Contracts.Dtos
 {
@@ -27,6 +27,6 @@ namespace Acb.Spear.Contracts.Dtos
         public DateTime CreateTime { get; set; }
 
         ///<summary> 状态 </summary>
-        public short Status { get; set; }
+        public byte Status { get; set; }
     }
 }

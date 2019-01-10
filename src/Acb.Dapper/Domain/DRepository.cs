@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Data;
 using Acb.Core.Dependency;
 using Acb.Core.Domain;
+using Acb.Core.Domain.Entities;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using System;
@@ -126,6 +127,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected int Increment<T>(string column, object key, string keyColumn = "id",
             int count = 1)
+            where T : IEntity
         {
             return Connection.Increment<T>(column, key, keyColumn, count, Trans);
         }

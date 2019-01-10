@@ -1,5 +1,10 @@
 import request from '@/utils/request'
 
+/**
+ * 帐号登录
+ * @param {*} account
+ * @param {*} password
+ */
 export const login = (account, password) => {
   return request.post('/api/account/login', {
     account,
@@ -7,10 +12,9 @@ export const login = (account, password) => {
   })
 }
 
-export const logout = () => {
-  return request.post('/api/account/logout')
-}
-
+/**
+ * 获取帐号信息
+ */
 export const getInfo = () => {
   return request.get('/api/account')
 }

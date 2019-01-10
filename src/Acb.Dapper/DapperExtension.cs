@@ -1,9 +1,10 @@
 ﻿using Acb.Core;
+using Acb.Core.Data;
+using Acb.Core.Data.Adapters;
 using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Extensions;
 using Acb.Core.Serialize;
-using Acb.Dapper.Adapters;
 using Acb.Dapper.Domain;
 using Dapper;
 using System;
@@ -14,8 +15,7 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Acb.Core.Data;
-using Acb.Core.Data.Adapters;
+using Acb.Core.Domain.Entities;
 
 namespace Acb.Dapper
 {
@@ -239,6 +239,7 @@ namespace Acb.Dapper
 
         /// <summary> 查询所有数据 </summary>
         public static IEnumerable<T> QueryAll<T>(this IDbConnection conn)
+            where T : IEntity
         {
             var sql = QueryAllSql<T>();
             sql = conn.FormatSql(sql);
@@ -251,6 +252,7 @@ namespace Acb.Dapper
         /// <param name="keyColumn"></param>
         /// <returns></returns>
         public static T QueryById<T>(this IDbConnection conn, object key, string keyColumn = null)
+            where T : IEntity
         {
             var sql = QueryByIdSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
@@ -267,6 +269,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static PagedList<T> PagedList<T>(this IDbConnection conn, string sql, int page, int size,
             object param = null)
+            where T : IEntity
         {
             SQL pageSql = sql;
             return pageSql.PagedList<T>(conn, page, size, param);
@@ -285,6 +288,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static int Insert<T>(this IDbConnection conn, T model, string[] excepts = null,
             IDbTransaction trans = null, int? commandTimeout = null)
+            where T : IEntity
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
@@ -301,6 +305,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static int Insert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null,
             IDbTransaction trans = null, int? commandTimeout = null)
+            where T : IEntity
         {
             var type = typeof(T);
             var sql = type.InsertSql(excepts);
@@ -310,6 +315,7 @@ namespace Acb.Dapper
 
         public static int BatchInsert<T>(this IDbConnection conn, IEnumerable<T> models, string[] excepts = null,
             IDbTransaction trans = null, int? commandTimeout = null)
+            where T : IEntity
         {
             return conn.Insert(models, excepts, trans, commandTimeout);
         }
@@ -343,6 +349,23 @@ namespace Acb.Dapper
         /// <summary> 更新数据 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="conn"></param>
+        /// <param name="entityToUpdates">待更新实体</param>
+        /// <param name="updateProps">更新属性</param>
+        /// <param name="trans"></param>
+        /// <param name="commandTimeout"></param>
+        /// <returns></returns>
+        public static int Update<T>(this IDbConnection conn, IEnumerable<T> entityToUpdates, string[] updateProps = null,
+            IDbTransaction trans = null, int? commandTimeout = null)
+            where T : IEntity
+        {
+            var sql = UpdateSql<T>(updateProps);
+            sql = conn.FormatSql(sql);
+            return conn.Execute(sql, entityToUpdates.ToArray(), trans, commandTimeout);
+        }
+
+        /// <summary> 更新数据 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="conn"></param>
         /// <param name="entityToUpdate">待更新实体</param>
         /// <param name="updateProps">更新属性</param>
         /// <param name="trans"></param>
@@ -350,6 +373,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static int Update<T>(this IDbConnection conn, T entityToUpdate, string[] updateProps = null,
             IDbTransaction trans = null, int? commandTimeout = null)
+            where T : IEntity
         {
             var sql = UpdateSql<T>(updateProps);
             sql = conn.FormatSql(sql);
@@ -377,6 +401,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static int Delete<T>(this IDbConnection conn, object value, string keyColumn = null,
             IDbTransaction trans = null)
+            where T : IEntity
         {
             var sql = DeleteSql<T>(keyColumn);
             sql = conn.FormatSql(sql);
@@ -392,6 +417,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static int DeleteWhere<T>(this IDbConnection conn, string where, object param = null,
             IDbTransaction trans = null)
+            where T : IEntity
         {
             var tableName = typeof(T).PropName();
             var sql = $"DELETE FROM [{tableName}] WHERE {where}";
@@ -410,6 +436,7 @@ namespace Acb.Dapper
         /// <param name="value"></param>
         /// <returns></returns>
         public static long Count<T>(this IDbConnection conn, string column, object value)
+            where T : IEntity
         {
             var tableName = typeof(T).PropName();
             var sql = $"SELECT COUNT(1) FROM [{tableName}] WHERE [{column}]=@value";
@@ -424,6 +451,7 @@ namespace Acb.Dapper
         /// <param name="param"></param>
         /// <returns></returns>
         public static long CountWhere<T>(this IDbConnection conn, string where = null, object param = null)
+            where T : IEntity
         {
             var tableName = typeof(T).PropName();
             SQL sql = $"SELECT COUNT(1) FROM [{tableName}]";
@@ -440,6 +468,7 @@ namespace Acb.Dapper
         /// <param name="value"></param>
         /// <returns></returns>
         public static bool Exists<T>(this IDbConnection conn, string column, object value)
+            where T : IEntity
         {
             return conn.Count<T>(column, value) > 0;
         }
@@ -451,6 +480,7 @@ namespace Acb.Dapper
         /// <param name="param"></param>
         /// <returns></returns>
         public static bool ExistsWhere<T>(this IDbConnection conn, string where = null, object param = null)
+            where T : IEntity
         {
             return conn.CountWhere<T>(where, param) > 0;
         }
@@ -463,6 +493,7 @@ namespace Acb.Dapper
         /// <param name="param"></param>
         /// <returns></returns>
         public static long Min<T>(this IDbConnection conn, string column, string where = null, object param = null)
+            where T : IEntity
         {
             var tableName = typeof(T).PropName();
             SQL sql = $"SELECT MIN([{column}]) FROM [{tableName}]";
@@ -480,6 +511,7 @@ namespace Acb.Dapper
         /// <param name="param"></param>
         /// <returns></returns>
         public static long Max<T>(this IDbConnection conn, string column, string where = null, object param = null)
+            where T : IEntity
         {
             var tableName = typeof(T).PropName();
             SQL sql = $"SELECT MAX([{column}]) FROM [{tableName}]";
@@ -499,6 +531,7 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static int Increment<T>(this IDbConnection conn, string column, object key, string keyColumn = null,
             int count = 1, IDbTransaction trans = null)
+            where T : IEntity
         {
             var type = typeof(T);
             var tableName = type.PropName();
@@ -516,7 +549,8 @@ namespace Acb.Dapper
         /// <param name="excepts"></param>
         /// <returns></returns>
         public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null,
-            string tableName = null, string[] excepts = null) where T : class
+            string tableName = null, string[] excepts = null)
+            where T : IEntity
         {
             var type = GetInnerType<T>();
             tableName = string.IsNullOrWhiteSpace(tableName) ? type.PropName() : tableName;

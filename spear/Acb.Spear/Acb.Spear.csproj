@@ -11,15 +11,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Scheduler\**" />
     <Compile Remove="source\**" />
     <Compile Remove="wwwroot\source\**" />
     <Compile Remove="_logs\**" />
+    <Content Remove="Scheduler\**" />
     <Content Remove="source\**" />
     <Content Remove="wwwroot\source\**" />
     <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="Scheduler\**" />
     <EmbeddedResource Remove="source\**" />
     <EmbeddedResource Remove="wwwroot\source\**" />
     <EmbeddedResource Remove="_logs\**" />
+    <None Remove="Scheduler\**" />
     <None Remove="source\**" />
     <None Remove="wwwroot\source\**" />
     <None Remove="_logs\**" />
@@ -30,12 +34,17 @@
     <PackageReference Include="Acb.WebApi" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
-    <PackageReference Include="Quartz" Version="3.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Acb.Spear.Business\Acb.Spear.Business.csproj" />
     <ProjectReference Include="..\Acb.Spear.Contracts\Acb.Spear.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

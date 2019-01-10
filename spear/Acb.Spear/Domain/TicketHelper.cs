@@ -24,6 +24,8 @@ namespace Acb.Spear.Domain
 
         /// <summary> 项目编码 </summary>
         public Guid? ProjectId { get; set; }
+        /// <summary> 权限 </summary>
+        public byte Role { get; set; }
     }
 
     public static class TicketHelper
@@ -85,14 +87,14 @@ namespace Acb.Spear.Domain
             var ticket = context.GetTicket();
             if (ticket != null && ticket.ProjectId.HasValue)
             {
-                project = contract.Detail(ticket.ProjectId.Value);
+                project = contract.DetailAsync(ticket.ProjectId.Value).SyncRun();
             }
             else
             {
                 var code = context.GetProjectCode();
                 if (string.IsNullOrWhiteSpace(code))
                     return null;
-                project = CurrentIocManager.Resolve<IProjectContract>().DetailByCodeAsync(code).GetAwaiter().GetResult();
+                project = contract.DetailByCodeAsync(code).SyncRun();
             }
 
             context.Items.TryAdd(ProjectCacheKey, project);

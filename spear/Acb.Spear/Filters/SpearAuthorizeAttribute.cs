@@ -1,6 +1,5 @@
 ﻿using Acb.Core;
 using Acb.Spear.Domain;
-using Acb.Spear.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -8,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.Filters
 {

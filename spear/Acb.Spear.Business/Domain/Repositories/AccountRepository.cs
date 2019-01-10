@@ -1,28 +1,27 @@
-﻿using Acb.AutoMapper;
+﻿using System.Threading.Tasks;
+using Acb.AutoMapper;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
-using Acb.Spear.Contracts.Dtos;
-using System.Threading.Tasks;
 using Acb.Spear.Contracts.Dtos.Account;
 
-namespace Acb.Spear.Business.Domain
+namespace Acb.Spear.Business.Domain.Repositories
 {
     public class AccountRepository : DapperRepository<TAccount>
     {
-        public Task<bool> ExistsAccountAsync(string account)
+        public async Task<bool> ExistsAccountAsync(string account)
         {
-            return Connection.ExistsWhereAsync<TAccount>("[Account]=@account", new { account });
+            return await Connection.ExistsWhereAsync<TAccount>("[Account]=@account", new { account });
         }
 
         /// <summary> 查询账号 </summary>
         /// <param name="account"></param>
         /// <returns></returns>
-        public Task<TAccount> QueryAccountAsync(string account)
+        public async Task<TAccount> QueryAccountAsync(string account)
         {
-            return Connection.QueryByIdAsync<TAccount>(account, nameof(TAccount.Account));
+            return await Connection.QueryByIdAsync<TAccount>(account, nameof(TAccount.Account));
         }
 
         public async Task<AccountDto> LoginAsync(string account, string password)
@@ -35,9 +34,9 @@ namespace Acb.Spear.Business.Domain
             return model.MapTo<AccountDto>();
         }
 
-        public Task<int> UpdateAsync(TAccount model)
+        public async Task<int> UpdateAsync(TAccount model)
         {
-            return Connection.UpdateAsync(model, new[] { nameof(TAccount.Nick), nameof(TAccount.Avatar) }, Trans);
+            return await Connection.UpdateAsync(model, new[] { nameof(TAccount.Nick), nameof(TAccount.Avatar) }, Trans);
         }
     }
 }

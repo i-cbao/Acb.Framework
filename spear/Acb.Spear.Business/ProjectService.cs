@@ -1,8 +1,7 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
 using Acb.Core.Domain;
-using Acb.Spear.Business.Domain;
-using Acb.Spear.Business.Domain.Entities;
+using Acb.Spear.Business.Domain.Repositories;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
 using System;
@@ -34,14 +33,9 @@ namespace Acb.Spear.Business
             return _repository.QueryByCodeAsync(code);
         }
 
-        public ProjectDto DetailByCode(string code)
+        public async Task<ProjectDto> DetailAsync(Guid id)
         {
-            return _repository.QueryByCode(code);
-        }
-
-        public ProjectDto Detail(Guid id)
-        {
-            var model = _repository.QueryById(id);
+            var model = await _repository.QueryByIdAsync(id);
             return model.MapTo<ProjectDto>();
         }
 

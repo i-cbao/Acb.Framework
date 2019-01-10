@@ -1,13 +1,13 @@
-﻿using Acb.AutoMapper;
+﻿using System.Threading.Tasks;
+using Acb.AutoMapper;
 using Acb.Core.Exceptions;
 using Acb.Core.Helper;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
 using Acb.Spear.Contracts.Dtos;
-using System.Threading.Tasks;
 
-namespace Acb.Spear.Business.Domain
+namespace Acb.Spear.Business.Domain.Repositories
 {
     public class ProjectRepository : DapperRepository<TProject>
     {
@@ -53,10 +53,10 @@ namespace Acb.Spear.Business.Domain
             return model.MapTo<ProjectDto>();
         }
 
-        public ProjectDto QueryByCode(string code)
-        {
-            var model = Connection.QueryById<TProject>(code, nameof(TProject.Code));
-            return model.MapTo<ProjectDto>();
-        }
+        //public ProjectDto QueryByCode(string code)
+        //{
+        //    var model = Connection.QueryById<TProject>(code, nameof(TProject.Code));
+        //    return model.MapTo<ProjectDto>();
+        //}
     }
 }

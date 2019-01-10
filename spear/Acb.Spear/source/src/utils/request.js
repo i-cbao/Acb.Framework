@@ -46,7 +46,7 @@ service.interceptors.response.use(
         message: res.message
       })
     }
-    if (res.hasOwnProperty('data')) {
+    if (res.hasOwnProperty('data') && !res.hasOwnProperty('total')) {
       return res.data
     }
     return res

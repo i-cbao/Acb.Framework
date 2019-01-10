@@ -17,7 +17,7 @@
         <theme-picker class="theme-switch right-menu-item"/>
       </el-tooltip>
 
-      <el-dropdown class="avatar-container right-menu-item" trigger="click">
+      <el-dropdown :title="name" class="avatar-container right-menu-item" trigger="click">
         <div class="avatar-wrapper">
           <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
           <i class="el-icon-caret-bottom"/>

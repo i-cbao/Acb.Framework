@@ -1,4 +1,6 @@
-﻿namespace Acb.Spear.Contracts.Dtos.Job
+﻿using System.Collections.Generic;
+
+namespace Acb.Spear.Contracts.Dtos.Job
 {
     public class HttpDetailDto : JobDetailDto
     {
@@ -9,7 +11,7 @@
         /// <summary> 数据类型 </summary>
         public int BodyType { get; set; }
         /// <summary> 请求头 </summary>
-        public string Header { get; set; }
+        public IDictionary<string, string> Header { get; set; }
         /// <summary> 数据 </summary>
         public string Data { get; set; }
     }

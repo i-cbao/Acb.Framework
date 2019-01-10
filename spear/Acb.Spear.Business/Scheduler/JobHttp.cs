@@ -1,13 +1,12 @@
-﻿using System.Collections.Generic;
-using Acb.Core.Helper.Http;
+﻿using Acb.Core.Helper.Http;
+using Acb.Spear.Contracts.Dtos.Job;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Acb.Spear.Business.Domain.Entities;
-using Acb.Spear.Contracts.Dtos;
-using Acb.Spear.Contracts.Dtos.Job;
 
-namespace Acb.Spear.Scheduler
+namespace Acb.Spear.Business.Scheduler
 {
     public class JobHttp : JobBase<HttpDetailDto>
     {
@@ -24,7 +23,7 @@ namespace Acb.Spear.Scheduler
                 case 3:
                     return HttpMethod.Put;
                 case 4:
-                    return HttpMethod.Patch;
+                    return HttpMethod.Options;
                 default:
                     return HttpMethod.Get;
             }
@@ -34,21 +33,29 @@ namespace Acb.Spear.Scheduler
         /// <param name="data"></param>
         /// <param name="record"></param>
         /// <returns></returns>
-        protected override async Task ExecuteJob(HttpDetailDto data, TJobRecord record)
+        protected override async Task ExecuteJob(HttpDetailDto data, JobRecordDto record)
         {
             var req = new HttpRequest(data.Url)
             {
-                BodyType = (HttpBodyType)data.BodyType
+                BodyType = (HttpBodyType)data.BodyType,
+                Headers = new Dictionary<string, string>
+                {
+                    {"Request-By", "spear"}
+                }
             };
             if (!string.IsNullOrWhiteSpace(data.Data))
                 req.Data = JsonConvert.DeserializeObject(data.Data);
-            if (!string.IsNullOrWhiteSpace(data.Header))
+            if (data.Header != null && data.Header.Any())
             {
-                req.Headers = JsonConvert.DeserializeObject<IDictionary<string, string>>(data.Header);
+                foreach (var header in data.Header)
+                {
+                    req.Headers.Add(header.Key, header.Value);
+                }
             }
             var resp = await HttpHelper.Instance.RequestAsync(GetHttpMethod(data.Method), req);
             var html = await resp.Content.ReadAsStringAsync();
-            record.Result = $"code:{resp.StatusCode},content:{html}";
+            record.ResultCode = (int)resp.StatusCode;
+            record.Result = html;
         }
     }
 }

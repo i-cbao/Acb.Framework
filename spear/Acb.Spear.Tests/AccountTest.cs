@@ -1,10 +1,13 @@
 using Acb.Framework;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos.Account;
-using Acb.Spear.Domain.Enums;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Threading.Tasks;
+using Acb.Core.Helper;
+using Acb.Spear.Business.Domain;
+using Acb.Spear.Business.Domain.Repositories;
+using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.Tests
 {
@@ -19,15 +22,34 @@ namespace Acb.Spear.Tests
         }
 
         [TestMethod]
+        public void GuidTest()
+        {
+            var key = IdentityHelper.NewSequentialGuid().ToString("N");
+            Print(key);
+            var id = Guid.Parse(key);
+            Print(id);
+        }
+
+        [TestMethod]
+        public async Task MuliQueryTest()
+        {
+            var rep = Resolve<AccountRepository>();
+            var t1 = rep.QueryAccountAsync("ichebao");
+            var t2 = rep.QueryAccountAsync("icbhs");
+            Print(await t1);
+            Print(await t2);
+        }
+
+        [TestMethod]
         public async Task CreateTest()
         {
             var dto = await _contract.CreateAsync(new AccountInputDto
             {
-                Account = "ichebao",
-                Nick = "爱车保",
+                Account = "icbhs",
+                Nick = "i车保护神",
                 Password = "123456",
                 Role = AccountRole.Project,
-                ProjectId = new Guid("5afba2f4-9077-c91c-963d-08d5fbcacf01")
+                ProjectId = new Guid("d3e356f5-b686-c00e-e224-08d60ddebb59")
             });
             Assert.AreNotEqual(dto, null);
             Print(dto);

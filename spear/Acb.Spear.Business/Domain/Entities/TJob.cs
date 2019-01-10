@@ -18,10 +18,10 @@ namespace Acb.Spear.Business.Domain.Entities
         public string Group { get; set; }
 
         ///<summary> 任务状态 </summary>
-        public int Status { get; set; }
+        public byte Status { get; set; }
 
         ///<summary> 任务类型 </summary>
-        public int Type { get; set; }
+        public byte Type { get; set; }
 
         ///<summary> 任务描述 </summary>
         public string Desc { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Acb.Spear.Contracts.Enums
 {
-    public enum AccountRecordStatus : short
+    public enum RecordStatus : byte
     {
         Success = 1,
         Fail = 2

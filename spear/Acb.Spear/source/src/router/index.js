@@ -54,7 +54,7 @@ export const asyncRouterMap = [{
   children: [{
     path: 'index',
     component: () =>
-        import('@/views/config/index'),
+        import('@/views/pages/config/index'),
     name: 'Config',
     meta: {
       title: 'config',
@@ -62,13 +62,13 @@ export const asyncRouterMap = [{
     }
   }]
 }, {
-  path: '/job',
+  path: '/jobs',
   component: Layout,
   redirect: 'noredirect',
   children: [{
     path: 'index',
     component: () =>
-        import('@/views/jobs/index'),
+        import('@/views/pages/jobs/index'),
     name: 'Job',
     meta: {
       title: 'job',
@@ -82,7 +82,7 @@ export const asyncRouterMap = [{
   children: [{
     path: 'index',
     component: () =>
-        import('@/views/dbdoc/index'),
+        import('@/views/pages/dbdoc/index'),
     name: 'DbDoc',
     meta: {
       title: 'dbdoc',

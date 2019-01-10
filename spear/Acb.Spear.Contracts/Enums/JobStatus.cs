@@ -1,14 +1,22 @@
-﻿namespace Acb.Spear.Domain.Enums
+﻿using System.ComponentModel;
+
+namespace Acb.Spear.Contracts.Enums
 {
-    public enum JobStatus
+    public enum JobStatus : byte
     {
-        /// <summary> 所有 </summary>
-        All = -1,
         /// <summary> 已暂停 </summary>
-        Pause = 0,
+        [Description("已暂停")]
+        Disabled = 0,
         /// <summary> 已启动 </summary>
-        Start = 1,
+        [Description("已启动")]
+        Enabled = 1,
+
         /// <summary> 已异常 </summary>
-        Error = 2
+        [Description("异常")]
+        Error = 2,
+
+        /// <summary> 已删除 </summary>
+        [Description("已删除")]
+        Delete = 4
     }
 }

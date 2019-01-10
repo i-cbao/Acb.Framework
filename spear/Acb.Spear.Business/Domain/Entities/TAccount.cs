@@ -27,7 +27,7 @@ namespace Acb.Spear.Business.Domain.Entities
         public string Avatar { get; set; }
 
         ///<summary> 角色 </summary>
-        public short Role { get; set; }
+        public byte Role { get; set; }
 
         ///<summary> 创建时间 </summary>
         public DateTime CreateTime { get; set; }

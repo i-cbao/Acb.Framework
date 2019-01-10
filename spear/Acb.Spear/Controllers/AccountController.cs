@@ -25,6 +25,7 @@ namespace Acb.Spear.Controllers
         /// <summary> 创建账户 </summary>
         /// <param name="input"></param>
         /// <returns></returns>
+        [HttpPost("")]
         public async Task<DResult> Create([FromBody] VAccountInput input)
         {
             var dto = input.MapTo<AccountInputDto>();
@@ -44,6 +45,7 @@ namespace Acb.Spear.Controllers
                 Id = model.Id,
                 Nick = model.Nick,
                 Avatar = model.Avatar,
+                Role = model.Role,
                 ProjectId = model.ProjectId
             };
             var ticket = client.Ticket();
@@ -59,7 +61,8 @@ namespace Acb.Spear.Controllers
             {
                 Id = Ticket.Id,
                 Nick = Ticket.Nick,
-                Avatar = Ticket.Avatar
+                Avatar = Ticket.Avatar,
+                Role = Ticket.Role
             }));
         }
     }

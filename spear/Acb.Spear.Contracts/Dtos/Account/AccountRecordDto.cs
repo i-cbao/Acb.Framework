@@ -10,7 +10,7 @@ namespace Acb.Spear.Contracts.Dtos.Account
         public Guid Id { get; set; }
 
         ///<summary> 状态 </summary>
-        public AccountRecordStatus Status { get; set; }
+        public RecordStatus Status { get; set; }
 
         ///<summary> 备注 </summary>
         public string Remark { get; set; }

@@ -90,7 +90,7 @@ export default {
   methods: {
     loadList() {
       list().then(json => {
-        this.list = json
+        this.list = json.data
       })
     },
     loadConfig() {

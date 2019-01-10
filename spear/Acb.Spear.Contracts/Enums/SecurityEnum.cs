@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace Acb.Spear.Domain.Enums
+namespace Acb.Spear.Contracts.Enums
 {
     [Flags]
-    public enum SecurityEnum : short
+    public enum SecurityEnum : byte
     {
         /// <summary> 匿名 </summary>
         None = 0,

@@ -3,8 +3,8 @@
  */
 
 export function parseTime(time, cFormat) {
-  if (arguments.length === 0) {
-    return null
+  if (arguments.length === 0 || !time) {
+    return '无'
   }
   const format = cFormat || '{y}-{m}-{d} {h}:{i}:{s}'
   let date

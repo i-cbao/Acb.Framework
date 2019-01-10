@@ -68,6 +68,15 @@ export default {
     cancel: '取 消',
     confirm: '确 定'
   },
+  jobTable: {
+    create: '创建任务',
+    logs: '日志',
+    trigger: '添加触发器',
+    start: '开启',
+    pause: '暂停',
+    resume: '恢复',
+    action: '立即执行'
+  },
   errorLog: {
     tips: '请点击右上角bug小图标',
     description: '现在的管理后台基本都是spa的形式了，它增强了用户体验，但同时也会增加页面出问题的可能性，可能一个小小的疏忽就导致整个页面的死锁。好在 Vue 官网提供了一个方法来捕获处理异常，你可以在其中进行错误处理或者异常上报。',

@@ -1,6 +1,6 @@
-﻿using Acb.Spear.Domain.Enums;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.ViewModels
 {

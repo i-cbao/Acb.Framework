@@ -1,8 +1,8 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
 using Acb.Core.Domain;
-using Acb.Spear.Business.Domain;
 using Acb.Spear.Business.Domain.Entities;
+using Acb.Spear.Business.Domain.Repositories;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
 using System;

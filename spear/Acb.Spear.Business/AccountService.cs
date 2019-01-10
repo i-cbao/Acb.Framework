@@ -5,8 +5,8 @@ using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Timing;
-using Acb.Spear.Business.Domain;
 using Acb.Spear.Business.Domain.Entities;
+using Acb.Spear.Business.Domain.Repositories;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos.Account;
 using Acb.Spear.Contracts.Enums;
@@ -56,17 +56,17 @@ namespace Acb.Spear.Business
             };
             if (!string.Equals($"{password},{model.PasswordSalt}".Md5(), model.Password))
             {
-                record.Status = (short)AccountRecordStatus.Fail;
+                record.Status = (byte)RecordStatus.Fail;
                 record.Remark = "登录密码不正确";
             }
             else
             {
-                record.Status = (short)AccountRecordStatus.Success;
+                record.Status = (byte)RecordStatus.Success;
                 record.Remark = "登录成功";
             }
 
             await _recordRepository.InsertAsync(record);
-            if (record.Status != (short)AccountRecordStatus.Success)
+            if (record.Status != (short)RecordStatus.Success)
                 throw new BusiException(record.Remark);
             return model.MapTo<AccountDto>();
         }

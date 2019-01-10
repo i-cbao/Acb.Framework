@@ -1,6 +1,6 @@
-﻿namespace Acb.Spear.Domain.Enums
+﻿namespace Acb.Spear.Contracts.Enums
 {
-    public enum JobType
+    public enum JobType:byte
     {
         Http = 0
     }

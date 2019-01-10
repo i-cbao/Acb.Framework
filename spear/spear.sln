@@ -5,17 +5,17 @@ VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Spear", "Acb.Spear\Acb.Spear.csproj", "{BCC2906B-2180-44B7-BD89-EC79A7152414}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Spear.Contracts", "Acb.Spear.Contracts\Acb.Spear.Contracts.csproj", "{4306A8A3-5C10-4E96-B2E6-36B54B3D8A9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Spear.Contracts", "Acb.Spear.Contracts\Acb.Spear.Contracts.csproj", "{4306A8A3-5C10-4E96-B2E6-36B54B3D8A9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00.Solution Items", "00.Solution Items", "{3F096BE2-170A-4210-AE54-FB5042C01EB8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01.Business", "01.Business", "{00B16932-7413-4DBD-9372-B97F5888869F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Spear.Business", "Acb.Spear.Business\Acb.Spear.Business.csproj", "{28ED0B2E-30CE-4C7F-85B7-A12439090B80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Spear.Business", "Acb.Spear.Business\Acb.Spear.Business.csproj", "{28ED0B2E-30CE-4C7F-85B7-A12439090B80}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "99.Tests", "99.Tests", "{114917BD-C3B4-485D-80E7-F59D3C7F48FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Spear.Tests", "Acb.Spear.Tests\Acb.Spear.Tests.csproj", "{915652C5-A5A3-4CDB-B245-BE50B9DCD8F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Spear.Tests", "Acb.Spear.Tests\Acb.Spear.Tests.csproj", "{915652C5-A5A3-4CDB-B245-BE50B9DCD8F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,14 +1,14 @@
-﻿using Acb.Spear.Hubs;
-using Acb.Spear.Scheduler;
+﻿using Acb.Core.Extensions;
+using Acb.Spear.Contracts;
+using Acb.Spear.Hubs;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
 using System;
 using System.IO;
-using Acb.Core.Extensions;
-using Microsoft.Extensions.FileProviders;
+using System.Threading.Tasks;
 
 namespace Acb.Spear
 {
@@ -20,7 +20,7 @@ namespace Acb.Spear
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.GetService<SchedulerCenter>().StartScheduler().SyncRun();
+            Task.Run(async () => { await provider.GetService<ISchedulerContract>().Start(); });
             base.UseServices(provider);
         }
 
@@ -35,7 +35,6 @@ namespace Acb.Spear
         public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
             services.AddSignalR();
-            services.TryAddSingleton<SchedulerCenter>();
             return base.ConfigureServices(services);
         }
 

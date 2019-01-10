@@ -8,6 +8,6 @@ namespace Acb.WebApi
     public class DAuthorController<TTicket> : DController where TTicket : IClientTicket
     {
         /// <summary> 当前用户 </summary>
-        public TTicket Client => AcbHttpContext.Current.Request.VerifyTicket<TTicket>();
+        public virtual TTicket Client => AcbHttpContext.Current.Request.VerifyTicket<TTicket>();
     }
 }

@@ -1,4 +1,7 @@
-﻿using Acb.Core;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Acb.Core;
 using Acb.Core.Data;
 using Acb.Core.Domain;
 using Acb.Core.Exceptions;
@@ -8,13 +11,10 @@ using Acb.Core.Timing;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Spear.Business.Domain.Entities;
-using Acb.Spear.Domain.Enums;
+using Acb.Spear.Contracts.Enums;
 using Dapper;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
-namespace Acb.Spear.Business.Domain
+namespace Acb.Spear.Business.Domain.Repositories
 {
     /// <summary> 配置中心仓储类 </summary>
     public class ConfigRepository : DapperRepository<TConfig>

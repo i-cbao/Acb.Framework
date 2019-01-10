@@ -3,7 +3,6 @@ using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
-using Acb.Spear.Domain.Enums;
 using Acb.Spear.Filters;
 using Acb.Spear.Hubs;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Spear.Contracts.Enums;
 
 namespace Acb.Spear.Controllers
 {
@@ -37,7 +37,7 @@ namespace Acb.Spear.Controllers
         /// <param name="modules">多个以,分割</param>
         /// <param name="env">模式</param>
         /// <returns></returns>
-        [HttpGet("{modules}/{env}"), ConfigGet]
+        [HttpGet("/config/{modules}/{env}"), ConfigGet]
         public async Task<Dictionary<string, object>> Index(string modules, string env)
         {
             var list = modules.Split(',');

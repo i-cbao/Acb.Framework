@@ -1,8 +1,8 @@
-﻿namespace Acb.Spear.Domain.Enums
+﻿namespace Acb.Spear.Contracts.Enums
 {
-    public enum AccountRole : short
+    public enum AccountRole : byte
     {
         Project = 1 << 0,
-        Admin = 1 << 8
+        Admin = 1 << 8 - 1
     }
 }

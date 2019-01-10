@@ -15,7 +15,7 @@ namespace Acb.Spear.Business.Domain.Entities
         public string Name { get; set; }
 
         ///<summary> 安全性:0,匿名;1,管理验证;2.获取验证; </summary>
-        public short Security { get; set; }
+        public byte Security { get; set; }
 
         ///<summary> 描述 </summary>
         public string Desc { get; set; }
@@ -30,6 +30,6 @@ namespace Acb.Spear.Business.Domain.Entities
         public DateTime CreateTime { get; set; }
 
         ///<summary> 状态 </summary>
-        public short Status { get; set; }
+        public byte Status { get; set; }
     }
 }
