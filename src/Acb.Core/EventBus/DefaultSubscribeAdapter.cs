@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace Acb.Core.EventBus
 {
-    public class DefaultSubscriptionAdapter : ISubscriptionAdapter
+    public class DefaultSubscribeAdapter : ISubscribeAdapter
     {
         private readonly IConsumeConfigurator _consumeConfigurator;
         private readonly IEnumerable<IEventHandler> _integrationEventHandler;
         private readonly ILogger _logger;
-        public DefaultSubscriptionAdapter(IConsumeConfigurator consumeConfigurator, IEnumerable<IEventHandler> integrationEventHandler)
+        public DefaultSubscribeAdapter(IConsumeConfigurator consumeConfigurator, IEnumerable<IEventHandler> integrationEventHandler)
         {
             _consumeConfigurator = consumeConfigurator;
             _integrationEventHandler = integrationEventHandler;
-            _logger = LogManager.Logger<DefaultSubscriptionAdapter>();
+            _logger = LogManager.Logger<DefaultSubscribeAdapter>();
         }
 
         public void SubscribeAt()

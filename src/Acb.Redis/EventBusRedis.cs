@@ -1,10 +1,8 @@
 ﻿using Acb.Core.EventBus;
+using Acb.Core.EventBus.Options;
 using Acb.Core.Logging;
-using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Acb.Redis
@@ -14,25 +12,26 @@ namespace Acb.Redis
         private readonly ISubscriber _subscriber;
         private const string EventBusName = "eventBus";
         private readonly ILogger _logger;
-        public EventBusRedis(ISubscriptionManager manager, string configName = null) : base(manager)
+        public EventBusRedis(ISubscribeManager manager, IMessageCodec codec, string configName = null) : base(manager, codec)
         {
             configName = string.IsNullOrWhiteSpace(configName) ? EventBusName : configName;
             _subscriber = RedisManager.Instance.GetSubscriber(configName);
             _logger = LogManager.Logger<EventBusRedis>();
         }
 
-        public override Task Subscribe<T, TH>(Func<TH> handler)
+        public override Task Subscribe<T, TH>(Func<TH> handler, SubscribeOption option = null)
         {
             if (!SubscriptionManager.HasSubscriptionsForEvent<T>())
             {
-                var key = GetEventKey(typeof(T));
+                var key = typeof(T).GetRouteKey();
                 _subscriber.SubscribeAsync(key,
                     async (channel, value) =>
                     {
-                        var message = Encoding.UTF8.GetString(value);
+                        byte[] message = value;
+                        //var message = Encoding.UTF8.GetBytes(value);
                         try
                         {
-                            await ProcessEvent(channel, message);
+                            await SubscriptionManager.ProcessEvent(channel, message);
                         }
                         catch (Exception ex)
                         {
@@ -45,11 +44,10 @@ namespace Acb.Redis
             return Task.CompletedTask;
         }
 
-        public override Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null)
+        public override Task Publish(string key, byte[] message, PublishOption option = null)
         {
-            var message = JsonConvert.SerializeObject(@event);
-            var body = Encoding.UTF8.GetBytes(message);
-            return _subscriber.PublishAsync(key, body);
+            //:todo delay
+            return _subscriber.PublishAsync(key, message);
         }
 
         public void Dispose()

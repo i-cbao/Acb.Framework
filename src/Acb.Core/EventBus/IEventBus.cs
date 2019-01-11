@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Acb.Core.EventBus.Options;
+using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
+    /// <summary> 事件总线 </summary>
     public interface IEventBus
     {
+        /// <summary> 编解码器 </summary>
+        IMessageCodec Codec { get; }
+
         /// <summary> 订阅 </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="TH"></typeparam>
         /// <param name="handler"></param>
-        Task Subscribe<T, TH>(Func<TH> handler)
+        /// <param name="option"></param>
+        Task Subscribe<T, TH>(Func<TH> handler, SubscribeOption option = null)
             where TH : IEventHandler<T>;
 
         /// <summary> 取消订阅 </summary>
@@ -20,45 +26,32 @@ namespace Acb.Core.EventBus
             where TH : IEventHandler<T>;
 
         /// <summary> 发布 </summary>
-        /// <param name="event">事件</param>
-        /// <param name="delay">延迟时间(毫秒)</param>
-        /// <param name="headers"></param>
-        Task Publish(DEvent @event, long delay = 0, IDictionary<string, object> headers = null);
+        /// <param name="key">事件</param>
+        /// <param name="message"></param>
+        /// <param name="option"></param>
+        Task Publish(string key, object message, PublishOption option = null);
+    }
 
-        /// <summary> 发布 </summary>
-        /// <param name="key"></param>
-        /// <param name="event"></param>
-        /// <param name="delay">延迟时间(毫秒)</param>
-        /// <param name="headers"></param>
+    /// <summary> 扩展 </summary>
+    public static class EventBusExtensions
+    {
+        /// <summary> 获取事件的路由键 </summary>
+        /// <param name="eventType"></param>
         /// <returns></returns>
-        Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null);
+        public static string GetRouteKey(this MemberInfo eventType)
+        {
+            var attr = eventType.GetCustomAttribute<RouteKeyAttribute>();
+            return attr == null ? eventType.Name : attr.Key;
+        }
 
         /// <summary> 发布 </summary>
+        /// <param name="eventBus"></param>
         /// <param name="event">事件</param>
-        /// <param name="delay">延迟时间</param>
-        /// <param name="headers"></param>
-        Task Publish(DEvent @event, TimeSpan delay, IDictionary<string, object> headers = null);
-
-        /// <summary> 发布 </summary>
-        /// <param name="key"></param>
-        /// <param name="event"></param>
-        /// <param name="delay"></param>
-        /// <param name="headers"></param>
-        /// <returns></returns>
-        Task Publish(string key, object @event, TimeSpan delay, IDictionary<string, object> headers = null);
-
-        /// <summary> 发布 </summary>
-        /// <param name="event">事件</param>
-        /// <param name="delay">延迟时间(秒)</param>
-        /// <param name="headers"></param>
-        Task Publish(DEvent @event, DateTime delay, IDictionary<string, object> headers = null);
-
-        /// <summary> 发布 </summary>
-        /// <param name="key"></param>
-        /// <param name="event"></param>
-        /// <param name="delay"></param>
-        /// <param name="headers"></param>
-        /// <returns></returns>
-        Task Publish(string key, object @event, DateTime delay, IDictionary<string, object> headers = null);
+        /// <param name="option"></param>
+        public static Task Publish(this IEventBus eventBus, DEvent @event, PublishOption option = null)
+        {
+            var key = @event.GetType().GetRouteKey();
+            return eventBus.Publish(key, @event, option);
+        }
     }
 }

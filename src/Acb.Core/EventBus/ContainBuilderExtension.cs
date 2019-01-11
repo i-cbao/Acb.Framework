@@ -10,7 +10,7 @@ namespace Acb.Core.EventBus
         /// <returns></returns>
         public static IServiceProvider SubscribeAt(this IServiceProvider provider)
         {
-            provider.GetService<ISubscriptionAdapter>().SubscribeAt();
+            provider.GetService<ISubscribeAdapter>().SubscribeAt();
             return provider;
         }
     }

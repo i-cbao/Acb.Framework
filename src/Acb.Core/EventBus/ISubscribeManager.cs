@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Acb.Core.Dependency;
+using System;
 using System.Collections.Generic;
-using Acb.Core.Dependency;
+using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
-    /// <summary> 定于管理器 </summary>
-    public interface ISubscriptionManager : ISingleDependency
+    /// <summary> 订阅管理器 </summary>
+    public interface ISubscribeManager : ISingleDependency
     {
         /// <summary> 是否为空 </summary>
         bool IsEmpty { get; }
@@ -47,5 +48,34 @@ namespace Acb.Core.EventBus
         /// <param name="eventKey"></param>
         /// <returns></returns>
         IEnumerable<Delegate> GetHandlersForEvent(string eventKey);
+    }
+
+    public static class SubsciptionManagerExtension
+    {
+        /// <summary> 执行事务 </summary>
+        /// <param name="manager"></param>
+        /// <param name="eventName"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static async Task ProcessEvent(this ISubscribeManager manager, string eventName, byte[] data)
+        {
+            var codec = CurrentIocManager.Resolve<IMessageCodec>();
+            if (manager.HasSubscriptionsForEvent(eventName))
+            {
+                var eventType = manager.GetEventTypeByName(eventName);
+                var @event = codec.Decode(data, eventType);
+                var handlers = manager.GetHandlersForEvent(eventName);
+
+                foreach (var handlerfactory in handlers)
+                {
+                    var handler = handlerfactory.DynamicInvoke();
+                    var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
+                    var method = concreteType.GetMethod("Handle");
+                    if (method == null)
+                        continue;
+                    await (Task)method.Invoke(handler, new[] { @event });
+                }
+            }
+        }
     }
 }

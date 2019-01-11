@@ -1,10 +1,10 @@
 ﻿using Acb.Backgrounder.Test.Jobs;
 using Acb.Core.EventBus;
 using Acb.Core.Logging;
-using Acb.Core.Timing;
 using Acb.Demo.Contracts.EventBus;
 using Acb.Framework;
 using Acb.RabbitMq;
+using Acb.RabbitMq.Options;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Quartz;
@@ -109,10 +109,16 @@ namespace Acb.Backgrounder.Test
         private static void OnCommand(string cmd, IContainer provider)
         {
             var bus = provider.Resolve<IEventBus>();
-            bus.Publish(new UserEvent { Name = cmd }, TimeSpan.FromSeconds(2));
+            bus.Publish(new UserEvent { Name = cmd }, new RabbitMqPublishOption
+            {
+                Delay = TimeSpan.FromSeconds(2)
+            });
             //bus.Publish("icb_framework_simple_queue", cmd, 2 * 1000);
             _logger.Info($"Send Message:{cmd}");
-            bus.Publish(new TestEvent { Content = cmd }, Clock.Now.AddMinutes(5));
+            bus.Publish(new TestEvent { Content = cmd }, new RabbitMqPublishOption
+            {
+                Delay = TimeSpan.FromMinutes(5)
+            });
             //var queue = provider.Resolve<IMessageQueue>();
             //queue.Send(cmd);
         }

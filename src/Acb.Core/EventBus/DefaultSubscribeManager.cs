@@ -6,14 +6,14 @@ using System.Reflection;
 
 namespace Acb.Core.EventBus
 {
-    public class DefaultSubscriptionManager : ISubscriptionManager
+    public class DefaultSubscribeManager : ISubscribeManager
     {
         private readonly ConcurrentDictionary<string, List<Delegate>> _handlers;
         private readonly ConcurrentDictionary<string, Type> _eventTypes;
 
         public event EventHandler<string> OnEventRemoved;
 
-        public DefaultSubscriptionManager()
+        public DefaultSubscribeManager()
         {
             _handlers = new ConcurrentDictionary<string, List<Delegate>>();
             _eventTypes = new ConcurrentDictionary<string, Type>();

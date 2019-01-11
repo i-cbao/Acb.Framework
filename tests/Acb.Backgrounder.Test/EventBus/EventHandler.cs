@@ -5,6 +5,7 @@ using Acb.Core.Serialize;
 using Acb.Demo.Contracts.EventBus;
 using Acb.RabbitMq;
 using System.Threading.Tasks;
+using Acb.RabbitMq.Options;
 
 namespace Acb.Backgrounder.Test.EventBus
 {

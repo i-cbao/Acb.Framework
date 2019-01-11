@@ -1,13 +1,14 @@
-﻿using Acb.Core.EventBus;
+﻿using Acb.Core.Dependency;
+using Acb.Core.EventBus;
+using Acb.Core.EventBus.Options;
 using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
-using Newtonsoft.Json;
 using ons;
 using System;
-using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
-using Acb.Core.Extensions;
 
 namespace Acb.RocketMq
 {
@@ -19,7 +20,7 @@ namespace Acb.RocketMq
         private PushConsumer _consumer;
         private static RocketMqLisenter _rocketMqLisenter;
 
-        public EventBusRocketMq(ISubscriptionManager manager, RocketMqConfig config) : base(manager)
+        public EventBusRocketMq(ISubscribeManager manager, IMessageCodec codec, RocketMqConfig config) : base(manager, codec)
         {
             _config = config;
         }
@@ -62,7 +63,7 @@ namespace Acb.RocketMq
             _consumer.start();
         }
 
-        public override Task Subscribe<T, TH>(Func<TH> handler)
+        public override Task Subscribe<T, TH>(Func<TH> handler, SubscribeOption option = null)
         {
             if (!SubscriptionManager.HasSubscriptionsForEvent<T>())
             {
@@ -72,14 +73,16 @@ namespace Acb.RocketMq
             return Task.CompletedTask;
         }
 
-        public override Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null)
+        public override Task Publish(string key, byte[] message, PublishOption option = null)
         {
             CreateProducer();
-            var message = JsonConvert.SerializeObject(@event);
-            using (var msg = new Message(_config.Topic, key, message))
+
+            var body = Encoding.UTF8.GetString(message);
+            using (var msg = new Message(_config.Topic, key, body))
             {
                 msg.setMsgID(IdentityHelper.Guid32);
-                msg.setStartDeliverTime(delay);
+                if (option?.Delay != null)
+                    msg.setStartDeliverTime((long)option.Delay.Value.TotalMilliseconds);
                 var ons = _producer.send(msg);
             }
 
@@ -98,9 +101,11 @@ namespace Acb.RocketMq
             {
                 var body = value.getBody();
                 var tag = value.getTag();
+                var manager = CurrentIocManager.Resolve<ISubscribeManager>();
                 try
                 {
-                    ProcessEvent(tag, body).SyncRun();
+                    var data = Encoding.UTF8.GetBytes(body);
+                    manager.ProcessEvent(tag, data).SyncRun();
                     return ons.Action.CommitMessage;
                 }
                 catch (Exception ex)

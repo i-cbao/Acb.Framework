@@ -1,23 +1,25 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
-using Acb.Core.Timing;
-using Newtonsoft.Json;
+﻿using Acb.Core.EventBus.Options;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
     public abstract class AbstractEventBus : IEventBus
     {
-        protected readonly ISubscriptionManager SubscriptionManager;
+        /// <summary> 订阅管理器 </summary>
+        protected readonly ISubscribeManager SubscriptionManager;
 
-        protected AbstractEventBus(ISubscriptionManager manager)
+        /// <summary> 编解码器 </summary>
+        public IMessageCodec Codec { get; }
+
+        protected AbstractEventBus(ISubscribeManager manager, IMessageCodec messageCodec)
         {
-            SubscriptionManager = manager ?? new DefaultSubscriptionManager();
+            SubscriptionManager = manager ?? new DefaultSubscribeManager();
+            Codec = messageCodec;
         }
-        public abstract Task Subscribe<T, TH>(Func<TH> handler) where TH : IEventHandler<T>;
+
+        public abstract Task Subscribe<T, TH>(Func<TH> handler, SubscribeOption option = null)
+            where TH : IEventHandler<T>;
 
         public Task Unsubscribe<T, TH>() where TH : IEventHandler<T>
         {
@@ -25,64 +27,12 @@ namespace Acb.Core.EventBus
             return Task.CompletedTask;
         }
 
-        public virtual Task Publish(DEvent @event, long delay = 0, IDictionary<string, object> headers = null)
+        public Task Publish(string key, object message, PublishOption option = null)
         {
-            var key = GetEventKey(@event.GetType());
-            return Publish(key, @event, delay, headers);
+            var data = Codec.Encode(message);
+            return Publish(key, data, option);
         }
 
-        public abstract Task Publish(string key, object @event, long delay = 0, IDictionary<string, object> headers = null);
-
-        public Task Publish(DEvent @event, TimeSpan delay, IDictionary<string, object> headers = null)
-        {
-            return Publish(@event, (long)delay.TotalMilliseconds, headers);
-        }
-
-        public Task Publish(string key, object @event, TimeSpan delay, IDictionary<string, object> headers = null)
-        {
-            return Publish(key, @event, (long)delay.TotalMilliseconds, headers);
-        }
-
-        public Task Publish(DEvent @event, DateTime delay, IDictionary<string, object> headers = null)
-        {
-            return delay < Clock.Now ? Task.CompletedTask : Publish(@event, delay - Clock.Now, headers);
-        }
-
-        public Task Publish(string key, object @event, DateTime delay, IDictionary<string, object> headers = null)
-        {
-            return delay < Clock.Now ? Task.CompletedTask : Publish(key, @event, delay - Clock.Now, headers);
-        }
-
-        /// <summary> 获取事件的路由键 </summary>
-        /// <param name="eventType"></param>
-        /// <returns></returns>
-        protected string GetEventKey(Type eventType)
-        {
-            var attr = eventType.GetCustomAttribute<RouteKeyAttribute>();
-            return attr == null ? eventType.Name : attr.Key;
-        }
-
-        protected static async Task ProcessEvent(string eventName, string message)
-        {
-            var manager = CurrentIocManager.Resolve<ISubscriptionManager>();
-            if (manager.HasSubscriptionsForEvent(eventName))
-            {
-                var eventType = manager.GetEventTypeByName(eventName);
-                var integrationEvent = eventType.IsSimpleType()
-                    ? message.CastTo(eventType)
-                    : JsonConvert.DeserializeObject(message, eventType);
-                var handlers = manager.GetHandlersForEvent(eventName);
-
-                foreach (var handlerfactory in handlers)
-                {
-                    var handler = handlerfactory.DynamicInvoke();
-                    var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
-                    var method = concreteType.GetMethod("Handle");
-                    if (method == null)
-                        continue;
-                    await (Task)method.Invoke(handler, new[] { integrationEvent });
-                }
-            }
-        }
+        public abstract Task Publish(string key, byte[] message, PublishOption option = null);
     }
 }
