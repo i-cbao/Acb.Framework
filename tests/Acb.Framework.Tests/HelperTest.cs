@@ -26,6 +26,8 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
+            var sign = $"TEST0519011500001454acbtest".Md5();
+            Print(sign);
             //var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
             //Print(str);
             //var time = DateTime.Parse(str);

@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([["5nfI"],{"5nfI":function(n,e,t){"use strict";t.r(e);var i={name:"DbDoc"},l=t("KHd+"),o=Object(l.a)(i,function(){var n=this.$createElement;return(this._self._c||n)("div")},[],!1,null,null,null);o.options.__file="index.vue";e.default=o.exports}}]);

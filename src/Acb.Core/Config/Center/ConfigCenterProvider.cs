@@ -1,7 +1,6 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
-using Acb.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -9,38 +8,33 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Acb.Core.Config.Center
 {
     /// <summary> 中心配置提供者 </summary>
-    internal class ConfigCenterProvider : ConfigurationProvider, IConfigurationSource
+    internal class ConfigCenterProvider : DConfigProvider, IConfigurationSource
     {
         private CenterConfig _config;
-        private readonly bool _reloadConfig;
+        private readonly bool _reload;
         private IDictionary<string, string> _headers;
-        private readonly ILogger _logger;
-        private const string ArrayPattern = @"(\[[0-9]+\])*$";
         private readonly HttpHelper _httpHelper;
 
         private readonly ConcurrentDictionary<string, long> _configVersions;
 
-        public ConfigCenterProvider(CenterConfig config = null)
+        public ConfigCenterProvider(CenterConfig config, bool reload = false)
         {
-            _logger = LogManager.Logger<ConfigCenterProvider>();
             _httpHelper = HttpHelper.Instance;
             _configVersions = new ConcurrentDictionary<string, long>();
             _config = config;
-            _reloadConfig = config == null;
+            _reload = reload;
         }
 
         private async Task LoadTicket()
         {
             if (string.IsNullOrWhiteSpace(_config.Account))
                 return;
-            _logger.Info("正在加载配置中心令牌");
+            Logger.Info("正在加载配置中心令牌");
             try
             {
                 var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
@@ -55,12 +49,12 @@ namespace Acb.Core.Config.Center
                 }
                 else
                 {
-                    _logger.Info(data);
+                    Logger.Info(data);
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.Message, ex);
+                Logger.Error(ex.Message, ex);
             }
         }
 
@@ -70,7 +64,7 @@ namespace Acb.Core.Config.Center
         private async Task<long> CheckVersion(string app)
         {
             var mode = Consts.Mode.ToString().ToLower();
-            _logger.Debug($"正在检测配置中心版本[{_config.Uri}:{mode}:{app}]");
+            Logger.Debug($"正在检测配置中心版本[{_config.Uri}:{mode}:{app}]");
             var versionPath = $"v/{app}/{mode}";
             var versionUrl = new Uri(new Uri(_config.Uri), versionPath).AbsoluteUri;
             var versionResp =
@@ -94,14 +88,10 @@ namespace Acb.Core.Config.Center
         private async Task LoadConfig(bool reload = false)
         {
             if (!reload)
-            {
                 Data.Clear();
-            }
-
             if (string.IsNullOrWhiteSpace(_config.Uri) || string.IsNullOrWhiteSpace(_config.Application))
                 return;
             var mode = Consts.Mode.ToString().ToLower();
-            var parser = new JsonConfigurationParser();
             var apps = _config.Application.Split(new[] { ",", ";" }, StringSplitOptions.RemoveEmptyEntries);
             var act = reload ? "更新" : "加载";
             foreach (var app in apps)
@@ -111,7 +101,7 @@ namespace Acb.Core.Config.Center
                     var version = await CheckVersion(app);
                     if (version <= 0)
                         continue;
-                    _logger.Info($"正在{act}配置中心[{_config.Uri}:{mode}:{app}_{version}]");
+                    Logger.Info($"正在{act}配置中心[{_config.Uri}:{mode}:{app}_{version}]");
                     var path = $"{app}/{Consts.Mode.ToString().ToLower()}";
                     var url = new Uri(new Uri(_config.Uri), path).AbsoluteUri;
                     var resp = await _httpHelper.RequestAsync(HttpMethod.Get,
@@ -119,56 +109,17 @@ namespace Acb.Core.Config.Center
                     var json = await resp.Content.ReadAsStringAsync();
                     if (!resp.IsSuccessStatusCode)
                     {
-                        _logger.Warn($"{path}:{json}");
+                        Logger.Warn($"{path}:{json}");
                         continue;
                     }
 
-                    if (string.IsNullOrWhiteSpace(json))
-                        continue;
-                    var t = parser.Parse(json);
-                    foreach (var key in t.Keys)
-                    {
-                        var dKey = ConvertKey(key);
-                        if (string.IsNullOrWhiteSpace(dKey))
-                            continue;
-                        Data[dKey] = t[key];
-                    }
+                    LoadJson(json);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex.Message, ex);
+                    Logger.Error(ex.Message, ex);
                 }
             }
-        }
-
-        /// <summary> 键转换 </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        protected internal virtual string ConvertKey(string key)
-        {
-            if (string.IsNullOrEmpty(key))
-            {
-                return key;
-            }
-            var split = key.Split('.');
-            var sb = new StringBuilder();
-            foreach (var part in split)
-            {
-                var keyPart = ConvertArrayKey(part);
-                sb.Append(keyPart);
-                sb.Append(ConfigurationPath.KeyDelimiter);
-            }
-
-            return sb.ToString(0, sb.Length - 1);
-        }
-
-        protected internal virtual string ConvertArrayKey(string key)
-        {
-            return Regex.Replace(key, ArrayPattern, (match) =>
-            {
-                var result = match.Value.Replace("[", ":").Replace("]", string.Empty);
-                return result;
-            });
         }
 
         public IConfigurationProvider Build(IConfigurationBuilder builder)
@@ -182,10 +133,10 @@ namespace Acb.Core.Config.Center
 
         private void StartRefresh()
         {
-            _logger.Info($"refresh:{_config.Interval}");
             var refresh = CurrentIocManager.Resolve<ConfigCenterRefresh>();
             if (_config.Interval > 0)
             {
+                Logger.Info($"refresh:{_config.Interval}");
                 refresh.Start(_config.Interval, this);
             }
             else
@@ -208,7 +159,7 @@ namespace Acb.Core.Config.Center
             }
             if (!(state is IConfigurationRoot config) || config.Providers.All(t => t is ConfigCenterProvider))
                 return;
-            if (_reloadConfig)
+            if (_reload)
                 _config = CenterConfig.Config();
             LoadTicket().Wait();
             StartRefresh();

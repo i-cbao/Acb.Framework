@@ -7,9 +7,9 @@ namespace Acb.Spear.Contracts.Enums
     {
         /// <summary> 匿名 </summary>
         None = 0,
-        /// <summary> 获取验证 </summary>
+        /// <summary> 获取时验证 </summary>
         Get = 1,
-        /// <summary> 管理验证 </summary>
+        /// <summary> 管理时验证 </summary>
         Manage = 2
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Acb.Core;
-using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
@@ -9,7 +8,6 @@ using Acb.Spear.Hubs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +46,10 @@ namespace Acb.Spear.Controllers
                 {
                     var item = configEnv.ToString().ToLower();
                     if (existsEnvs.Contains(item))
+                    {
                         continue;
+                    }
+
                     await _configHub.UpdateAsync(Project.Code, module, item, config);
                 }
             }
@@ -62,27 +63,11 @@ namespace Acb.Spear.Controllers
         /// <param name="modules">多个以,分割</param>
         /// <param name="env">模式</param>
         /// <returns></returns>
-        [HttpGet("/config/{modules}/{env}"), ConfigGet]
-        public async Task<Dictionary<string, object>> Index(string modules, string env)
+        [HttpGet("/config/{modules}/{env}"), AllowGet]
+        public async Task<IDictionary<string, object>> Index(string modules, string env)
         {
             var list = modules.Split(',');
-            var dict = new Dictionary<string, object>();
-            foreach (var model in list)
-            {
-                var config = await _contract.GetAsync(Project.Id, model, env);
-                if (config == null)
-                    continue;
-                var obj = JsonConvert.DeserializeObject<JObject>(config);
-                var tokens = obj.Children();
-                foreach (var item in tokens)
-                {
-                    if (item is JProperty prop)
-                    {
-                        dict.AddOrUpdate(prop.Name, prop.Value);
-                    }
-                }
-            }
-            return dict;
+            return await _contract.BatchGetAsync(Project.Id, list, env);
         }
 
         /// <summary> 删除配置 </summary>
@@ -95,6 +80,7 @@ namespace Acb.Spear.Controllers
             if (env == "default") env = null;
             var result = await _contract.RemoveAsync(Project.Id, module, env);
             //:todo 通知删除 1.删除默认的，通知缺省的，2.删除具体的，获取默认再通知
+            await NotifyConfig(module, env, null);
             return result > 0 ? DResult.Success : DResult.Error("删除失败");
         }
 
@@ -102,7 +88,7 @@ namespace Acb.Spear.Controllers
         /// <param name="modules">多个以,分割</param>
         /// <param name="env">模式</param>
         /// <returns></returns>
-        [HttpGet("version/{modules}/{env}"), ConfigGet]
+        [HttpGet("version/{modules}/{env}"), AllowGet]
         public async Task<Dictionary<string, string>> Versions(string modules, string env)
         {
             var list = modules.Split(',');

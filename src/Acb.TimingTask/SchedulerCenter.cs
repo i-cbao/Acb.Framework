@@ -36,19 +36,24 @@ namespace Acb.TimingTask
             }
             else
             {
-                var arr = corn.Split(',');
+                var arr = corn.Split(new[] { ",", " ", ";" }, StringSplitOptions.RemoveEmptyEntries);
                 var interval = arr[0].CastTo(0);
-                var repeat = 0;
-                if (arr.Length > 1)
-                    repeat = arr[1].CastTo(0);
-                triggerBuilder.WithSimpleSchedule(b =>
+                if (interval > 0)
                 {
-                    b.WithIntervalInSeconds(interval);
-                    if (repeat > 0)
+                    var repeat = 0;
+                    if (arr.Length > 1)
+                        repeat = arr[1].CastTo(0);
+                    triggerBuilder.WithSimpleSchedule(b =>
                     {
-                        b.WithRepeatCount(repeat);
-                    }
-                });
+                        b.WithIntervalInSeconds(interval);
+                        if (repeat == -1)
+                            b.RepeatForever();
+                        else if (repeat > 1)
+                        {
+                            b.WithRepeatCount(repeat - 1);
+                        }
+                    });
+                }
             }
             return triggerBuilder.ForJob(jobDetail).Build();
         }

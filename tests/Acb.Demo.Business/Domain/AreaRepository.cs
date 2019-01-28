@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Data;
+using Acb.Core.Domain;
 using Acb.Core.Extensions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
@@ -11,9 +12,9 @@ namespace Acb.Demo.Business.Domain
 {
     public class AreaRepository : DapperRepository<TAreas>
     {
-        //public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
-        //{
-        //}
+        public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
+        {
+        }
 
         public async Task<IEnumerable<TAreas>> QueryAreaAsync(string parentCode = null)
         {
@@ -32,7 +33,7 @@ namespace Acb.Demo.Business.Domain
         {
             return await Transaction(async () =>
             {
-                var count = await Connection.UpdateAsync(new TAreas { Id = "110000", CityName = "北京市1" },
+                var count = await Connection.UpdateAsync(new TAreas { Id = "110000", CityName = "北京市" },
                     new[] { nameof(TAreas.CityName) }, Trans);
                 return count;
             });
@@ -49,6 +50,6 @@ namespace Acb.Demo.Business.Domain
             });
         }
 
-        
+
     }
 }

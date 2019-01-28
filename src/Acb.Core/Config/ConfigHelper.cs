@@ -56,10 +56,6 @@ namespace Acb.Core.Config
             _callbackRegistration = _config.GetReloadToken().RegisterChangeCallback(OnConfigChanged, state);
         }
 
-        ///// <summary> 单例 </summary>
-        //public static ConfigHelper Instance => Singleton<ConfigHelper>.Instance ??
-        //                                       (Singleton<ConfigHelper>.Instance = new ConfigHelper());
-
         /// <summary> 构建配置 </summary>
         /// <param name="builderAction"></param>
         public void Build(Action<IConfigurationBuilder> builderAction)
@@ -133,7 +129,11 @@ namespace Acb.Core.Config
         /// <summary> 使用配置中心 </summary>
         public void UseCenter(CenterConfig config = null)
         {
-            var provider = new ConfigCenterProvider(config);
+            var reload = config == null;
+            config = config ?? CenterConfig.Config();
+            if (config == null)
+                return;
+            var provider = new ConfigCenterProvider(config, reload);
             Build(b => b.Add(provider));
             ConfigChanged += provider.Reload;
         }

@@ -7,6 +7,7 @@ using Acb.Spear.Contracts.Dtos.Job;
 using Dapper;
 using System;
 using System.Threading.Tasks;
+using Acb.Core.Domain;
 
 namespace Acb.Spear.Business.Domain.Repositories
 {
@@ -39,11 +40,11 @@ namespace Acb.Spear.Business.Domain.Repositories
                 "UPDATE [t_job_trigger] SET [PrevTime]=@start WHERE [Id] = @id;" +
                 "UPDATE [t_job_trigger] SET [Times]=[Times]-1 WHERE [Id] = @id AND [Type]=2 AND [Times]>0;";
             var fmtSql = Connection.FormatSql(sql);
-            return Transaction(async (conn, trans) =>
+            return UnitOfWork.Trans(async () =>
             {
-                var count = await conn.ExecuteAsync(fmtSql, new { id = record.TriggerId, start = record.StartTime },
-                    trans);
-                count += await conn.InsertAsync(record, trans: trans);
+                var count = await Connection.ExecuteAsync(fmtSql, new { id = record.TriggerId, start = record.StartTime },
+                    Trans);
+                count += await Connection.InsertAsync(record, trans: Trans);
                 return count;
             });
         }

@@ -1,9 +1,9 @@
 ﻿using Acb.Core.Data;
+using Acb.Core.Extensions;
 using System;
 using System.Data;
 using System.Data.SQLite;
 using System.Text.RegularExpressions;
-using Acb.Core.Extensions;
 
 namespace Acb.Dapper.SQLite
 {

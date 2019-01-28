@@ -29,6 +29,7 @@ namespace Acb.Spear.Contracts
         /// <returns></returns>
         Task<string> GetAsync(Guid projectId, string module, string env = null);
 
+        Task<IDictionary<string, object>> BatchGetAsync(Guid projectId, string[] modules, string env = null);
         /// <summary> 获取配置 </summary>
         /// <param name="configId"></param>
         /// <returns></returns>

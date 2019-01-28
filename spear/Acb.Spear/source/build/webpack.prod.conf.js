@@ -78,7 +78,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         return chunk.name
       }
       const modules = Array.from(chunk.modulesIterable)
-      if (modules.length > 1) {
+      if (modules.length > 1 || modules[0].id.indexOf('/') >= 0) {
         const hash = require('hash-sum')
         const joinedHash = hash(modules.map(m => m.id).join('_'))
         let len = nameLength
@@ -92,13 +92,11 @@ const webpackConfig = merge(baseWebpackConfig, {
     // keep module.id stable when vender modules does not change
     new webpack.HashedModuleIdsPlugin(),
     // copy custom static assets
-    new CopyWebpackPlugin([
-      {
-        from: path.resolve(__dirname, '../static'),
-        to: config.build.assetsSubDirectory,
-        ignore: ['.*']
-      }
-    ])
+    new CopyWebpackPlugin([{
+      from: path.resolve(__dirname, '../static'),
+      to: config.build.assetsSubDirectory,
+      ignore: ['.*']
+    }])
   ],
   optimization: {
     splitChunks: {

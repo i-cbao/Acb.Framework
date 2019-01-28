@@ -2,9 +2,9 @@ import request from '@/utils/request'
 
 const _url = (key, env) => {
   if (env === 'default') {
-    return `/config/${key}`
+    return `/api/config/${key}`
   }
-  return `/config/${key}/${env}`
+  return `/api/config/${key}/${env}`
 }
 
 export const list = () => request.get('/api/config/list')

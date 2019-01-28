@@ -59,7 +59,7 @@ namespace Acb.Spear.Business.Domain.Repositories
         public async Task<string> QueryVersionAsync(Guid projectId, string module, string env = null)
         {
             const string sql =
-                "SELECT [Md5] FROM [t_config] WHERE [Status]=0 AND [ProjectId]=@projectId AND [Name]=@name AND ([Mode]=@mode OR [Mode] IS NULL) ORDER BY [Mode]";
+                "SELECT [Md5] FROM [t_config] WHERE [Status]=0 AND [ProjectId]=@projectId AND [Name]=@name AND [Status]=0 AND ([Mode]=@mode OR [Mode] IS NULL) ORDER BY [Mode]";
 
             return await Connection.QueryFirstOrDefaultAsync<string>(Connection.FormatSql(sql), new
             {
@@ -121,8 +121,9 @@ namespace Acb.Spear.Business.Domain.Repositories
             var version = await QueryVersionAsync(model.ProjectId, model.Name, model.Mode);
             if (version != null && version == model.Md5)
                 throw new BusiException("配置未更改");
+
             //更新之前版本为历史版本
-            return await Transaction(async () =>
+            return await UnitOfWork.Trans(async () =>
             {
                 var count = await DeleteByModuleAsync(model.ProjectId, model.Name, model.Mode);
                 count += await Connection.InsertAsync(model, trans: Trans);

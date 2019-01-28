@@ -125,24 +125,24 @@ namespace Acb.Spear.Business.Domain.Repositories
         public Task<int> UpdateAsync(JobDto dto)
         {
             var job = dto.MapTo<TJob>();
-            return Transaction(async (conn, trans) =>
+            return UnitOfWork.Trans(async () =>
             {
-                var count = await conn.UpdateAsync(job,
+                var count = await Connection.UpdateAsync(job,
                     new[]
                     {
                         nameof(TJob.Group), nameof(TJob.Name), nameof(TJob.Desc),
                         nameof(TJob.Type)
-                    }, trans);
+                    }, Trans);
                 switch (dto.Type)
                 {
                     case JobType.Http:
                         var detail = dto.Detail.MapTo<TJobHttp>();
-                        count += await conn.UpdateAsync(detail,
+                        count += await Connection.UpdateAsync(detail,
                             new[]
                             {
                                 nameof(TJobHttp.Url), nameof(TJobHttp.Method), nameof(TJobHttp.Data),
                                 nameof(TJobHttp.Header), nameof(TJobHttp.BodyType)
-                            }, trans);
+                            }, Trans);
                         break;
                 }
                 return count;
@@ -167,7 +167,7 @@ namespace Acb.Spear.Business.Domain.Repositories
         /// <returns></returns>
         public Task DeleteByIdAsync(Guid jobId)
         {
-            Transaction(() =>
+            UnitOfWork.Trans(() =>
             {
                 Connection.Delete<TJob>(jobId, trans: Trans);
                 Connection.Delete<TJobHttp>(jobId, trans: Trans);

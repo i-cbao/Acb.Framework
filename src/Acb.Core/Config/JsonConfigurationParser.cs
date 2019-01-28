@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Acb.Core.Dependency;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -9,7 +10,7 @@ using System.Linq;
 
 namespace Acb.Core.Config
 {
-    public class JsonConfigurationParser
+    public class JsonConfigurationParser : ISingleDependency
     {
         private readonly IDictionary<string, string> _data = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly Stack<string> _context = new Stack<string>();

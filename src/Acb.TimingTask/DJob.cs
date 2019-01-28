@@ -3,6 +3,7 @@ using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Quartz;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Acb.TimingTask
@@ -10,19 +11,43 @@ namespace Acb.TimingTask
     public abstract class DJob : IJob, IDependency
     {
         protected readonly ILogger Logger;
-        protected string JobName;
+
+        private string _name;
+
+        protected virtual string JobName
+        {
+            get => string.IsNullOrWhiteSpace(_name) ? GetType().PropName() : _name;
+            set => _name = value;
+        }
 
         protected DJob()
         {
             Logger = LogManager.Logger(GetType());
-            JobName = GetType().PropName();
         }
 
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
-            Logger.Debug($"job execute -> {JobName}");
-            return ExecuteAsync(context);
+            Logger.Info($"job {JobName} start");
+            var watcher = Stopwatch.StartNew();
+            try
+            {
+                await ExecuteAsync(context);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"job {JobName} error:{ex.Message}", ex);
+            }
+            finally
+            {
+                watcher.Stop();
+                Logger.Info($" job {JobName} complete -> use {watcher.ElapsedMilliseconds}ms");
+                if (context.NextFireTimeUtc.HasValue)
+                {
+                    Logger.Info($"{JobName} next time:{context.NextFireTimeUtc.Value.LocalDateTime:yyyy-MM-dd HH:mm:ss}");
+                }
+            }
         }
+
 
         protected abstract Task ExecuteAsync(IJobExecutionContext context);
 

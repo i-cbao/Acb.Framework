@@ -94,6 +94,7 @@ export default {
       })
     },
     loadConfig() {
+      if (!this.configKey) return
       config(this.configKey, this.configEnv).then(json => {
         this.editor.set(json || {})
         if (

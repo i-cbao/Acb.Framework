@@ -49,9 +49,9 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         protected IDbConnection GetConnection(string connectionName = null)
         {
-            return ConnectionProvider.Connection(string.IsNullOrWhiteSpace(connectionName)
-                ? UnitOfWork.ConfigName
-                : connectionName);
+            return string.IsNullOrWhiteSpace(connectionName)
+                ? UnitOfWork.CreateConnection()
+                : ConnectionProvider.Connection(connectionName);
         }
 
         /// <summary> 执行事务(当前连接) </summary>
@@ -60,6 +60,25 @@ namespace Acb.Dapper.Domain
         /// <param name="level"></param>
         /// <returns></returns>
         protected TResult Transaction<TResult>(Func<TResult> action, IsolationLevel? level = null)
+        {
+            return UnitOfWork.Trans(action, level);
+        }
+
+        /// <summary> 执行事务(当前连接) </summary>
+        /// <param name="action"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        protected Task Transaction(Func<Task> action, IsolationLevel? level = null)
+        {
+            return UnitOfWork.Trans(action, level);
+        }
+
+        /// <summary> 执行事务(当前连接) </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="action"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
+        protected Task<TResult> Transaction<TResult>(Func<Task<TResult>> action, IsolationLevel? level = null)
         {
             return UnitOfWork.Trans(action, level);
         }

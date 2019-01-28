@@ -9,10 +9,12 @@ namespace Acb.Core.Domain
     public interface IUnitOfWork : IScopedDependency, IDisposable
     {
         Guid Id { get; }
-        string ConfigName { get; }
 
         /// <summary> 获取当前连接 </summary>
         IDbConnection Connection { get; }
+
+        /// <summary> 创建新连接 </summary>
+        IDbConnection CreateConnection();
 
         /// <summary> 获取当前事务 </summary>
         IDbTransaction Transaction { get; }

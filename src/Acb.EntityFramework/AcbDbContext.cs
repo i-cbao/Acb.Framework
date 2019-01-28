@@ -11,9 +11,13 @@ namespace Acb.EntityFramework
         private static readonly ILogger Logger = LogManager.Logger<AcbDbContext>();
 
         public Guid Id { get; }
-        public string ConfigName { get; }
 
         public IDbConnection Connection { get; }
+        public IDbConnection CreateConnection()
+        {
+            throw new NotImplementedException();
+        }
+
         public IDbTransaction Transaction { get; }
         public bool IsTransaction { get; set; }
         public bool Begin(IsolationLevel? level = null)

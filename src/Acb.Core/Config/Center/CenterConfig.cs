@@ -12,7 +12,7 @@ namespace Acb.Core.Config.Center
         public static CenterConfig Config(string configName = null)
         {
             configName = string.IsNullOrWhiteSpace(configName) ? DefaultName : configName;
-            return configName.Config<CenterConfig>() ?? new CenterConfig();
+            return configName.Config<CenterConfig>();
         }
         /// <summary> 配置中心url </summary>
         public string Uri { get; set; }

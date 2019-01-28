@@ -1,4 +1,5 @@
-﻿using Acb.Core.Dependency;
+﻿using Acb.Core.Data;
+using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
@@ -8,36 +9,55 @@ namespace Acb.Dapper
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly ConnectionFactory _factory;
+        private readonly IDbConnectionProvider _factory;
         private readonly ILogger _logger;
 
         private bool _closeabel;
 
         public Guid Id { get; }
-        public string ConfigName { get; }
+        private readonly string _configName;
+
+        private readonly string _connectionString;
+        private readonly string _providerName;
+
+        private static readonly object SyncObj = new object();
 
         private UnitOfWork()
         {
             Id = Guid.NewGuid();
-            _factory = CurrentIocManager.Resolve<ConnectionFactory>();
+            _factory = CurrentIocManager.Resolve<IDbConnectionProvider>();
             _logger = LogManager.Logger(GetType());
             _logger.Debug($"{GetType().Name}:{Id} Create");
         }
 
         public UnitOfWork(string configName = null) : this()
         {
-            ConfigName = configName;
-            Connection = _factory.Connection(configName, false);
+            _configName = configName;
         }
 
         public UnitOfWork(string connectionString, string providerName) : this()
         {
-            Connection = _factory.Connection(connectionString, providerName, false);
+            _connectionString = connectionString;
+            _providerName = providerName;
         }
 
+        private IDbConnection _connection;
         /// <inheritdoc />
         /// <summary> 当前数据库连接 </summary>
-        public IDbConnection Connection { get; }
+        public IDbConnection Connection
+        {
+            get
+            {
+                lock (SyncObj)
+                {
+                    if (_connection == null)
+                    {
+                        return _connection = CreateConnection();
+                    }
+                    return _connection;
+                }
+            }
+        }
 
         /// <inheritdoc />
         /// <summary> 当前事务 </summary>
@@ -49,27 +69,35 @@ namespace Acb.Dapper
         {
             if (IsTransaction)
                 return false;
-            _closeabel = Connection.State == ConnectionState.Closed;
+            var conn = Connection;
+            _closeabel = conn.State == ConnectionState.Closed;
             if (_closeabel)
-                Connection.Open();
-            _logger.Debug($"{GetType().Name}[{Id}] Begin");
+                conn.Open();
+            _logger.Debug($"{GetType().Name}[{Id}] Begin Transaction");
             Transaction = level.HasValue
-                ? Connection.BeginTransaction(level.Value)
-                : Connection.BeginTransaction();
+                ? conn.BeginTransaction(level.Value)
+                : conn.BeginTransaction();
             return true;
+        }
+
+        public IDbConnection CreateConnection()
+        {
+            return string.IsNullOrWhiteSpace(_connectionString)
+                ? _factory.Connection(_configName)
+                : _factory.Connection(_connectionString, _providerName);
         }
 
         public void Commit()
         {
             Transaction?.Commit();
-            _logger.Debug($"{GetType().Name}[{Id}] Commit");
+            _logger.Debug($"{GetType().Name}[{Id}] Commit Transaction");
             Dispose();
         }
 
         public void Rollback()
         {
             Transaction?.Rollback();
-            _logger.Debug($"{GetType().Name}[{Id}] Rollback");
+            _logger.Debug($"{GetType().Name}[{Id}] Rollback Transaction");
 
             Dispose();
         }
@@ -78,7 +106,7 @@ namespace Acb.Dapper
         {
             if (Transaction != null)
             {
-                _logger.Debug($"{GetType().Name}[{Id}] Dispose");
+                _logger.Debug($"{GetType().Name}[{Id}] Dispose Transaction");
                 Transaction.Dispose();
                 Transaction = null;
             }

@@ -11,7 +11,7 @@ namespace Acb.Dapper
         public static IServiceCollection AddDapper(this IServiceCollection services,
             Action<ConnectionConfig> configAction = null)
         {
-            services.TryAddTransient<IUnitOfWork>(provider =>
+            services.TryAddScoped<IUnitOfWork>(provider =>
             {
                 var config = ConnectionConfig.Config();
                 configAction?.Invoke(config);

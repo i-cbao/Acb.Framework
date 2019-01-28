@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Acb.Core.Dependency;
+using Acb.Spear.Contracts;
+using Microsoft.AspNetCore.SignalR;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Acb.Spear.Hubs
@@ -7,17 +10,29 @@ namespace Acb.Spear.Hubs
     public class ConfigHub : SpearHub
     {
         /// <summary> 订阅配置 </summary>
-        /// <param name="modes">模块</param>
+        /// <param name="modules">模块</param>
         /// <param name="env">环境模式</param>
         /// <returns></returns>
-        public async Task Subscript(string[] modes, string env)
+        public async Task Subscript(string[] modules, string env)
         {
-            Logger.Info($"hub:{Context.ConnectionId} Subscript {env} - {string.Join(',', modes)}");
             if (string.IsNullOrWhiteSpace(Code))
                 return;
-            foreach (var mode in modes)
+            Logger.Info($"hub:{Context.ConnectionId} Subscript {env} - {string.Join(',', modules)}");
+            foreach (var mode in modules)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"{Code}_{mode}_{env}");
+            }
+
+            if (ProjectId.HasValue)
+            {
+                var contract = CurrentIocManager.Resolve<IConfigContract>();
+                var dict = new Dictionary<string, object>();
+                foreach (var module in modules)
+                {
+                    var config = await contract.GetAsync(ProjectId.Value, module, env);
+                    dict.Add(module, config);
+                }
+                await Clients.Caller.SendAsync("UPDATE", dict);
             }
         }
 
@@ -50,7 +65,11 @@ namespace Acb.Spear.Hubs
         public static async Task UpdateAsync(this IHubContext<ConfigHub> context, string code, string module,
             string mode, object config)
         {
-            await context.Clients.Group($"{code}_{module}_{mode}").SendAsync("UPDATE", config);
+            await context.Clients.Group($"{code}_{module}_{mode}")
+                .SendAsync("UPDATE", new Dictionary<string, object>
+                {
+                    {module, config}
+                });
         }
     }
 }

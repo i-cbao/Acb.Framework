@@ -13,7 +13,10 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
+using Acb.Office;
+using Microsoft.AspNetCore.Http;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -29,6 +32,21 @@ namespace Acb.WebApi.Test.Controllers
             _demoService = ProxyService.Proxy<IDemoService>();
             //_demoService = demoService;
             _accountContract = accountContract;
+        }
+
+        /// <summary> 导入数据 </summary>
+        /// <param name="file">file</param>
+        /// <param name="otherFile"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpPost("import")]
+        public DResult<DataSet> Import(IFormFile file, IFormFile otherFile, string name)
+        {
+            using (var stream = file.OpenReadStream())
+            {
+                var dt = ExcelHelper.Read(stream);
+                return Succ(dt);
+            }
         }
 
         [HttpGet]

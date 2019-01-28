@@ -1,5 +1,5 @@
 ﻿using Acb.Core;
-using Acb.Core.Helper;
+using Acb.Core.Config;
 using Acb.Core.Logging;
 using Acb.Core.Timing;
 using Acb.Framework;
@@ -14,11 +14,12 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Acb.Core.Config;
 using ProductMode = Acb.Core.Domain.ProductMode;
 
 namespace Acb.WebApi
@@ -42,17 +43,30 @@ namespace Acb.WebApi
             return new Dictionary<string, string> { { "help", _appName } };
         }
 
+        protected virtual void SwaggerOption(SwaggerOptions options)
+        {
+
+        }
+        protected virtual void SwaggerGenOption(SwaggerGenOptions options)
+        {
+
+        }
+        protected virtual void SwaggerUiOption(SwaggerUIOptions options)
+        {
+
+        }
+
         private void AddSwagger(IServiceCollection services)
         {
             if (Consts.Mode == ProductMode.Prod)
                 return;
             var assName = Assembly.GetExecutingAssembly().GetName();
             _appName = string.IsNullOrWhiteSpace(_appName) ? assName.Name : _appName;
-            services.AddSwaggerGen(option =>
+            services.AddSwaggerGen(options =>
             {
                 foreach (var docGroup in DocGroups())
                 {
-                    option.SwaggerDoc(docGroup.Key, new Info
+                    options.SwaggerDoc(docGroup.Key, new Info
                     {
                         Title = docGroup.Value,
                         Version = $"v{assName.Version}"
@@ -62,24 +76,20 @@ namespace Acb.WebApi
                 var files = Directory.GetFiles(dir, "*.xml", SearchOption.TopDirectoryOnly);
                 foreach (var file in files)
                 {
-                    option.IncludeXmlComments(file);
+                    options.IncludeXmlComments(file);
                 }
-                //option.TagActionsBy(d =>
-                //{
-                //    d.ActionDescriptor.RouteValues.TryGetValue("area", out var area);
-                //    d.ActionDescriptor.RouteValues.TryGetValue("controller", out var controller);
-                //    return string.IsNullOrWhiteSpace(area) ? controller : $"{area}_{controller}";
-                //});
 
-                option.CustomSchemaIds(t => t.FullName);
+                options.CustomSchemaIds(t => t.FullName);
                 //添加Header验证
-                option.AddSecurityDefinition("acb", new ApiKeyScheme
+                options.AddSecurityDefinition("acb", new ApiKeyScheme
                 {
                     Description = "OAuth2授权(数据将在请求头中进行传输) 参数结构: \"Authorization: acb {token}\"",
                     Name = "Authorization",//OAuth2默认的参数名称
                     In = "header",
                     Type = "apiKey"
                 });
+                options.OperationFilter<SwaggerFileUploadFilter>();
+                SwaggerGenOption(options);
             });
         }
 
@@ -87,7 +97,7 @@ namespace Acb.WebApi
         {
             if (Consts.Mode == ProductMode.Prod)
                 return;
-            app.UseSwagger();
+            app.UseSwagger(SwaggerOption);
             app.UseSwaggerUI(options =>
             {
                 foreach (var docGroup in DocGroups())
@@ -95,6 +105,7 @@ namespace Acb.WebApi
                     options.SwaggerEndpoint(
                         $"/swagger/{docGroup.Key}/swagger.json", docGroup.Value);
                 }
+                SwaggerUiOption(options);
             });
         }
         #endregion

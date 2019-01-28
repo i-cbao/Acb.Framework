@@ -1,9 +1,9 @@
 ﻿using Acb.Core.Domain;
-using Acb.Core.Exceptions;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
 using Acb.Demo.Business.Domain.Entities;
 using System.Threading.Tasks;
+using Acb.Core.Exceptions;
 
 namespace Acb.Demo.Business.Domain
 {
@@ -17,7 +17,7 @@ namespace Acb.Demo.Business.Domain
         {
             return await Transaction(async () =>
             {
-                var count = await Connection.UpdateAsync(new TAreas { Id = "110000", ParentCode = "01" },
+                var count = await Connection.UpdateAsync(new TAreas { Id = "110000", ParentCode = "0" },
                     new[] { nameof(TAreas.ParentCode) }, Trans);
                 //throw new BusiException("ex test");
                 return count;

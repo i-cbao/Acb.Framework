@@ -55,7 +55,13 @@ namespace Acb.Spear
                 EnableDefaultFiles = true,
                 DefaultFilesOptions = { DefaultFileNames = new[] { "index.html" } }
             });
-            app.UseSignalR(route => { route.MapHub<ConfigHub>("/config_hub"); });
+            app.UseSignalR(route =>
+            {
+                //配置
+                route.MapHub<ConfigHub>("/config_hub");
+                //定时任务
+                route.MapHub<JobHub>("/job_hub");
+            });
             app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
             base.Configure(app, env);
         }

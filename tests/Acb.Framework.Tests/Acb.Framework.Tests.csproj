@@ -37,6 +37,8 @@
     <ProjectReference Include="..\..\src\Acb.ApiClient\Acb.ApiClient.csproj" />
     <ProjectReference Include="..\..\src\Acb.AutoMapper\Acb.AutoMapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Dapper.SQLite\Acb.Dapper.SQLite.csproj" />
     <ProjectReference Include="..\..\src\Acb.Dapper\Acb.Dapper.csproj" />
     <ProjectReference Include="..\..\src\Acb.EntityFramework\Acb.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />

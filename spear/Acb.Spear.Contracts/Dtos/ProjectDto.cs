@@ -12,7 +12,7 @@ namespace Acb.Spear.Contracts.Dtos
         ///<summary> 项目名称 </summary>
         public string Name { get; set; }
 
-        ///<summary> 安全性:0,匿名;1,管理验证;2.获取验证; </summary>
+        ///<summary> 安全性:0,匿名;1.获取验证;2,管理验证 </summary>
         public SecurityEnum Security { get; set; }
 
         ///<summary> 描述 </summary>

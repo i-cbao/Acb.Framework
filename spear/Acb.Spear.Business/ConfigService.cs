@@ -1,10 +1,13 @@
 ﻿using Acb.AutoMapper;
 using Acb.Core;
 using Acb.Core.Domain;
+using Acb.Core.Extensions;
 using Acb.Spear.Business.Domain.Entities;
 using Acb.Spear.Business.Domain.Repositories;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,6 +36,27 @@ namespace Acb.Spear.Business
         public Task<string> GetAsync(Guid projectId, string module, string env = null)
         {
             return _repository.QueryByModuleAsync(projectId, module, env);
+        }
+
+        public async Task<IDictionary<string, object>> BatchGetAsync(Guid projectId, string[] modules, string env = null)
+        {
+            var dict = new Dictionary<string, object>();
+            foreach (var model in modules)
+            {
+                var config = await GetAsync(projectId, model, env);
+                if (config == null)
+                    continue;
+                var obj = JsonConvert.DeserializeObject<JObject>(config);
+                var tokens = obj.Children();
+                foreach (var item in tokens)
+                {
+                    if (item is JProperty prop)
+                    {
+                        dict.AddOrUpdate(prop.Name, prop.Value);
+                    }
+                }
+            }
+            return dict;
         }
 
         public async Task<ConfigDto> DetailAsync(Guid configId)

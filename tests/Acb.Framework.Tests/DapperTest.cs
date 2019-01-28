@@ -35,6 +35,9 @@ namespace Acb.Framework.Tests
                 config.ConnectionString =
                     "server=192.168.0.250;user=root;database=icbv2db;port=3306;password=icb@888;Pooling=true;SslMode=none;Charset=utf8;";
                 config.ProviderName = "mysql";
+                //config.ConnectionString =
+                //    "Host=192.168.0.251;Port=15432;Username=postgres;Password=;Database=db_spear;Pooling=true;Minimum Pool Size=10;Maximum Pool Size=300;";
+                //config.ProviderName = "postgresql";
             });
         }
 
@@ -74,14 +77,19 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public async Task UpdateTest()
         {
-            var code = await CodeTimer.Time("dapper", 10, async () =>
-            {
-                var demo = Resolve<IDemoService>();
-                var result = await demo.Update();
-                var list = await demo.Areas("510100");
-            }, 2);
-            //Print(list);
-            Print(code.ToString());
+            var demo = Resolve<IDemoService>();
+            var result = await demo.Update();
+            var list = await demo.Areas("510100");
+            Print(result);
+            Print(list);
+            //var code = await CodeTimer.Time("dapper", 10, async () =>
+            //{
+            //    var demo = Resolve<IDemoService>();
+            //    var result = await demo.Update();
+            //    var list = await demo.Areas("510100");
+            //}, 2);
+            ////Print(list);
+            //Print(code.ToString());
             //using (var conn = _factory.Connection())
             //{
             //    var result = conn.Update(new TAreas

@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
+using Acb.Spear.Contracts.Dtos;
 
 namespace Acb.Spear.Hubs
 {
     public abstract class SpearHub : Hub
     {
-        private const string CodeKey = "code";
+        private const string ProjectKey = "__hub_project";
         protected readonly ILogger Logger;
 
         protected SpearHub()
@@ -24,8 +25,19 @@ namespace Acb.Spear.Hubs
         {
             get
             {
-                if (Context.Items.TryGetValue(CodeKey, out var code) && code != null)
-                    return code.ToString();
+                if (Context.Items.TryGetValue(ProjectKey, out var project) && project != null)
+                    return ((ProjectDto)project).Code;
+                return null;
+            }
+        }
+
+        /// <summary> 项目ID </summary>
+        protected Guid? ProjectId
+        {
+            get
+            {
+                if (Context.Items.TryGetValue(ProjectKey, out var project) && project != null)
+                    return ((ProjectDto)project).Id;
                 return null;
             }
         }
@@ -38,15 +50,18 @@ namespace Acb.Spear.Hubs
             return conn == null ? string.Empty : $"{conn.RemoteIpAddress}:{conn.RemotePort}";
         }
 
+        protected virtual Task Connected() { return Task.CompletedTask; }
+
         /// <summary> 建立连接 </summary>
         /// <returns></returns>
         public override async Task OnConnectedAsync()
         {
             Logger.Info($"hub:{Context.ConnectionId} Connected,{RemoteAddress()}");
-            var code = AcbHttpContext.Current.GetProjectCode();
-            if (string.IsNullOrWhiteSpace(code))
+            var code = AcbHttpContext.Current.GetProject();
+            if (code == null)
                 return;
-            Context.Items.Add(CodeKey, code);
+            Context.Items.Add(ProjectKey, code);
+            await Connected();
             await base.OnConnectedAsync();
         }
 

@@ -17,7 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "99.Tests", "99.Tests", "{11
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Spear.Tests", "Acb.Spear.Tests\Acb.Spear.Tests.csproj", "{915652C5-A5A3-4CDB-B245-BE50B9DCD8F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asb.Spear.Client", "Asb.Spear.Client\Asb.Spear.Client.csproj", "{735D8533-FC10-4597-87D5-605A8FA0B14E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Asb.Spear.Client", "Asb.Spear.Client\Asb.Spear.Client.csproj", "{735D8533-FC10-4597-87D5-605A8FA0B14E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Spear.ConsoleTest", "Acb.Spear.ConsoleTest\Acb.Spear.ConsoleTest.csproj", "{13BEF44B-BB83-43F4-A0A1-BE5F68534FC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{735D8533-FC10-4597-87D5-605A8FA0B14E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{735D8533-FC10-4597-87D5-605A8FA0B14E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{735D8533-FC10-4597-87D5-605A8FA0B14E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13BEF44B-BB83-43F4-A0A1-BE5F68534FC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13BEF44B-BB83-43F4-A0A1-BE5F68534FC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13BEF44B-BB83-43F4-A0A1-BE5F68534FC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13BEF44B-BB83-43F4-A0A1-BE5F68534FC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 		{28ED0B2E-30CE-4C7F-85B7-A12439090B80} = {00B16932-7413-4DBD-9372-B97F5888869F}
 		{915652C5-A5A3-4CDB-B245-BE50B9DCD8F3} = {114917BD-C3B4-485D-80E7-F59D3C7F48FA}
 		{735D8533-FC10-4597-87D5-605A8FA0B14E} = {00B16932-7413-4DBD-9372-B97F5888869F}
+		{13BEF44B-BB83-43F4-A0A1-BE5F68534FC4} = {114917BD-C3B4-485D-80E7-F59D3C7F48FA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BC0DABF8-DA35-46F6-8C63-F5EB5093F51A}

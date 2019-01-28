@@ -1,0 +1,180 @@
+﻿@using Acb.Spear.Contracts.Enums
+@model IEnumerable<Acb.Spear.Contracts.Dtos.Database.TableDto>
+
+@{
+    ViewBag.Title = ViewBag.DbName + " - 数据库文档";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="icon" href="~/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="~/favicon.ico" type="image/x-icon" />
+    <link href="//cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/highlight.js/9.13.1/styles/default.min.css" rel="stylesheet">
+    <link href="//cdn.bootcss.com/highlight.js/9.13.1/styles/monokai-sublime.min.css" rel="stylesheet">
+    <title>@ViewBag.Title</title>
+    <style>
+        body, html {
+            background-color: #686686;
+        }
+
+        .container {
+            padding: 0;
+        }
+
+        .app-wrapper {
+            padding-top: 58px;
+        }
+
+        header.container {
+            position: fixed;
+            background-color: #e8e8e8;
+            font-size: 2rem;
+            color: #333;
+            text-align: center;
+            font-weight: 600;
+            top: 0;
+            padding: 15px;
+        }
+
+        header span {
+            margin-right: 1rem;
+        }
+
+        header small {
+            color: #999;
+            margin-left: 1rem;
+        }
+
+        .t-item {
+            background-color: #fff;
+            margin: 15px 0;
+            border: solid 1px #e8e8e8;
+            padding: 15px;
+        }
+
+        caption {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+            caption span {
+                margin-right: 1rem;
+            }
+
+            caption small {
+                font-size: 85%;
+                color: #999;
+                margin: 0 1rem 0 2rem;
+            }
+
+        .hljs-ln-numbers {
+            white-space: nowrap;
+        }
+
+        .hljs-ln-line.hljs-ln-n {
+            border-right: 1px solid #ccc;
+            padding-right: 5px;
+            margin: 0 8px 0 0;
+        }
+
+        .label-default {
+            background-color: #bdbdbd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container app-wrapper">
+        <header class="container">
+            <span class="label label-primary">@ViewBag.Provider</span>
+            @ViewBag.DbName
+            <small>@(Model.Count(t => t.Type == TableType.Table) + "张表")</small>
+            @if (Model.Any(t => t.Type == TableType.View))
+            {
+                <small>@(Model.Count(t => t.Type == TableType.View) + "张视图")</small>
+            }
+        </header>
+        @foreach (var table in Model)
+        {
+            <div class="t-item">
+                <table class="table table-striped table-hover">
+                    <caption>
+                        <span class="label @(table.Type == TableType.Table ? "label-info" : "label-success")">@table.Type</span>
+                        @table.Name<small>@table.Description</small>
+                        <a href="#" data-toggle="modal" data-target="#@("entityModal_" + table.Name)">Model实体</a>
+                    </caption>
+                    <colgroup>
+                        <col style="width: 18%" />
+                        <col style="width: 12%" />
+                        <col style="width: 12%" />
+                        <col style="width: 10%" />
+                        <col style="width: 10%" />
+                        <col style="width: 10%" />
+                        <col />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>字段名称</th>
+                            <th>字段类型</th>
+                            <th>字段长度</th>
+                            <th>是否自增</th>
+                            <th>可为空</th>
+                            <th>主键</th>
+                            <th>描述</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var col in table.Columns)
+                        {
+                            <tr>
+                                <td>@col.Name</td>
+                                <td>@col.DbType</td>
+                                <td>@col.DataLength</td>
+                                <td>
+                                    <span class="label @(col.AutoIncrement ? "label-success" : "label-default")">@col.AutoIncrement</span>
+                                </td>
+                                <td>
+                                    <span class="label @(col.IsNullable ? "label-success" : "label-default")">@col.IsNullable</span>
+                                </td>
+                                <td>
+                                    <span class="label @(col.IsPrimaryKey ? "label-primary" : "label-default")">@col.IsPrimaryKey</span>
+                                </td>
+                                <td>@col.Description</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="modal fade" id="@("entityModal_" + table.Name)" tabindex="-1" role="dialog">
+                    @Html.Partial("Entity", table, ViewData)
+                </div>
+            </div>
+        }
+    </div>
+    <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/highlight.js/9.13.1/highlight.min.js"></script>
+    <script src="//cdn.bootcss.com/highlightjs-line-numbers.js/2.5.0/highlightjs-line-numbers.min.js"></script>
+    <script src="//cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        (function ($, H) {
+            $('#entityModal').on('show.bs.modal',
+                function (event) {
+                    var button = $(event.relatedTarget);
+                    var entity = button.data('entity');
+                });
+            $(document).ready(function () {
+                $('pre code').each(function (i, block) {
+                    H.highlightBlock(block);
+                    H.lineNumbersBlock(block, { singleLine: true });
+                });
+            });
+        })(jQuery, hljs)
+    </script>
+</body>
+</html>
+
+

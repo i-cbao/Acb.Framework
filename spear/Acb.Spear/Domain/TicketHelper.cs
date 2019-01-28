@@ -3,6 +3,7 @@ using Acb.Core.Extensions;
 using Acb.Core.Timing;
 using Acb.Spear.Contracts;
 using Acb.Spear.Contracts.Dtos;
+using Acb.Spear.Contracts.Enums;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -63,7 +64,11 @@ namespace Acb.Spear.Domain
             }
         }
 
-        /// <summary> 获取项目编码 </summary>
+        /// <summary>
+        /// 获取项目编码
+        /// 1.参数
+        /// 2.header
+        /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         public static string GetProjectCode(this HttpContext context)
@@ -76,29 +81,54 @@ namespace Acb.Spear.Domain
             return code;
         }
 
+        /// <summary> 根据编码获取项目 </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static ProjectDto GetProjectByCode(this HttpContext context)
+        {
+            var code = context.GetProjectCode();
+            if (string.IsNullOrWhiteSpace(code))
+                return null;
+            var contract = CurrentIocManager.Resolve<IProjectContract>();
+            return contract.DetailByCodeAsync(code).SyncRun();
+        }
+
+        /// <summary> 根据编码获取项目 </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public static ProjectDto GetProjectByToken(this HttpContext context)
+        {
+            var ticket = context.GetTicket();
+            if (ticket == null || !ticket.ProjectId.HasValue)
+                return null;
+            var contract = CurrentIocManager.Resolve<IProjectContract>();
+            return contract.DetailAsync(ticket.ProjectId.Value).SyncRun();
+        }
+
         /// <summary> 获取项目信息 </summary>
         /// <param name="context"></param>
         /// <returns></returns>
         public static ProjectDto GetProject(this HttpContext context)
         {
-            if (context.Items.TryGetValue(ProjectCacheKey, out var project) && project != null)
-                return project as ProjectDto;
-            var contract = CurrentIocManager.Resolve<IProjectContract>();
-            var ticket = context.GetTicket();
-            if (ticket != null && ticket.ProjectId.HasValue)
+            if (context.Items.TryGetValue(ProjectCacheKey, out var cacheProject) && cacheProject != null)
+                return cacheProject as ProjectDto;
+            var project = context.GetProjectByToken();
+            if (project == null)
             {
-                project = contract.DetailAsync(ticket.ProjectId.Value).SyncRun();
-            }
-            else
-            {
-                var code = context.GetProjectCode();
-                if (string.IsNullOrWhiteSpace(code))
+                project = context.GetProjectByCode();
+                if (project == null || (project.Security & SecurityEnum.Get) > 0)
                     return null;
-                project = contract.DetailByCodeAsync(code).SyncRun();
             }
-
             context.Items.TryAdd(ProjectCacheKey, project);
-            return (ProjectDto)project;
+            return project;
+        }
+
+        /// <summary> 设置项目 </summary>
+        /// <param name="context"></param>
+        /// <param name="project"></param>
+        public static void SetProject(this HttpContext context, ProjectDto project)
+        {
+            context.Items.TryAdd(ProjectCacheKey, project);
         }
     }
 }
