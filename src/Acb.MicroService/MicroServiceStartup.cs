@@ -81,7 +81,9 @@ namespace Acb.MicroService
             AcbHttpContext.Configure(httpContextAccessor);
             app.UseMvc(routes =>
             {
+                //健康检测
                 routes.MapGet("healthy", async ctx => await ctx.Response.WriteAsync("ok"));
+                //重新加载配置
                 routes.MapGet("reload", async ctx =>
                 {
                     ConfigHelper.Instance.Reload();

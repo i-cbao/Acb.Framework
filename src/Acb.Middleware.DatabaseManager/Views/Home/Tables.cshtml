@@ -87,6 +87,14 @@
         .label-default {
             background-color: #bdbdbd;
         }
+
+        small em {
+            font-style: normal;
+            font-family:sans-serif;
+            margin: 0 2px;
+            /*color: #ff3200;*/
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -94,10 +102,10 @@
         <header class="container">
             <span class="label label-primary">@ViewBag.Provider</span>
             @ViewBag.DbName
-            <small>@(Model.Count(t => t.Type == TableType.Table) + "张表")</small>
+            <small><em>@Model.Count(t => t.Type == TableType.Table)</em>张表</small>
             @if (Model.Any(t => t.Type == TableType.View))
             {
-                <small>@(Model.Count(t => t.Type == TableType.View) + "张视图")</small>
+                <small><em>@Model.Count(t => t.Type == TableType.View)</em>张视图</small>
             }
         </header>
         @foreach (var table in Model)
@@ -108,6 +116,7 @@
                         <span class="label @(table.Type == TableType.Table ? "label-info" : "label-success")">@table.Type</span>
                         @table.Name<small>@table.Description</small>
                         <a href="#" data-toggle="modal" data-target="#@("entityModal_" + table.Name)">Model实体</a>
+                        <small><em>@table.Columns.Count()</em>个字段</small>
                     </caption>
                     <colgroup>
                         <col style="width: 18%" />

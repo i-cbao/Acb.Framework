@@ -269,7 +269,6 @@ namespace Acb.Dapper
         /// <returns></returns>
         public static PagedList<T> PagedList<T>(this IDbConnection conn, string sql, int page, int size,
             object param = null)
-            where T : IEntity
         {
             SQL pageSql = sql;
             return pageSql.PagedList<T>(conn, page, size, param);

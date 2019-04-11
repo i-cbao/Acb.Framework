@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 
 namespace Acb.Core.Helper.Http
@@ -16,6 +17,8 @@ namespace Acb.Core.Helper.Http
         public IDictionary<string, string> Headers { get; set; }
         /// <summary> Body参数 </summary>
         public object Data { get; set; }
+
+        public HttpContent Content { get; set; }
         /// <summary> 编码 </summary>
         public Encoding Encoding { get; set; }
         /// <summary> 文件列表 </summary>

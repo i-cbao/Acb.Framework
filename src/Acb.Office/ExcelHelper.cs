@@ -326,8 +326,31 @@ namespace Acb.Office
                 var dataRow = dt.NewRow();
                 for (int j = row.FirstCellNum; j < cellCount; ++j)
                 {
-                    if (row.GetCell(j) != null) //同理，没有数据的单元格都默认是null
-                        dataRow[j] = row.GetCell(j).ToString();
+                    var cell = row.GetCell(j);
+                    object value = null;
+                    if (cell != null && !string.IsNullOrWhiteSpace(cell.ToString()))
+                    {
+                        if (DateUtil.IsCellDateFormatted(cell))
+                            value = cell.DateCellValue;
+                        else
+                        {
+                            //同理，没有数据的单元格都默认是null
+                            switch (cell.CellType)
+                            {
+                                case CellType.String:
+                                    value = cell.StringCellValue;
+                                    break;
+                                case CellType.Boolean:
+                                    value = cell.BooleanCellValue;
+                                    break;
+                                case CellType.Numeric:
+                                    value = cell.NumericCellValue;
+                                    break;
+                            }
+                        }
+                    }
+
+                    dataRow[j] = value;
                 }
                 dt.Rows.Add(dataRow);
             }

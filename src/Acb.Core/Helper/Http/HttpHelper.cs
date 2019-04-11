@@ -88,13 +88,19 @@ namespace Acb.Core.Helper.Http
             }
 
             HttpContent content = null;
-            if (request.Data != null && method != HttpMethod.Get)
+            if (request.Content != null)
+            {
+                content = request.Content;
+            }
+            else if (request.Data != null && method != HttpMethod.Get)
             {
                 switch (request.BodyType)
                 {
                     case HttpBodyType.Json:
-                        content = new StringContent(JsonHelper.ToJson(request.Data), request.Encoding,
-                            "application/json");
+                        var json = request.Data is string
+                            ? request.Data.ToString()
+                            : JsonHelper.ToJson(request.Data);
+                        content = new StringContent(json, request.Encoding, "application/json");
                         break;
                     case HttpBodyType.Form:
                         var str = string.Empty;
@@ -111,12 +117,15 @@ namespace Acb.Core.Helper.Http
                                 str = dict.ToUrl(true, request.Encoding);
                             }
                         }
+
                         content = new ByteArrayContent(request.Encoding.GetBytes(str));
                         content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
                         break;
                     case HttpBodyType.Xml:
-                        var xmlDict = request.Data.ToDictionary();
-                        content = new StringContent(xmlDict.ToXml(), request.Encoding, "text/xml");
+                        var xml = request.Data is string
+                            ? request.Data.ToString()
+                            : request.Data.ToDictionary().ToXml();
+                        content = new StringContent(xml, request.Encoding, "text/xml");
                         break;
                     case HttpBodyType.File:
                         if (request.Files != null && request.Files.Any())
@@ -131,11 +140,14 @@ namespace Acb.Core.Helper.Http
                                     stream.Write(buffer, 0, bytesRead);
                                 multiContent.Add(new StreamContent(stream), file.Key, file.Value.Name);
                             }
+
                             content = multiContent;
                         }
+
                         break;
                 }
             }
+
             if (content != null)
                 req.Content = content;
             var formData = request.Data == null ? string.Empty : "->" + JsonHelper.ToJson(request.Data);
