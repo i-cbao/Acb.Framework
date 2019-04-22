@@ -8,9 +8,24 @@ using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
 {
+    public enum EnumType
+    {
+        [System.ComponentModel.Description("AA")]
+        A,
+        [System.ComponentModel.Description("BB")]
+        B
+    }
+
     [TestClass]
     public class ExtensionsTest : DTest
     {
+        [TestMethod]
+        public void EnumTest()
+        {
+            var text = (EnumType.A | EnumType.B).GetText();
+            Print(text);
+        }
+
         [TestMethod]
         public void CheckPropsTest()
         {

@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Acb.MicroService.Client.ServiceFinder
 {
@@ -30,35 +32,31 @@ namespace Acb.MicroService.Client.ServiceFinder
             });
         }
 
-        public List<string> Find(Assembly ass, MicroServiceConfig config)
+        public async Task<List<string>> Find(Assembly ass, MicroServiceConfig config)
         {
-            lock (LockObj)
-            {
-                var key = ass.AssemblyKey();
-                var urls = _cache.Get<List<string>>(key);
-                if (urls != null)
-                    return urls;
-                var name = ass.GetName();
-                urls = new List<string>();
-                using (var client = GetClient(config))
-                {
-                    var list = client.Catalog.Service(name.Name, $"{Consts.Mode}").Result;
-                    var items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
-                    urls.AddRange(items);
-                    //开发环境 可调用测试环境的微服务
-                    if (Consts.Mode == ProductMode.Dev)
-                    {
-                        list = client.Catalog.Service(name.Name, $"{ProductMode.Test}").Result;
-                        items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
-                        urls.AddRange(items);
-                    }
-                }
-
-                _cache.Set(key, urls, TimeSpan.FromMinutes(5));
+            var key = ass.AssemblyKey();
+            var urls = _cache.Get<List<string>>(key);
+            if (urls != null)
                 return urls;
+            urls = new List<string>();
+            using (var client = GetClient(config))
+            {
+                var serviceName = ass.GetName().Name;
+                var list = await client.Service(serviceName,
+                    new object[] { Consts.Mode, ass.GetName().Version });
+                var items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
+                urls.AddRange(items);
+                //开发环境 可调用测试环境的微服务
+                if (Consts.Mode == ProductMode.Dev)
+                {
+                    list = await client.Service(serviceName, new object[] { ProductMode.Test, ass.GetName().Version });
+                    items = list.Response.Select(t => $"{t.ServiceAddress}:{t.ServicePort}/").ToArray();
+                    urls.AddRange(items);
+                }
             }
 
-
+            _cache.Set(key, urls, TimeSpan.FromMinutes(5));
+            return urls;
         }
     }
 }

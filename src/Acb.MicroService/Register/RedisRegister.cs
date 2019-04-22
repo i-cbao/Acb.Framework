@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Acb.MicroService.Register
 {
@@ -31,22 +32,22 @@ namespace Acb.MicroService.Register
             return $"{RegistCenterKey}:{Consts.Mode}:{ass.GetName().Name}";
         }
 
-        public void Regist(HashSet<Assembly> asses)
+        public async Task Regist(HashSet<Assembly> asses)
         {
             _asses = asses;
             foreach (var ass in asses)
             {
-                _redis.SetAdd(AssKey(ass), ServiceUrl());
+                await _redis.SetAddAsync(AssKey(ass), ServiceUrl());
             }
         }
 
-        public void Deregist()
+        public async Task Deregist()
         {
             if (_asses == null || !_asses.Any())
                 return;
             foreach (var ass in _asses)
             {
-                _redis.SetRemove(AssKey(ass), ServiceUrl());
+                await _redis.SetRemoveAsync(AssKey(ass), ServiceUrl());
             }
         }
     }

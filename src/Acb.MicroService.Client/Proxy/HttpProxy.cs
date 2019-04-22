@@ -57,24 +57,24 @@ namespace Acb.MicroService.Client.Proxy
             }
         }
 
-        private IEnumerable<string> GetService()
+        private async Task<IEnumerable<string>> GetService()
         {
             var finder = GetServiceFinder();
-            var urls = finder.Find(_type.Assembly, _config).ToList();
+            var urls = (await finder.Find(_type.Assembly, _config)).ToList();
             if (urls == null || !urls.Any())
                 throw ErrorCodes.NoService.CodeException();
             return urls;
         }
 
-        private List<string> GetTypeService()
+        private async Task<List<string>> GetTypeService()
         {
-            var services = GetService();
+            var services = await GetService();
             return services.Select(url => new Uri(new Uri(url), $"micro/{_type.Name}/").AbsoluteUri).ToList();
         }
 
         protected override async Task<object> BasicInvokeAsync(MethodInfo targetMethod, object[] args)
         {
-            var services = GetTypeService();
+            var services = await GetTypeService();
             var service = string.Empty;
             var builder = Policy
                 .Handle<HttpRequestException>() //服务器异常

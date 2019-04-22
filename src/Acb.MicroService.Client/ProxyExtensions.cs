@@ -1,9 +1,19 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
+using Acb.Core.Extensions;
+using Acb.Core.Helper.Http;
 using Acb.Core.Reflection;
+using Consul;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Acb.MicroService.Client
 {
@@ -37,6 +47,37 @@ namespace Acb.MicroService.Client
                 services.TryAddSingleton(type, provider => ProxyService.Proxy(type));
             }
             return services;
+        }
+
+        internal static async Task<QueryResult<CatalogService[]>> Service(this ConsulClient client, string name,
+            object[] tags, CancellationToken ct = default(CancellationToken))
+        {
+            var url = new Uri(client.Config.Address, $"/v1/catalog/service/{name}").AbsoluteUri;
+            var ps = new List<string>();
+            if (!string.IsNullOrWhiteSpace(client.Config.Token))
+            {
+                ps.Add($"token={client.Config.Token.UrlEncode()}");
+            }
+
+            ps.AddRange(tags.Where(t => t != null).Select(tag => $"tag={tag.ToString().UrlEncode()}"));
+
+            if (ps.Any())
+            {
+                url += "?" + string.Join("&", ps);
+            }
+
+            var watcher = Stopwatch.StartNew();
+            var resp = await HttpHelper.Instance.RequestAsync(HttpMethod.Get, new HttpRequest(url));
+            watcher.Stop();
+            var result =
+                new QueryResult<CatalogService[]> { StatusCode = resp.StatusCode, RequestTime = watcher.Elapsed };
+
+            if (!resp.IsSuccessStatusCode)
+                return result;
+            var content = await resp.Content.ReadAsStringAsync();
+            result.Response = JsonConvert.DeserializeObject<CatalogService[]>(content);
+            return result;
+
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
@@ -28,13 +30,20 @@ namespace Acb.Core.Extensions
             try
             {
                 var ms = tp.GetType();
-                if (!ms.IsEnum)
+                if (!ms.IsEnum || !(tp is Enum))
                     return "枚举类型错误";
-                var field = ms.GetFields().FirstOrDefault(t => t.Name == tp.ToString());
-                if (field == null)
+                var names = new List<string>();
+                foreach (var value in Enum.GetValues(ms))
+                {
+                    if (value is Enum @enum && (tp as Enum).HasFlag(@enum))
+                        names.Add(@enum.ToString());
+                }
+
+                var fields = ms.GetFields().Where(t => names.Contains(t.Name)).ToArray();
+                if (!fields.Any())
                     return "枚举错误";
-                var desc = field.GetCustomAttribute<DescriptionAttribute>();
-                return desc != null ? desc.Description : field.Name;
+                var list = fields.Select(f => f.GetCustomAttribute<DescriptionAttribute>()?.Description ?? f.Name);
+                return string.Join(",", list);
             }
             catch
             {

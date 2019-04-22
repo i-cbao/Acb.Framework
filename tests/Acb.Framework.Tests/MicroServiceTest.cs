@@ -61,10 +61,10 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public void Test()
+        public async Task Test()
         {
             var logger = LogManager.Logger<MicroServiceTest>();
-            var localResult = CodeTimer.Time("local", 1000, async () =>
+            var localResult = await CodeTimer.Time("local", 1000, async () =>
             {
                 try
                 {
@@ -79,7 +79,7 @@ namespace Acb.Framework.Tests
                     throw;
                 }
             }, 2);
-            var microResult = CodeTimer.Time("micro", 1000, async () =>
+            var microResult = await CodeTimer.Time("micro", 1000, async () =>
             {
                 try
                 {

@@ -4,6 +4,7 @@ using Consul;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Acb.MicroService.Register
 {
@@ -27,18 +28,19 @@ namespace Acb.MicroService.Register
             });
         }
 
-        public void Regist(HashSet<Assembly> asses)
+        public async Task Regist(HashSet<Assembly> asses)
         {
             using (var client = GetClient())
             {
                 foreach (var ass in asses)
                 {
                     var assName = ass.GetName();
+                    var serviceName = assName.Name;
                     var service = new AgentServiceRegistration
                     {
-                        ID = $"{ass.GetName().Name}_{_config.Host}_{_config.Port}".Md5(),
-                        Name = assName.Name,
-                        Tags = new[] { $"{Consts.Mode}" },
+                        ID = $"{serviceName}_{_config.Host}_{_config.Port}".Md5(),
+                        Name = serviceName,
+                        Tags = new[] { Consts.Mode.ToString(), assName.Version.ToString() },
                         EnableTagOverride = true,
                         Address = $"http://{_config.Host}",
                         Port = _config.Port
@@ -53,18 +55,18 @@ namespace Acb.MicroService.Register
                         };
                     }
                     Services.Add(service.ID);
-                    client.Agent.ServiceRegister(service).Wait();
+                    await client.Agent.ServiceRegister(service);
                 }
             }
         }
 
-        public void Deregist()
+        public async Task Deregist()
         {
             using (var client = GetClient())
             {
                 foreach (var service in Services)
                 {
-                    client.Agent.ServiceDeregister(service).Wait();
+                    await client.Agent.ServiceDeregister(service);
                 }
             }
         }
