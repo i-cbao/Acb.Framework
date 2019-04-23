@@ -39,7 +39,7 @@ namespace Acb.Backgrounder.Test.EventBus
         {
             _logger.Info("icb_handler_user_01");
             _logger.Info(JsonHelper.ToJson(@event));
-            throw new BusiException("exception Test");
+            //throw new BusiException("exception Test");
             return Task.CompletedTask;
         }
     }

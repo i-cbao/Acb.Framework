@@ -3,7 +3,6 @@ using Acb.Core.Domain;
 using Acb.Core.Message;
 using Acb.Redis;
 using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -11,16 +10,14 @@ using System.Threading.Tasks;
 
 namespace Acb.MicroService.Router
 {
-    public class RedisRouter : IServiceRouter
+    public class RedisRouter : DServiceRouter
     {
         private readonly IDictionary<string, RedisValue> _services;
-        private readonly MicroServiceConfig _serviceConfig;
         private readonly IMessageCodec _messageCodec;
         private readonly IDatabase _redis;
 
-        public RedisRouter(IMessageCodec messageCodec, MicroServiceConfig serviceConfig)
+        public RedisRouter(IMessageCodec messageCodec, MicroServiceConfig serviceConfig) : base(serviceConfig)
         {
-            _serviceConfig = serviceConfig;
             _messageCodec = messageCodec;
             _services = new Dictionary<string, RedisValue>();
             _redis = RedisManager.Instance.GetDatabase();
@@ -31,7 +28,7 @@ namespace Acb.MicroService.Router
             return $"{Constants.RegistCenterKey}:{Consts.Mode}:{ass.ServiceName()}";
         }
 
-        public async Task Regist(IEnumerable<Assembly> serviceAssemblies, ServiceAddress address)
+        public override async Task Regist(IEnumerable<Assembly> serviceAssemblies, ServiceAddress address)
         {
             foreach (var ass in serviceAssemblies)
             {
@@ -42,23 +39,22 @@ namespace Acb.MicroService.Router
             }
         }
 
-        public async Task<List<ServiceAddress>> Find(Type serviceType)
+        protected override async Task<List<ServiceAddress>> FindServices(Assembly assembly)
         {
             var urlList = new List<ServiceAddress>();
-            var ass = serviceType.Assembly;
-            var list = await _redis.SetMembersAsync($"{Constants.RegistCenterKey}:{Consts.Mode}:{ass.GetName().Name}");
+            var serviceName = assembly.ServiceName();
+            var list = await _redis.SetMembersAsync($"{Constants.RegistCenterKey}:{Consts.Mode}:{serviceName}");
             urlList.AddRange(list.Select(t => _messageCodec.Decode<ServiceAddress>(t)));
             if (Consts.Mode == ProductMode.Dev)
             {
                 list = await _redis.SetMembersAsync(
-                    $"{Constants.RegistCenterKey}:{ProductMode.Test}:{ass.GetName().Name}");
+                    $"{Constants.RegistCenterKey}:{ProductMode.Test}:{serviceName}");
                 urlList.AddRange(list.Select(t => _messageCodec.Decode<ServiceAddress>(t)));
             }
-
             return urlList;
         }
 
-        public async Task Deregist()
+        public override async Task Deregist()
         {
             if (_services == null || !_services.Any())
                 return;

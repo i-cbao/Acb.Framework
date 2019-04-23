@@ -22,6 +22,9 @@ namespace Acb.MicroService
     {
         private const string MicroSreviceKey = "micro_service";
 
+        /// <summary> 服务命名 </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
         public static string ServiceName(this Assembly assembly)
         {
             var assName = assembly.GetName();

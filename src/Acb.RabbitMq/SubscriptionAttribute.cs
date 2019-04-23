@@ -16,9 +16,9 @@ namespace Acb.RabbitMq
         /// <param name="routeKey">路由键,默认为事件属性的RouteKey</param>
         public SubscriptionAttribute(string queue, string routeKey = null)
         {
+            Option = new RabbitMqSubscribeOption();
             Queue = queue;
             RouteKey = routeKey;
-            Option = new RabbitMqSubscribeOption(queue, routeKey);
         }
 
         /// <summary> 队列名称 </summary>

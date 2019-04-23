@@ -2,6 +2,7 @@
 using Acb.MicroService.Host;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Acb.Core.EventBus;
 
 namespace Acb.Demo.MicroService
 {

@@ -19,6 +19,8 @@ namespace Acb.MicroService
         /// <returns></returns>
         Task<List<ServiceAddress>> Find(Type serviceType);
 
+        Task CleanCache(Type serviceType);
+
         /// <summary> 注销服务 </summary>
         /// <returns></returns>
         Task Deregist();

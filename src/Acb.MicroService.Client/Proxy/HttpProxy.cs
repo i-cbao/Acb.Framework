@@ -5,6 +5,7 @@ using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
+using Acb.Core.Message;
 using Polly;
 using System;
 using System.Collections;
@@ -14,7 +15,6 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using Acb.Core.Message;
 
 namespace Acb.MicroService.Client.Proxy
 {
@@ -74,6 +74,7 @@ namespace Acb.MicroService.Client.Proxy
                     ? $"{service}{targetMethod.Name}:retry,{count},{result.Exception.Format()}"
                     : $"{service}{targetMethod.Name}:retry,{count},{result.Result.StatusCode}");
                 services.Remove(service);
+                _serviceRouter.CleanCache(_type);
             });
 
             var policy = Policy.WrapAsync(retry, breaker);

@@ -10,27 +10,26 @@ using System.Threading.Tasks;
 
 namespace Acb.MicroService.Router
 {
-    public class ConsulRouter : IServiceRouter
+    public class ConsulRouter : DServiceRouter
     {
-        private static readonly List<string> Services = new List<string>();
-        private readonly MicroServiceConfig _config;
+        private readonly List<string> _services;
 
-        public ConsulRouter(MicroServiceConfig config)
+        public ConsulRouter(MicroServiceConfig config) : base(config)
         {
-            _config = config;
+            _services = new List<string>();
         }
 
         private ConsulClient GetClient()
         {
             return new ConsulClient(cfg =>
             {
-                cfg.Address = new Uri(_config.ConsulServer);
-                if (!string.IsNullOrWhiteSpace(_config.ConsulToken))
-                    cfg.Token = _config.ConsulToken;
+                cfg.Address = new Uri(Config.ConsulServer);
+                if (!string.IsNullOrWhiteSpace(Config.ConsulToken))
+                    cfg.Token = Config.ConsulToken;
             });
         }
 
-        public async Task Regist(IEnumerable<Assembly> serviceAssemblies, ServiceAddress address)
+        public override async Task Regist(IEnumerable<Assembly> serviceAssemblies, ServiceAddress address)
         {
             using (var client = GetClient())
             {
@@ -45,40 +44,38 @@ namespace Acb.MicroService.Router
                         Tags = new[] { Consts.Mode.ToString(), ass.GetName().Version.ToString() },
                         EnableTagOverride = true,
                         Address = address.Address(),
-                        Port = _config.Port
+                        Port = Config.Port
                     };
-                    if (_config.ConsulCheck)
+                    if (Config.ConsulCheck)
                     {
                         service.Check = new AgentServiceCheck
                         {
                             HTTP = $"{address}/healthy",
-                            Interval = TimeSpan.FromSeconds(_config.Consulinterval),
-                            DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(_config.DeregisterAfter)
+                            Interval = TimeSpan.FromSeconds(Config.Consulinterval),
+                            DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(Config.DeregisterAfter)
                         };
                     }
 
-                    Services.Add(service.ID);
+                    _services.Add(service.ID);
                     await client.Agent.ServiceRegister(service);
                 }
             }
         }
 
-        public async Task<List<ServiceAddress>> Find(Type serviceType)
+        protected override async Task<List<ServiceAddress>> FindServices(Assembly assembly)
         {
-            var ass = serviceType.Assembly;
             var addresses = new List<ServiceAddress>();
             using (var client = GetClient())
             {
-                var serviceName = ass.ServiceName();
-                var list = await client.Service(serviceName,
-                    new object[] { Consts.Mode, ass.GetName().Version });
-                var items = list.Response.Select(t => new ServiceAddress(t.ServiceAddress, t.ServicePort)).ToArray();
+                var serviceName = assembly.ServiceName();
+                var list = await client.Health.Service(serviceName, Consts.Mode.ToString());
+                var items = list.Response.Select(t => new ServiceAddress(t.Service.Address, t.Service.Port)).ToArray();
                 addresses.AddRange(items);
                 //开发环境 可调用测试环境的微服务
                 if (Consts.Mode == ProductMode.Dev)
                 {
-                    list = await client.Service(serviceName, new object[] { ProductMode.Test, ass.GetName().Version });
-                    items = list.Response.Select(t => new ServiceAddress(t.ServiceAddress, t.ServicePort)).ToArray();
+                    list = await client.Health.Service(serviceName, ProductMode.Test.ToString());
+                    items = list.Response.Select(t => new ServiceAddress(t.Service.Address, t.Service.Port)).ToArray();
                     addresses.AddRange(items);
                 }
             }
@@ -86,11 +83,11 @@ namespace Acb.MicroService.Router
             return addresses;
         }
 
-        public async Task Deregist()
+        public override async Task Deregist()
         {
             using (var client = GetClient())
             {
-                foreach (var service in Services)
+                foreach (var service in _services)
                 {
                     await client.Agent.ServiceDeregister(service);
                 }

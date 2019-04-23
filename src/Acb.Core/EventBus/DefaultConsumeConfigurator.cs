@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Dependency;
+using Acb.Core.Logging;
 using Acb.Core.Reflection;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,12 @@ namespace Acb.Core.EventBus
     public class DefaultConsumeConfigurator : IConsumeConfigurator
     {
         private readonly IEventBus _eventBus;
+        private readonly ILogger _logger;
 
         public DefaultConsumeConfigurator(IEventBus eventBus)
         {
             _eventBus = eventBus;
+            _logger = LogManager.Logger<DefaultConsumeConfigurator>();
         }
 
         public void Configure(List<Type> consumers)
@@ -38,7 +41,7 @@ namespace Acb.Core.EventBus
                 }
                 catch (Exception ex)
                 {
-                    throw;
+                    _logger.Error(ex.Message, ex);
                 }
             }
         }

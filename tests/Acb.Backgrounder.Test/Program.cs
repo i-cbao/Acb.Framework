@@ -11,7 +11,9 @@ using Quartz;
 using Quartz.Impl;
 using System;
 using System.Collections.Specialized;
+using System.Reflection;
 using System.Threading.Tasks;
+using Acb.Backgrounder.Test.EventBus;
 using ILogger = Acb.Core.Logging.ILogger;
 
 namespace Acb.Backgrounder.Test
@@ -31,6 +33,8 @@ namespace Acb.Backgrounder.Test
             //            "acb EQS9LTGKzNOHiCn0+8avXJIDCiLW/KtraWRAnl1874nNBAcZ0nPd8KZXUXLC+OnCevPWKVQzju/ZLcSExoq+ps3pwpBGpKtK0ZMOfQoPsu4uvhyRvbuU66eaYaH6w1sPMDLpmxHwBi3C8Mc3bdk4Bi1EC8SYlPct22K+gLG6vAM=");
             //    })
             //    .Build();
+            //var attr = typeof(MessageHandler).GetCustomAttribute<SubscriptionAttribute>();
+
             _logger = LogManager.Logger<Program>();
             Command += OnCommand;
             MapServices += OnMapServices;
