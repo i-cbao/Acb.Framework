@@ -1,21 +1,18 @@
 ﻿using Acb.Core;
+using Acb.Core.Config;
 using Acb.Core.Dependency;
 using Acb.Core.Extensions;
-using Acb.Core.Helper;
 using Acb.Core.Reflection;
-using Acb.MicroService.Register;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Acb.Core.Config;
 
-namespace Acb.MicroService
+namespace Acb.MicroService.Host
 {
     /// <summary> 微服务注册 </summary>
     internal class MicroServiceRegister
     {
-        public const string MicroSreviceKey = "micro_service";
         private const string HostEnvironmentName = "MICRO_SERVICE_HOST";
         private const string PortEnvironmentName = "MICRO_SERVICE_PORT";
         private const string AutoDeregistEnvironmentName = "AUTO_DEREGIST";
@@ -25,19 +22,16 @@ namespace Acb.MicroService
 
 
         private static MicroServiceConfig _config;
-        private static IRegister _register;
 
         static MicroServiceRegister()
         {
             Methods = new ConcurrentDictionary<string, MethodInfo>();
             ServiceAssemblies = new HashSet<Assembly>();
             LoadConfig();
-            _register = GetRegister();
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
                 Deregist();
                 LoadConfig();
-                _register = GetRegister();
                 Regist();
             };
         }
@@ -67,7 +61,7 @@ namespace Acb.MicroService
 
         private static void LoadConfig()
         {
-            _config = MicroSreviceKey.Config<MicroServiceConfig>();
+            _config = Constants.MicroSreviceKey.Config<MicroServiceConfig>();
             var host = HostEnvironmentName.Env();
             var port = PortEnvironmentName.Env(0);
             if (!string.IsNullOrWhiteSpace(host))
@@ -79,19 +73,6 @@ namespace Acb.MicroService
                 _config.AutoDeregist = autoDeregist.Value;
         }
 
-        private static IRegister GetRegister()
-        {
-            switch (_config.Register)
-            {
-                case RegisterType.Consul:
-                    return new ConsulRegister(_config);
-                case RegisterType.Redis:
-                    return new RedisRegister(_config);
-                default:
-                    return new RedisRegister(_config);
-            }
-        }
-
 
         /// <summary> 注册微服务 </summary>
         public static void Regist()
@@ -100,14 +81,14 @@ namespace Acb.MicroService
             var asses = ServiceAssemblies;
             if (asses == null || asses.IsNullOrEmpty() || string.IsNullOrWhiteSpace(_config?.Host) || _config?.Port <= 0)
                 return;
-            _register.Regist(asses);
+            CurrentIocManager.Resolve<IServiceRouter>().Regist(asses, new ServiceAddress(_config.Host, _config.Port));
         }
 
         /// <summary> 取消注册 </summary>
         public static void Deregist()
         {
             if (_config.AutoDeregist)
-                _register.Deregist();
+                CurrentIocManager.Resolve<IServiceRouter>().Deregist();
         }
     }
 }

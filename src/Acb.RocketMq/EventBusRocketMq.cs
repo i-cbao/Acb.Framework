@@ -9,6 +9,8 @@ using ons;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Acb.Core;
+using Acb.Core.Message;
 
 namespace Acb.RocketMq
 {

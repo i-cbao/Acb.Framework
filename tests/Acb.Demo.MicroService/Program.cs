@@ -1,4 +1,4 @@
-﻿using Acb.MicroService;
+﻿using Acb.MicroService.Host;
 
 namespace Acb.Demo.MicroService
 {

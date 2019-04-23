@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Acb.MicroService.Controller
+namespace Acb.MicroService.Host.Controller
 {
     [Route("micro")]
     public class MicroController : Microsoft.AspNetCore.Mvc.Controller

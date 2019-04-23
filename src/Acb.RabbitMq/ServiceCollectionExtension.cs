@@ -1,5 +1,6 @@
 ﻿using Acb.Core.EventBus;
-using Acb.Core.EventBus.Codec;
+using Acb.Core.Message;
+using Acb.Core.Message.Codec;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

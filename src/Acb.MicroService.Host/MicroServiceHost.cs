@@ -3,14 +3,14 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 
-namespace Acb.MicroService
+namespace Acb.MicroService.Host
 {
     public class MicroServiceHost : MicroServiceHost<MicroServiceStartup>
     {
     }
 
     /// <summary> 微服务主机 </summary>
-    public class MicroServiceHost<TStartup> where TStartup : MicroServiceStartup
+    public class MicroServiceHost<TStartup> where TStartup : Host.MicroServiceStartup
     {
         protected static event Action<IWebHostBuilder> Builder;
         /// <summary> 开启服务 </summary>

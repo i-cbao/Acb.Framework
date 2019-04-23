@@ -7,12 +7,10 @@
     <Authors>icb@shay</Authors>
     <Product>爱车保 - 微服务框架服务消费者</Product>
     <Description>爱车保 - 微服务框架服务消费者</Description>
-    <Version>1.6.0</Version>
+    <Version>1.6.3</Version>
     <Title>爱车保 - 微服务框架服务消费者</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
-    <AssemblyVersion>1.6.0.0</AssemblyVersion>
-    <FileVersion>1.6.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -26,14 +24,12 @@
 
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.Reflection" Version="1.0.1" />
-    <PackageReference Include="Consul" Version="0.7.2.6" />
     <PackageReference Include="Polly" Version="5.8.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
-    <ProjectReference Include="..\Acb.Redis\Acb.Redis.csproj" />
+    <ProjectReference Include="..\Acb.MicroService\Acb.MicroService.csproj" />
   </ItemGroup>
 
 </Project>

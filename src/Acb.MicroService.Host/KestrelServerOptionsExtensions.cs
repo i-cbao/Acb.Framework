@@ -9,7 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Acb.MicroService
+namespace Acb.MicroService.Host
 {
     public static class KestrelServerOptionsExtensions
     {

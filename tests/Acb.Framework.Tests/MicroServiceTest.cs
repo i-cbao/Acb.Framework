@@ -3,23 +3,26 @@ using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
+using Acb.Core.Message;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
+using Acb.Core.Timing;
 using Acb.Dapper;
 using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
+using Acb.MicroService;
 using Acb.MicroService.Client;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -31,6 +34,10 @@ namespace Acb.Framework.Tests
 
         protected override void MapServices(IServiceCollection services)
         {
+            //services.AddMessagePackCodec();
+            services.AddJsonCodec();
+            //services.AddProtoBufferCodec();
+            services.AddMicroRouter();
             //services.AddMicroClient();
             base.MapServices(services);
         }
@@ -42,8 +49,22 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
+        public void CodecTest()
+        {
+            var codec = Resolve<IMessageCodec>();
+            var m = codec.Encode(new Dictionary<string, object> { { "123", "456" } });
+
+            var t = codec.Decode(m, typeof(Dictionary<string, object>));
+
+            Print(t);
+
+        }
+
+        [TestMethod]
         public async Task NowTest()
         {
+            //var version = new Version("2.1.3.5");
+            //Print(JsonConvert.SerializeObject(version));
             //var dict = await _microService.Areas("510100");
             //Print(dict);
             var time = await _microService.Now();
@@ -58,6 +79,9 @@ namespace Acb.Framework.Tests
             await _microService.LoadAsync();
             var dict = await _microService.Dict(new[] { "123", "456" });
             Print(dict);
+
+            var areas = await _microService.Areas("510000");
+            Print(areas);
         }
 
         [TestMethod]

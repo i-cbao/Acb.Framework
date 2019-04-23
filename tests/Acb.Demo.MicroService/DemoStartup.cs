@@ -1,5 +1,5 @@
 ﻿using Acb.Dapper;
-using Acb.MicroService;
+using Acb.MicroService.Host;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -14,6 +14,8 @@ namespace Acb.Demo.MicroService
                 config.ConnectionString = "";
                 config.ProviderName = "";
             });
+
+            //services.AddMessagePackCodec();
             //services.AddRedisEventBus();
             base.MapServices(services);
         }

@@ -1,6 +1,6 @@
-﻿namespace Acb.MicroService.Client
+﻿namespace Acb.MicroService
 {
-    internal static class Constans
+    public static class Constants
     {
         public const string MicroSreviceKey = "micro_service";
         public const string RegistCenterKey = MicroSreviceKey + ":center";

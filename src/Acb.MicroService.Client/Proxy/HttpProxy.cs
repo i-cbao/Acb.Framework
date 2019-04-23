@@ -1,11 +1,10 @@
 ﻿using Acb.Core;
 using Acb.Core.Cache;
+using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
-using Acb.MicroService.Client.ServiceFinder;
-using Newtonsoft.Json;
 using Polly;
 using System;
 using System.Collections;
@@ -15,6 +14,7 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using Acb.Core.Message;
 
 namespace Acb.MicroService.Client.Proxy
 {
@@ -29,8 +29,8 @@ namespace Acb.MicroService.Client.Proxy
     public class HttpProxy : ProxyAsync
     {
         private readonly ILogger _logger = LogManager.Logger(typeof(HttpProxy));
-        private readonly MicroServiceConfig _config;
         private readonly ICache _serviceCache;
+        private readonly IServiceRouter _serviceRouter;
 
         /// <summary> 接口类型 </summary>
         private readonly Type _type;
@@ -40,30 +40,16 @@ namespace Acb.MicroService.Client.Proxy
         public HttpProxy(Type type)
         {
             _type = type;
-            _config = Constans.MicroSreviceKey.Config<MicroServiceConfig>();
             _serviceCache = CacheManager.GetCacher(typeof(HttpProxy));
-        }
-
-        private IServiceFinder GetServiceFinder()
-        {
-            switch (_config.Register)
-            {
-                case RegisterType.Consul:
-                    return new ConsulServiceFinder();
-                case RegisterType.Redis:
-                    return new RedisServiceFinder();
-                default:
-                    return new RedisServiceFinder();
-            }
+            _serviceRouter = CurrentIocManager.Resolve<IServiceRouter>();
         }
 
         private async Task<IEnumerable<string>> GetService()
         {
-            var finder = GetServiceFinder();
-            var urls = (await finder.Find(_type.Assembly, _config)).ToList();
+            var urls = (await _serviceRouter.Find(_type)).ToList();
             if (urls == null || !urls.Any())
                 throw ErrorCodes.NoService.CodeException();
-            return urls;
+            return urls.Select(t => t.ToString());
         }
 
         private async Task<List<string>> GetTypeService()
@@ -143,15 +129,16 @@ namespace Acb.MicroService.Client.Proxy
         private static async Task<object> ResultAsync(Task<HttpResponseMessage> respTask, Type returnType)
         {
             var resp = await respTask;
+            var codec = CurrentIocManager.Resolve<IMessageCodec>();
             if (resp.StatusCode == HttpStatusCode.OK)
             {
-                var html = await resp.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject(html, returnType);
+                var data = await resp.Content.ReadAsByteArrayAsync();
+                return codec.Decode(data, returnType);
             }
             else
             {
-                var html = await resp.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<DResult>(html);
+                var data = await resp.Content.ReadAsByteArrayAsync();
+                var result = codec.Decode<DResult>(data);
                 throw new BusiException(result.Message, result.Code);
             }
         }

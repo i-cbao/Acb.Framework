@@ -4,6 +4,8 @@ using Acb.Core.Logging;
 using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
+using Acb.Core;
+using Acb.Core.Message;
 
 namespace Acb.Redis
 {

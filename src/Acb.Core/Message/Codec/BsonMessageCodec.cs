@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json.Bson;
-using System;
+﻿using System;
 using System.IO;
+using Newtonsoft.Json.Bson;
 
-namespace Acb.Core.EventBus.Codec
+namespace Acb.Core.Message.Codec
 {
     public class BsonMessageCodec : IMessageCodec
     {

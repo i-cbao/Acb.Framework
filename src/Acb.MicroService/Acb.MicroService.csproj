@@ -5,14 +5,12 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
-    <Version>1.6.0</Version>
-    <Product>爱车保 - 微服务框架服务提供者</Product>
-    <Description>爱车保 - 微服务框架服务提供者</Description>
-    <Title>爱车保 - 微服务框架服务提供者</Title>
+    <Version>1.6.3</Version>
+    <Product>爱车保 - 微服务框架基础类</Product>
+    <Description>爱车保 - 微服务框架基础类</Description>
+    <Title>爱车保 - 微服务框架基础类</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>
     <Copyright>爱车保 © 2018</Copyright>
-    <AssemblyVersion>1.6.0.0</AssemblyVersion>
-    <FileVersion>1.6.0.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -21,15 +19,35 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Controller\**" />
+    <Compile Remove="Filters\**" />
+    <Compile Remove="Register\**" />
+    <EmbeddedResource Remove="Controller\**" />
+    <EmbeddedResource Remove="Filters\**" />
+    <EmbeddedResource Remove="Register\**" />
+    <None Remove="Controller\**" />
+    <None Remove="Filters\**" />
+    <None Remove="Register\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="EndpointConfiguration.cs" />
+    <Compile Remove="KestrelServerOptionsExtensions.cs" />
+    <Compile Remove="MicroServiceHost.cs" />
+    <Compile Remove="MicroServiceRegister.cs" />
+    <Compile Remove="MicroServiceRouter.cs" />
+    <Compile Remove="MicroServiceRunner.cs" />
+    <Compile Remove="MicroServiceStartup.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Consul" Version="0.7.2.6" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.0.2" />
+    <PackageReference Include="MessagePack" Version="1.7.3.4" />
+    <PackageReference Include="protobuf-net" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
-    <ProjectReference Include="..\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\Acb.Redis\Acb.Redis.csproj" />
   </ItemGroup>
 

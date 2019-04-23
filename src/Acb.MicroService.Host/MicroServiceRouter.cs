@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Acb.Core.Dependency;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using System;
 using System.Threading.Tasks;
-using Acb.Core.Dependency;
 
-namespace Acb.MicroService
+namespace Acb.MicroService.Host
 {
     /// <summary> 微服务路由 </summary>
     public class MicroServiceRouter : IRouter

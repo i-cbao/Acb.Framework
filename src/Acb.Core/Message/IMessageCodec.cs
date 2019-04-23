@@ -1,7 +1,7 @@
-﻿using Acb.Core.Extensions;
-using System;
+﻿using System;
+using Acb.Core.Extensions;
 
-namespace Acb.Core.EventBus
+namespace Acb.Core.Message
 {
     /// <summary> 消息编解码器 </summary>
     public interface IMessageCodec
@@ -15,7 +15,7 @@ namespace Acb.Core.EventBus
         /// <param name="data"></param>
         /// <param name="dataType"></param>
         /// <returns></returns>
-        object Decode(byte[] data, Type dataType = null);
+        object Decode(byte[] data, Type dataType);
     }
 
     /// <summary> 编码器扩展 </summary>

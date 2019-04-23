@@ -1,12 +1,12 @@
 ﻿namespace Acb.MicroService
 {
-    internal enum RegisterType
+    public enum RegisterType
     {
         Redis,
         Consul
     }
 
-    internal class MicroServiceConfig
+    public class MicroServiceConfig
     {
         public RegisterType Register { get; set; }
         /// <summary> Consul服务地址 </summary>

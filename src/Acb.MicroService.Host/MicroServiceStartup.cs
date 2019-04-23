@@ -1,9 +1,9 @@
 ﻿using Acb.Core;
-using Acb.Core.Helper;
+using Acb.Core.Config;
 using Acb.Core.Logging;
 using Acb.Framework;
 using Acb.Framework.Logging;
-using Acb.MicroService.Filters;
+using Acb.MicroService.Host.Filters;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -14,9 +14,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using System;
-using Acb.Core.Config;
 
-namespace Acb.MicroService
+namespace Acb.MicroService.Host
 {
     public class MicroServiceStartup
     {
@@ -52,10 +51,16 @@ namespace Acb.MicroService
                 //自定义异常捕获
                 options.Filters.Add<DExceptionFilter>();
             }).AddControllersAsServices();
-
-            //services.TryAddSingleton<IRegister, ConsulRegister>();
-            MapServices(services);
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            //使用Json编解码
+            services.AddJsonCodec();
+
+            //使用服务注册发现
+            services.AddMicroRouter();
+
+            MapServices(services);
+
             _bootstrap.BuilderHandler += builder =>
             {
                 builder.Populate(services);

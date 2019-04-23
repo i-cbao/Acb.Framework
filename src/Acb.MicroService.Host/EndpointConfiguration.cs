@@ -1,4 +1,4 @@
-﻿namespace Acb.MicroService
+﻿namespace Acb.MicroService.Host
 {
     public class EndpointConfiguration
     {

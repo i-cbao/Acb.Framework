@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
+using Acb.Core;
+using Acb.Core.Message;
 using RabbitMqSubscribeOption = Acb.RabbitMq.Options.RabbitMqSubscribeOption;
 
 namespace Acb.RabbitMq

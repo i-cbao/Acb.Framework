@@ -2,7 +2,7 @@
 using System;
 using System.Text;
 
-namespace Acb.Core.EventBus.Codec
+namespace Acb.Core.Message.Codec
 {
     public class JsonMessageCodec : IMessageCodec
     {
@@ -15,7 +15,7 @@ namespace Acb.Core.EventBus.Codec
             return Encoding.UTF8.GetBytes(json);
         }
 
-        public object Decode(byte[] data, Type dataType = null)
+        public object Decode(byte[] data, Type dataType)
         {
             if (data == null || data.Length == 0)
                 return null;

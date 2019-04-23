@@ -12,10 +12,6 @@ namespace Acb.Demo.Business.Domain
 {
     public class AreaRepository : DapperRepository<TAreas>
     {
-        public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
-        {
-        }
-
         public async Task<IEnumerable<TAreas>> QueryAreaAsync(string parentCode = null)
         {
             var type = typeof(TAreas);

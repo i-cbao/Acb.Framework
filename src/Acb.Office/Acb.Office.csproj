@@ -7,8 +7,8 @@
     <Product>爱车保 - Office组件辅助类</Product>
     <Description>爱车保 - Office组件辅助类</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.6.1</Version>
-    <AssemblyVersion>1.6.1.0</AssemblyVersion>
+    <Version>1.6.3</Version>
+    <AssemblyVersion>1.6.3.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

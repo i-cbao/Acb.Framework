@@ -2,8 +2,8 @@
 using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
+using Acb.Core.Message;
 using Acb.Core.Monitor;
-using Acb.Core.Serialize;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
@@ -15,10 +15,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace Acb.MicroService
+namespace Acb.MicroService.Host
 {
     /// <summary> 微服务路由 </summary>
     internal class MicroServiceRunner
@@ -100,9 +99,15 @@ namespace Acb.MicroService
                     if (prop != null)
                         data = prop.GetValue(task);
                 }
+                else
+                {
+                    return;
+                }
             }
 
-            var bytes = Encoding.UTF8.GetBytes(JsonHelper.ToJson(data));
+            var codec = CurrentIocManager.Resolve<IMessageCodec>();
+
+            var bytes = codec.Encode(data);
             await response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 

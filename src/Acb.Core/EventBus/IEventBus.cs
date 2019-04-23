@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Acb.Core.Message;
 
 namespace Acb.Core.EventBus
 {
