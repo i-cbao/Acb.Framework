@@ -1,7 +1,5 @@
-﻿using Acb.Core.Dependency;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using System;
 using System.Threading.Tasks;
 
 namespace Acb.MicroService.Host
@@ -9,6 +7,13 @@ namespace Acb.MicroService.Host
     /// <summary> 微服务路由 </summary>
     public class MicroServiceRouter : IRouter
     {
+        private readonly MicroServiceRunner _serviceRunner;
+
+        public MicroServiceRouter(MicroServiceRunner serviceRunner)
+        {
+            _serviceRunner = serviceRunner;
+        }
+
         /// <summary> 路由处理 </summary>
         /// <param name="context"></param>
         /// <returns></returns>
@@ -17,7 +22,7 @@ namespace Acb.MicroService.Host
             var requestedUrl = context.HttpContext.Request.Path.Value.Trim('/');
             if (string.IsNullOrWhiteSpace(requestedUrl))
             {
-                context.Handler = async ctx => await MicroServiceRunner.Methods(ctx);
+                context.Handler = async ctx => await _serviceRunner.Methods(ctx);
                 return Task.CompletedTask;
             }
 
@@ -29,8 +34,7 @@ namespace Acb.MicroService.Host
                 return Task.CompletedTask;
             }
 
-            context.Handler = async ctx => await MicroServiceRunner.MicroTask(ctx.Request, ctx.Response, requestedUrl,
-                CurrentIocManager.Resolve<IServiceProvider>());
+            context.Handler = async ctx => await _serviceRunner.MicroTask(ctx.Request, ctx.Response, requestedUrl);
 
             return Task.CompletedTask;
         }

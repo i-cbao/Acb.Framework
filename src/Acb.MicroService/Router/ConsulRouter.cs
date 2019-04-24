@@ -44,7 +44,7 @@ namespace Acb.MicroService.Router
                         Tags = new[] { Consts.Mode.ToString(), ass.GetName().Version.ToString() },
                         EnableTagOverride = true,
                         Address = address.Address(),
-                        Port = Config.Port
+                        Port = address.Port
                     };
                     if (Config.ConsulCheck)
                     {

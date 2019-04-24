@@ -20,9 +20,20 @@ using System.Threading.Tasks;
 namespace Acb.MicroService.Host
 {
     /// <summary> 微服务路由 </summary>
-    internal class MicroServiceRunner
+    public class MicroServiceRunner
     {
-        private static async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response, IServiceProvider provider)
+        private readonly MicroServiceRegister _serviceRegister;
+        private readonly IMessageCodec _messageCodec;
+        private readonly IServiceProvider _serviceProvider;
+
+        public MicroServiceRunner(MicroServiceRegister serviceRegister, IMessageCodec messageCodec, IServiceProvider serviceProvider)
+        {
+            _serviceRegister = serviceRegister;
+            _messageCodec = messageCodec;
+            _serviceProvider = serviceProvider;
+        }
+
+        private async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response)
         {
             string requestBody = null;
             var watcher = new Stopwatch();
@@ -63,7 +74,7 @@ namespace Acb.MicroService.Host
                     i++;
                 }
 
-                var instance = provider.GetService(m.DeclaringType); //CurrentIocManager.Resolve(m.DeclaringType);
+                var instance = _serviceProvider.GetService(m.DeclaringType); //CurrentIocManager.Resolve(m.DeclaringType);
                 var result = m.Invoke(instance, args.ToArray());
                 await WriteJsonAsync(response, result);
             }
@@ -85,7 +96,7 @@ namespace Acb.MicroService.Host
             }
         }
 
-        private static async Task WriteJsonAsync(HttpResponse response, object data, int code = (int)HttpStatusCode.OK)
+        private async Task WriteJsonAsync(HttpResponse response, object data, int code = (int)HttpStatusCode.OK)
         {
             response.StatusCode = code;
             response.ContentType = "application/json";
@@ -105,15 +116,13 @@ namespace Acb.MicroService.Host
                 }
             }
 
-            var codec = CurrentIocManager.Resolve<IMessageCodec>();
-
-            var bytes = codec.Encode(data);
+            var bytes = _messageCodec.Encode(data);
             await response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 
-        public static async Task Methods(HttpContext ctx)
+        public async Task Methods(HttpContext ctx)
         {
-            var methods = MicroServiceRegister.Methods.Select(t => new
+            var methods = _serviceRegister.Methods.Select(t => new
             {
                 url = t.Key,
                 param = t.Value.GetParameters().ToDictionary(k => k.Name, v => v.ParameterType.Name)
@@ -121,21 +130,22 @@ namespace Acb.MicroService.Host
             await WriteJsonAsync(ctx.Response, methods);
         }
 
-        public static Task MicroTask(HttpRequest req, HttpResponse resp, string contract, string method, IServiceProvider provider)
+        public Task MicroTask(HttpRequest req, HttpResponse resp, string contract, string method)
         {
             var path = $"{contract}/{method}";
-            return MicroTask(req, resp, path, provider);
+            return MicroTask(req, resp, path);
         }
 
-        public static Task MicroTask(HttpRequest req, HttpResponse resp, string path, IServiceProvider provider)
+        public Task MicroTask(HttpRequest req, HttpResponse resp, string path)
         {
             var key = path.ToLower();
-            if (!MicroServiceRegister.Methods.TryGetValue(key, out var m))
+            var register = CurrentIocManager.Resolve<MicroServiceRegister>();
+            if (!register.Methods.TryGetValue(key, out var m))
             {
                 return WriteJsonAsync(resp, DResult.Error($"{path} not found"), (int)HttpStatusCode.NotFound);
             }
 
-            return RunMethod(m, req, resp, provider);
+            return RunMethod(m, req, resp);
         }
 
 
@@ -147,7 +157,7 @@ namespace Acb.MicroService.Host
             var requestedUrl = context.HttpContext.Request.Path.Value.Trim('/');
             if (string.IsNullOrWhiteSpace(requestedUrl))
             {
-                context.Handler = async ctx => await WriteJsonAsync(ctx.Response, MicroServiceRegister.Methods.Keys);
+                context.Handler = async ctx => await WriteJsonAsync(ctx.Response, _serviceRegister.Methods.Keys);
                 return Task.CompletedTask;
             }
 
@@ -159,7 +169,7 @@ namespace Acb.MicroService.Host
                 return Task.CompletedTask;
             }
 
-            if (!MicroServiceRegister.Methods.TryGetValue(requestedUrl, out var method))
+            if (!_serviceRegister.Methods.TryGetValue(requestedUrl, out var method))
             {
                 context.Handler = async ctx =>
                     await WriteJsonAsync(ctx.Response, DResult.Error($"{requestedUrl} not found"), (int)HttpStatusCode.NotFound);
@@ -171,7 +181,7 @@ namespace Acb.MicroService.Host
             return Task.CompletedTask;
         }
 
-        private static async Task Runner(HttpContext ctx, object instance, MethodBase m)
+        private async Task Runner(HttpContext ctx, object instance, MethodBase m)
         {
             string requestBody = null;
             var watcher = new Stopwatch();

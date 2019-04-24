@@ -38,7 +38,6 @@ namespace Acb.MicroService.Host
 
         protected virtual void UseServices(IServiceProvider provider)
         {
-
         }
 
         /// <summary> 配置服务 </summary>
@@ -52,6 +51,9 @@ namespace Acb.MicroService.Host
                 options.Filters.Add<DExceptionFilter>();
             }).AddControllersAsServices();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            services.AddSingleton<MicroServiceRegister>();
+            services.AddSingleton<MicroServiceRunner>();
 
             //使用Json编解码
             services.AddJsonCodec();
@@ -67,8 +69,6 @@ namespace Acb.MicroService.Host
                 MapServices(builder);
             };
             _bootstrap.Initialize();
-
-            MicroServiceRegister.Regist();
             LogManager.AddAdapter(new ConsoleAdapter());
             return new AutofacServiceProvider(_bootstrap.Container);
         }
@@ -79,7 +79,8 @@ namespace Acb.MicroService.Host
         /// <param name="env"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="applicationLifetime"></param>
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IApplicationLifetime applicationLifetime)
+        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
+            IApplicationLifetime applicationLifetime)
         {
             var provider = app.ApplicationServices;
             var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
@@ -94,24 +95,18 @@ namespace Acb.MicroService.Host
                     ConfigHelper.Instance.Reload();
                     await ctx.Response.WriteAsync("ok");
                 });
-                //routes.MapGet("micro", async ctx => await MicroServiceRunner.Methods(ctx));
-                //routes.MapPost("micro/{contract}/{method}", (request, response, route) =>
-                //{
-                //    route.Values.TryGetValue("contract", out var contract);
-                //    route.Values.TryGetValue("method", out var method);
-                //    return MicroServiceRunner.MicroTask(request, response, $"{contract}/{method}");
-                //});
                 //普通路由
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 //区域路由
                 routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
             });
+            provider.GetService<MicroServiceRegister>().Regist();
             UseServices(provider);
 
             applicationLifetime.ApplicationStopping.Register(() =>
             {
                 _bootstrap.Dispose();
-                MicroServiceRegister.Deregist();
+                app.ApplicationServices.GetService<MicroServiceRegister>().Deregist();
             });
         }
     }
