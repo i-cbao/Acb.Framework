@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapper;
+using MongoDB.Bson;
 
 namespace Acb.Framework.Tests
 {
@@ -166,16 +168,31 @@ AND u.create_time >=""2018 / 05 / 10""
             const string countSql = "SELECT COUNT(1) FROM [t_areas] /**where**/";
             const string selectSql = "SELECT * FROM [t_areas] /**where**/ /**orderby**/";
             var builder = new SqlBuilder();
-            //builder.Where("[parent_code]=@parentCode", new { parentCode = "510000" });
+            //builder.Select("[parent_code]=@parentCode", new { parentCode = "510000" });
             builder.OrWhere("[city_code]=@code", new { code = "510000" });
             builder.OrWhere("[parent_code]=@parentCode", new { parentCode = "510000" });
-            //builder.Where("[city_code]=@code", new { code = "510000" });
+            //builder.Select("[city_code]=@code", new { code = "510000" });
             builder.OrderBy("[name] DESC");
 
             var c = builder.AddTemplate(countSql);
             var sel = builder.AddTemplate(selectSql);
             Print(c.RawSql);
+            Print(c.Parameters);
             Print(sel.RawSql);
+            Print(sel.Parameters);
+        }
+
+        [TestMethod]
+        public void SqlTest()
+        {
+            var sql = typeof(TAreas).Select(" [parent_code]=@code", " [city_code]",
+                includes: new[] { nameof(TAreas.CityName), nameof(TAreas.Id) });
+            using (var conn = Resolve<IUnitOfWork>().CreateConnection())
+            {
+                var fsql = conn.FormatSql(sql);
+                var t = conn.Query<TAreas>(fsql, new { code = "510000" });
+                Print(t);
+            }
         }
     }
 }

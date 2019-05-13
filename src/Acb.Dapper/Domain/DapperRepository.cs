@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Domain.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace Acb.Dapper.Domain
@@ -10,12 +11,28 @@ namespace Acb.Dapper.Domain
     public partial class DapperRepository<T> : DRepository
         where T : IEntity
     {
-        public DapperRepository() : base(CurrentIocManager.Resolve<IUnitOfWork>()) { }
+        /// <summary> 仓储数据库实体类型 </summary>
+        protected Type ModelType { get; }
+        public DapperRepository() : this(CurrentIocManager.Resolve<IUnitOfWork>()) { }
 
         /// <summary> 构造 </summary>
         /// <param name="unitOfWork"></param>
         public DapperRepository(IUnitOfWork unitOfWork) : base(unitOfWork)
         {
+            ModelType = typeof(T);
+        }
+
+        /// <summary> SELECT语句构建 </summary>
+        /// <param name="where">where</param>
+        /// <param name="orderby">order by</param>
+        /// <param name="excepts">排除字段</param>
+        /// <param name="includes">包含字段</param>
+        /// <param name="tableAlias">表别名</param>
+        /// <returns></returns>
+        public string Select(string where, string orderby = null, string[] excepts = null, string[] includes = null,
+            string tableAlias = null)
+        {
+            return ModelType.Select(where, orderby, excepts, includes, tableAlias);
         }
 
         /// <summary> 查询所有数据 </summary>
@@ -39,7 +56,6 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Insert(T model, string[] excepts = null)
         {
-
             return TransConnection.Insert(model, excepts, Trans);
         }
 
