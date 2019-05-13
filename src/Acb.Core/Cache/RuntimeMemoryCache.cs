@@ -10,16 +10,15 @@ namespace Acb.Core.Cache
     /// <summary> 运行时缓存 </summary>
     public class RuntimeMemoryCache : BaseCache
     {
-        private readonly string _region;
         private IMemoryCache _cache;
 
         public RuntimeMemoryCache(string region)
         {
-            _region = region;
+            Region = region;
             _cache = new MemoryCache(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
         }
         /// <summary> 缓存区域 </summary>
-        public override string Region => _region;
+        public override string Region { get; }
 
         public override void Set(string key, object value)
         {

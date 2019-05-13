@@ -20,12 +20,12 @@ namespace Acb.Core.Config.Center
         private IDictionary<string, string> _headers;
         private readonly HttpHelper _httpHelper;
 
-        private readonly ConcurrentDictionary<string, long> _configVersions;
+        private readonly ConcurrentDictionary<string, Lazy<long>> _configVersions;
 
         public ConfigCenterProvider(CenterConfig config, bool reload = false)
         {
             _httpHelper = HttpHelper.Instance;
-            _configVersions = new ConcurrentDictionary<string, long>();
+            _configVersions = new ConcurrentDictionary<string, Lazy<long>>();
             _config = config;
             _reload = reload;
         }
@@ -72,13 +72,13 @@ namespace Acb.Core.Config.Center
             var version = (await versionResp.Content.ReadAsStringAsync()).CastTo(0L);
             if (_configVersions.ContainsKey(app))
             {
-                var change = version != _configVersions[app];
+                var change = version != _configVersions[app].Value;
                 if (change)
-                    _configVersions[app] = version;
+                    _configVersions[app] = new Lazy<long>(() => version);
                 return change ? version : 0;
             }
 
-            _configVersions.TryAdd(app, version);
+            _configVersions.TryAdd(app, new Lazy<long>(() => version));
             return version;
         }
 

@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 
@@ -11,14 +12,14 @@ namespace Acb.Core.Config.Xml
     /// </summary>
     public class ConfigManager
     {
-        private readonly ConcurrentDictionary<string, object> _configCache;
+        private readonly ConcurrentDictionary<string, Lazy<object>> _configCache;
 
         private readonly string _configPath;
 
         private ConfigManager()
         {
             _configPath = "configPath".Config(string.Empty);
-            _configCache = new ConcurrentDictionary<string, object>();
+            _configCache = new ConcurrentDictionary<string, Lazy<object>>();
             _configPath = _configPath.GetPath();
             if (!Directory.Exists(_configPath))
                 throw new DException($"{_configPath}不存在");
@@ -50,7 +51,7 @@ namespace Acb.Core.Config.Xml
             if (!File.Exists(path))
                 return null;
             var config = XmlHelper.XmlDeserialize<T>(path);
-            _configCache.TryAdd(fileName, config);
+            _configCache.TryAdd(fileName, new Lazy<object>(() => config));
             return config;
         }
 
@@ -65,8 +66,7 @@ namespace Acb.Core.Config.Xml
         {
             if (_configCache.ContainsKey(e.Name))
             {
-                object config;
-                _configCache.TryRemove(e.Name, out config);
+                _configCache.TryRemove(e.Name, out _);
             }
             Change?.Invoke(e.Name);
         }

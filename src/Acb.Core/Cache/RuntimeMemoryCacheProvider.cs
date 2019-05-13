@@ -1,15 +1,16 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 
 namespace Acb.Core.Cache
 {
     /// <summary> 运行时内存缓存提供程序 </summary>
     public class RuntimeMemoryCacheProvider : ICacheProvider
     {
-        private static readonly ConcurrentDictionary<string, ICache> Caches;
+        private static readonly ConcurrentDictionary<string, Lazy<ICache>> Caches;
 
         static RuntimeMemoryCacheProvider()
         {
-            Caches = new ConcurrentDictionary<string, ICache>();
+            Caches = new ConcurrentDictionary<string, Lazy<ICache>>();
         }
 
         /// <summary>
@@ -22,14 +23,8 @@ namespace Acb.Core.Cache
         /// <returns></returns>
         public ICache GetCache(string regionName)
         {
-            ICache cache;
-            if (Caches.TryGetValue(regionName, out cache))
-            {
-                return cache;
-            }
-            cache = new RuntimeMemoryCache(regionName);
-            Caches.TryAdd(regionName, cache);
-            return cache;
+            var lazyCache = Caches.GetOrAdd(regionName, key => new Lazy<ICache>(() => new RuntimeMemoryCache(key)));
+            return lazyCache.Value;
         }
     }
 }

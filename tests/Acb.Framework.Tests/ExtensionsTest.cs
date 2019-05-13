@@ -11,9 +11,9 @@ namespace Acb.Framework.Tests
     public enum EnumType
     {
         [System.ComponentModel.Description("AA")]
-        A,
+        A = 1,
         [System.ComponentModel.Description("BB")]
-        B
+        B = 3
     }
 
     [TestClass]
@@ -22,7 +22,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void EnumTest()
         {
-            var text = (EnumType.A | EnumType.B).GetText();
+            var text = (EnumType.A | EnumType.B).GetText(true);
             Print(text);
         }
 
@@ -33,7 +33,7 @@ namespace Acb.Framework.Tests
             {
                 Id = "1234",
                 CityName = "北京",
-                ParentCode = "10010",
+                //ParentCode = "10010",
                 Deep = 0
             };
             var target = new TAreas

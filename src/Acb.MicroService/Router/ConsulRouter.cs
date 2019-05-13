@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Acb.MicroService.Router
 {
+    /// <summary> Consul服务路由 </summary>
     public class ConsulRouter : DServiceRouter
     {
         private readonly List<string> _services;

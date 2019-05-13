@@ -1,6 +1,7 @@
 ﻿using Acb.Core;
 using Acb.Core.Data;
 using Acb.Core.Dependency;
+using Acb.Core.Domain;
 using Acb.Core.Tests;
 using Acb.Dapper;
 using Acb.Demo.Business.Domain;
@@ -10,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
 using System.Threading.Tasks;
-using Acb.Core.Extensions;
 
 namespace Acb.Framework.Tests
 {
@@ -42,12 +42,13 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public void PagedTest()
+        public async Task PagedTest()
         {
 
             var columns = typeof(TAreas).Columns();
             var sql = $"select {columns} from [t_areas] where [parent_code]=@code";
-            using (var conn = _factory.Connection("default"))
+            var conn = _factory.Connection("default");
+            using (conn)
             {
                 //var set = conn.QueryDataSet(conn.FormatSql(sql), new { code = "510100" });
                 //Print(set);
@@ -57,12 +58,15 @@ namespace Acb.Framework.Tests
                 //Print(dtos);
                 Print(DResult.Succ(list));
             }
+
+            var t = await conn.QueryByIdAsync<TAreas>("510000");
+            Print(t);
         }
 
         [TestMethod]
         public async Task QueryTest()
         {
-            var r = CodeTimer.Time("thread test", 5, async () =>
+            var r = await CodeTimer.Time("thread test", 5, async () =>
              {
                  var model = await _areaRepository.Get("110108");
                  Print($"Thread Id:{Thread.CurrentThread.ManagedThreadId}");
@@ -71,7 +75,7 @@ namespace Acb.Framework.Tests
             Print(r.ToString());
             var t = await _areaRepository.Get("110108");
             Print(t);
-            Print(CurrentIocManager.Resolve<IDbConnectionProvider>().ToString());
+            Print(CurrentIocManager.Resolve<ConnectionFactory>().ToString());
         }
 
         [TestMethod]
@@ -131,6 +135,47 @@ AND u.create_time >=""2018 / 05 / 10""
                 Print(t);
             }
 
+        }
+
+        [TestMethod]
+        public async Task ConnectionTest()
+        {
+            using (var scope = new LifetimeScopeManager())
+            {
+                var uw = scope.Resolve<IUnitOfWork>();
+                var result = await CodeTimer.Time("test", 10, async () =>
+                {
+                    var resp = scope.Resolve<AreaRepository>();
+                    var list = await resp.QueryAreaAsync("510000");
+                    using (var conn = uw.Connection)
+                    {
+                        var t = await conn.QueryByIdAsync<TAreas>("510000");
+                        //Print(t);
+                    }
+
+                    //Print(await list);
+                }, 20);
+                Print(result.ToString());
+            }
+        }
+
+        [TestMethod]
+        public void SqlBuilderTest()
+        {
+            Print(0x10000 | 0x80);
+            const string countSql = "SELECT COUNT(1) FROM [t_areas] /**where**/";
+            const string selectSql = "SELECT * FROM [t_areas] /**where**/ /**orderby**/";
+            var builder = new SqlBuilder();
+            //builder.Where("[parent_code]=@parentCode", new { parentCode = "510000" });
+            builder.OrWhere("[city_code]=@code", new { code = "510000" });
+            builder.OrWhere("[parent_code]=@parentCode", new { parentCode = "510000" });
+            //builder.Where("[city_code]=@code", new { code = "510000" });
+            builder.OrderBy("[name] DESC");
+
+            var c = builder.AddTemplate(countSql);
+            var sel = builder.AddTemplate(selectSql);
+            Print(c.RawSql);
+            Print(sel.RawSql);
         }
     }
 }

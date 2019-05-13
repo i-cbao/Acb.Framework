@@ -106,7 +106,7 @@ namespace Acb.MicroService.Host
             applicationLifetime.ApplicationStopping.Register(() =>
             {
                 _bootstrap.Dispose();
-                app.ApplicationServices.GetService<MicroServiceRegister>().Deregist();
+                provider.GetService<MicroServiceRegister>().Deregist();
             });
         }
     }

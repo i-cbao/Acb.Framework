@@ -3,7 +3,9 @@ using Acb.Core.Dependency;
 using Acb.Core.Domain;
 using Acb.Core.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Data;
+using System.Threading;
 
 namespace Acb.Dapper
 {
@@ -11,6 +13,7 @@ namespace Acb.Dapper
     {
         private readonly IDbConnectionProvider _factory;
         private readonly ILogger _logger;
+        private readonly ConcurrentDictionary<int, Lazy<IDbConnection>> _connections;
 
         private bool _closeabel;
 
@@ -26,6 +29,7 @@ namespace Acb.Dapper
         {
             Id = Guid.NewGuid();
             _factory = CurrentIocManager.Resolve<IDbConnectionProvider>();
+            _connections = new ConcurrentDictionary<int, Lazy<IDbConnection>>();
             _logger = LogManager.Logger(GetType());
             _logger.Debug($"{GetType().Name}:{Id} Create");
         }
@@ -41,21 +45,17 @@ namespace Acb.Dapper
             _providerName = providerName;
         }
 
-        private IDbConnection _connection;
         /// <inheritdoc />
         /// <summary> 当前数据库连接 </summary>
         public IDbConnection Connection
         {
             get
             {
-                lock (SyncObj)
-                {
-                    if (_connection == null)
-                    {
-                        return _connection = CreateConnection();
-                    }
-                    return _connection;
-                }
+                //return CreateConnection();
+                var key = Thread.CurrentThread.ManagedThreadId;
+                _logger.Debug($"{GetType().Name}[{Id}],Current Thread:{key},{_connections.Count}");
+                var lazy = _connections.GetOrAdd(key, k => new Lazy<IDbConnection>(CreateConnection));
+                return lazy.Value;
             }
         }
 
@@ -104,12 +104,24 @@ namespace Acb.Dapper
 
         public void Dispose()
         {
+            _logger.Debug($"{GetType().Name}[{Id}] Dispose UnitOfWork");
             if (Transaction != null)
             {
                 _logger.Debug($"{GetType().Name}[{Id}] Dispose Transaction");
                 Transaction.Dispose();
+                Transaction.Connection.Close();
                 Transaction = null;
             }
+
+            if (_connections.Count > 0)
+            {
+                foreach (var conn in _connections)
+                {
+                    conn.Value.Value.Close();
+                }
+            }
+
+            _connections.Clear();
             if (_closeabel)
                 Connection.Close();
         }

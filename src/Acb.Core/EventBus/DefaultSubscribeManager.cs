@@ -8,15 +8,15 @@ namespace Acb.Core.EventBus
 {
     public class DefaultSubscribeManager : ISubscribeManager
     {
-        private readonly ConcurrentDictionary<string, List<Delegate>> _handlers;
-        private readonly ConcurrentDictionary<string, Type> _eventTypes;
+        private readonly ConcurrentDictionary<string, Lazy<List<Delegate>>> _handlers;
+        private readonly ConcurrentDictionary<string, Lazy<Type>> _eventTypes;
 
         public event EventHandler<string> OnEventRemoved;
 
         public DefaultSubscribeManager()
         {
-            _handlers = new ConcurrentDictionary<string, List<Delegate>>();
-            _eventTypes = new ConcurrentDictionary<string, Type>();
+            _handlers = new ConcurrentDictionary<string, Lazy<List<Delegate>>>();
+            _eventTypes = new ConcurrentDictionary<string, Lazy<Type>>();
         }
 
         public bool IsEmpty => !_handlers.Keys.Any();
@@ -28,12 +28,12 @@ namespace Acb.Core.EventBus
             var key = string.IsNullOrWhiteSpace(eventKey) ? GetEventKey<T>() : eventKey;
             if (!HasSubscriptionsForEvent(key))
             {
-                _handlers.TryAdd(key, new List<Delegate>());
+                _handlers.TryAdd(key, new Lazy<List<Delegate>>(() => new List<Delegate>()));
             }
 
-            _handlers[key].Add(handler);
+            _handlers[key].Value.Add(handler);
             if (!_eventTypes.ContainsKey(key))
-                _eventTypes.TryAdd(key, typeof(T));
+                _eventTypes.TryAdd(key, new Lazy<Type>(() => typeof(T)));
         }
 
         public void RemoveSubscription<T, TH>(string eventKey = null)
@@ -43,15 +43,15 @@ namespace Acb.Core.EventBus
             var handlerToRemove = FindHandlerToRemove<T, TH>(key);
             if (handlerToRemove != null)
             {
-                _handlers[key].Remove(handlerToRemove);
-                if (!_handlers[key].Any())
+                _handlers[key].Value.Remove(handlerToRemove);
+                if (!_handlers[key].Value.Any())
                 {
                     _handlers.TryRemove(key, out _);
                     _eventTypes.TryGetValue(key, out var eventType);
                     if (eventType != null)
                     {
                         _eventTypes.TryRemove(key, out _);
-                        RaiseOnEventRemoved(eventType.Name);
+                        RaiseOnEventRemoved(eventType.Value.Name);
                     }
                 }
 
@@ -65,7 +65,7 @@ namespace Acb.Core.EventBus
         }
         public IEnumerable<Delegate> GetHandlersForEvent(string eventKey)
         {
-            return _handlers.TryGetValue(eventKey, out var events) ? events : new List<Delegate>();
+            return _handlers.TryGetValue(eventKey, out var events) ? events.Value : new List<Delegate>();
         }
 
         private void RaiseOnEventRemoved(string eventName)
@@ -86,7 +86,7 @@ namespace Acb.Core.EventBus
                 return null;
             }
 
-            foreach (var func in _handlers[key])
+            foreach (var func in _handlers[key].Value)
             {
                 var genericArgs = func.GetType().GetGenericArguments();
                 if (genericArgs.SingleOrDefault() == typeof(TH))
@@ -108,7 +108,7 @@ namespace Acb.Core.EventBus
         public Type GetEventTypeByName(string eventKey)
         {
             _eventTypes.TryGetValue(eventKey, out var type);
-            return type;
+            return type?.Value;
         }
 
         private static string GetEventKey<T>()

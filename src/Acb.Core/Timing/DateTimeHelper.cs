@@ -56,7 +56,7 @@ namespace Acb.Core.Timing
         /// <returns></returns>
         public static DateTime FromTimestamp(this long timestamp)
         {
-            return new DateTime(1970, 1, 1).Add(new TimeSpan(timestamp * TimeSpan.TicksPerSecond)).ToLocalTime();
+            return ZoneTime.Add(new TimeSpan(timestamp * TimeSpan.TicksPerSecond)).ToLocalTime();
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Acb.Core.Timing
         /// <returns></returns>
         public static DateTime FromMillisecondTimestamp(this long timestamp)
         {
-            return new DateTime(1970, 1, 1).Add(new TimeSpan(timestamp * TimeSpan.TicksPerMillisecond)).ToLocalTime();
+            return ZoneTime.Add(new TimeSpan(timestamp * TimeSpan.TicksPerMillisecond)).ToLocalTime();
         }
 
         #region 日

@@ -8,11 +8,11 @@ namespace Acb.Core.Monitor
     public static class MonitorManager
     {
         /// <summary> 监控列表 </summary>
-        private static readonly ConcurrentDictionary<RuntimeTypeHandle, IMonitor> Monitors;
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, Lazy<IMonitor>> Monitors;
 
         static MonitorManager()
         {
-            Monitors = new ConcurrentDictionary<RuntimeTypeHandle, IMonitor>();
+            Monitors = new ConcurrentDictionary<RuntimeTypeHandle, Lazy<IMonitor>>();
         }
 
         /// <summary> 添加适配 </summary>
@@ -20,7 +20,7 @@ namespace Acb.Core.Monitor
         {
             var key = monitor.GetType().TypeHandle;
             if (Monitors.ContainsKey(key)) return;
-            Monitors.TryAdd(key, monitor);
+            Monitors.TryAdd(key, new Lazy<IMonitor>(() => monitor));
         }
 
         /// <summary> 获取监控 </summary>
@@ -36,7 +36,7 @@ namespace Acb.Core.Monitor
                 return;
             foreach (var monitor in Monitors)
             {
-                monitorAction?.Invoke(monitor.Value);
+                monitorAction?.Invoke(monitor.Value.Value);
             }
         }
     }

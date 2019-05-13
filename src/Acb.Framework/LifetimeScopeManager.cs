@@ -9,7 +9,7 @@ namespace Acb.Framework
         private readonly ILifetimeScope _scope;
         public LifetimeScopeManager()
         {
-            _scope = Resolve<IocManager>().Current.BeginLifetimeScope();
+            _scope = CurrentIocManager.Resolve<IocManager>().Current.BeginLifetimeScope();
         }
 
         /// <summary> 获取Ioc注入实例 </summary>

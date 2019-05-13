@@ -128,6 +128,7 @@ namespace Acb.WebApi
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
             AddSwagger(services);
+
             services
                 .AddMvc(options =>
                 {

@@ -14,18 +14,18 @@ namespace Acb.Redis
     public class RedisManager : IDisposable
     {
         private readonly ILogger _logger;
-        private readonly ConcurrentDictionary<string, ConnectionMultiplexer> _connections;
+        private readonly ConcurrentDictionary<string, Lazy<ConnectionMultiplexer>> _connections;
 
         private RedisManager()
         {
-            _connections = new ConcurrentDictionary<string, ConnectionMultiplexer>();
+            _connections = new ConcurrentDictionary<string, Lazy<ConnectionMultiplexer>>();
             _logger = LogManager.Logger<RedisManager>();
 
             ConfigHelper.Instance.ConfigChanged += obj =>
             {
                 if (_connections.Count <= 0)
                     return;
-                _connections.Values.Foreach(t => t.Close());
+                _connections.Values.Foreach(t => t.Value.Close());
                 _connections.Clear();
             };
         }
@@ -77,13 +77,15 @@ namespace Acb.Redis
 
         private ConnectionMultiplexer GetConnection(string configName, ConfigurationOptions configOpts)
         {
-            var conn = _connections.GetOrAdd(configName, p => Connect(configOpts));
-            if (conn != null && conn.IsConnected)
-                return conn;
-            conn?.Dispose();
-            conn = Connect(configOpts);
+            if (_connections.TryGetValue(configName, out var lazyConn))
+            {
+                if (lazyConn.Value.IsConnected)
+                    return lazyConn.Value;
+                lazyConn.Value.Dispose();
+            }
+            var conn = new Lazy<ConnectionMultiplexer>(() => Connect(configOpts));
             _connections[configName] = conn;
-            return conn;
+            return conn.Value;
         }
 
         public IDatabase GetDatabase(RedisConfig config, int defaultDb = -1)
@@ -147,7 +149,7 @@ namespace Acb.Redis
         {
             if (_connections == null || _connections.Count == 0)
                 return;
-            _connections.Values.Foreach(t => t.Close());
+            _connections.Values.Foreach(t => t.Value.Close());
         }
     }
 }

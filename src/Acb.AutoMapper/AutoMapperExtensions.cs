@@ -23,8 +23,8 @@ namespace Acb.AutoMapper
     /// <summary> AutoMapper扩展 </summary>
     public static class AutoMapperExtensions
     {
-        private static readonly ConcurrentDictionary<MapperType, IMapper> Mappers =
-            new ConcurrentDictionary<MapperType, IMapper>();
+        private static readonly ConcurrentDictionary<MapperType, Lazy<IMapper>> Mappers =
+            new ConcurrentDictionary<MapperType, Lazy<IMapper>>();
 
         private static IMapper Create(MapperType mapperType, Type sourceType, Type destinationType,
             TypeMap[] maps = null)
@@ -57,19 +57,22 @@ namespace Acb.AutoMapper
 
         private static IMapper CreateFromCache(Type sourceType, Type destinationType, MapperType mapperType = MapperType.Normal)
         {
-            if (Mappers.TryGetValue(mapperType, out var mapper))
+            if (Mappers.TryGetValue(mapperType, out var lazyMapper))
             {
+                var mapper = lazyMapper.Value;
                 var m = mapper.ConfigurationProvider.FindTypeMapFor(sourceType, destinationType);
                 if (m != null)
                     return mapper;
             }
 
-            return Mappers.AddOrUpdate(mapperType, type => Create(type, sourceType, destinationType),
+            lazyMapper = Mappers.AddOrUpdate(mapperType,
+                type => new Lazy<IMapper>(() => Create(type, sourceType, destinationType)),
                 (type, old) =>
                 {
-                    var maps = old.ConfigurationProvider.GetAllTypeMaps();
-                    return Create(type, sourceType, destinationType, maps);
+                    var maps = old.Value.ConfigurationProvider.GetAllTypeMaps();
+                    return new Lazy<IMapper>(() => Create(type, sourceType, destinationType, maps));
                 });
+            return lazyMapper.Value;
         }
 
         /// <summary> 映射实体 </summary>

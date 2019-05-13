@@ -13,7 +13,7 @@ namespace Acb.Core.Logging
         private const string ConfigLevel = "logLevel";
         private const string ConfigLevelEnvironmentName = "ACB_LOGLEVEL";
 
-        private static readonly ConcurrentDictionary<string, Logger> LoggerDictionary;
+        private static readonly ConcurrentDictionary<string, Lazy<Logger>> LoggerDictionary;
 
         /// <summary> 日志适配器集合 </summary>
         private static readonly ConcurrentDictionary<ILoggerAdapter, LogLevel> LoggerAdapters;
@@ -23,7 +23,7 @@ namespace Acb.Core.Logging
         /// <summary> 静态构造 </summary>
         static LogManager()
         {
-            LoggerDictionary = new ConcurrentDictionary<string, Logger>();
+            LoggerDictionary = new ConcurrentDictionary<string, Lazy<Logger>>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
             LogLevel();
         }
@@ -71,6 +71,7 @@ namespace Acb.Core.Logging
             {
                 return;
             }
+
             LoggerAdapters.TryAdd(adapter, _logLevel);
         }
 
@@ -122,11 +123,12 @@ namespace Acb.Core.Logging
         {
             if (LoggerDictionary.TryGetValue(name, out var logger))
             {
-                return logger;
+                return logger.Value;
             }
-            logger = new Logger(name);
+
+            logger = new Lazy<Logger>(() => new Logger(name));
             LoggerDictionary.TryAdd(name, logger);
-            return logger;
+            return logger.Value;
         }
 
         /// <summary>

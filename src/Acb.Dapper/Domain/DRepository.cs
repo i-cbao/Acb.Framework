@@ -16,8 +16,13 @@ namespace Acb.Dapper.Domain
         public IUnitOfWork UnitOfWork { get; }
         /// <summary> 获取默认连接 </summary>
         protected IDbConnection Connection => UnitOfWork.Connection;
+
         /// <summary> 当前事务 </summary>
         protected IDbTransaction Trans => UnitOfWork.Transaction;
+
+        /// <summary> 开启事务的连接或者当前连接 </summary>
+        protected IDbConnection TransConnection =>
+            UnitOfWork.IsTransaction ? Trans.Connection : UnitOfWork.Connection;
 
         public IDbConnectionProvider ConnectionProvider { protected get; set; }
 

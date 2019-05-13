@@ -39,7 +39,8 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Insert(T model, string[] excepts = null)
         {
-            return Connection.Insert(model, excepts, Trans);
+
+            return TransConnection.Insert(model, excepts, Trans);
         }
 
         /// <summary> 批量插入 </summary>
@@ -48,7 +49,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Insert(IEnumerable<T> models, string[] excepts = null)
         {
-            return Connection.Insert<T>(models, excepts, Trans);
+            return TransConnection.Insert<T>(models, excepts, Trans);
         }
 
         /// <summary> 删除 </summary>
@@ -57,7 +58,7 @@ namespace Acb.Dapper.Domain
         /// <returns></returns>
         public int Delete(object key, string keyColumn = null)
         {
-            return Connection.Delete<T>(key, keyColumn, Trans);
+            return TransConnection.Delete<T>(key, keyColumn, Trans);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Exceptions;
 using Acb.Core.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Data;
 
@@ -8,12 +9,12 @@ namespace Acb.Core.Data
     /// <summary> 数据库连接管理器 </summary>
     public static class DbConnectionManager
     {
-        private static readonly ConcurrentDictionary<string, IDbConnectionAdapter> Adapters;
+        private static readonly ConcurrentDictionary<string, Lazy<IDbConnectionAdapter>> Adapters;
         private static readonly ILogger Logger;
 
         static DbConnectionManager()
         {
-            Adapters = new ConcurrentDictionary<string, IDbConnectionAdapter>();
+            Adapters = new ConcurrentDictionary<string, Lazy<IDbConnectionAdapter>>();
             Logger = LogManager.Logger(nameof(DbConnectionManager));
         }
 
@@ -26,7 +27,7 @@ namespace Acb.Core.Data
             var key = adapter.ProviderName.ToLower();
             if (Adapters.ContainsKey(key))
                 return;
-            Adapters.TryAdd(key, adapter);
+            Adapters.TryAdd(key, new Lazy<IDbConnectionAdapter>(() => adapter));
         }
 
         /// <summary> 创建数据库适配器 </summary>
@@ -35,7 +36,7 @@ namespace Acb.Core.Data
         public static IDbConnectionAdapter Create(string providerName)
         {
             if (Adapters.TryGetValue(providerName.ToLower(), out var adapter))
-                return adapter;
+                return adapter.Value;
             throw new BusiException($"不支持的DbProvider：{providerName}");
         }
 
@@ -45,8 +46,9 @@ namespace Acb.Core.Data
         /// <returns></returns>
         public static string FormatSql(this IDbConnection conn, string sql)
         {
-            foreach (var adapter in Adapters.Values)
+            foreach (var lazyAdapter in Adapters.Values)
             {
+                var adapter = lazyAdapter.Value;
                 if (adapter.ConnectionType != conn.GetType())
                     continue;
                 sql = adapter.FormatSql(sql);
@@ -64,8 +66,9 @@ namespace Acb.Core.Data
         /// <returns></returns>
         public static string PagedSql(this IDbConnection conn, string sql, string columns, string order)
         {
-            foreach (var adapter in Adapters.Values)
+            foreach (var lazyAdapter in Adapters.Values)
             {
+                var adapter = lazyAdapter.Value;
                 if (adapter.ConnectionType == conn.GetType())
                     return adapter.FormatSql(adapter.PageSql(sql, columns, order));
             }

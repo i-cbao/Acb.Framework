@@ -19,7 +19,7 @@ namespace Acb.Dapper
     /// <summary> 数据库连接管理 </summary>
     public class ConnectionFactory : ISingleDependency
     {
-        private readonly ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>> _connectionCache;
+        private readonly ConcurrentDictionary<Thread, Lazy<Dictionary<string, ConnectionStruct>>> _connectionCache;
         private static readonly object SyncObj = new object();
         private int _createCount;
         private int _removeCount;
@@ -31,7 +31,7 @@ namespace Acb.Dapper
 
         public ConnectionFactory()
         {
-            _connectionCache = new ConcurrentDictionary<Thread, Dictionary<string, ConnectionStruct>>();
+            _connectionCache = new ConcurrentDictionary<Thread, Lazy<Dictionary<string, ConnectionStruct>>>();
             _logger = LogManager.Logger<ConnectionFactory>();
             //配置文件改变时，清空缓存
             ConfigHelper.Instance.ConfigChanged += name =>
@@ -63,8 +63,9 @@ namespace Acb.Dapper
                 return;
             foreach (var key in _connectionCache.Keys)
             {
-                if (!_connectionCache.TryGetValue(key, out var connDict))
+                if (!_connectionCache.TryGetValue(key, out var lazyDict))
                     continue;
+                var connDict = lazyDict.Value;
                 foreach (var name in connDict.Keys)
                 {
                     if (key.IsAlive && connDict[name].IsAlive())
@@ -77,8 +78,9 @@ namespace Acb.Dapper
                         conn?.Dispose();
                     }
                 }
+
                 if (connDict.Count == 0)
-                    _connectionCache.TryRemove(key, out connDict);
+                    _connectionCache.TryRemove(key, out _);
             }
             _logger.Debug(ToString());
         }
@@ -113,11 +115,16 @@ namespace Acb.Dapper
                 }
                 var key = config.ConnectionString.Md5();
                 var connectionKey = Thread.CurrentThread;
-
-                if (!_connectionCache.TryGetValue(connectionKey, out var connDict))
+                Dictionary<string, ConnectionStruct> connDict;
+                if (_connectionCache.TryGetValue(connectionKey, out var lazyDict))
+                {
+                    connDict = lazyDict.Value;
+                }
+                else
                 {
                     connDict = new Dictionary<string, ConnectionStruct>();
-                    if (!_connectionCache.TryAdd(connectionKey, connDict))
+                    if (!_connectionCache.TryAdd(connectionKey,
+                        new Lazy<Dictionary<string, ConnectionStruct>>(() => connDict)))
                     {
                         throw new Exception("Can not set db connection!");
                     }
@@ -172,7 +179,7 @@ namespace Acb.Dapper
         }
 
         /// <summary> 缓存总数/// </summary>
-        public int Count => _connectionCache.Sum(t => t.Value.Count);
+        public int Count => _connectionCache.Sum(t => t.Value.Value.Count);
 
         /// <summary> 连接缓存信息 </summary>
         /// <returns></returns>
@@ -186,7 +193,7 @@ namespace Acb.Dapper
             sb.AppendLine($"线程数：{proc.Threads.Count}");
             foreach (var connectionStruct in _connectionCache)
             {
-                foreach (var item in connectionStruct.Value)
+                foreach (var item in connectionStruct.Value.Value)
                 {
                     sb.AppendLine(item.ToString());
                 }

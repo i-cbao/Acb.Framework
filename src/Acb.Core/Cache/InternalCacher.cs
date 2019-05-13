@@ -20,7 +20,7 @@ namespace Acb.Core.Cache
         public InternalCacher(string region, CacheLevel level, double expireMinutes)
         {
             _caches = CacheManager.Providers.Where(m => m.Value != null && (m.Key & level) > 0)
-                .ToDictionary(k => k.Key, v => v.Value.GetCache(region));
+                .ToDictionary(k => k.Key, v => v.Value.Value.GetCache(region));
             if (_caches.Count == 0)
             {
                 Logger.Warn("no cache provider！");
