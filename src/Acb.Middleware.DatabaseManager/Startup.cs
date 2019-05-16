@@ -1,13 +1,7 @@
-﻿using Acb.Core.Domain;
-using Acb.Dapper;
-using Acb.Middleware.DatabaseManager.Domain;
-using Acb.Middleware.DatabaseManager.Domain.Services;
-using Acb.WebApi;
+﻿using Acb.WebApi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using MySql.Data.MySqlClient;
-using Npgsql;
 
 namespace Acb.Middleware.DatabaseManager
 {
@@ -28,10 +22,6 @@ namespace Acb.Middleware.DatabaseManager
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
             }
 
             app.UseStaticFiles();

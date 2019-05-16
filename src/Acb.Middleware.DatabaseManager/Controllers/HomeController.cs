@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Acb.Core;
+﻿using Acb.Core;
+using Acb.Core.Logging;
 using Acb.Middleware.DatabaseManager.Domain;
 using Acb.Middleware.DatabaseManager.Domain.Models;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Acb.Middleware.DatabaseManager.Controllers
 {
@@ -43,6 +42,7 @@ namespace Acb.Middleware.DatabaseManager.Controllers
             {
                 ViewBag.DbName = ex.Message;
                 ViewBag.Name = name;
+                LogManager.Logger<HomeController>().Error(ex.Message, ex);
                 return View(new List<Table>());
             }
         }

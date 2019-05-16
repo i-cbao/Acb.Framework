@@ -13,6 +13,8 @@ namespace Acb.Dapper.Domain
     {
         /// <summary> 仓储数据库实体类型 </summary>
         protected Type ModelType { get; }
+
+        /// <summary> 构造函数 </summary>
         public DapperRepository() : this(CurrentIocManager.Resolve<IUnitOfWork>()) { }
 
         /// <summary> 构造 </summary>
@@ -22,7 +24,7 @@ namespace Acb.Dapper.Domain
             ModelType = typeof(T);
         }
 
-        /// <summary> SELECT语句构建 </summary>
+        /// <summary> 当前SELECT语句构建 </summary>
         /// <param name="where">where</param>
         /// <param name="orderby">order by</param>
         /// <param name="excepts">排除字段</param>

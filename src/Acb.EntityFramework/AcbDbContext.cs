@@ -8,41 +8,54 @@ namespace Acb.EntityFramework
 {
     public abstract class AcbDbContext : DbContext, IUnitOfWork
     {
-        private static readonly ILogger Logger = LogManager.Logger<AcbDbContext>();
+        protected readonly ILogger Logger;
+        private bool _closeabel;
+
+        protected AcbDbContext()
+        {
+            Id = Guid.NewGuid();
+            Logger = LogManager.Logger<AcbDbContext>();
+        }
 
         public Guid Id { get; }
 
-        public IDbConnection Connection { get; }
+        public IDbConnection Connection => CreateConnection();
+
         public IDbConnection CreateConnection()
         {
-            throw new NotImplementedException();
+            return Database.GetDbConnection();
         }
 
-        public IDbTransaction Transaction { get; }
-        public bool IsTransaction { get; set; }
+        public IDbTransaction Transaction { get; private set; }
+        public bool IsTransaction => Transaction != null;
         public bool Begin(IsolationLevel? level = null)
         {
-            throw new NotImplementedException();
+            if (IsTransaction)
+                return false;
+            var conn = Connection;
+            _closeabel = conn.State == ConnectionState.Closed;
+            if (_closeabel)
+                conn.Open();
+            Logger.Debug($"{GetType().Name}[{Id}] Begin Transaction");
+            Transaction = level.HasValue
+                ? conn.BeginTransaction(level.Value)
+                : conn.BeginTransaction();
+            return true;
         }
 
         public void Commit()
         {
-            throw new NotImplementedException();
+            Transaction?.Commit();
+            Logger.Debug($"{GetType().Name}[{Id}] Commit Transaction");
+            Dispose();
         }
 
         public void Rollback()
         {
-            throw new NotImplementedException();
-        }
+            Transaction?.Rollback();
+            Logger.Debug($"{GetType().Name}[{Id}] Rollback Transaction");
 
-        public void BeginTransaction(Action action, IsolationLevel? level = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public T BeginTransaction<T>(Func<T> func, IsolationLevel? level = null)
-        {
-            throw new NotImplementedException();
+            Dispose();
         }
 
         #region 私有方法

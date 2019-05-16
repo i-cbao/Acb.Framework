@@ -31,7 +31,7 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
                 "( CASE WHEN Col.Is_Nullable = 'NO' THEN 0 ELSE 1 END ) AS IsNullable," +
                 "( CASE WHEN Col.Column_Key = 'PRI' THEN 1 ELSE 0 END ) AS IsPrimaryKey," +
                 "( CASE WHEN Col.Extra = 'auto_increment' THEN 1 ELSE 0 END ) AS AutoIncrement,Col.Column_Comment AS `Description` " +
-                "FROM Information_Schema.COLUMNS AS Col Select Table_Schema =?dbName and Table_Name =?table; ";
+                "FROM Information_Schema.COLUMNS AS Col WHERE Table_Schema =?dbName and Table_Name =?table; ";
             return Connection.QueryAsync<Column>(sql, new { table, dbName = Connection.Database });
         }
     }

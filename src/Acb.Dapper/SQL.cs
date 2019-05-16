@@ -76,26 +76,24 @@ namespace Acb.Dapper
         }
 
         /// <summary> 是否是更新操作 </summary>
-        /// <returns></returns>
         public bool IsChange()
         {
             return Regex.IsMatch(_sqlBuilder.ToString(), "((insert)|(update)|(delete))\\s+", RegexOptions.IgnoreCase);
         }
 
+        /// <summary> 是否新增操作 </summary>
         public bool IsInsert()
         {
             return Regex.IsMatch(_sqlBuilder.ToString(), "insert\\s+", RegexOptions.IgnoreCase);
         }
 
         /// <summary> 是否是查询操作 </summary>
-        /// <returns></returns>
         public bool IsSelect()
         {
             return !IsChange() && Regex.IsMatch(_sqlBuilder.ToString(), "select\\s+", RegexOptions.IgnoreCase);
         }
 
         /// <summary> 获取查询列 </summary>
-        /// <returns></returns>
         private static string Columns(string sql)
         {
             var match = Regex.Match(sql,

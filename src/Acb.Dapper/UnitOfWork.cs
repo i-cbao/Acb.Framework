@@ -17,13 +17,14 @@ namespace Acb.Dapper
 
         private bool _closeabel;
 
+        /// <inheritdoc />
         public Guid Id { get; }
         private readonly string _configName;
 
         private readonly string _connectionString;
         private readonly string _providerName;
 
-        private static readonly object SyncObj = new object();
+        //private static readonly object SyncObj = new object();
 
         private UnitOfWork()
         {
@@ -63,8 +64,12 @@ namespace Acb.Dapper
         /// <summary> 当前事务 </summary>
         public IDbTransaction Transaction { get; private set; }
 
+        /// <summary> 是否开启事务 </summary>
         public bool IsTransaction => Transaction != null;
 
+        /// <summary> 开始事务 </summary>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public bool Begin(IsolationLevel? level = null)
         {
             if (IsTransaction)
@@ -80,6 +85,8 @@ namespace Acb.Dapper
             return true;
         }
 
+        /// <summary> 创建连接 </summary>
+        /// <returns></returns>
         public IDbConnection CreateConnection()
         {
             return string.IsNullOrWhiteSpace(_connectionString)
@@ -87,6 +94,7 @@ namespace Acb.Dapper
                 : _factory.Connection(_connectionString, _providerName);
         }
 
+        /// <summary> 提交事务 </summary>
         public void Commit()
         {
             Transaction?.Commit();
@@ -94,6 +102,7 @@ namespace Acb.Dapper
             Dispose();
         }
 
+        /// <summary> 回滚事务 </summary>
         public void Rollback()
         {
             Transaction?.Rollback();
@@ -102,6 +111,7 @@ namespace Acb.Dapper
             Dispose();
         }
 
+        /// <summary> 资源释放 </summary>
         public void Dispose()
         {
             _logger.Debug($"{GetType().Name}[{Id}] Dispose UnitOfWork");
@@ -115,9 +125,9 @@ namespace Acb.Dapper
 
             if (_connections.Count > 0)
             {
-                foreach (var conn in _connections)
+                foreach (var conn in _connections.Values)
                 {
-                    conn.Value.Value.Close();
+                    conn.Value.Close();
                 }
             }
 

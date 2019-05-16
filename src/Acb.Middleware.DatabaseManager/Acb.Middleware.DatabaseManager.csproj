@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Acb.Core\Acb.Core.csproj" />
     <ProjectReference Include="..\Acb.Dapper.MySql\Acb.Dapper.MySql.csproj" />
     <ProjectReference Include="..\Acb.Dapper.PostgreSql\Acb.Dapper.PostgreSql.csproj" />
@@ -36,6 +32,16 @@
 
   <ItemGroup>
     <None Include="wwwroot\favicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Dockerfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

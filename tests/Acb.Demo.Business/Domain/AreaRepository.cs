@@ -5,11 +5,13 @@ using Acb.Demo.Business.Domain.Entities;
 using Dapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Acb.Core.Domain;
 
 namespace Acb.Demo.Business.Domain
 {
     public class AreaRepository : DapperRepository<TAreas>
     {
+        public AreaRepository(IUnitOfWork unitOfWork) : base(unitOfWork) { }
         public async Task<IEnumerable<TAreas>> QueryAreaAsync(string parentCode = null)
         {
             var sql = Select("[parent_code]=@parentCode");

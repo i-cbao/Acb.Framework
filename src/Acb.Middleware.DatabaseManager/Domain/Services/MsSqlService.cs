@@ -18,24 +18,24 @@ namespace Acb.Middleware.DatabaseManager.Domain.Services
         protected override Task<IEnumerable<Table>> QueryTableAsync()
         {
             const string sql =
-                "Select Obj.object_id As Id,Obj.name As Name,(Case Obj.type When 'V' Then 'View' Else 'Table' End) As Type," +
+                "SELECT Obj.object_id As Id,Obj.name As Name,(Case Obj.type When 'V' Then 'View' Else 'Table' End) As Type," +
                 "EPObj.value As [Description] From Sys.Objects Obj " +
                 "Left Join Sys.Extended_Properties EPObj On EPObj.major_id = Obj.object_id And EPObj.minor_id = 0 And EPObj.name = 'MS_Description' " +
-                "Select Obj.type In('U','V') And Obj.is_ms_shipped = 0";
+                "WHERE Obj.type In('U','V') And Obj.is_ms_shipped = 0";
             return Connection.QueryAsync<Table>(sql);
         }
 
         protected override Task<IEnumerable<Column>> QueryColumnAsync(string table, int? tableId = null)
         {
             const string sql =
-                "Select Col.column_id As Id, Col.object_id As TableId,Col.name As Name,Tp.name As DbType," +
+                "SELECT Col.column_id As Id, Col.object_id As TableId,Col.name As Name,Tp.name As DbType," +
                 "Col.max_length As DataLength,EPCol.value As Description,Col.is_nullable As IsNullable," +
                 "Col.is_identity As AutoIncrement,IsNull(" +
                 "(Select Top 1 1 From INFORMATION_SCHEMA.KEY_COLUMN_USAGE " +
                 "Select Table_Name = @table And Col.name = Column_Name),0) IsPrimaryKey " +
                 "From Sys.Columns Col Left Join Sys.Extended_Properties EPCol On EPCol.major_id = Col.object_id " +
                 "And EPCol.minor_id = Col.column_id Left Join Sys.Types Tp On Tp.system_type_id = Col.system_type_id " +
-                "Select TP.name != 'sysname' And Col.object_id = @tableId Order By Col.column_id Asc";
+                "WHERE TP.name != 'sysname' And Col.object_id = @tableId Order By Col.column_id Asc";
             return Connection.QueryAsync<Column>(sql, new { table, tableId });
         }
     }

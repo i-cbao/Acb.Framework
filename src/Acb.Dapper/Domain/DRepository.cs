@@ -32,6 +32,7 @@ namespace Acb.Dapper.Domain
             LogManager.Logger<DRepository>().Debug($"{GetType().Name} Create");
         }
 
+
         /// <summary> 建议使用Ioc注入的方式 </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
@@ -154,6 +155,20 @@ namespace Acb.Dapper.Domain
             where T : IEntity
         {
             return Connection.Increment<T>(column, key, keyColumn, count, Trans);
+        }
+
+        /// <summary> SELECT语句构建 </summary>
+        /// <param name="where">where</param>
+        /// <param name="orderby">order by</param>
+        /// <param name="excepts">排除字段</param>
+        /// <param name="includes">包含字段</param>
+        /// <param name="tableAlias">表别名</param>
+        /// <returns></returns>
+        public string Select<TModel>(string where, string orderby = null, string[] excepts = null,
+            string[] includes = null, string tableAlias = null)
+            where TModel : IEntity
+        {
+            return typeof(TModel).Select(where, orderby, excepts, includes, tableAlias);
         }
     }
 }

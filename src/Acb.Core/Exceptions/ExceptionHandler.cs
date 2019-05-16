@@ -20,12 +20,18 @@ namespace Acb.Core.Exceptions
             public string Message { private get; set; }
             public string Url { private get; set; }
             public string Form { private get; set; }
+            public string Token { private get; set; }
 
             public override string ToString()
             {
-                if (string.IsNullOrWhiteSpace(Url))
-                    return Message;
-                return string.IsNullOrWhiteSpace(Form) ? $"{Message},url:{Url}" : $"{Message},url:{Url},form:{Form}";
+                var msg = Message;
+                if (!string.IsNullOrWhiteSpace(Url))
+                    msg += $",url:{Url}";
+                if (!string.IsNullOrWhiteSpace(Form))
+                    msg += $",form:{Form}";
+                if (!string.IsNullOrWhiteSpace(Token))
+                    msg += $",token:{Token}";
+                return msg;
             }
         }
 
@@ -71,6 +77,10 @@ namespace Acb.Core.Exceptions
                         {
                             msg.Form = requestBody;
                         }
+
+                        if (AcbHttpContext.Current.Request.Headers.TryGetValue("Authorization", out var authorize) &&
+                            !string.IsNullOrWhiteSpace(authorize))
+                            msg.Token = authorize;
                     }
 
                     Logger.Error(msg.ToString(), ex);

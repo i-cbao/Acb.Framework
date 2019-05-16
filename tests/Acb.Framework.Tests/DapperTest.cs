@@ -25,9 +25,9 @@ namespace Acb.Framework.Tests
 
         public DapperTest()
         {
-            _areaRepository = Resolve<AreaRepository>();
-            _factory = Resolve<IDbConnectionProvider>();
-            _demoService = Resolve<IDemoService>();
+            //_areaRepository = Resolve<AreaRepository>();
+            //_factory = Resolve<IDbConnectionProvider>();
+            //_demoService = Resolve<IDemoService>();
         }
 
         protected override void MapServices(IServiceCollection services)
@@ -144,12 +144,12 @@ AND u.create_time >=""2018 / 05 / 10""
         {
             using (var scope = new LifetimeScopeManager())
             {
-                var uw = scope.Resolve<IUnitOfWork>();
+                //var uw = scope.Resolve<IUnitOfWork>();
                 var result = await CodeTimer.Time("test", 10, async () =>
                 {
                     var resp = scope.Resolve<AreaRepository>();
                     var list = await resp.QueryAreaAsync("510000");
-                    using (var conn = uw.Connection)
+                    using (var conn = resp.UnitOfWork.Connection)
                     {
                         var t = await conn.QueryByIdAsync<TAreas>("510000");
                         //Print(t);
