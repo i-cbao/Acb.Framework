@@ -10,7 +10,7 @@ namespace Acb.MicroService.Host
     }
 
     /// <summary> 微服务主机 </summary>
-    public class MicroServiceHost<TStartup> where TStartup : Host.MicroServiceStartup
+    public class MicroServiceHost<TStartup> where TStartup : MicroServiceStartup
     {
         protected static event Action<IWebHostBuilder> Builder;
         /// <summary> 开启服务 </summary>

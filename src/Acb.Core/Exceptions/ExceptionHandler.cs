@@ -17,22 +17,12 @@ namespace Acb.Core.Exceptions
 
         private class LogErrorMsg
         {
-            public string Message { private get; set; }
-            public string Url { private get; set; }
-            public string Form { private get; set; }
-            public string Token { private get; set; }
-
-            public override string ToString()
-            {
-                var msg = Message;
-                if (!string.IsNullOrWhiteSpace(Url))
-                    msg += $",url:{Url}";
-                if (!string.IsNullOrWhiteSpace(Form))
-                    msg += $",form:{Form}";
-                if (!string.IsNullOrWhiteSpace(Token))
-                    msg += $",token:{Token}";
-                return msg;
-            }
+            public string Message { get; set; }
+            public string Url { get; set; }
+            public string Form { get; set; }
+            public string Token { get; set; }
+            public string ClientIp { get; set; }
+            public string UserAgent { get; set; }
         }
 
         /// <summary> 异常处理 </summary>
@@ -60,6 +50,8 @@ namespace Acb.Core.Exceptions
                     if (AcbHttpContext.Current != null)
                     {
                         msg.Url = AcbHttpContext.RawUrl;
+                        msg.ClientIp = AcbHttpContext.ClientIp;
+                        msg.UserAgent = AcbHttpContext.UserAgent;
                         if (string.IsNullOrWhiteSpace(requestBody))
                         {
                             var input = AcbHttpContext.Body;
@@ -83,7 +75,7 @@ namespace Acb.Core.Exceptions
                             msg.Token = authorize;
                     }
 
-                    Logger.Error(msg.ToString(), ex);
+                    Logger.Error(msg, ex);
                     result = ErrorCodes.SystemError.CodeResult();
                     break;
             }

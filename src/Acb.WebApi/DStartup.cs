@@ -127,6 +127,8 @@ namespace Acb.WebApi
 
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            LogManager.AddAdapter(new ConsoleAdapter());
+
             AddSwagger(services);
 
             services
@@ -149,13 +151,14 @@ namespace Acb.WebApi
 
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             MapServices(services);
+
             Bootstrap.BuilderHandler += builder =>
             {
                 builder.Populate(services);
                 MapServices(builder);
             };
             Bootstrap.Initialize();
-            LogManager.AddAdapter(new ConsoleAdapter());
+
             return new AutofacServiceProvider(Bootstrap.Container);
         }
 

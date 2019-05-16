@@ -1,5 +1,5 @@
-﻿using Acb.Core.Logging;
-using Acb.Core.Serialize;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Logging;
 using log4net.Core;
 using System;
 using ILogger = log4net.Core.ILogger;
@@ -16,19 +16,16 @@ namespace Acb.Framework.Logging
 
         protected override void WriteInternal(LogLevel level, object message, Exception exception)
         {
-            string str;
             if (message == null)
-                str = "NULL";
+                message = "NULL";
             else
             {
                 var type = message.GetType();
-                if (type.IsValueType || type == typeof(string))
-                    str = message.ToString();
-                else
-                    str = JsonHelper.ToJson(message);
+                if (type.IsSimpleType())
+                    message = message.ToString();
             }
 
-            _logger.Log(typeof(Log4NetLog), ParseLevel(level), str, exception);
+            _logger.Log(typeof(Log4NetLog), ParseLevel(level), message, exception);
         }
 
         public override bool IsTraceEnabled => _logger.IsEnabledFor(Level.Trace);

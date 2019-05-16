@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using HttpRequest = Microsoft.AspNetCore.Http.HttpRequest;
@@ -43,6 +46,18 @@ namespace Acb.Core
         public static string GetRealIp()
         {
             return AcbHttpContext.RemoteIpAddress;
+        }
+
+        /// <summary> 获取本地Ip地址 </summary>
+        /// <returns></returns>
+        public static string GetLocalIp()
+        {
+            return NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Select(p => p.GetIPProperties())
+                .SelectMany(p => p.UnicastAddresses)
+                .FirstOrDefault(p => p.Address.AddressFamily == AddressFamily.InterNetwork &&
+                                     !IPAddress.IsLoopback(p.Address))?.Address.ToString();
         }
 
         ///<summary> 判断List值相等</summary>

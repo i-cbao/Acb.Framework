@@ -1,17 +1,30 @@
-﻿using Acb.Core.Logging;
+﻿using Acb.Core.Extensions;
+using log4net;
 using log4net.Appender;
 using log4net.Core;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using Acb.Core;
+using ILogger = Acb.Core.Logging.ILogger;
+using LogManager = Acb.Core.Logging.LogManager;
 
 namespace Acb.Framework.Logging
 {
     internal class TcpAppender : AppenderSkeleton
     {
         private int _remotePort;
-        private readonly Core.Logging.ILogger _logger = LogManager.Logger<TcpAppender>();
+        private readonly ILogger _logger;
+
+        public TcpAppender()
+        {
+            _logger = LogManager.Logger<TcpAppender>();
+        }
 
         public IPAddress RemoteAddress { get; set; }
 
@@ -57,9 +70,40 @@ namespace Acb.Framework.Logging
         {
             try
             {
+                if (Client == null)
+                    InitializeClientConnection();
                 var ntwStream = Client.GetStream();
+                var dict = new Dictionary<string, object>
+                {
+                    {"date", loggingEvent.TimeStamp},
+                    {"level", loggingEvent.Level.DisplayName},
+                    {"site", GlobalContext.Properties["LogSite"]},
+                    {"logger", loggingEvent.LoggerName},
+                    {"exception", loggingEvent.ExceptionObject?.Format()},
+                    {"host", Utils.GetLocalIp()}
+                };
+                if (loggingEvent.MessageObject != null)
+                {
+                    if (loggingEvent.MessageObject.GetType().IsSimpleType())
+                    {
+                        dict.Add("msg", loggingEvent.MessageObject);
+                    }
+                    else
+                    {
+                        foreach (var item in loggingEvent.MessageObject.ToDictionary())
+                        {
+                            if (item.Value == null || item.Value.Equals(string.Empty)) continue;
+                            var key = item.Key.ToCamelCase();
+                            //替换关键的message键
+                            if (key == "message") key = "msg";
+                            dict.AddOrUpdate(key, item.Value);
+                        }
+                    }
+                }
+                //需要添加\n
+                var bytes = Encoding.GetBytes(JsonConvert.SerializeObject(dict) + "\n");
                 //var aa = RenderLoggingEvent(loggingEvent).ToCharArray();
-                var bytes = Encoding.GetBytes(RenderLoggingEvent(loggingEvent).ToCharArray());
+                //var bytes = Encoding.GetBytes(RenderLoggingEvent(loggingEvent).ToCharArray());
                 ntwStream.Write(bytes, 0, bytes.Length);
             }
             catch (Exception ex)
@@ -82,6 +126,7 @@ namespace Acb.Framework.Logging
             try
             {
                 Client = new TcpClient(RemoteAddress.ToString(), RemotePort);
+                _logger.Info($"开启分布式日志组件:{RemoteAddress}:{RemotePort}");
             }
             catch (Exception ex)
             {

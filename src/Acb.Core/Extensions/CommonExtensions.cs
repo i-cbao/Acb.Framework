@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
@@ -199,6 +200,21 @@ namespace Acb.Core.Extensions
         {
             var services = provider.GetServices<T>();
             return services.First(t => t.GetType().PropName() == name);
+        }
+
+        /// <summary> 模型验证 </summary>
+        /// <param name="obj"></param>
+        /// <param name="items"></param>
+        public static void Validate(this object obj, Dictionary<object, object> items = null)
+        {
+            if (obj == null) return;
+            var validationContext = new ValidationContext(obj, items);
+            var results = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(obj, validationContext, results, true);
+
+            if (isValid) return;
+            var error = results.First();
+            throw new ArgumentNullException(error.MemberNames.FirstOrDefault(), error.ErrorMessage);
         }
     }
 }

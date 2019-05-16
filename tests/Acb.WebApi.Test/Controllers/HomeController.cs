@@ -12,6 +12,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Acb.Core.Dependency;
 using Acb.Core.EventBus;
+using Newtonsoft.Json;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -48,8 +49,15 @@ namespace Acb.WebApi.Test.Controllers
             Response.Clear();
             var n = key.Replace("-", ":").Config<string>();
             _logger.Info(n);
-            _logger.Error(n, new Exception("ex test"));
-            return await Task.FromResult(Succ($"hello {n}"));
+            throw new Exception(n);
+            //_logger.Error(new
+            //{
+            //    msg = n,
+            //    url = "http://www.baidu.com",
+            //    form = "a=1",
+            //    token = "acb 123456"
+            //}, new Exception("ex test"));
+            //return await Task.FromResult(Succ($"hello {n}"));
         }
 
         // POST api/values
