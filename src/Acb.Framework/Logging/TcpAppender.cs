@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using log4net;
 using log4net.Appender;
 using log4net.Core;
@@ -7,10 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using Acb.Core;
 using ILogger = Acb.Core.Logging.ILogger;
 using LogManager = Acb.Core.Logging.LogManager;
 
@@ -72,6 +71,8 @@ namespace Acb.Framework.Logging
             {
                 if (Client == null)
                     InitializeClientConnection();
+                if (Client == null)
+                    return;
                 var ntwStream = Client.GetStream();
                 var dict = new Dictionary<string, object>
                 {

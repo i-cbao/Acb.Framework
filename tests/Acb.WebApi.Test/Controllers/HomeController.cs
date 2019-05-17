@@ -1,4 +1,6 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
+using Acb.Core.EventBus;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Office;
@@ -10,9 +12,6 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using Acb.Core.Dependency;
-using Acb.Core.EventBus;
-using Newtonsoft.Json;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -20,12 +19,14 @@ namespace Acb.WebApi.Test.Controllers
     public class HomeController : BaseController
     {
         private readonly ILogger _logger;
+        private readonly IRemoteLogger _remoteLogger;
         private readonly IHubContext<MessageHub> _messageHub;
 
-        public HomeController(IHubContext<MessageHub> mhub)
+        public HomeController(IHubContext<MessageHub> mhub, IRemoteLogger remoteLogger)
         {
             _messageHub = mhub;
             _logger = LogManager.Logger<HomeController>();
+            _remoteLogger = remoteLogger;
             var bus = CurrentIocManager.Resolve<IEventBus>();
         }
 
@@ -49,15 +50,18 @@ namespace Acb.WebApi.Test.Controllers
             Response.Clear();
             var n = key.Replace("-", ":").Config<string>();
             _logger.Info(n);
-            throw new Exception(n);
-            //_logger.Error(new
-            //{
-            //    msg = n,
-            //    url = "http://www.baidu.com",
-            //    form = "a=1",
-            //    token = "acb 123456"
-            //}, new Exception("ex test"));
-            //return await Task.FromResult(Succ($"hello {n}"));
+            //throw new Exception(n);
+            var obj = new
+            {
+                msg = n,
+                url = "http://www.baidu.com",
+                form = "a=1",
+                token = "acb 123456"
+            };
+            var ex = new Exception("ex test");
+            await _remoteLogger.Logger(obj, LogLevel.Info, ex, logger: GetType().FullName);
+            //_logger.Error(obj, ex);
+            return await Task.FromResult(Succ($"hello {n}"));
         }
 
         // POST api/values

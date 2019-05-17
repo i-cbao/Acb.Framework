@@ -1,6 +1,5 @@
 ﻿using Acb.Core.Cache;
 using Acb.Core.Exceptions;
-using Acb.WebApi.Filters;
 using Acb.WebApi.Test.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
