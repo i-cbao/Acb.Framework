@@ -50,7 +50,7 @@ namespace Acb.Core.Logging
             }
             catch (Exception ex)
             {
-                _logger.Warn($"Could not initialize the UdpClient connection on  {host}:{port}.", ex);
+                _logger.Warn($"Could not initialize the UdpClient connection on  {host}:{port}.{ex.Format()}");
                 _client = null;
             }
         }
@@ -70,6 +70,8 @@ namespace Acb.Core.Logging
             {
                 if (_client == null)
                     CreateClient();
+                if (_client == null)
+                    return;
                 var ntwStream = _client.GetStream();
                 var dict = new Dictionary<string, object>
                 {

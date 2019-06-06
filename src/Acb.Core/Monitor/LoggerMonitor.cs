@@ -5,13 +5,12 @@ namespace Acb.Core.Monitor
 {
     public class LoggerMonitor : IMonitor
     {
-        public async Task Record(string service, string url, string from, long milliseconds, string data = null, string userAgent = null,
-            string clientIp = null)
+        public async Task Record(MonitorData data)
         {
             await Task.Run(() =>
             {
                 var logger = LogManager.Logger<LoggerMonitor>();
-                logger.Info($"[{service}],{url},{milliseconds}ms,from:{from},data:{data},{userAgent},{clientIp}");
+                logger.Info(data.ToString());
             });
 
         }

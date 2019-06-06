@@ -21,6 +21,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void GetTest()
         {
+            var redis1 = RedisManager.Instance.GetDatabase();
             ThreadPool.GetMinThreads(out var min, out var compt);
             Print($"最小线程数：{min},{compt}");
             //ThreadPool.SetMinThreads(300, compt);

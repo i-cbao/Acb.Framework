@@ -8,11 +8,11 @@ namespace Acb.Core
     public class Singleton
     {
         /// <summary> 所有单例 </summary>
-        protected static ConcurrentDictionary<Type, Lazy<object>> AllSingletons { get; }
+        protected static ConcurrentDictionary<Type, object> AllSingletons { get; }
 
         static Singleton()
         {
-            AllSingletons = new ConcurrentDictionary<Type, Lazy<object>>();
+            AllSingletons = new ConcurrentDictionary<Type, object>();
         }
     }
 
@@ -26,15 +26,11 @@ namespace Acb.Core
             get
             {
                 if (AllSingletons.TryGetValue(typeof(T), out var instance))
-                    return (T)instance.Value;
+                    return (T)instance;
+
                 return default(T);
             }
-            set
-            {
-                var lazy = new Lazy<object>(() => value);
-                AllSingletons.AddOrUpdate(typeof(T), lazy,
-                    (type, obj) => new Lazy<object>(() => value == null ? obj : lazy));
-            }
+            set => AllSingletons.AddOrUpdate(typeof(T), value, (type, obj) => value == null ? obj : value);
         }
     }
 

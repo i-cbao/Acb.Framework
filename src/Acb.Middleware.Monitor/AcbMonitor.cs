@@ -1,5 +1,4 @@
-﻿using Acb.Core.Dependency;
-using Acb.Core.Extensions;
+﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Monitor;
 using Acb.Core.Timing;
@@ -11,8 +10,15 @@ using System.Threading.Tasks;
 
 namespace Acb.Middleware.Monitor
 {
-    internal class AcbMonitor : IMonitor
+    public class AcbMonitor : IMonitor
     {
+        private readonly MonitorRepository _repository;
+
+        public AcbMonitor(MonitorRepository repository)
+        {
+            _repository = repository;
+        }
+
         /// <summary> unescape </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -40,22 +46,21 @@ namespace Acb.Middleware.Monitor
             return sb.ToString();
         }
 
-        public async Task Record(string service, string url, string @from, long milliseconds, string data = null, string userAgent = null,
-            string clientIp = null)
+        public async Task Record(MonitorData data)
         {
             var model = new TMonitor
             {
                 Id = IdentityHelper.Guid32,
-                Service = service,
-                Url = url,
-                Data = UnEscape(data ?? string.Empty),
-                Referer = from,
-                UserAgent = userAgent,
-                ClientIp = clientIp,
-                Time = milliseconds,
+                Service = data.Service,
+                Url = data.Url,
+                Data = UnEscape(data.Data ?? string.Empty),
+                Referer = data.Referer,
+                UserAgent = data.UserAgent,
+                ClientIp = data.ClientIp,
+                Time = data.Time,
                 CreateTime = Clock.Now
             };
-            await CurrentIocManager.Resolve<MonitorRepository>().InsertAsync(model);
+            await _repository.InsertAsync(model);
         }
     }
 }

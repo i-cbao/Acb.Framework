@@ -1,42 +1,55 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Timing;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Acb.Core.Monitor
 {
     /// <summary> 监控管理 </summary>
-    public static class MonitorManager
+    public class MonitorManager
     {
-        /// <summary> 监控列表 </summary>
-        private static readonly ConcurrentDictionary<RuntimeTypeHandle, Lazy<IMonitor>> Monitors;
+        private const string EnableMonitorEnv = "ENABLE_MONITOR";
+        private readonly IEnumerable<IMonitor> _monitors;
 
-        static MonitorManager()
+        public MonitorManager(IEnumerable<IMonitor> monitors)
         {
-            Monitors = new ConcurrentDictionary<RuntimeTypeHandle, Lazy<IMonitor>>();
+            _monitors = monitors;
         }
 
-        /// <summary> 添加适配 </summary>
-        public static void Add(IMonitor monitor)
+        public void Record(MonitorData data)
         {
-            var key = monitor.GetType().TypeHandle;
-            if (Monitors.ContainsKey(key)) return;
-            Monitors.TryAdd(key, new Lazy<IMonitor>(() => monitor));
-        }
-
-        /// <summary> 获取监控 </summary>
-        /// <returns></returns>
-        public static DMonitor Monitor()
-        {
-            return new DMonitor();
-        }
-
-        internal static void Each(Action<IMonitor> monitorAction)
-        {
-            if (Monitors == null || !Monitors.Any())
+            if (_monitors == null || !_monitors.Any())
                 return;
-            foreach (var monitor in Monitors)
+            var enabled = "monitor".Config(EnableMonitorEnv.Env(false));
+            if (!enabled)
+                return;
+            Task.Run(() =>
             {
-                monitorAction?.Invoke(monitor.Value.Value);
+                foreach (var monitor in _monitors)
+                {
+                    monitor.Record(data);
+                }
+            });
+        }
+
+        public void MonitorAction(Action<MonitorData> action, string service = null)
+        {
+            var data = new MonitorData(service);
+            try
+            {
+                action.Invoke(data);
+            }
+            catch (Exception ex)
+            {
+                data.Code = 500;
+                data.Result = ex.Message;
+            }
+            finally
+            {
+                data.CompleteTime = Clock.Now;
+                Record(data);
             }
         }
     }

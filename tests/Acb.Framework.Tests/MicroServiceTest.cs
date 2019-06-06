@@ -4,6 +4,7 @@ using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Message;
+using Acb.Core.Monitor;
 using Acb.Core.Serialize;
 using Acb.Core.Tests;
 using Acb.Core.Timing;
@@ -13,6 +14,7 @@ using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.Enums;
 using Acb.MicroService;
 using Acb.MicroService.Client;
+using Acb.Middleware.Monitor;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -39,6 +41,7 @@ namespace Acb.Framework.Tests
             //services.AddProtoBufferCodec();
             services.AddMicroRouter();
             //services.AddMicroClient();
+            services.AddMonitor(typeof(LoggerMonitor), typeof(AcbMonitor));
             base.MapServices(services);
         }
 

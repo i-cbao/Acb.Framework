@@ -45,6 +45,8 @@ namespace Acb.MicroService.Host
         /// <returns></returns>
         public virtual IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            LogManager.AddAdapter(new ConsoleAdapter());
+
             services.AddMvc(options =>
             {
                 //自定义异常捕获
@@ -69,7 +71,6 @@ namespace Acb.MicroService.Host
                 MapServices(builder);
             };
             _bootstrap.Initialize();
-            LogManager.AddAdapter(new ConsoleAdapter());
             return new AutofacServiceProvider(_bootstrap.Container);
         }
 

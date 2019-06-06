@@ -1,8 +1,10 @@
-﻿using Acb.Dapper;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Monitor;
+using Acb.Dapper;
 using Acb.MicroService.Host;
+using Acb.Middleware.Monitor;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Acb.Core.EventBus;
 
 namespace Acb.Demo.MicroService
 {
@@ -18,6 +20,7 @@ namespace Acb.Demo.MicroService
 
             //services.AddMessagePackCodec();
             //services.AddRedisEventBus();
+            services.AddMonitor(typeof(LoggerMonitor), typeof(AcbMonitor));
             base.MapServices(services);
         }
 

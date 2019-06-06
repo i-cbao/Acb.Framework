@@ -25,6 +25,7 @@
     <PackageReference Include="Autofac.Extras.DynamicProxy" Version="4.5.0" />
     <PackageReference Include="AutoMapper" Version="6.2.2" />
     <PackageReference Include="Consul" Version="0.7.2.6" />
+    <PackageReference Include="FastDFSNetCore" Version="1.2.3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Microsoft.ML" Version="0.9.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
@@ -43,6 +44,7 @@
     <ProjectReference Include="..\..\src\Acb.EntityFramework\Acb.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\Acb.Framework\Acb.Framework.csproj" />
     <ProjectReference Include="..\..\src\Acb.MicroService.Client\Acb.MicroService.Client.csproj" />
+    <ProjectReference Include="..\..\src\Acb.Middleware.Monitor\Acb.Middleware.Monitor.csproj" />
     <ProjectReference Include="..\..\src\Acb.MongoDb\Acb.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Acb.Office\Acb.Office.csproj" />
     <ProjectReference Include="..\..\src\Acb.ProxyGenerator\Acb.ProxyGenerator.csproj" />

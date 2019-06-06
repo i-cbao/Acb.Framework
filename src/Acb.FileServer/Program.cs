@@ -1,18 +1,12 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Acb.WebApi;
 
 namespace Acb.FileServer
 {
-    public class Program
+    public class Program : DHost<Startup>
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            Start(args);
         }
-
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
     }
 }

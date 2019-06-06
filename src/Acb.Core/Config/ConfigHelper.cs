@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Acb.Core.Config
 {
@@ -13,6 +14,7 @@ namespace Acb.Core.Config
     {
         private IConfigurationRoot _config;
         private const string ConfigName = "appsettings.json";
+        private const string EnvConfigParttern = "^\\$\\{([^\\}]+)\\}\\s*|\\s*([\\w\\W]+)$";
         private IDisposable _callbackRegistration;
         private IConfigurationBuilder _builder;
 
@@ -71,6 +73,20 @@ namespace Acb.Core.Config
             _config = _builder.Build();
         }
 
+        private T GetEnvOrValue<T>(string value, T defaultValue)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return defaultValue;
+            var match = Regex.Match(value, EnvConfigParttern);
+            if (!match.Success)
+                return value.CastTo(defaultValue);
+            //获取环境变量
+            var env = match.Groups[1].Value.Env(defaultValue);
+            if (env != null && !env.Equals(defaultValue))
+                return env;
+            return match.Groups[2].Value.CastTo(defaultValue);
+        }
+
         /// <summary> 配置文件读取 </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="defaultValue">默认值</param>
@@ -83,11 +99,15 @@ namespace Acb.Core.Config
             if (!string.IsNullOrWhiteSpace(supressKey))
                 key = supressKey;
             var type = typeof(T);
-            if (type.IsSimpleType())
-                return _config.GetValue(key, defaultValue);
-            //枚举类型处理
-            if (type.IsEnum)
-                return _config.GetValue<string>(key).CastTo(defaultValue);
+            if (type.IsSimpleType() || type.IsEnum)
+            {
+                var str = _config.GetValue<string>(key);
+                return GetEnvOrValue(str, defaultValue);
+            }
+
+            ////枚举类型处理
+            //if (type.IsEnum)
+            //    return _config.GetValue<string>(key).CastTo(defaultValue);
             try
             {
                 //区分大小写

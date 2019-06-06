@@ -4,13 +4,13 @@ using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Message;
 using Acb.Core.Monitor;
+using Acb.Core.Timing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -35,9 +35,8 @@ namespace Acb.MicroService.Host
 
         private async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response)
         {
+            var monitorData = new MonitorData("micro_service");
             string requestBody = null;
-            var watcher = new Stopwatch();
-            watcher.Start();
             try
             {
                 var input = request.Body;
@@ -80,6 +79,8 @@ namespace Acb.MicroService.Host
             }
             catch (Exception ex)
             {
+                monitorData.Code = 500;
+                monitorData.Result = ex.Message;
                 var result = ExceptionHandler.Handler(ex, requestBody);
                 if (result == null)
                     return;
@@ -87,12 +88,12 @@ namespace Acb.MicroService.Host
             }
             finally
             {
-                watcher.Stop();
-                var monitor = MonitorManager.Monitor();
-                var url = Utils.RawUrl(request);
-                request.Headers.TryGetValue("referer", out var from);
-                await monitor.Record("micro_service", url, from, watcher.ElapsedMilliseconds, requestBody,
-                    AcbHttpContext.UserAgent, AcbHttpContext.ClientIp);
+                monitorData.Url = Utils.RawUrl(request);
+                monitorData.Data = requestBody;
+                monitorData.CompleteTime = Clock.Now;
+                if (request.Headers.TryGetValue("referer", out var from))
+                    monitorData.Referer = from;
+                _serviceProvider.Monitor(monitorData);
             }
         }
 
@@ -184,8 +185,7 @@ namespace Acb.MicroService.Host
         private async Task Runner(HttpContext ctx, object instance, MethodBase m)
         {
             string requestBody = null;
-            var watcher = new Stopwatch();
-            watcher.Start();
+            var monitorData = new MonitorData("micro_service");
             try
             {
                 var input = ctx.Request.Body;
@@ -227,6 +227,8 @@ namespace Acb.MicroService.Host
             }
             catch (Exception ex)
             {
+                monitorData.Code = 500;
+                monitorData.Result = ex.Message;
                 var result = ExceptionHandler.Handler(ex, requestBody);
                 if (result == null)
                     return;
@@ -234,12 +236,12 @@ namespace Acb.MicroService.Host
             }
             finally
             {
-                watcher.Stop();
-                var monitor = MonitorManager.Monitor();
-                var url = Utils.RawUrl(ctx.Request);
-                ctx.Request.Headers.TryGetValue("referer", out var from);
-                await monitor.Record("micro_service", url, from, watcher.ElapsedMilliseconds, requestBody,
-                    AcbHttpContext.UserAgent, AcbHttpContext.ClientIp);
+                monitorData.Url = Utils.RawUrl(ctx.Request);
+                monitorData.Data = requestBody;
+                monitorData.CompleteTime = Clock.Now;
+                if (ctx.Request.Headers.TryGetValue("referer", out var from))
+                    monitorData.Referer = from;
+                _serviceProvider.Monitor(monitorData);
             }
         }
 

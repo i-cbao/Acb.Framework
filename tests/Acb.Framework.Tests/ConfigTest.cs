@@ -7,6 +7,7 @@ using Acb.MongoDb;
 using log4net.Appender;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using Acb.Core.Domain;
 
 namespace Acb.Framework.Tests
 {
@@ -53,6 +54,13 @@ namespace Acb.Framework.Tests
         {
             var config = "log".Config<RollingFileAppender>();
             Print(config);
+        }
+
+        [TestMethod]
+        public void EnvConfigTest()
+        {
+            var t = "env".Config(ProductMode.Dev);
+            Print(t.ToString());
         }
     }
 }

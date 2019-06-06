@@ -15,6 +15,7 @@ namespace Acb.Core.Config.Center
     /// <summary> 中心配置提供者 </summary>
     internal class ConfigCenterProvider : DConfigProvider, IConfigurationSource
     {
+        private const string AuthorizationKey = "Authorization";
         private CenterConfig _config;
         private readonly bool _reload;
         private IDictionary<string, string> _headers;
@@ -32,12 +33,13 @@ namespace Acb.Core.Config.Center
 
         private async Task LoadTicket()
         {
-            if (string.IsNullOrWhiteSpace(_config.Account))
+            if (string.IsNullOrWhiteSpace(_config.Account) || _headers.ContainsKey(AuthorizationKey))
                 return;
             Logger.Info("正在加载配置中心令牌");
             try
             {
                 var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
+
                 var loginResp = await _httpHelper.PostAsync(loginUrl,
                     new { account = _config.Account, password = _config.Password });
                 var data = await loginResp.Content.ReadAsStringAsync();
@@ -45,7 +47,7 @@ namespace Acb.Core.Config.Center
                 {
                     var json = JsonConvert.DeserializeObject<dynamic>(data);
                     if ((bool)json.ok)
-                        _headers["Authorization"] = $"acb {json.ticket}";
+                        _headers[AuthorizationKey] = $"acb {json.ticket}";
                 }
                 else
                 {
@@ -126,7 +128,7 @@ namespace Acb.Core.Config.Center
         {
             _headers = new Dictionary<string, string>();
             _config = _config ?? CenterConfig.Config();
-            LoadTicket().Wait();
+            LoadTicket().SyncRun();
             StartRefresh();
             return this;
         }
@@ -161,7 +163,7 @@ namespace Acb.Core.Config.Center
                 return;
             if (_reload)
                 _config = CenterConfig.Config();
-            LoadTicket().Wait();
+            LoadTicket().SyncRun();
             StartRefresh();
         }
     }

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.WebApi.Filters;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -44,13 +45,12 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         // GET api/values/5
-        [HttpGet("{key}")]
+        [HttpGet("{key}"), RecordFilter("demo_key")]
         public async Task<DResult<string>> Get(string key)
         {
             Response.Clear();
             var n = key.Replace("-", ":").Config<string>();
             _logger.Info(n);
-            //throw new Exception(n);
             var obj = new
             {
                 msg = n,

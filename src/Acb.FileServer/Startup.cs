@@ -1,30 +1,37 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Acb.FileServer.Helper;
+using Acb.WebApi;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.IO;
+using Microsoft.Extensions.FileProviders;
 
 namespace Acb.FileServer
 {
-    public class Startup
+    public class Startup : DStartup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
+        public override IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<DirectoryHelper>();
+            return base.ConfigureServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public override void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Run(async (context) =>
+            app.UseFileServer(new FileServerOptions
             {
-                await context.Response.WriteAsync("Hello World!");
+                FileProvider = new PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot"))
             });
+            app.UseCors(b => b.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
+            base.Configure(app, env);
         }
     }
 }

@@ -29,7 +29,6 @@ namespace Acb.MicroService.Client.Proxy
     public class HttpProxy : ProxyAsync
     {
         private readonly ILogger _logger = LogManager.Logger(typeof(HttpProxy));
-        private readonly ICache _serviceCache;
         private readonly IServiceRouter _serviceRouter;
 
         /// <summary> 接口类型 </summary>
@@ -40,7 +39,6 @@ namespace Acb.MicroService.Client.Proxy
         public HttpProxy(Type type)
         {
             _type = type;
-            _serviceCache = CacheManager.GetCacher(typeof(HttpProxy));
             _serviceRouter = CurrentIocManager.Resolve<IServiceRouter>();
         }
 
@@ -83,7 +81,7 @@ namespace Acb.MicroService.Client.Proxy
             {
                 if (!services.Any())
                 {
-                    _serviceCache.Remove(_type.Assembly.AssemblyKey());
+                    await _serviceRouter.CleanCache(_type);
                     throw ErrorCodes.NoService.CodeException();
                 }
                 service = services.First();
