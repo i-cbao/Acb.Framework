@@ -1,14 +1,15 @@
 ﻿using Acb.Core.EventBus.Options;
+using Acb.Core.Message;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Acb.Core.Message;
 
 namespace Acb.Core.EventBus
 {
     /// <summary> 事件总线 </summary>
     public interface IEventBus
     {
+        string Name { get; }
         /// <summary> 编解码器 </summary>
         IMessageCodec Codec { get; }
 

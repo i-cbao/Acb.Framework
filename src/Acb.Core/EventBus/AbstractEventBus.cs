@@ -1,7 +1,7 @@
 ﻿using Acb.Core.EventBus.Options;
+using Acb.Core.Message;
 using System;
 using System.Threading.Tasks;
-using Acb.Core.Message;
 
 namespace Acb.Core.EventBus
 {
@@ -10,13 +10,17 @@ namespace Acb.Core.EventBus
         /// <summary> 订阅管理器 </summary>
         protected readonly ISubscribeManager SubscriptionManager;
 
+        /// <summary> 名称 </summary>
+        public string Name { get; }
+
         /// <summary> 编解码器 </summary>
         public IMessageCodec Codec { get; }
 
-        protected AbstractEventBus(ISubscribeManager manager, IMessageCodec messageCodec)
+        protected AbstractEventBus(ISubscribeManager manager, IMessageCodec messageCodec, string name = null)
         {
             SubscriptionManager = manager ?? new DefaultSubscribeManager();
             Codec = messageCodec;
+            Name = name;
         }
 
         public abstract Task Subscribe<T, TH>(Func<TH> handler, SubscribeOption option = null)

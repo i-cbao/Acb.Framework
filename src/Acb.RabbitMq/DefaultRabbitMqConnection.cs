@@ -21,6 +21,7 @@ namespace Acb.RabbitMq
 
         public DefaultRabbitMqConnection(string configName) : this(RabbitMqConfig.Config(configName))
         {
+            Name = configName;
         }
 
         public DefaultRabbitMqConnection(RabbitMqConfig config = null)
@@ -42,6 +43,7 @@ namespace Acb.RabbitMq
             Broker = config.Broker;
         }
 
+        public string Name { get; }
         public string Broker { get; }
         public bool IsConnected => _connection != null && _connection.IsOpen && !_disposed;
 

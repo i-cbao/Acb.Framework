@@ -14,7 +14,7 @@ namespace Acb.Redis
         private readonly ISubscriber _subscriber;
         private const string EventBusName = "eventBus";
         private readonly ILogger _logger;
-        public EventBusRedis(ISubscribeManager manager, IMessageCodec codec, string configName = null) : base(manager, codec)
+        public EventBusRedis(ISubscribeManager manager, IMessageCodec codec, string configName = null) : base(manager, codec, configName)
         {
             configName = string.IsNullOrWhiteSpace(configName) ? EventBusName : configName;
             _subscriber = RedisManager.Instance.GetSubscriber(configName);

@@ -30,7 +30,7 @@ namespace Acb.RabbitMq
         private const string DelayTimesKey = "delay_times";
 
         public EventBusRabbitMq(IRabbitMqConnection connection, ISubscribeManager subsManager, IMessageCodec messageCodec)
-            : base(subsManager, messageCodec)
+            : base(subsManager, messageCodec, connection.Name)
         {
             _connection =
                 connection ?? throw new ArgumentNullException(nameof(connection));

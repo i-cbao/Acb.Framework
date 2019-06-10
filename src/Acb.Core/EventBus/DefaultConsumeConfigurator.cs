@@ -5,17 +5,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Acb.Core.Extensions;
+using Acb.Core.Serialize;
 
 namespace Acb.Core.EventBus
 {
     public class DefaultConsumeConfigurator : IConsumeConfigurator
     {
-        private readonly IEventBus _eventBus;
+        private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
 
-        public DefaultConsumeConfigurator(IEventBus eventBus)
+        public DefaultConsumeConfigurator(IServiceProvider provider)
         {
-            _eventBus = eventBus;
+            _provider = provider;
             _logger = LogManager.Logger<DefaultConsumeConfigurator>();
         }
 
@@ -50,7 +52,10 @@ namespace Acb.Core.EventBus
             where TConsumer : IEventHandler<TEvent>
             where TEvent : class
         {
-            _eventBus.Subscribe<TEvent, TConsumer>(CurrentIocManager.Resolve<TConsumer>);
+            var consumer = CurrentIocManager.Resolve<TConsumer>();
+            var name = consumer.GetType().GetCustomAttribute<NamingAttribute>();
+            var eventBus = _provider.GetEventBus(name?.Name);
+            eventBus.Subscribe<TEvent, TConsumer>(() => consumer);
         }
     }
 }

@@ -7,6 +7,7 @@ namespace Acb.RabbitMq
     /// <summary> MQ连接 </summary>
     public interface IRabbitMqConnection : IDisposable, IScopedDependency
     {
+        string Name { get; }
         /// <summary> 交换机 </summary>
         string Broker { get; }
 

@@ -8,7 +8,7 @@ using System;
 
 namespace Acb.Redis
 {
-    public static class ContainBuilderExtension
+    public static class ServiceCollectionExtension
     {
         /// <summary> 使用Redis事件总线 </summary>
         /// <param name="services"></param>
