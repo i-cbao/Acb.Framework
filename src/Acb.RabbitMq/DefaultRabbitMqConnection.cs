@@ -11,7 +11,7 @@ namespace Acb.RabbitMq
 {
     public class DefaultRabbitMqConnection : IRabbitMqConnection
     {
-        private readonly IConnectionFactory _connectionFactory;
+        private readonly ConnectionFactory _connectionFactory;
         private readonly ILogger _logger;
 
         private IConnection _connection;
@@ -75,7 +75,8 @@ namespace Acb.RabbitMq
 
         public bool TryConnect()
         {
-            _logger.Info("RabbitMQ Client is trying to connect");
+            _logger.Info(
+                $"RabbitMQ Client is trying to connect:{_connectionFactory.HostName}:{_connectionFactory.Port}/{_connectionFactory.VirtualHost}");
 
             lock (_syncRoot)
             {

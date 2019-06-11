@@ -24,7 +24,7 @@ namespace Acb.RabbitMq
                 services.TryAddSingleton<IMessageCodec, JsonMessageCodec>();
             }
 
-            services.TryAddSingleton<IEventBus>(provider =>
+            services.AddSingleton<IEventBus>(provider =>
             {
                 var manager = provider.GetService<ISubscribeManager>();
                 var codec = provider.GetService<IMessageCodec>();

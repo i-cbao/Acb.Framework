@@ -1,11 +1,9 @@
 ﻿using Acb.Core.EventBus;
-using Acb.Core.Exceptions;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts.EventBus;
 using Acb.RabbitMq;
 using System.Threading.Tasks;
-using Acb.RabbitMq.Options;
 
 namespace Acb.Backgrounder.Test.EventBus
 {
@@ -62,7 +60,7 @@ namespace Acb.Backgrounder.Test.EventBus
     //    }
     //}
 
-    [Subscription("icb_handler_test")]
+    [Subscription("icb_handler_test"), Naming("spartner")]
     public class MessageHandlerTwo : IEventHandler<TestEvent>
     {
         private readonly ILogger _logger;
@@ -74,6 +72,7 @@ namespace Acb.Backgrounder.Test.EventBus
 
         public Task Handle(TestEvent @event)
         {
+            _logger.Info("icb_handler_test");
             _logger.Info(JsonHelper.ToJson(@event));
             return Task.CompletedTask;
         }

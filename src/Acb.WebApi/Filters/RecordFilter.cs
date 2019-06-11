@@ -16,7 +16,7 @@ namespace Acb.WebApi.Filters
     /// <summary> 日志过滤器 </summary>
     public class RecordFilter : ActionFilterAttribute, IExceptionFilter
     {
-        private const string ItemKey = "action_record";
+        private const string ItemKey = "action_record_{0}";
         private readonly string _type;
 
         public RecordFilter(string type = null)
@@ -67,7 +67,8 @@ namespace Acb.WebApi.Filters
                 dto.Data = req.QueryString.ToUriComponent();
             }
 
-            context.HttpContext.Items.Add(ItemKey, dto);
+            var key = string.Format(ItemKey, _type);
+            context.HttpContext.Items.Add(key, dto);
             await base.OnActionExecutionAsync(context, next);
         }
 
@@ -75,7 +76,9 @@ namespace Acb.WebApi.Filters
         {
             var manager = context.HttpContext.RequestServices.GetService<MonitorManager>();
             MonitorData dto;
-            if (manager != null && context.HttpContext.Items.TryGetValue(ItemKey, out var value) && (dto = value as MonitorData) != null)
+            var key = string.Format(ItemKey, _type);
+            if (manager != null && context.HttpContext.Items.TryGetValue(key, out var value) &&
+                (dto = value as MonitorData) != null)
             {
                 var result = await next();
                 dto.CompleteTime = Clock.Now;
@@ -136,7 +139,6 @@ namespace Acb.WebApi.Filters
             }
 
             manager.Record(dto);
-
         }
     }
 }

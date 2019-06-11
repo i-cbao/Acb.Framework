@@ -1,4 +1,6 @@
-﻿using Acb.MicroService.Client;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Monitor;
+using Acb.MicroService.Client;
 using Acb.Payment;
 using Acb.RabbitMq;
 using Acb.WebApi.Test.Hubs;
@@ -9,12 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using Acb.Core.Extensions;
-using Acb.Core.Monitor;
 
 namespace Acb.WebApi.Test
 {
-    public class GatewayStartup : DStartup
+    public class Startup : DStartup
     {
         /// <summary> 注册服务 </summary>
         /// <param name="services"></param>
@@ -22,8 +22,7 @@ namespace Acb.WebApi.Test
         {
             services.AddDbContext<DbContext>(options => { });
             services.AddRabbitMqEventBus();
-            services.AddPayment();
-
+            
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 

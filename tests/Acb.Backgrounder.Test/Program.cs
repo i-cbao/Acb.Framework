@@ -11,9 +11,7 @@ using Quartz;
 using Quartz.Impl;
 using System;
 using System.Collections.Specialized;
-using System.Reflection;
 using System.Threading.Tasks;
-using Acb.Backgrounder.Test.EventBus;
 using ILogger = Acb.Core.Logging.ILogger;
 
 namespace Acb.Backgrounder.Test
@@ -82,6 +80,7 @@ namespace Acb.Backgrounder.Test
         {
             //注册事件总线
             //RabbitMQ
+            services.AddRabbitMqEventBus("spartner");
             services.AddRabbitMqEventBus();
             //Redis
             //services.AddRedisEventBus();
@@ -119,9 +118,10 @@ namespace Acb.Backgrounder.Test
             });
             //bus.Publish("icb_framework_simple_queue", cmd, 2 * 1000);
             _logger.Info($"Send Message:{cmd}");
-            bus.Publish(new TestEvent { Content = cmd }, new RabbitMqPublishOption
+            var sbus = provider.Resolve<IServiceProvider>().GetEventBus("spartner");
+            sbus.Publish(new TestEvent { Content = cmd }, new RabbitMqPublishOption
             {
-                Delay = TimeSpan.FromMinutes(5)
+                Delay = TimeSpan.FromSeconds(10)
             });
             //var queue = provider.Resolve<IMessageQueue>();
             //queue.Send(cmd);
