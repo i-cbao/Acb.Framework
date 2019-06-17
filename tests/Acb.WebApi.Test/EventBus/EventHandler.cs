@@ -1,12 +1,12 @@
-﻿using System;
-using Acb.Core.EventBus;
+﻿using Acb.Core.EventBus;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Demo.Contracts.EventBus;
 using Acb.RabbitMq;
+using System;
 using System.Threading.Tasks;
 
-namespace Acb.Backgrounder.Test.EventBus
+namespace Acb.WebApi.Test.EventBus
 {
     //[Subscription("icb_framework_simple_queue")]
     //public class MessageHandler : IEventHandler<string>

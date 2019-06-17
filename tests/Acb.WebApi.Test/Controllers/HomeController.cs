@@ -3,16 +3,19 @@ using Acb.Core.Dependency;
 using Acb.Core.EventBus;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
+using Acb.Demo.Contracts.EventBus;
 using Acb.Office;
+using Acb.RabbitMq.Options;
+using Acb.WebApi.Filters;
 using Acb.WebApi.Test.Hubs;
 using Acb.WebApi.Test.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using Acb.WebApi.Filters;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -101,6 +104,26 @@ namespace Acb.WebApi.Test.Controllers
             dt.Columns.Add("姓名", typeof(string));
             dt.Rows.Add("shay");
             await ExcelHelper.Export(new DataSet { Tables = { dt } }, "在口袋里的.xls");
+        }
+
+        [HttpPost("event/send")]
+        public async Task<DResult> EventHandler(string message)
+        {
+            var provider = HttpContext.RequestServices;
+            var bus = provider.GetService<IEventBus>();
+            await bus.Publish(new UserEvent { Name = message }, new RabbitMqPublishOption
+            {
+                Delay = TimeSpan.FromSeconds(2)
+            });
+
+            //bus.Publish("icb_framework_simple_queue", cmd, 2 * 1000);
+            _logger.Info($"Send Message:{message}");
+            var sbus = provider.GetEventBus("spartner");
+            await sbus.Publish(new TestEvent { Content = message }, new RabbitMqPublishOption
+            {
+                Delay = TimeSpan.FromSeconds(10)
+            });
+            return Success;
         }
     }
 }

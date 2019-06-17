@@ -1,10 +1,12 @@
 using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +16,6 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Acb.Core.Extensions;
 
 namespace Acb.Framework.Tests
 {
@@ -26,14 +27,17 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
-            var sign = $"TEST0519011500001454acbtest".Md5();
-            Print(sign);
-            //var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
+            //var t = new { a = "abc", b = "123" };
+            var t = new[] { "abc", "123" };
+            t.Each(Print);
+            //var sign = $"TEST0519011500001454acbtest".Md5();
+            //Print(sign);
+            ////var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");
             //Print(str);
             //var time = DateTime.Parse(str);
             //Print(time);
             //Print("1523879631960" + EncryptHelper.MD5("account=1&password=12385653b8832ad55cd1523879631960"));
-            Print(IdentityHelper.Guid16);
+            //Print(IdentityHelper.Guid16);
             //Print(Utils.GetSpellCode("±±¾©"));
             //Print(Clock.Now.ToTimestamp());
             //var md5 = "shay".Md5();

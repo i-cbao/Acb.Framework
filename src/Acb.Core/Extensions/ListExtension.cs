@@ -29,9 +29,30 @@ namespace Acb.Core.Extensions
         /// <returns>当前集合</returns>
         public static void Each<T>(this IEnumerable<T> instance, Action<T> action)
         {
+            if (action == null) return;
             foreach (var item in instance)
             {
                 action(item);
+            }
+        }
+
+        /// <summary> 遍历执行(自适应对象和列表) </summary>
+        /// <param name="instance"></param>
+        /// <param name="action"></param>
+        public static void Each<T>(this T instance, Action<object> action)
+        where T : class
+        {
+            if (action == null) return;
+            if (instance != null && instance is IEnumerable list)
+            {
+                foreach (var item in list)
+                {
+                    action.Invoke(item);
+                }
+            }
+            else
+            {
+                action.Invoke(instance);
             }
         }
 

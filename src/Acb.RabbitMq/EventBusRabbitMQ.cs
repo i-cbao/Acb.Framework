@@ -169,7 +169,7 @@ namespace Acb.RabbitMq
                     times = t.CastTo(0);
                 }
 
-                if (times > maxTime)
+                if (times >= maxTime)
                 {
                     //拒收，不重新入列
                     _consumerChannel.BasicNack(ea.DeliveryTag, false, false);

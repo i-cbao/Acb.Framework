@@ -1,10 +1,12 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Acb.Core;
 using Acb.Core.Dependency;
 using Acb.Core.Helper.Http;
 using Acb.Core.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
+using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -33,17 +35,20 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public async Task RestHelperTest()
+        public void RestHelperTest()
         {
-            const string uri = "/query/life?t=1";
-            var helper = new RestHelper(HelperTest.Site.Market);
-            var result = await helper.GetAsync<DResult<dynamic>>(uri, new
-            {
-                cityCode = "510100"
-            });
+            var time = TimeSpan.FromDays(7) - TimeSpan.FromSeconds(562382);
+            var loginTime = Clock.Now.AddSeconds(-time.TotalSeconds);
+            Print($"{loginTime:yyyy-MM-dd HH:mm:ss}");
+            //const string uri = "/query/life?t=1";
+            //var helper = new RestHelper(HelperTest.Site.Market);
+            //var result = await helper.GetAsync<DResult<dynamic>>(uri, new
+            //{
+            //    cityCode = "510100"
+            //});
             //var xx = JsonConvert.SerializeObject(html.Data.xianXing);
             //if (html.Data.xianxing != null)
-            Print(result);
+            //Print(result);
         }
 
         [TestMethod]

@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Acb.Core.EventBus
 {
@@ -24,13 +25,7 @@ namespace Acb.Core.EventBus
 
         private List<Type> GetQueueConsumers()
         {
-            var result = new List<Type>();
-            foreach (var consumer in _integrationEventHandler)
-            {
-                var type = consumer.GetType();
-                result.Add(type);
-            }
-            return result;
+            return _integrationEventHandler.Select(consumer => consumer.GetType()).ToList();
         }
     }
 }

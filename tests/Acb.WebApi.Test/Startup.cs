@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using Acb.Core.EventBus;
 
 namespace Acb.WebApi.Test
 {
@@ -21,8 +22,10 @@ namespace Acb.WebApi.Test
         protected override void MapServices(IServiceCollection services)
         {
             services.AddDbContext<DbContext>(options => { });
+
+            services.AddRabbitMqEventBus("spartner");
             services.AddRabbitMqEventBus();
-            
+
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
@@ -47,18 +50,7 @@ namespace Acb.WebApi.Test
 
         protected override void UseServices(IServiceProvider provider)
         {
-            //var ioc = (IocManager)provider.GetService<IIocManager>();
-            //ioc.MapService(b =>
-            //{
-            //    var serviceType = typeof(IMicroService);
-            //    var types = provider.GetService<ITypeFinder>()
-            //        .Find(t => serviceType.IsAssignableFrom(t) && t != serviceType);
-            //    foreach (var type in types)
-            //    {
-            //        b.RegisterInstance(ProxyService.Proxy(type)).AsImplementedInterfaces().SingleInstance();
-            //    }
-            //});
-            //provider.SubscriptAt();
+            provider.SubscribeAt();
             base.UseServices(provider);
         }
 

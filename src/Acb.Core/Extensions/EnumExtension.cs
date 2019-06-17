@@ -9,7 +9,7 @@ namespace Acb.Core.Extensions
     /// <summary> 枚举相关扩展 </summary>
     public static class EnumExtension
     {
-        private const string DefaultEnumText = "枚举异常";
+        private const string DefaultEnumText = "--";
 
         /// <summary> 获取枚举值 </summary>
         /// <typeparam name="T"></typeparam>
@@ -120,7 +120,7 @@ namespace Acb.Core.Extensions
             }
             catch
             {
-                return "枚举异常";
+                return DefaultEnumText;
             }
         }
 
@@ -153,7 +153,7 @@ namespace Acb.Core.Extensions
             }
             catch
             {
-                return "枚举异常";
+                return DefaultEnumText;
             }
         }
 

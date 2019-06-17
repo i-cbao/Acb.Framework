@@ -51,7 +51,7 @@ namespace Acb.Redis
         public ConnectionMultiplexer Connect(ConfigurationOptions configOpts)
         {
             var points = string.Join<EndPoint>(",", configOpts.EndPoints.ToArray());
-            _logger.Info($"Create Redis: {points}");
+            _logger.Info($"Create Redis: {points},db:{configOpts.DefaultDatabase}");
             var conn = ConnectionMultiplexer.Connect(configOpts);
             conn.ConfigurationChanged += (sender, e) =>
             {
