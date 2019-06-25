@@ -27,7 +27,7 @@ namespace Acb.TimingTask
 
         public async Task Execute(IJobExecutionContext context)
         {
-            Logger.Info($"job {JobName} start");
+            Logger.Debug($"job {JobName} start");
             var watcher = Stopwatch.StartNew();
             try
             {
@@ -40,10 +40,10 @@ namespace Acb.TimingTask
             finally
             {
                 watcher.Stop();
-                Logger.Info($" job {JobName} complete -> use {watcher.ElapsedMilliseconds}ms");
+                Logger.Debug($" job {JobName} complete -> use {watcher.ElapsedMilliseconds}ms");
                 if (context.NextFireTimeUtc.HasValue)
                 {
-                    Logger.Info($"{JobName} next time:{context.NextFireTimeUtc.Value.LocalDateTime:yyyy-MM-dd HH:mm:ss}");
+                    Logger.Debug($"{JobName} next time:{context.NextFireTimeUtc.Value.LocalDateTime:yyyy-MM-dd HH:mm:ss}");
                 }
             }
         }

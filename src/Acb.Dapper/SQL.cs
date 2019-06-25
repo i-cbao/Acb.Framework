@@ -150,6 +150,7 @@ namespace Acb.Dapper
             var columns = Columns(sql);
             var order = Order(sql);
             sql = conn.PagedSql(sql, columns, order);
+            if (page < 1) page = 1;
 
             _parameters.Add("skip", (page - 1) * size);
             _parameters.Add("size", size);

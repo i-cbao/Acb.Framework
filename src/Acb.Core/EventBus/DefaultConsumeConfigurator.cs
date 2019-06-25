@@ -1,12 +1,12 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Logging;
 using Acb.Core.Reflection;
+using Acb.Core.Serialize;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Acb.Core.Extensions;
-using Acb.Core.Serialize;
+using System.Threading.Tasks;
 
 namespace Acb.Core.EventBus
 {
@@ -39,7 +39,7 @@ namespace Acb.Core.EventBus
                 try
                 {
                     this.FastInvoke(new[] { consumerType, consumer },
-                        x => x.ConsumerTo<object, IEventHandler<object>>());
+                       x => x.ConsumerTo<object, IEventHandler<object>>());
                 }
                 catch (Exception ex)
                 {

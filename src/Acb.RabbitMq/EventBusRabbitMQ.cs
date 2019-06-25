@@ -140,7 +140,6 @@ namespace Acb.RabbitMq
         /// <returns></returns>
         private async Task ReceiveMessage(string queue, BasicDeliverEventArgs ea, RabbitMqSubscribeOption option)
         {
-            //var name = ea.RoutingKey;
             try
             {
                 await SubscriptionManager.ProcessEvent(queue, ea.Body);
@@ -226,7 +225,18 @@ namespace Acb.RabbitMq
 
             var consumer = new EventingBasicConsumer(_consumerChannel);
 
-            consumer.Received += async (model, ea) => await ReceiveMessage(queue, ea, opt);
+            consumer.Received += async (model, ea) =>
+            {
+                try
+                {
+                    await ReceiveMessage(queue, ea, opt);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"MQ订阅处理异常：{ex.Message}", ex);
+                }
+
+            };
 
             _consumerChannel.BasicConsume(queue, false, consumer);
 
