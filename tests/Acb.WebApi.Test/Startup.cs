@@ -29,7 +29,7 @@ namespace Acb.WebApi.Test
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
-            services.AddMonitor(typeof(LoggerMonitor));
+            //services.AddMonitor(typeof(LoggerMonitor));
             services.AddSignalR();
             //services.AddSingleton(provider =>
             //{
@@ -50,7 +50,7 @@ namespace Acb.WebApi.Test
 
         protected override void UseServices(IServiceProvider provider)
         {
-            provider.SubscribeAt();
+            //provider.SubscribeAt();
             base.UseServices(provider);
         }
 

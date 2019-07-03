@@ -158,7 +158,11 @@ namespace Acb.RabbitMq
                 _logger.Error(ex.Message, ex);
 
                 if (!option.EnableRetry)
+                {
+                    _consumerChannel.BasicNack(ea.DeliveryTag, false, false);
                     return;
+                }
+
                 var maxTime = option.Times.Length;
 
                 var times = 0;

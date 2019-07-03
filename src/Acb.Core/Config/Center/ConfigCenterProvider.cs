@@ -1,13 +1,8 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Extensions;
-using Acb.Core.Helper.Http;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Acb.Core.Config.Center
@@ -15,73 +10,15 @@ namespace Acb.Core.Config.Center
     /// <summary> 中心配置提供者 </summary>
     internal class ConfigCenterProvider : DConfigProvider, IConfigurationSource
     {
-        private const string AuthorizationKey = "Authorization";
-        private CenterConfig _config;
         private readonly bool _reload;
-        private IDictionary<string, string> _headers;
-        private readonly HttpHelper _httpHelper;
-
-        private readonly ConcurrentDictionary<string, Lazy<long>> _configVersions;
+        private CenterConfig _config;
+        private readonly ConfigCenterApi _configApi;
 
         public ConfigCenterProvider(CenterConfig config, bool reload = false)
         {
-            _httpHelper = HttpHelper.Instance;
-            _configVersions = new ConcurrentDictionary<string, Lazy<long>>();
             _config = config;
+            _configApi = new ConfigCenterApi(config);
             _reload = reload;
-        }
-
-        private async Task LoadTicket()
-        {
-            if (string.IsNullOrWhiteSpace(_config.Account) || _headers.ContainsKey(AuthorizationKey))
-                return;
-            Logger.Info("正在加载配置中心令牌");
-            try
-            {
-                var loginUrl = new Uri(new Uri(_config.Uri), "login").AbsoluteUri;
-
-                var loginResp = await _httpHelper.PostAsync(loginUrl,
-                    new { account = _config.Account, password = _config.Password });
-                var data = await loginResp.Content.ReadAsStringAsync();
-                if (loginResp.IsSuccessStatusCode)
-                {
-                    var json = JsonConvert.DeserializeObject<dynamic>(data);
-                    if ((bool)json.ok)
-                        _headers[AuthorizationKey] = $"acb {json.ticket}";
-                }
-                else
-                {
-                    Logger.Info(data);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.Message, ex);
-            }
-        }
-
-        /// <summary> 检测版本号 </summary>
-        /// <param name="app"></param>
-        /// <returns></returns>
-        private async Task<long> CheckVersion(string app)
-        {
-            var mode = Consts.Mode.ToString().ToLower();
-            Logger.Debug($"正在检测配置中心版本[{_config.Uri}:{mode}:{app}]");
-            var versionPath = $"v/{app}/{mode}";
-            var versionUrl = new Uri(new Uri(_config.Uri), versionPath).AbsoluteUri;
-            var versionResp =
-                await _httpHelper.RequestAsync(HttpMethod.Get, new HttpRequest(versionUrl) { Headers = _headers });
-            var version = (await versionResp.Content.ReadAsStringAsync()).CastTo(0L);
-            if (_configVersions.ContainsKey(app))
-            {
-                var change = version != _configVersions[app].Value;
-                if (change)
-                    _configVersions[app] = new Lazy<long>(() => version);
-                return change ? version : 0;
-            }
-
-            _configVersions.TryAdd(app, new Lazy<long>(() => version));
-            return version;
         }
 
         /// <summary> 加载配置 </summary>
@@ -100,22 +37,13 @@ namespace Acb.Core.Config.Center
             {
                 try
                 {
-                    var version = await CheckVersion(app);
-                    if (version <= 0)
+                    var version = await _configApi.CheckVersion(app);
+                    if (version == 0)
                         continue;
                     Logger.Info($"正在{act}配置中心[{_config.Uri}:{mode}:{app}_{version}]");
-                    var path = $"{app}/{Consts.Mode.ToString().ToLower()}";
-                    var url = new Uri(new Uri(_config.Uri), path).AbsoluteUri;
-                    var resp = await _httpHelper.RequestAsync(HttpMethod.Get,
-                        new HttpRequest(url) { Headers = _headers });
-                    var json = await resp.Content.ReadAsStringAsync();
-                    if (!resp.IsSuccessStatusCode)
-                    {
-                        Logger.Warn($"{path}:{json}");
-                        continue;
-                    }
-
-                    LoadJson(json);
+                    var json = await _configApi.GetConfig(app);
+                    if (!string.IsNullOrWhiteSpace(json))
+                        LoadJson(json);
                 }
                 catch (Exception ex)
                 {
@@ -126,9 +54,6 @@ namespace Acb.Core.Config.Center
 
         public IConfigurationProvider Build(IConfigurationBuilder builder)
         {
-            _headers = new Dictionary<string, string>();
-            _config = _config ?? CenterConfig.Config();
-            LoadTicket().SyncRun();
             StartRefresh();
             return this;
         }
@@ -149,21 +74,20 @@ namespace Acb.Core.Config.Center
 
         public override void Load()
         {
-            LoadConfig().Wait();
+            LoadConfig().SyncRun();
         }
 
         internal void Reload(object state = null)
         {
             if (state == null)
             {
-                LoadConfig(true).Wait();
+                LoadConfig(true).SyncRun();
                 return;
             }
             if (!(state is IConfigurationRoot config) || config.Providers.All(t => t is ConfigCenterProvider))
                 return;
             if (_reload)
                 _config = CenterConfig.Config();
-            LoadTicket().SyncRun();
             StartRefresh();
         }
     }

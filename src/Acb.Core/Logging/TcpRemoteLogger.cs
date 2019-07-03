@@ -50,7 +50,7 @@ namespace Acb.Core.Logging
             }
             catch (Exception ex)
             {
-                _logger.Warn($"Could not initialize the UdpClient connection on  {host}:{port}.{ex.Format()}");
+                _logger.Warn($"Could not initialize the UdpClient connection on  {host}:{port}.{ex.Message}");
                 _client = null;
             }
         }

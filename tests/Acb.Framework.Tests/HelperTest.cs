@@ -6,7 +6,6 @@ using Acb.Core.Logging;
 using Acb.Core.Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,6 +15,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -27,9 +27,36 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void Md5Test()
         {
+            const int count = 20;
+            var ev = new CountdownEvent(count);
+            var teacher = new Task(() =>
+            {
+                Print($"{Clock.Now:yyyy-MM-dd HH:mm:ss},发卷子");
+                ev.Wait();
+                Print($"{Clock.Now:yyyy-MM-dd HH:mm:ss},收卷子");
+            });
+            teacher.Start();
+            Thread.Sleep(1000);
+            var students = new List<Task>();
+            for (var i = 0; i < count; i++)
+            {
+                var student = new Task(state =>
+                    {
+                        var time = Clock.Now;
+                        Print($"{time:yyyy-MM-dd HH:mm:ss},学生{state}，开始作答");
+                        Thread.Sleep(RandomHelper.Random().Next(5, 12) * 1000);
+                        Print(
+                            $"{Clock.Now:yyyy-MM-dd HH:mm:ss},学生{state}，交卷,耗时：{(Clock.Now - time).TotalMilliseconds}ms");
+                        ev.Signal();
+                    }, i + 1);
+                student.Start();
+                students.Add(student);
+            }
+
+            Task.WaitAll(students.Union(new[] { teacher }).ToArray());
             //var t = new { a = "abc", b = "123" };
-            var t = new[] { "abc", "123" };
-            t.Each(Print);
+            //var t = new[] { "abc", "123" };
+            //t.Each(Print);
             //var sign = $"TEST0519011500001454acbtest".Md5();
             //Print(sign);
             ////var str = "20180427144321".Insert(4, "-").Insert(7, "-").Insert(10, " ").Insert(13, ":").Insert(16, ":");

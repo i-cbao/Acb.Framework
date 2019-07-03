@@ -110,7 +110,7 @@ namespace Acb.Framework.Logging
             catch (Exception ex)
             {
                 _logger.Warn(
-                    $"Unable to send logging event to remote host {RemoteAddress} on port {RemotePort}.{ex.Format()}");
+                    $"Unable to send logging event to remote host {RemoteAddress} on port {RemotePort}.{ex.Message}");
             }
         }
 
@@ -132,7 +132,7 @@ namespace Acb.Framework.Logging
             }
             catch (Exception ex)
             {
-                _logger.Warn($"Could not initialize the UdpClient connection on port {RemotePort}.{ex.Format()}");
+                _logger.Warn($"Could not initialize the UdpClient connection on port {RemotePort}.{ex.Message}");
                 Client = null;
             }
         }
