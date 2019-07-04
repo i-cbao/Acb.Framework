@@ -5,7 +5,6 @@ using Acb.Core.Timing;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -42,24 +41,34 @@ namespace Acb.Core.Helper.Http
             return $"{timestamp}{EncryptHelper.Hash($"{key}{timestamp}", EncryptHelper.HashFormat.MD532).ToLower()}";
         }
 
+        public async Task<HttpResponseMessage> RequestAsync(HttpRequest request, HttpMethod method = null,
+            bool ticket = false)
+        {
+            if (string.IsNullOrWhiteSpace(request.Url))
+                throw new BusiException("Http请求参数异常");
+            if (!string.IsNullOrWhiteSpace(_baseUri))
+            {
+                var uri = new Uri(new Uri(_baseUri), request.Url);
+                request.Url = uri.AbsoluteUri;
+            }
+
+            request.Headers = request.Headers ?? new Dictionary<string, string>();
+            if (ticket)
+                request.Headers.Add("App-Ticket", GetTicket());
+            return await _httpHelper.RequestAsync(method ?? HttpMethod.Get, request);
+        }
+
         /// <summary> 请求接口 </summary>
         /// <param name="request"></param>
         /// <param name="method"></param>
         /// <param name="ticket"></param>
         /// <returns></returns>
-        public async Task<string> RequestAsync(HttpRequest request, HttpMethod method = null, bool ticket = false)
+        public async Task<string> RequestStringAsync(HttpRequest request, HttpMethod method = null, bool ticket = false)
         {
-            if (string.IsNullOrWhiteSpace(request.Url))
-                return string.Empty;
-            if (!string.IsNullOrWhiteSpace(_baseUri))
-                request.Url = string.Concat(_baseUri?.TrimEnd('/'), "/", request.Url.TrimStart('/'));
-
-            request.Headers = request.Headers ?? new Dictionary<string, string>();
-            if (ticket)
-                request.Headers.Add("App-Ticket", GetTicket());
-            var resp = await _httpHelper.RequestAsync(method ?? HttpMethod.Get, request);
-            if (resp.StatusCode == HttpStatusCode.OK)
+            var resp = await RequestAsync(request, method, ticket);
+            if (resp.IsSuccessStatusCode)
                 return await resp.Content.ReadAsStringAsync();
+            _logger.Warn($"http request fail:{resp.StatusCode}");
             return string.Empty;
         }
 
@@ -67,12 +76,13 @@ namespace Acb.Core.Helper.Http
         /// <typeparam name="T"></typeparam>
         /// <param name="request"></param>
         /// <param name="method"></param>
+        /// <param name="def"></param>
         /// <returns></returns>
-        public async Task<T> RequestAsync<T>(HttpRequest request, HttpMethod method = null)
+        public async Task<T> RequestAsync<T>(HttpRequest request, HttpMethod method = null, T def = default(T))
         {
             try
             {
-                var html = await RequestAsync(request, method);
+                var html = await RequestStringAsync(request, method);
                 if (!string.IsNullOrWhiteSpace(html))
                 {
                     var setting = new JsonSerializerSettings();
@@ -89,7 +99,8 @@ namespace Acb.Core.Helper.Http
 
                 _logger.Error(ex.Message, ex);
             }
-            return default(T);
+
+            return def;
         }
 
         /// <summary> GET </summary>
@@ -98,28 +109,30 @@ namespace Acb.Core.Helper.Http
         /// <param name="headers"></param>
         /// <returns></returns>
         public async Task<string> GetAsync(string api, object paras = null, IDictionary<string, string> headers = null)
-            => await RequestAsync(new HttpRequest(api) { Params = paras, Headers = headers }, HttpMethod.Get);
+            => await RequestStringAsync(new HttpRequest(api) { Params = paras, Headers = headers }, HttpMethod.Get);
 
         /// <summary> GET </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="api"></param>
         /// <param name="paras"></param>
         /// <param name="headers"></param>
+        /// <param name="def"></param>
         /// <returns></returns>
-        public async Task<T> GetAsync<T>(string api, object paras = null, IDictionary<string, string> headers = null)
-            => await RequestAsync<T>(new HttpRequest(api) { Params = paras, Headers = headers }, HttpMethod.Get);
+        public async Task<T> GetAsync<T>(string api, object paras = null, IDictionary<string, string> headers = null,
+            T def = default(T))
+            => await RequestAsync<T>(new HttpRequest(api) { Params = paras, Headers = headers }, HttpMethod.Get, def);
 
         /// <summary> POST </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<string> PostAsync(HttpRequest request) => await RequestAsync(request, HttpMethod.Post);
+        public async Task<string> PostAsync(HttpRequest request) => await RequestStringAsync(request, HttpMethod.Post);
 
         /// <summary> POST </summary>
         /// <param name="url"></param>
         /// <param name="data"></param>
         /// <returns></returns>
         public async Task<string> PostAsync(string url, object data) =>
-            await RequestAsync(new HttpRequest(url) { Data = data }, HttpMethod.Post);
+            await RequestStringAsync(new HttpRequest(url) { Data = data }, HttpMethod.Post);
 
         /// <summary> POST </summary>
         /// <typeparam name="T"></typeparam>
@@ -140,12 +153,12 @@ namespace Acb.Core.Helper.Http
         /// <param name="data"></param>
         /// <returns></returns>
         public async Task<string> PutAsync(string url, object param = null, object data = null) =>
-            await RequestAsync(new HttpRequest(url) { Params = param, Data = data }, HttpMethod.Put);
+            await RequestStringAsync(new HttpRequest(url) { Params = param, Data = data }, HttpMethod.Put);
 
         /// <summary> PUT </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public async Task<string> PutAsync(HttpRequest request) => await RequestAsync(request, HttpMethod.Put);
+        public async Task<string> PutAsync(HttpRequest request) => await RequestStringAsync(request, HttpMethod.Put);
 
         /// <summary> PUT </summary>
         /// <param name="url"></param>
@@ -168,7 +181,7 @@ namespace Acb.Core.Helper.Http
         /// <returns></returns>
         public async Task<string> DeleteAsync(string api, object paras = null,
             IDictionary<string, string> headers = null)
-            => await RequestAsync(new HttpRequest(api) { Params = paras, Headers = headers }, HttpMethod.Delete);
+            => await RequestStringAsync(new HttpRequest(api) { Params = paras, Headers = headers }, HttpMethod.Delete);
 
         /// <summary> DELETE </summary>
         /// <typeparam name="T"></typeparam>

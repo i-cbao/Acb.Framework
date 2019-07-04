@@ -16,8 +16,8 @@ namespace Acb.Core.Helper.Http
     /// <summary> Http请求类 </summary>
     public class HttpHelper : IDisposable
     {
-        private static readonly HttpClient Client = new HttpClient();
-        private static readonly ILogger Logger = LogManager.Logger<HttpHelper>();
+        private readonly HttpClient _client;
+        private readonly ILogger _logger;
 
         private static readonly IDictionary<string, string> DefaultHeaders = new Dictionary<string, string>
         {
@@ -30,12 +30,14 @@ namespace Acb.Core.Helper.Http
 
         private HttpHelper()
         {
+            _client = new HttpClient(new HttpClientHandler { UseCookies = true });
+            _logger = LogManager.Logger<HttpHelper>();
             foreach (var header in DefaultHeaders)
             {
-                Client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                _client.DefaultRequestHeaders.Add(header.Key, header.Value);
             }
 
-            Client.Timeout = TimeSpan.FromSeconds(65);
+            _client.Timeout = TimeSpan.FromSeconds(65);
         }
 
         /// <summary> 单例模式 </summary>
@@ -46,7 +48,7 @@ namespace Acb.Core.Helper.Http
         /// <param name="timeout"></param>
         public void Timeout(TimeSpan timeout)
         {
-            Client.Timeout = timeout;
+            _client.Timeout = timeout;
         }
 
         /// <summary> 请求 </summary>
@@ -83,8 +85,8 @@ namespace Acb.Core.Helper.Http
             TimeSpan? currentTimeout = null;
             if (request.Timeout.HasValue)
             {
-                currentTimeout = Client.Timeout;
-                Client.Timeout = request.Timeout.Value;
+                currentTimeout = _client.Timeout;
+                _client.Timeout = request.Timeout.Value;
             }
 
             HttpContent content = null;
@@ -151,10 +153,10 @@ namespace Acb.Core.Helper.Http
             if (content != null)
                 req.Content = content;
             var formData = request.Data == null ? string.Empty : "->" + JsonHelper.ToJson(request.Data);
-            Logger.Debug($"HttpHelper：[{method}]{url}{formData}");
-            var resp = await Client.SendAsync(req);
+            _logger.Debug($"HttpHelper：[{method}]{url}{formData}");
+            var resp = await _client.SendAsync(req);
             if (currentTimeout.HasValue)
-                Client.Timeout = currentTimeout.Value;
+                _client.Timeout = currentTimeout.Value;
             return resp;
         }
 
@@ -216,7 +218,7 @@ namespace Acb.Core.Helper.Http
         /// <summary> 释放资源 </summary>
         public void Dispose()
         {
-            Client?.Dispose();
+            _client?.Dispose();
         }
     }
 }

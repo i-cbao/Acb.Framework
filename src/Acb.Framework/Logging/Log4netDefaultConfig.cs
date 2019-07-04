@@ -1,19 +1,17 @@
 ﻿using Acb.Core;
+using Acb.Core.Dependency;
 using Acb.Core.Domain;
-using Acb.Core.Extensions;
+using Acb.Core.Logging;
+using Acb.Core.Logging.Remote;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Filter;
 using log4net.Layout;
-using System.Net;
-using System.Text;
 
 namespace Acb.Framework.Logging
 {
     internal class Log4NetDefaultConfig
     {
-        private const string TcpLoggerConfigName = "tcpLogger";
-
         private static readonly ILayout NormalLayout =
             new PatternLayout(
                 "%date [%-5level] [%property{LogSite}] %r %thread %logger %message %exception%n");
@@ -69,17 +67,10 @@ namespace Acb.Framework.Logging
 
         internal static IAppender TcpAppender()
         {
-            var tcp = TcpLoggerConfigName.Config<TcpLoggerConfig>();
-            if (string.IsNullOrWhiteSpace(tcp?.Address) || tcp.Port <= 0)
-                return null;
-            var tcpAppender = new TcpAppender
-            {
-                Encoding = Encoding.UTF8,
-                RemoteAddress = IPAddress.Parse(tcp.Address),
-                RemotePort = tcp.Port,
-                Layout = string.IsNullOrWhiteSpace(tcp.Layout) ? ErrorLayout : new PatternLayout(tcp.Layout)
-            };
-            var level = Log4NetLog.ParseLevel(tcp.Level);
+            var logger = CurrentIocManager.Resolve<IRemoteLogger>();
+            var tcpAppender = new TcpAppender(logger);
+            var tcp = RemoteLoggerConfig.Config();
+            var level = Log4NetLog.ParseLevel(tcp?.Level ?? LogLevel.Error);
             tcpAppender.AddFilter(new LevelRangeFilter
             {
                 LevelMin = level

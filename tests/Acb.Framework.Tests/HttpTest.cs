@@ -1,12 +1,9 @@
-﻿using System;
-using System.Threading;
-using Acb.Core;
-using Acb.Core.Dependency;
-using Acb.Core.Helper.Http;
+﻿using Acb.Core.Helper.Http;
 using Acb.Core.Tests;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading.Tasks;
 using Acb.Core.Timing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading.Tasks;
 
 namespace Acb.Framework.Tests
 {
@@ -52,32 +49,14 @@ namespace Acb.Framework.Tests
         }
 
         [TestMethod]
-        public void TaskTest()
+        public async Task TaskTest()
         {
-            //var result = CodeTimer.Time("test", 10, () =>
-            //{
-            //    var resp = GetData().Result;
-            //    var html = resp.Content.ReadAsStringAsync().Result;
-            //}, 2);
-            //Print(result.ToString());
-            //Print(GetData().Result);
-            var result = CodeTimer.Time("vote", 100, async () =>
-             {
-                 var helper = HttpHelper.Instance;
-                 var req = await helper.PostAsync(new HttpRequest("http://jypx.cdhrss.gov.cn:90/api/poll/click_poll")
-                 {
-                     BodyType = HttpBodyType.Form,
-                     Data = new
-                     {
-                         token = "79b456a035d946ed890e5401da20ccfa",
-                         pollId = 1530168146334234,
-                         pollObjId = 1530169584268712//1530170304584777
-                     }
-                 });
-                 var html = await req.Content.ReadAsStringAsync();
-                 Print(html);
-             }, 20);
-            Thread.Sleep(10000);
+            var result = await CodeTimer.Time("http", 10, async () =>
+            {
+                var rest = new RestHelper("http://192.168.0.231:8889");
+                var config = await rest.GetAsync("basic/dev");
+                Print(config);
+            }, 5);
             Print(result.ToString());
         }
     }

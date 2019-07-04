@@ -26,5 +26,11 @@ namespace Acb.Framework.Logging
             };
             base.Initialize();
         }
+
+        public override void Shutdown()
+        {
+            IocManager.Resolve<IRemoteLogger>().Dispose();
+            base.Shutdown();
+        }
     }
 }

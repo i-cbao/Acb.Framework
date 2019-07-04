@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Extensions;
+using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Newtonsoft.Json;
 using System;
@@ -6,7 +7,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Acb.Core.Config.Center
@@ -18,12 +18,14 @@ namespace Acb.Core.Config.Center
         private readonly IDictionary<string, string> _headers;
         private readonly ConcurrentDictionary<string, long> _configVersions;
         private readonly ILogger _logger;
+        private readonly RestHelper _restHelper;
 
         public ConfigCenterApi(CenterConfig config = null)
         {
             _config = config ?? CenterConfig.Config();
             _headers = new Dictionary<string, string>();
             _configVersions = new ConcurrentDictionary<string, long>();
+            _restHelper = new RestHelper(_config?.Uri);
             _logger = LogManager.Logger<ConfigCenterApi>();
         }
 
@@ -35,49 +37,34 @@ namespace Acb.Core.Config.Center
         /// <returns></returns>
         private async Task<string> Request(HttpMethod method, string api, object data = null, bool cache = false)
         {
-            if (_config == null)
+            if (_config == null || string.IsNullOrWhiteSpace(api))
                 return string.Empty;
-            var url = new Uri(new Uri(_config.Uri), api).AbsoluteUri;
-            if (string.IsNullOrWhiteSpace(url))
-                return string.Empty;
-            var client = new HttpClient();
             try
             {
-                var req = new HttpRequestMessage(method, url);
-                foreach (var header in _headers)
+                var resp = await _restHelper.RequestAsync(new HttpRequest
                 {
-                    req.Headers.Add(header.Key, header.Value);
-                }
-
-                if (data != null)
-                {
-                    req.Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8,
-                        "application/json");
-                }
-
-                var resp = await client.SendAsync(req);
+                    Url = api,
+                    Data = data,
+                    Headers = _headers
+                }, method);
                 var content = await resp.Content.ReadAsStringAsync();
                 if (resp.IsSuccessStatusCode)
                 {
                     if (cache)
-                        url.SetConfig(content);
+                        api.SetConfig(content);
                     return content;
                 }
 
                 if (resp.StatusCode == HttpStatusCode.Forbidden)
                     _headers.Remove(AuthorizationKey);
-                _logger.Warn($"ConfigCenter 请求状态异常[{url}]:{resp.StatusCode},{content}");
+                _logger.Warn($"ConfigCenter 请求状态异常[{api}]:{resp.StatusCode},{content}");
             }
             catch (Exception ex)
             {
-                _logger.Warn($"ConfigCenter 请求异常[{url}]:{ex.Message}");
-            }
-            finally
-            {
-                client.Dispose();
+                _logger.Warn($"ConfigCenter 请求异常[{api}]:{ex.Message}");
             }
 
-            return cache ? url.GetConfig() : string.Empty;
+            return cache ? api.GetConfig() : string.Empty;
         }
 
         /// <summary> 登录 </summary>

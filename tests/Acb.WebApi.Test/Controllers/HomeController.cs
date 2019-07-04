@@ -62,8 +62,8 @@ namespace Acb.WebApi.Test.Controllers
                 token = "acb 123456"
             };
             var ex = new Exception("ex test");
-            await _remoteLogger.Logger(obj, LogLevel.Info, ex, logger: GetType().FullName);
-            //_logger.Error(obj, ex);
+            _remoteLogger.Logger(obj, LogLevel.Info, ex, logger: GetType().FullName);
+            _logger.Error(obj, ex);
             return await Task.FromResult(Succ($"hello {n}"));
         }
 
