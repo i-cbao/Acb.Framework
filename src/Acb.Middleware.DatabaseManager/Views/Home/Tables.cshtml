@@ -90,10 +90,35 @@
 
         small em {
             font-style: normal;
-            font-family:sans-serif;
+            font-family: sans-serif;
             margin: 0 2px;
             /*color: #ff3200;*/
             font-weight: bold;
+        }
+
+        .coder {
+            position: relative;
+        }
+
+        .copy-btn {
+            display: none;
+            position: absolute;
+            top: 35px;
+            right: 18px;
+        }
+
+        .popover {
+            white-space: nowrap;
+            background-color: #555;
+            color: #ddd;
+        }
+
+            .popover.bottom > .arrow:after {
+                border-bottom-color: #555;
+            }
+
+        .coder:hover .copy-btn {
+            display: block;
         }
     </style>
 </head>
@@ -169,8 +194,9 @@
     <script src="//cdn.bootcss.com/highlight.js/9.13.1/highlight.min.js"></script>
     <script src="//cdn.bootcss.com/highlightjs-line-numbers.js/2.5.0/highlightjs-line-numbers.min.js"></script>
     <script src="//cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="//cdn.bootcss.com/clipboard.js/2.0.4/clipboard.min.js"></script>
     <script>
-        (function ($, H) {
+        (function ($, H, Clip) {
             $('#entityModal').on('show.bs.modal',
                 function (event) {
                     var button = $(event.relatedTarget);
@@ -181,8 +207,18 @@
                     H.highlightBlock(block);
                     H.lineNumbersBlock(block, { singleLine: true });
                 });
+                var clip = new Clip('.copy-btn');
+                clip.on('success',
+                    function (e) {
+                        var pop = $(e.trigger).popover({ placement: 'bottom', content: '复制成功' });
+                        pop.popover('show');
+                        setTimeout(function () {
+                            pop.popover('hide');
+                        }, 1200);
+                        e.clearSelection();
+                    });
             });
-        })(jQuery, hljs)
+        })(jQuery, hljs, ClipboardJS)
     </script>
 </body>
 </html>

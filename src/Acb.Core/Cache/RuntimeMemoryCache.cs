@@ -1,5 +1,4 @@
-﻿using Acb.Core.Extensions;
-using Microsoft.Extensions.Caching.Memory;
+﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections;
@@ -12,59 +11,36 @@ namespace Acb.Core.Cache
     {
         private IMemoryCache _cache;
 
-        public RuntimeMemoryCache(string region)
+        public RuntimeMemoryCache(string region) : base(region)
         {
-            Region = region;
             _cache = new MemoryCache(new OptionsWrapper<MemoryCacheOptions>(new MemoryCacheOptions()));
         }
-        /// <summary> 缓存区域 </summary>
-        public override string Region { get; }
 
-        public override void Set(string key, object value)
+        public override void Set(string key, object value, TimeSpan? expire = null)
         {
             if (string.IsNullOrWhiteSpace(key) || value == null)
                 return;
             var cacheKey = GetKey(key);
-            _cache.Set(cacheKey, new DictionaryEntry(key, value));
+            if (expire.HasValue)
+                _cache.Set(cacheKey, new DictionaryEntry(key, value), expire.Value);
+            else
+                _cache.Set(cacheKey, new DictionaryEntry(key, value));
         }
 
-        public override void Set(string key, object value, TimeSpan expire)
-        {
-            if (string.IsNullOrWhiteSpace(key) || value == null)
-                return;
-            var cacheKey = GetKey(key);
-            _cache.Set(cacheKey, new DictionaryEntry(key, value), expire);
-        }
-
-        public override void Set(string key, object value, DateTime expire)
-        {
-            if (string.IsNullOrWhiteSpace(key) || value == null)
-                return;
-            var cacheKey = GetKey(key);
-            _cache.Set(cacheKey, new DictionaryEntry(key, value), expire);
-        }
-
-        public override object Get(string key)
+        public override object Get(string key, Type type)
         {
             if (string.IsNullOrWhiteSpace(key))
                 return null;
             var cacheKey = GetKey(key);
             var value = _cache.Get(cacheKey);
-            if (value == null)
+            if (value == null || !(value is DictionaryEntry entry))
                 return null;
-            var entry = (DictionaryEntry)value;
             return key.Equals(entry.Key) ? entry.Value : null;
         }
 
         public override IEnumerable<object> GetAll()
         {
             throw new NotImplementedException();
-        }
-
-        public override T Get<T>(string key)
-        {
-            var value = Get(key);
-            return value == null ? default(T) : value.CastTo<T>();
         }
 
         public override void Remove(string key)
@@ -75,12 +51,9 @@ namespace Acb.Core.Cache
             _cache.Remove(cacheKey);
         }
 
-        public override void Remove(IEnumerable<string> keys)
+        public override TimeSpan? ExpireTime(string key)
         {
-            foreach (var key in keys)
-            {
-                Remove(key);
-            }
+            return null;
         }
 
         public override void Clear()
@@ -91,16 +64,9 @@ namespace Acb.Core.Cache
 
         public override void ExpireEntryIn(string key, TimeSpan timeSpan)
         {
-            var value = Get(key);
+            var value = Get(key, null);
             if (value != null)
                 Set(key, value, timeSpan);
-        }
-
-        public override void ExpireEntryAt(string key, DateTime dateTime)
-        {
-            var value = Get(key);
-            if (value != null)
-                Set(key, value, dateTime);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Acb.Core.Serialize;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,9 +10,7 @@ using System.Text;
 
 namespace Acb.Core.Extensions
 {
-    /// <summary>
-    /// 对象扩展辅助
-    /// </summary>
+    /// <summary> 对象扩展辅助 </summary>
     public static class CommonExtensions
     {
         /// <summary>
@@ -215,6 +214,80 @@ namespace Acb.Core.Extensions
             if (isValid) return;
             var error = results.First();
             throw new ArgumentNullException(error.MemberNames.FirstOrDefault(), error.ErrorMessage);
+        }
+
+        private static readonly object ConsoleSync = new object();
+
+        public static void Print(this IEnumerable<PrintItem> prints)
+        {
+            lock (ConsoleSync)
+            {
+                foreach (var item in prints)
+                {
+                    ConsoleColor? tc = null;
+                    if (item.Color.HasValue)
+                    {
+                        tc = Console.ForegroundColor;
+                        Console.ForegroundColor = item.Color.Value;
+                    }
+
+                    var content = item.Message == null
+                        ? "NULL"
+                        : (item.Message.GetType().IsSimpleType()
+                            ? item.Message.ToString()
+                            : JsonHelper.ToJson(item.Message, NamingType.CamelCase, true));
+                    if (item.NewLine)
+                        Console.WriteLine(content);
+                    else
+                        Console.Write(content);
+                    if (tc.HasValue)
+                        Console.ForegroundColor = tc.Value;
+                }
+            }
+        }
+
+        public static void Print(this object msg, ConsoleColor? color = null, bool newline = true)
+        {
+            new[] { new PrintItem(msg, color, newline) }.Print();
+        }
+
+        public static void PrintSucc(this object msg, bool newline = true)
+        {
+            msg.Print(ConsoleColor.Green, newline);
+        }
+
+        public static void PrintInfo(this object msg, bool newline = true)
+        {
+            msg.Print(ConsoleColor.Cyan, newline);
+        }
+
+        public static void PrintWarn(this object msg, bool newline = true)
+        {
+            msg.Print(ConsoleColor.Yellow, newline);
+        }
+
+        public static void PrintError(this object msg, bool newline = true)
+        {
+            msg.Print(ConsoleColor.Red, newline);
+        }
+
+        public static void PrintFatal(this object msg, bool newline = true)
+        {
+            msg.Print(ConsoleColor.Magenta, newline);
+        }
+    }
+
+    public class PrintItem
+    {
+        public object Message { get; set; }
+        public ConsoleColor? Color { get; set; }
+        public bool NewLine { get; set; }
+
+        public PrintItem(object msg, ConsoleColor? color = null, bool newline = true)
+        {
+            Message = msg;
+            Color = color;
+            NewLine = newline;
         }
     }
 }

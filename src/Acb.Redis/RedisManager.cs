@@ -1,10 +1,13 @@
 ﻿using Acb.Core;
+using Acb.Core.Cache;
 using Acb.Core.Config;
 using Acb.Core.Extensions;
+using Acb.Core.Helper;
 using Acb.Core.Logging;
 using StackExchange.Redis;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
@@ -13,11 +16,15 @@ namespace Acb.Redis
     /// <summary> Redis管理器 </summary>
     public class RedisManager : IDisposable
     {
+        private readonly string _managerId;
+        //缓存同步
+        private bool _cacheSync;
         private readonly ILogger _logger;
         private readonly ConcurrentDictionary<string, Lazy<ConnectionMultiplexer>> _connections;
 
         private RedisManager()
         {
+            _managerId = IdentityHelper.Guid16;
             _connections = new ConcurrentDictionary<string, Lazy<ConnectionMultiplexer>>();
             _logger = LogManager.Logger<RedisManager>();
 
@@ -150,6 +157,40 @@ namespace Acb.Redis
             if (_connections == null || _connections.Count == 0)
                 return;
             _connections.Values.Foreach(t => t.Value.Close());
+        }
+
+        private void ConfigSubscribe(RedisChannel channel, RedisValue val)
+        {
+            var arr = val.ToString().Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+            if (arr.Length != 3 || arr[0] == _managerId) return;
+            _logger.Debug($"subscribe:{val}");
+            var cache = CacheManager.GetCacher(arr[1], cache: false);
+            cache.Remove(arr[2]);
+        }
+
+        internal void CacheSubscribe(string configName = null)
+        {
+            _cacheSync = true;
+            _logger.Info("开启两级缓存同步");
+            //订阅
+            var sub = GetSubscriber(configName);
+            sub.SubscribeAsync("cache.manager", ConfigSubscribe);
+        }
+
+        internal void CachePublish(string region, string key, string configName = null)
+        {
+            if (!_cacheSync || string.IsNullOrWhiteSpace(key)) return;
+            var sub = GetSubscriber(configName);
+            _logger.Debug($"publish cache:{region},{key}");
+            sub.PublishAsync("cache.manager", $"{_managerId},{region},{key}");
+        }
+
+        internal void CachePublish(string region, IEnumerable<string> keys, string configName = null)
+        {
+            foreach (var key in keys)
+            {
+                CachePublish(region, key);
+            }
         }
     }
 }

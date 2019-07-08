@@ -5,9 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_config_cache\**" />
     <Compile Remove="_logs\**" />
+    <Content Remove="_config_cache\**" />
     <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="_config_cache\**" />
     <EmbeddedResource Remove="_logs\**" />
+    <None Remove="_config_cache\**" />
     <None Remove="_logs\**" />
   </ItemGroup>
 

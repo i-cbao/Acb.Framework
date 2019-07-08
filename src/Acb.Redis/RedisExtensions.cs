@@ -1,5 +1,5 @@
 ﻿using Acb.Core.Extensions;
-using Acb.Core.Serialize;
+using Newtonsoft.Json;
 using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
@@ -10,9 +10,8 @@ namespace Acb.Redis
     public static class RedisExtensions
     {
         #region 私有方法
-        /// <summary>
-        /// 序列化对象
-        /// </summary>
+
+        /// <summary> 序列化对象 </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
         private static RedisValue Serialize(object obj)
@@ -22,24 +21,31 @@ namespace Acb.Redis
                 return RedisValue.Null;
             }
             var type = obj.GetType();
-            return type == typeof(string) || type.IsSimpleType() ? obj.ToString() : JsonHelper.ToJson(obj);
+            return type.IsSimpleType() ? obj.ToString() : JsonConvert.SerializeObject(obj);
         }
 
-        /// <summary>
-        /// 反序列化对象
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <summary> 反序列化对象 </summary>
         /// <param name="value"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        private static T Deserialize<T>(RedisValue value)
+        private static object Deserialize(RedisValue value, Type type)
         {
             if (!value.HasValue)
             {
-                return default(T);
+                return null;
             }
-            var type = typeof(T);
-            return type == typeof(string) || type.IsSimpleType() ? value.ToString().CastTo<T>() : JsonHelper.Json<T>(value);
+
+            if (typeof(string) == type)
+                return value.ToString();
+            return type.IsSimpleType() ? value.ToString().CastTo(type) : JsonConvert.DeserializeObject(value, type);
         }
+
+        private static T Deserialize<T>(RedisValue value)
+        {
+            var obj = Deserialize(value, typeof(T));
+            return obj == null ? default(T) : (T)obj;
+        }
+
         #endregion
 
         /// <summary> 获取缓存 </summary>
@@ -67,10 +73,12 @@ namespace Acb.Redis
         /// <summary> 获取缓存 </summary>
         /// <param name="database"></param>
         /// <param name="key">缓存键</param>
+        /// <param name="type"></param>
         /// <returns></returns>
-        public static object Get(this IDatabase database, string key)
+        public static object Get(this IDatabase database, string key, Type type)
         {
-            return database.Get<object>(key);
+            var val = database.StringGet(key);
+            return Deserialize(val, type);
         }
 
         /// <summary> 获取缓存 </summary>

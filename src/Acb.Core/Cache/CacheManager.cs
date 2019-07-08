@@ -36,10 +36,14 @@ namespace Acb.Core.Cache
         /// <param name="region">缓存区域</param>
         /// <param name="level">默认：一级缓存</param>
         /// <param name="memeryExpiredMinutes">一级缓存时间(分,仅当使用两级缓存时生效)</param>
+        /// <param name="cache">是否缓存区域</param>
         /// <returns></returns>
         public static ICache GetCacher(string region, CacheLevel level = CacheLevel.First,
-            double memeryExpiredMinutes = 5)
+            double memeryExpiredMinutes = 5, bool cache = true)
         {
+            if (!cache)
+                return new InternalCacher(region, level, memeryExpiredMinutes);
+
             var cacheLazy = Cachers.GetOrAdd(region,
                 key => new Lazy<ICache>(() => new InternalCacher(key, level, memeryExpiredMinutes)));
             return cacheLazy.Value;

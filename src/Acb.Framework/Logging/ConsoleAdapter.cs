@@ -9,12 +9,10 @@ namespace Acb.Framework.Logging
 {
     public class ConsoleLog : LogBase
     {
-        private static readonly object LockObj = new object();
-
         private readonly Dictionary<LogLevel, ConsoleColor> _logColors = new Dictionary<LogLevel, ConsoleColor>
         {
-            {LogLevel.Trace, ConsoleColor.DarkGray},
-            {LogLevel.Debug, ConsoleColor.Gray},
+            {LogLevel.Trace, ConsoleColor.Green},
+            {LogLevel.Debug, ConsoleColor.DarkGreen},
             {LogLevel.Info, ConsoleColor.Cyan},
             {LogLevel.Warn, ConsoleColor.Yellow},
             {LogLevel.Error, ConsoleColor.Red},
@@ -27,30 +25,29 @@ namespace Acb.Framework.Logging
         /// <param name="exception"></param>
         protected override void WriteInternal(LogLevel level, object message, Exception exception)
         {
-            lock (LockObj)
+            var prints = new List<PrintItem>();
+            ConsoleColor? color = null;
+            if (_logColors.ContainsKey(level))
             {
-                if (message != null)
-                {
-                    if (_logColors.ContainsKey(level))
-                        Console.ForegroundColor = _logColors[level];
-                    if (message.GetType().IsSimpleType())
-                    {
-
-                        Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]\t{message}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{Clock.Now:yyyy-MM-dd HH:mm:ss}({LoggerName})[{level}]");
-                        Console.WriteLine(JsonHelper.ToJson(message, NamingType.CamelCase, true));
-                    }
-                }
-
-                if (exception != null)
-                {
-                    Console.WriteLine(exception.Format());
-                }
-                Console.ResetColor();
+                color = _logColors[level];
             }
+
+            prints.Add(new PrintItem($"[{level}]\t", color, false));
+            prints.Add(new PrintItem($"{Clock.Now:yyyy-MM-dd HH:mm:ss}\t{LoggerName}", ConsoleColor.DarkCyan));
+            if (message != null)
+            {
+                var content = message.GetType().IsSimpleType()
+                    ? message.ToString()
+                    : JsonHelper.ToJson(message, NamingType.CamelCase, true);
+                prints.Add(new PrintItem($"\t{content}"));
+            }
+
+            if (exception != null)
+            {
+                prints.Add(new PrintItem($"\t{exception.Format()}", ConsoleColor.Red));
+            }
+
+            prints.Print();
         }
 
         public override bool IsTraceEnabled => true;

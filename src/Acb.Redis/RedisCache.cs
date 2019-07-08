@@ -1,5 +1,4 @@
 ﻿using Acb.Core.Cache;
-using Acb.Core.Timing;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -10,25 +9,20 @@ namespace Acb.Redis
     /// <summary> 缓存实现类 </summary>
     public class RedisCache : BaseCache
     {
-        private readonly string _region;
         private readonly string _configName;
         private readonly RedisConfig _config;
         private readonly RedisManager _redisManager;
-        public RedisCache(string region, string configName = null)
+        public RedisCache(string region, string configName = null) : base(region)
         {
-            _region = region;
             _configName = configName;
             _redisManager = RedisManager.Instance;
         }
 
-        public RedisCache(string region, RedisConfig config)
+        public RedisCache(string region, RedisConfig config) : base(region)
         {
-            _region = region;
             _config = config;
             _redisManager = RedisManager.Instance;
         }
-
-        public override string Region => _region;
 
         private IDatabase GetDatabase()
         {
@@ -40,68 +34,45 @@ namespace Acb.Redis
             return _config != null ? _redisManager.GetServer(_config) : _redisManager.GetServer(_configName);
         }
 
-        private void SetValue(string key, object value, TimeSpan? expired = null)
+        private object GetValue(string key, Type type)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+                return null;
+            var db = GetDatabase();
+            return db.Get(key, type);
+        }
+
+        public override void Set(string key, object value, TimeSpan? expired = null)
         {
             if (string.IsNullOrWhiteSpace(key))
                 return;
-            key = GetKey(key);
+            var cacheKey = GetKey(key);
             var db = GetDatabase();
             if (value == null)
             {
-                db.KeyDelete(key);
-                return;
+                db.KeyDelete(cacheKey);
             }
-            db.Set(key, value, expired);
+            else
+            {
+                db.Set(cacheKey, value, expired);
+            }
+            _redisManager.CachePublish(Region, key);
         }
-        private T GetValue<T>(string key, bool format = true)
+
+        public override object Get(string key, Type type)
         {
             if (string.IsNullOrWhiteSpace(key))
-                return default(T);
-            if (format)
-                key = GetKey(key);
-            var db = GetDatabase();
-            return db.Get<T>(key);
-        }
-
-        public override void Set(string key, object value)
-        {
-            SetValue(key, value);
-        }
-
-        public override void Set(string key, object value, TimeSpan expire)
-        {
-            SetValue(key, value, expire);
-        }
-
-        public override void Set(string key, object value, DateTime expire)
-        {
-            SetValue(key, value, expire - Clock.Now);
-        }
-
-
-
-        public override object Get(string key)
-        {
-            return GetValue<object>(key);
+                return null;
+            var cacheKey = GetKey(key);
+            return GetValue(cacheKey, type);
         }
 
         public override IEnumerable<object> GetAll()
         {
-            var token = string.Concat(_region, ":*");
+            var token = string.Concat(Region, ":*");
             var server = GetServer();
             var keys = server.Keys(pattern: token);
-            var list = new List<object>();
-            foreach (var key in keys)
-            {
-                var item = GetValue<object>(key, false);
-                list.Add(item);
-            }
-            return list;
-        }
-
-        public override T Get<T>(string key)
-        {
-            return GetValue<T>(key);
+            return keys.Select(key => GetValue(key, typeof(object))).ToList();
         }
 
         public override void Remove(string key)
@@ -110,37 +81,40 @@ namespace Acb.Redis
                 return;
             var cacheKey = GetKey(key);
             var db = GetDatabase();
-            db.KeyDelete(cacheKey);
+            var result = db.KeyDelete(cacheKey);
+            if (result)
+                _redisManager.CachePublish(Region, key);
         }
 
-        public override void Remove(IEnumerable<string> keys)
+        public override TimeSpan? ExpireTime(string key)
         {
-            var cacheKeys = keys.Select(GetKey);
+            if (string.IsNullOrWhiteSpace(key))
+                return null;
+            var cacheKey = GetKey(key);
             var db = GetDatabase();
-            foreach (var key in cacheKeys)
-            {
-                db.KeyDelete(key);
-            }
+            var t = db.StringGetWithExpiry(cacheKey);
+            return t.Expiry;
         }
 
         public override void Clear()
         {
-            var token = $"{_region}:*";
+            var token = $"{Region}:*";
             var server = GetServer();
-            var keys = server.Keys(pattern: token).Select(t => t.ToString());
-            Remove(keys);
+            var keys = server.Keys(pattern: token).Select(t => t.ToString()).ToArray();
+            this.Remove(keys);
+            foreach (var key in keys)
+            {
+                _redisManager.CachePublish(Region, key.Replace($"^{Region}:", string.Empty));
+            }
         }
 
         public override void ExpireEntryIn(string key, TimeSpan timeSpan)
         {
             var cacheKey = GetKey(key);
             var db = GetDatabase();
-            db.KeyExpire(cacheKey, timeSpan);
-        }
-
-        public override void ExpireEntryAt(string key, DateTime dateTime)
-        {
-            ExpireEntryIn(key, dateTime - Clock.Now);
+            var result = db.KeyExpire(cacheKey, timeSpan);
+            if (result)
+                _redisManager.CachePublish(Region, key);
         }
     }
 }

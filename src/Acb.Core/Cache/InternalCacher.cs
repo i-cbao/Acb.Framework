@@ -1,5 +1,4 @@
 ﻿using Acb.Core.Logging;
-using Acb.Core.Timing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +8,7 @@ namespace Acb.Core.Cache
     /// <summary> 缓存执行者 </summary>
     internal sealed class InternalCacher : ICache
     {
-        private static readonly ILogger Logger = LogManager.Logger<InternalCacher>();
+        private readonly ILogger _logger;
 
         private readonly Dictionary<CacheLevel, ICache> _caches;
 
@@ -19,39 +18,27 @@ namespace Acb.Core.Cache
         /// <summary> 初始化一个<see cref="InternalCacher"/>类型的新实例 </summary>
         public InternalCacher(string region, CacheLevel level, double expireMinutes)
         {
+            Region = region;
+            _logger = LogManager.Logger<InternalCacher>();
             _caches = CacheManager.Providers.Where(m => m.Value != null && (m.Key & level) > 0)
                 .ToDictionary(k => k.Key, v => v.Value.Value.GetCache(region));
             if (_caches.Count == 0)
             {
-                Logger.Warn("no cache provider！");
+                _logger.Warn("no cache provider！");
             }
             _memoryExpireMinutes = expireMinutes;
         }
 
-        private TimeSpan MemoryExpired(TimeSpan expired)
+        private TimeSpan MemoryExpired(TimeSpan? expired)
         {
             var memory = TimeSpan.FromMinutes(_memoryExpireMinutes);
-            return expired < memory ? expired : memory;
+            if (!expired.HasValue) return memory;
+            return expired.Value < memory ? expired.Value : memory;
         }
 
-        private DateTime MemoryExpired(DateTime expired)
-        {
-            var memory = Clock.Now.AddMinutes(_memoryExpireMinutes);
-            return expired < memory ? expired : memory;
-        }
+        public string Region { get; }
 
-        public void Set(string key, object value)
-        {
-            foreach (var cache in _caches)
-            {
-                if (cache.Key == CacheLevel.First && _caches.ContainsKey(CacheLevel.Second))
-                    cache.Value.Set(key, value, Clock.Now.AddMinutes(_memoryExpireMinutes));
-                else
-                    cache.Value.Set(key, value);
-            }
-        }
-
-        public void Set(string key, object value, TimeSpan expire)
+        public void Set(string key, object value, TimeSpan? expire = null)
         {
             var memoryExpired = MemoryExpired(expire);
             foreach (var cache in _caches)
@@ -63,35 +50,32 @@ namespace Acb.Core.Cache
             }
         }
 
-        public void Set(string key, object value, DateTime expire)
-        {
-            var memoryExpired = MemoryExpired(expire);
-            foreach (var cache in _caches)
-            {
-                if (cache.Key == CacheLevel.First && _caches.ContainsKey(CacheLevel.Second))
-                    cache.Value.Set(key, value, memoryExpired);
-                else
-                    cache.Value.Set(key, value, expire);
-            }
-        }
-
-        public object Get(string key)
+        public object Get(string key, Type type)
         {
             object value;
             if (_caches.TryGetValue(CacheLevel.First, out var cache))
             {
                 //先从一级缓存读取
-                value = cache.Get(key);
+                value = cache.Get(key, type);
                 if (value != null)
+                {
+                    _logger.Debug("get from first cache");
                     return value;
+                }
             }
             if (!_caches.TryGetValue(CacheLevel.Second, out cache))
                 return null;
-            value = cache.Get(key);
+            value = cache.Get(key, type);
+            _logger.Debug("get from second cache");
+            //没有值 或 没有一级缓存 直接返回
             if (value == null || !_caches.TryGetValue(CacheLevel.First, out cache))
                 return value;
             //设置一级缓存
-            cache.Set(key, value, Clock.Now.AddMinutes(_memoryExpireMinutes));
+            var memoryTime = TimeSpan.FromMinutes(_memoryExpireMinutes);
+            var time = cache.ExpireTime(key);
+            if (time.HasValue && time.Value < memoryTime)
+                memoryTime = time.Value;
+            cache.Set(key, value, memoryTime);
             return value;
         }
 
@@ -109,26 +93,6 @@ namespace Acb.Core.Cache
             return values;
         }
 
-        public T Get<T>(string key)
-        {
-            var value = default(T);
-            if (_caches.TryGetValue(CacheLevel.First, out var cache))
-            {
-                //先从一级缓存读取
-                value = cache.Get<T>(key);
-                if (value != null)
-                    return value;
-            }
-            if (!_caches.TryGetValue(CacheLevel.Second, out cache))
-                return value;
-            value = cache.Get<T>(key);
-            if (value == null || !_caches.TryGetValue(CacheLevel.First, out cache))
-                return value;
-            //设置一级缓存
-            cache.Set(key, value, Clock.Now.AddMinutes(_memoryExpireMinutes));
-            return value;
-        }
-
         public void Remove(string key)
         {
             foreach (var cache in _caches.Values)
@@ -137,13 +101,15 @@ namespace Acb.Core.Cache
             }
         }
 
-        public void Remove(IEnumerable<string> keys)
+        public TimeSpan? ExpireTime(string key)
         {
-            var enumerable = keys as string[] ?? keys.ToArray();
             foreach (var cache in _caches.Values)
             {
-                cache.Remove(enumerable);
+                var time = cache.ExpireTime(key);
+                if (time.HasValue) return time;
             }
+
+            return null;
         }
 
         public void Clear()
@@ -163,18 +129,6 @@ namespace Acb.Core.Cache
                     cache.Value.ExpireEntryIn(key, memoryExpired);
                 else
                     cache.Value.ExpireEntryIn(key, timeSpan);
-            }
-        }
-
-        public void ExpireEntryAt(string key, DateTime dateTime)
-        {
-            var memoryExpired = MemoryExpired(dateTime);
-            foreach (var cache in _caches)
-            {
-                if (cache.Key == CacheLevel.First && _caches.ContainsKey(CacheLevel.Second))
-                    cache.Value.ExpireEntryAt(key, memoryExpired);
-                else
-                    cache.Value.ExpireEntryAt(key, dateTime);
             }
         }
     }

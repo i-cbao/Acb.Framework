@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Acb.Core.Logging.Remote
@@ -24,6 +23,7 @@ namespace Acb.Core.Logging.Remote
         {
             _logger = LogManager.Logger<TcpRemoteLogger>();
             var config = RemoteLoggerConfig.Config();
+            if (string.IsNullOrWhiteSpace(config?.Address)) return;
             Host = config.Address;
             Port = config.Port;
             CreateClient();
@@ -55,7 +55,6 @@ namespace Acb.Core.Logging.Remote
         private async Task InternalLog(object msg, LogLevel level, Exception ex = null, DateTime? date = null,
             string logger = null, string site = null)
         {
-            Thread.Sleep(5000);
             if (_client == null || !_client.Connected)
                 CreateClient();
             if (_client == null)
@@ -109,6 +108,7 @@ namespace Acb.Core.Logging.Remote
         /// <returns></returns>
         public void Logger(object msg, LogLevel level, Exception ex = null, DateTime? date = null, string logger = null, string site = null)
         {
+            if (string.IsNullOrWhiteSpace(Host)) return;
             Task.Run(async () =>
             {
                 try
