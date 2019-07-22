@@ -17,13 +17,16 @@ namespace Acb.Core.Helper.Http
         private const string Prefix = "sites:";
         private readonly ILogger _logger = LogManager.Logger<RestHelper>();
         private readonly HttpHelper _httpHelper;
+        private readonly int _timeout;
 
         /// <summary> 构造函数 </summary>
         /// <param name="baseUri"></param>
-        public RestHelper(string baseUri = null)
+        /// <param name="timeout">超时时间(秒)</param>
+        public RestHelper(string baseUri = null, int timeout = -1)
         {
             _baseUri = baseUri;
             _httpHelper = HttpHelper.Instance;
+            _timeout = timeout;
         }
 
         /// <inheritdoc />
@@ -55,6 +58,8 @@ namespace Acb.Core.Helper.Http
             request.Headers = request.Headers ?? new Dictionary<string, string>();
             if (ticket)
                 request.Headers.Add("App-Ticket", GetTicket());
+            if (_timeout > 0)
+                request.Timeout = TimeSpan.FromSeconds(_timeout);
             return await _httpHelper.RequestAsync(method ?? HttpMethod.Get, request);
         }
 

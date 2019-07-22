@@ -1,13 +1,13 @@
-﻿using Acb.Core.Domain.Entities;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Acb.Core.Domain.Entities;
 using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Dapper;
 using Acb.Dapper.Domain;
-using Acb.WebApi.Test.Connections;
-using System.Threading;
-using System.Threading.Tasks;
+using Acb.WebApi.Test.Domain.Connections;
 
-namespace Acb.WebApi.Test.Repositories
+namespace Acb.WebApi.Test.Domain.Repositories
 {
     [Naming(NamingType.UrlCase, Name = "t_account")]
     public class TAccount : BaseEntity<string>

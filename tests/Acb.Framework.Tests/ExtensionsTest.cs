@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Acb.Core.Domain;
 
 namespace Acb.Framework.Tests
 {
@@ -43,8 +44,9 @@ namespace Acb.Framework.Tests
                 ParentCode = "10010",
                 Deep = 1
             };
-            var props = source.CheckProps(target, reset: true);
+            var props = source.CheckProps(target, reset: true, setValue: true);
             Print(props.Select(t => t.Name));
+            Print(target);
         }
 
         [TestMethod]
@@ -77,6 +79,11 @@ namespace Acb.Framework.Tests
                 //AggregateException
                 Console.WriteLine(e);
             }
+
+            //Resolve<IUnitOfWork>().Trans(async () =>
+            //{
+            //    await Task.FromResult(0);
+            //});
 
             var act = new Action(() => Console.WriteLine("shay"));
             await act;

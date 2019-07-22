@@ -1,11 +1,12 @@
 ﻿using Acb.Core;
-using Acb.Core.Cache;
 using Acb.Core.Dependency;
 using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Message;
+using Acb.Core.Security;
+using Acb.Core.Session;
 using Polly;
 using System;
 using System.Collections;
@@ -107,13 +108,22 @@ namespace Acb.MicroService.Client.Proxy
             var remoteIp = AcbHttpContext.RemoteIpAddress;
             var headers = new Dictionary<string, string>
             {
-                {"X-Forwarded-For", remoteIp},
-                {"X-Real-IP", remoteIp},
+                {AcbClaimTypes.HeaderForward, remoteIp},
+                {AcbClaimTypes.HeaderRealIp, remoteIp},
                 {
-                    "User-Agent", AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
+                    AcbClaimTypes.HeaderUserAgent,
+                    AcbHttpContext.Current == null ? "micro_service_client" : AcbHttpContext.UserAgent
                 },
-                {"referer", AcbHttpContext.RawUrl}
+                {AcbClaimTypes.HeaderReferer, AcbHttpContext.RawUrl}
             };
+            var session = CurrentIocManager.Resolve<IAcbSession>();
+            if (session.UserId != null)
+                headers.Add(AcbClaimTypes.HeaderUserId, session.GetUserId<string>());
+            if (session.TenantId != null)
+                headers.Add(AcbClaimTypes.HeaderTenantId, session.GetTenantId<string>());
+            headers.Add(AcbClaimTypes.HeaderUserName, session.UserName);
+            headers.Add(AcbClaimTypes.HeaderRole, session.Role);
+
             return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
             {
                 Data = args,

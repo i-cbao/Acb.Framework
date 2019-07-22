@@ -2,8 +2,12 @@
 using Acb.Core.Dependency;
 using Acb.Core.EventBus;
 using Acb.Core.Extensions;
+using Acb.Core.Helper;
 using Acb.Core.Logging;
+using Acb.Core.Session;
+using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.EventBus;
+using Acb.MicroService.Client;
 using Acb.Office;
 using Acb.RabbitMq.Options;
 using Acb.WebApi.Filters;
@@ -16,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -25,20 +30,52 @@ namespace Acb.WebApi.Test.Controllers
         private readonly ILogger _logger;
         private readonly IRemoteLogger _remoteLogger;
         private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IAcbSession _session;
 
-        public HomeController(IHubContext<MessageHub> mhub, IRemoteLogger remoteLogger)
+        private readonly IDemoService _demoService;
+
+        public HomeController(IHubContext<MessageHub> mhub, IRemoteLogger remoteLogger, IAcbSession session, IDemoService demoService)
         {
             _messageHub = mhub;
             _logger = LogManager.Logger<HomeController>();
             _remoteLogger = remoteLogger;
+            _session = session;
+            _demoService = ProxyService.Proxy<IDemoService>(); //demoService;
             var bus = CurrentIocManager.Resolve<IEventBus>();
         }
 
-        // GET api/values
-        [HttpGet]
-        public DResults<string> Get()
+        [HttpPost("login"), AllowAnonymous]
+        public DResult<string> Login([FromBody]VLoginInput input)
         {
-            return Succ(new[] { "value1", "value2" }, -1);
+            var client = new DClientTicket<Guid>
+            {
+                Id = IdentityHelper.NewSequentialGuid(),
+                Name = input.Account,
+                Role = "admin"
+            };
+            return Succ(client.Ticket());
+        }
+
+        // GET api/values
+        [HttpGet(), AllowAnonymous]
+        public DResults<string> Get(int code = 0)
+        {
+            //var claims = new List<Claim>
+            //{
+            //    new Claim(AcbClaimTypes.UserId, "shay"),
+            //    new Claim(AcbClaimTypes.TenantId, "10001")
+            //};
+            //HttpContext.User.AddIdentity(new ClaimsIdentity(claims));
+            //var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
+            //principal?.AddIdentity(new ClaimsIdentity(claims));
+            if (code == 0)
+                return Succ(_demoService.GetSession(), -1);
+            using (_session.Use("test", "10002"))
+            {
+                return Succ(_demoService.GetSession(), -1);
+            }
+
+            //return Succ(new[] { "value1", "value2" }, -1);
         }
 
         [HttpGet("test")]

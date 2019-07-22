@@ -17,6 +17,8 @@ namespace Acb.Redis
     public class RedisManager : IDisposable
     {
         private readonly string _managerId;
+
+        private const string CacheSyncChannel = "cache.manager";
         //缓存同步
         private bool _cacheSync;
         private readonly ILogger _logger;

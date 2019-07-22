@@ -83,6 +83,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.TimingTask", "src\Acb.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.MicroService.Host", "src\Acb.MicroService.Host\Acb.MicroService.Host.csproj", "{F0F8A838-3C84-48A5-8092-CB7EDBBCDB27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.Gateway.Ocelot", "tests\Acb.Gateway.Ocelot\Acb.Gateway.Ocelot.csproj", "{077AD881-2F03-4B04-B0FE-E786075F92D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,10 @@ Global
 		{F0F8A838-3C84-48A5-8092-CB7EDBBCDB27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0F8A838-3C84-48A5-8092-CB7EDBBCDB27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0F8A838-3C84-48A5-8092-CB7EDBBCDB27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{077AD881-2F03-4B04-B0FE-E786075F92D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{077AD881-2F03-4B04-B0FE-E786075F92D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{077AD881-2F03-4B04-B0FE-E786075F92D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{077AD881-2F03-4B04-B0FE-E786075F92D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -264,6 +270,7 @@ Global
 		{F3D4CE57-A617-4CAC-A05B-04979EA20D91} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 		{C8EDA568-52D7-4E77-8C11-0E133B7B8F50} = {C358CAF5-2662-4A0A-90D1-D44A6D6796B7}
 		{F0F8A838-3C84-48A5-8092-CB7EDBBCDB27} = {51887478-4531-490B-A79B-7F8BBD3D966A}
+		{077AD881-2F03-4B04-B0FE-E786075F92D8} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

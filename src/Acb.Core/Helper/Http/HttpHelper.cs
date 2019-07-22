@@ -16,7 +16,7 @@ namespace Acb.Core.Helper.Http
     /// <summary> Http请求类 </summary>
     public class HttpHelper : IDisposable
     {
-        private readonly HttpClient _client;
+        private HttpClient _client;
         private readonly ILogger _logger;
 
         private static readonly IDictionary<string, string> DefaultHeaders = new Dictionary<string, string>
@@ -30,14 +30,21 @@ namespace Acb.Core.Helper.Http
 
         private HttpHelper()
         {
-            _client = new HttpClient(new HttpClientHandler { UseCookies = true });
             _logger = LogManager.Logger<HttpHelper>();
+            CreateHttpClient();
+        }
+
+        private void CreateHttpClient(TimeSpan? timeout = null)
+        {
+            _client?.Dispose();
+            _client = new HttpClient(new HttpClientHandler { UseCookies = true });
             foreach (var header in DefaultHeaders)
             {
                 _client.DefaultRequestHeaders.Add(header.Key, header.Value);
             }
 
-            _client.Timeout = TimeSpan.FromSeconds(65);
+            timeout = timeout ?? TimeSpan.FromSeconds(65);
+            _client.Timeout = timeout.Value;
         }
 
         /// <summary> 单例模式 </summary>
@@ -48,7 +55,7 @@ namespace Acb.Core.Helper.Http
         /// <param name="timeout"></param>
         public void Timeout(TimeSpan timeout)
         {
-            _client.Timeout = timeout;
+            CreateHttpClient(timeout);
         }
 
         /// <summary> 请求 </summary>
@@ -82,11 +89,9 @@ namespace Acb.Core.Helper.Http
                 }
             }
 
-            TimeSpan? currentTimeout = null;
             if (request.Timeout.HasValue)
             {
-                currentTimeout = _client.Timeout;
-                _client.Timeout = request.Timeout.Value;
+                CreateHttpClient(request.Timeout);
             }
 
             HttpContent content = null;
@@ -154,9 +159,10 @@ namespace Acb.Core.Helper.Http
                 req.Content = content;
             var formData = request.Data == null ? string.Empty : "->" + JsonHelper.ToJson(request.Data);
             _logger.Debug($"HttpHelper：[{method}]{url}{formData}");
+            
             var resp = await _client.SendAsync(req);
-            if (currentTimeout.HasValue)
-                _client.Timeout = currentTimeout.Value;
+            if (request.Timeout.HasValue)
+                CreateHttpClient();
             return resp;
         }
 

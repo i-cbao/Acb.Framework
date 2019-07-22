@@ -4,11 +4,12 @@ using Acb.WebApi.Test.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using Acb.WebApi.Filters;
 
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 基础身份认证类 </summary>
-    //[DAuthorize]
+    [DAuthorize]
     [Route("[controller]")]
     [ApiExplorerSettings(GroupName = "help")]
     public abstract class BaseController : DAuthorController<DemoClientTicket>
@@ -24,13 +25,13 @@ namespace Acb.WebApi.Test.Controllers
         public override void AuthorizeValidate(HttpContext context)
         {
             base.AuthorizeValidate(context);
-            if (Client == null)
-                throw ErrorCodes.InvalidTicket.CodeException();
-            var cacheKey = $"ticket:{Client.Id}";
-            var cacheTicket = AuthorizeCache.Get<string>(cacheKey);
-            if (!string.Equals(Client.Ticket, cacheTicket, StringComparison.CurrentCultureIgnoreCase))
-                throw ErrorCodes.InvalidTicket.CodeException();
-            AuthorizeCache.ExpireEntryIn(cacheKey, TimeSpan.FromMinutes(30));
+            //if (Client == null)
+            //    throw ErrorCodes.InvalidTicket.CodeException();
+            //var cacheKey = $"ticket:{Client.Id}";
+            //var cacheTicket = AuthorizeCache.Get<string>(cacheKey);
+            //if (!string.Equals(Client.Ticket, cacheTicket, StringComparison.CurrentCultureIgnoreCase))
+            //    throw ErrorCodes.InvalidTicket.CodeException();
+            //AuthorizeCache.ExpireEntryIn(cacheKey, TimeSpan.FromMinutes(30));
         }
     }
 }

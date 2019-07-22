@@ -8,7 +8,6 @@ namespace Acb.Middleware.Monitor
     {
         public override void Initialize()
         {
-
             base.Initialize();
         }
     }

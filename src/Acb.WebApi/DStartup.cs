@@ -45,15 +45,12 @@ namespace Acb.WebApi
 
         protected virtual void SwaggerOption(SwaggerOptions options)
         {
-
         }
         protected virtual void SwaggerGenOption(SwaggerGenOptions options)
         {
-
         }
         protected virtual void SwaggerUiOption(SwaggerUIOptions options)
         {
-
         }
 
         private void AddSwagger(IServiceCollection services)

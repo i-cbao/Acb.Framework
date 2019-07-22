@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Acb.Core.Domain;
 
-namespace Acb.WebApi.Test.Repositories
+namespace Acb.WebApi.Test.Domain.Repositories
 {
     public class AccountService : IAccountContract
     {

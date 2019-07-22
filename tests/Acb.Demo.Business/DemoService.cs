@@ -1,6 +1,7 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
 using Acb.Core.Logging;
+using Acb.Core.Session;
 using Acb.Core.Timing;
 using Acb.Demo.Business.Domain;
 using Acb.Demo.Contracts;
@@ -19,8 +20,11 @@ namespace Acb.Demo.Business
         public AreaRepository AreaRepository { private get; set; }
         public AnotherAreaRepository AnotherAreaRepository { private get; set; }
 
-        public DemoService()
+        private readonly IAcbSession _acbSession;
+
+        public DemoService(IAcbSession acbSession)
         {
+            _acbSession = acbSession;
             _logger.Debug($"{GetType().Name} Create");
         }
 
@@ -81,6 +85,15 @@ namespace Acb.Demo.Business
                 count += await AnotherAreaRepository.UpdateParent();
                 return count;
             });
+        }
+
+        public string[] GetSession()
+        {
+            return new[]
+            {
+                _acbSession.GetUserId<string>(), _acbSession.GetTenantId<string>(), _acbSession.UserName,
+                _acbSession.Role
+            };
         }
     }
 }

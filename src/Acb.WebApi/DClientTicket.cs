@@ -1,17 +1,32 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core;
+using Acb.Core.Extensions;
 using Acb.Core.Helper;
 using Acb.Core.Logging;
+using Acb.Core.Security;
 using Acb.Core.Serialize;
 using Acb.Core.Timing;
 using Microsoft.AspNetCore.Http;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 
 namespace Acb.WebApi
 {
     /// <summary> 客户端令牌接口 </summary>
     public interface IClientTicket
     {
+        /// <summary> 用户Id </summary>
+        object UserId { get; set; }
+        /// <summary> 租户Id </summary>
+        object TenantId { get; set; }
+
+        /// <summary> 用户名称 </summary>
+        string Name { get; set; }
+
+        /// <summary> 用户角色 </summary>
+        string Role { get; set; }
         string Ticket { get; set; }
         /// <summary> 过期时间 </summary>
         DateTime? ExpiredTime { get; set; }
@@ -22,6 +37,11 @@ namespace Acb.WebApi
 
     public class ClientTicket : IClientTicket
     {
+        public object UserId { get; set; }
+        public object TenantId { get; set; }
+        public string Name { get; set; }
+        public string Role { get; set; }
+
         public string Ticket { get; set; }
 
         /// <inheritdoc />
@@ -48,14 +68,17 @@ namespace Acb.WebApi
     /// <summary> 默认客户端令牌 </summary>
     public class DClientTicket<T> : ClientTicket
     {
+        private T _id;
         /// <summary> 用户ID </summary>
-        public T Id { get; set; }
-
-        /// <summary> 姓名 </summary>
-        public string Name { get; set; }
-
-        /// <summary> 用户角色 </summary>
-        public long Role { get; set; }
+        public T Id
+        {
+            get => _id;
+            set
+            {
+                UserId = value;
+                _id = value;
+            }
+        }
     }
 
     /// <inheritdoc />
@@ -103,9 +126,33 @@ namespace Acb.WebApi
                     return default(TTicket);
                 var json = str.Substring(list[0].Length + 1);
                 var client = JsonHelper.Json<TTicket>(json);
-                return !string.Equals(list[0], client.Ticket, StringComparison.CurrentCultureIgnoreCase)
-                    ? default(TTicket)
-                    : client;
+                if (string.Equals(list[0], client.Ticket, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    if (AcbHttpContext.Current != null)
+                    {
+                        var principal = AcbHttpContext.Current.User;
+                        var claims = new List<Claim>();
+                        if (client.UserId != null)
+                        {
+                            claims.AddRange(new[]
+                            {
+                                new Claim(AcbClaimTypes.UserId, client.UserId?.ToString()),
+                                new Claim(AcbClaimTypes.UserName, client.Name),
+                                new Claim(AcbClaimTypes.Role, client.Role)
+                            });
+                        }
+                        if (client.TenantId != null)
+                            claims.Add(new Claim(AcbClaimTypes.TenantId, client.TenantId.ToString()));
+                        if (claims.Any())
+                        {
+                            var identity = new ClaimsIdentity(claims);
+                            principal.AddIdentity(identity);
+                        }
+                    }
+                    return client;
+                }
+
+                return default(TTicket);
             }
             catch (Exception ex)
             {

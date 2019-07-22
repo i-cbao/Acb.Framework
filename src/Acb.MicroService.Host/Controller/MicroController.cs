@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Acb.Core.Security;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Acb.MicroService.Host.Controller
@@ -31,6 +33,17 @@ namespace Acb.MicroService.Host.Controller
         {
             var req = ControllerContext.HttpContext.Request;
             var resp = ControllerContext.HttpContext.Response;
+
+            var identity = new ClaimsIdentity();
+            if (req.Headers.TryGetValue(AcbClaimTypes.HeaderUserId, out var userId))
+                identity.AddClaim(new Claim(AcbClaimTypes.UserId, userId));
+            if (req.Headers.TryGetValue(AcbClaimTypes.HeaderTenantId, out var tenantId))
+                identity.AddClaim(new Claim(AcbClaimTypes.TenantId, tenantId));
+            if (req.Headers.TryGetValue(AcbClaimTypes.HeaderUserName, out var userName))
+                identity.AddClaim(new Claim(AcbClaimTypes.UserName, userName));
+            if (req.Headers.TryGetValue(AcbClaimTypes.HeaderRole, out var role))
+                identity.AddClaim(new Claim(AcbClaimTypes.Role, role));
+            HttpContext.User.AddIdentity(identity);
             await _serviceRunner.MicroTask(req, resp, contract, method);
         }
     }

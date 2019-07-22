@@ -12,13 +12,14 @@ namespace Acb.WebApi.Filters
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+            var ticket = context.HttpContext.Request.VerifyTicket<ClientTicket>();
+
             if (context.ActionDescriptor.FilterDescriptors.Any(t => t.Filter.GetType() == typeof(AllowAnonymousFilter)))
             {
                 base.OnActionExecuting(context);
                 return;
             }
 
-            var ticket = context.HttpContext.Request.VerifyTicket<ClientTicket>();
             BaseValidate(ticket);
 
             var controller = context.Controller as DController;

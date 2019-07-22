@@ -25,7 +25,7 @@ namespace Acb.Core.Config.Center
             _config = config ?? CenterConfig.Config();
             _headers = new Dictionary<string, string>();
             _configVersions = new ConcurrentDictionary<string, long>();
-            _restHelper = new RestHelper(_config?.Uri);
+            _restHelper = new RestHelper(_config?.Uri, 3);
             _logger = LogManager.Logger<ConfigCenterApi>();
         }
 

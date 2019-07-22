@@ -26,5 +26,7 @@ namespace Acb.Demo.Contracts
         Task LoadAsync();
 
         Task<int> Update();
+
+        string[] GetSession();
     }
 }

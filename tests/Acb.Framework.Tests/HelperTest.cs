@@ -4,6 +4,7 @@ using Acb.Core.Helper;
 using Acb.Core.Helper.Http;
 using Acb.Core.Logging;
 using Acb.Core.Tests;
+using Acb.Core.Timing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
@@ -15,7 +16,6 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Acb.Core.Timing;
 
 namespace Acb.Framework.Tests
 {
@@ -221,6 +221,31 @@ namespace Acb.Framework.Tests
                 Print(id);
             });
             Print(result.ToString());
+        }
+
+        [TestMethod]
+        public async Task NotifyTest()
+        {
+            const string host = "http://localhost:25859";
+            //const string host = "https://pay.i-cbao.com";
+            var resp = await HttpHelper.Instance.PostAsync(new HttpRequest($"{host}/notify")
+            {
+                Data =
+                    "gmt_create=2019-07-12+18%3A53%3A07&charset=UTF-8&seller_email=ichebao%40i-cbao.com&subject=I%E8%BD%A6%E4%BF%9D%E7%BB%AD%E4%BF%9D%E8%AE%A2%E5%8D%95%E6%94%AF%E4%BB%98&sign=Jk0ri1d8W4hs%2B3MdT%2BlxZ%2FLLOvTyU7Lb5wDjtTBE53iPmcuue8s45qcFg7pJpcGtjkl8PdQ%2FrnKGKNZgJFFOr9iFZOhwudTYe3A6HN2h6zQzHKS9cPltSwaHXClMSKLOXFCyFFc%2B4n9H%2BrO%2BXW6s6bipKYdRyTlBa1yFZvl2yhcDOUyvw9bwbZmaLsIMHA9myfIVIwjN96Rere49TR4FjcQeeyPmIGm27lmOuc9dnXH9dusIErmZ6u0MY7nWbHJwCN3ddTU67%2BPHcu%2BKs4RbBQV4YaKPAhd4oxIR4Zsq%2BVnRUD%2FBMtDNpuDVhvPeuNlP08kqGmpAn6fvUE2RsjVTtA%3D%3D&body=I%E8%BD%A6%E4%BF%9D%E7%BB%AD%E4%BF%9D%E8%AE%A2%E5%8D%95%5BRO1562928747020%5D%E5%9C%A8%E7%BA%BF%E6%94%AF%E4%BB%98&buyer_id=2088002241808465&invoice_amount=0.01&notify_id=2019071200222185307008461040191282&fund_bill_list=%5B%7B%22amount%22%3A%220.01%22%2C%22fundChannel%22%3A%22PCREDIT%22%7D%5D&notify_type=trade_status_sync&trade_status=TRADE_SUCCESS&receipt_amount=0.01&app_id=2017102609532728&buyer_pay_amount=0.01&sign_type=RSA2&seller_id=2088621977822732&gmt_payment=2019-07-12+18%3A53%3A07&notify_time=2019-07-12+19%3A18%3A11&version=1.0&out_trade_no=T246055688930034411&total_amount=0.01&trade_no=2019071222001408461048341241&auth_app_id=2017102609532728&buyer_logon_id=luo***%40163.com&point_amount=0.00",
+                BodyType = HttpBodyType.Form
+            });
+            var content = await resp.Content.ReadAsStringAsync();
+            Print(content);
+        }
+
+        [TestMethod]
+        public void CommandTest()
+        {
+            Utils.ExecCommand(cmd =>
+            {
+                cmd("ping www.baidu.com");
+                cmd("ping www.i-cbao.com");
+            }, Print, 8000);
         }
     }
 }

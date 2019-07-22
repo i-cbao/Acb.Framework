@@ -170,9 +170,12 @@ namespace Acb.Core
         public static string FullUrl(string url, string host) => url.FullUrl(host);
 
         /// <summary> 执行命令 </summary>
-        /// <param name="inputAction"></param>
+        /// <param name="command"></param>
         /// <param name="outputAction"></param>
-        public static void ExecCommand(Action<Action<string>> inputAction, Action<string> outputAction = null)
+        /// <param name="timeout">超时时间(默认：-1)</param>
+        /// <param name="exeFile">可执行文件</param>
+        public static void ExecCommand(Action<Action<string>> command, Action<string> outputAction = null,
+            int timeout = -1, string exeFile = "cmd.exe")
         {
             Process pro = null;
             StreamWriter sIn = null;
@@ -183,7 +186,7 @@ namespace Acb.Core
                 {
                     StartInfo =
                     {
-                        FileName = "cmd.exe",
+                        FileName = exeFile,
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardInput = true,
@@ -194,17 +197,16 @@ namespace Acb.Core
                 if (outputAction == null)
                     outputAction = Console.WriteLine;
 
-                pro.OutputDataReceived += (sender, e) => outputAction(e.Data);
-                pro.ErrorDataReceived += (sender, e) => outputAction(e.Data);
+                pro.OutputDataReceived += (sender, e) => { outputAction(e.Data); };
+                pro.ErrorDataReceived += (sender, e) => { outputAction(e.Data); };
 
                 pro.Start();
                 sIn = pro.StandardInput;
                 sIn.AutoFlush = true;
-
                 pro.BeginOutputReadLine();
-                inputAction(value => sIn.WriteLine(value));
+                command.Invoke(value => sIn.WriteLine(value));
 
-                pro.WaitForExit();
+                pro.WaitForExit(timeout);
             }
             finally
             {

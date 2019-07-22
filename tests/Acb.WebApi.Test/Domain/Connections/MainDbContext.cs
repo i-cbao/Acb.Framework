@@ -1,6 +1,6 @@
 ﻿using Acb.Dapper;
 
-namespace Acb.WebApi.Test.Connections
+namespace Acb.WebApi.Test.Domain.Connections
 {
     public class MainDbContext : UnitOfWork
     {

@@ -217,39 +217,41 @@ namespace Acb.Core.Extensions
         /// <param name="target">目标对象</param>
         /// <param name="keyColumn">主键名称</param>
         /// <param name="reset">是否重置</param>
+        /// <param name="setValue">是否更新Target属性值</param>
         /// <returns></returns>
-        public static PropertyInfo[] CheckProps<T>(this T source, object target, string keyColumn = "id", bool reset = false)
+        public static PropertyInfo[] CheckProps<T>(this T source, object target, string keyColumn = "id", bool reset = false, bool setValue = false)
         {
             if (source == null || target == null)
                 return new PropertyInfo[] { };
-            var type = source.GetType();
+            var sourceType = source.GetType();
             var targetType = target.GetType();
-            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var sourceProps = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var list = new List<PropertyInfo>();
-            foreach (var prop in props)
+            foreach (var sourceProp in sourceProps)
             {
                 if (!string.IsNullOrWhiteSpace(keyColumn) &&
-                    prop.Name.Equals(keyColumn, StringComparison.CurrentCultureIgnoreCase))
+                    sourceProp.Name.Equals(keyColumn, StringComparison.CurrentCultureIgnoreCase))
                     continue;
-                var p = targetType.GetProperty(prop.Name,
+                var targetProp = targetType.GetProperty(sourceProp.Name,
                     BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-                if (p == null || p.PropertyType != prop.PropertyType)
+                if (targetProp == null)
                     continue;
                 //获取默认值
-                var def = prop.PropertyType.DefaultValue();
-                var s = prop.GetValue(source).CastTo(prop.PropertyType);
-                var t = p.GetValue(target).CastTo(prop.PropertyType);
+                var defValue = sourceProp.PropertyType.DefaultValue();
+                var sourceValue = sourceProp.GetValue(source).CastTo(targetProp.PropertyType);
+                var targetValue = targetProp.GetValue(target);
 
-                if (s == null || s.Equals(def))
+                if (sourceValue == null || sourceValue.Equals(defValue))
                 {
-                    if (!reset)
+                    if (!reset || targetValue == defValue)
                         continue;
-                    if (t != def)
-                        list.Add(prop);
+                    if (setValue && targetProp.CanWrite) targetProp.SetValue(target, sourceValue);
+                    list.Add(sourceProp);
                 }
-                else if (!s.Equals(t))
+                else if (!sourceValue.Equals(targetValue))
                 {
-                    list.Add(prop);
+                    if (setValue && targetProp.CanWrite) targetProp.SetValue(target, sourceValue);
+                    list.Add(sourceProp);
                 }
             }
 

@@ -7,7 +7,6 @@ using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.EventBus;
 using Acb.MicroService.Client;
-using Acb.WebApi.Test.Repositories;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -16,6 +15,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Acb.Office;
+using Acb.WebApi.Test.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
 
 namespace Acb.WebApi.Test.Controllers
