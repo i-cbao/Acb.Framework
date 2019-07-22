@@ -7,7 +7,7 @@ namespace Acb.WebApi.ViewModels
     {
         /// <inheritdoc />
         /// <summary> 当前页码 </summary>
-        [Range(1, 2000, ErrorMessage = "当前页面必须在1-2000之间")]
+        //[Range(1, 2000, ErrorMessage = "当前页面必须在1-2000之间")]
         public int Page { get; set; }
 
         /// <inheritdoc />
