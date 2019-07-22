@@ -1,4 +1,5 @@
-﻿using Acb.Core.Extensions;
+﻿using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using System;
 
 namespace Acb.Core.Session
@@ -40,14 +41,48 @@ namespace Acb.Core.Session
 
     public static class AcbSessionExtensions
     {
+        /// <summary> 获取UserId </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="session"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
         public static T GetUserId<T>(this IAcbSession session, T def = default(T))
         {
             return session.UserId.CastTo(def);
         }
 
+        /// <summary> 获取TenantId </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="session"></param>
+        /// <param name="def"></param>
+        /// <returns></returns>
         public static T GetTenantId<T>(this IAcbSession session, T def = default(T))
         {
             return session.TenantId.CastTo(def);
+        }
+
+        /// <summary> 获取必须的UserId(没有将抛出异常) </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        public static T GetRequiredUserId<T>(this IAcbSession session)
+        {
+            var value = session.UserId.CastTo<T>();
+            if (Equals(value, default(T)))
+                throw new BusiException("userId 不能为空");
+            return value;
+        }
+
+        /// <summary> 获取必须的TenantId(没有将抛出异常) </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        public static T GetRequiredTenantId<T>(this IAcbSession session)
+        {
+            var value = session.TenantId.CastTo<T>();
+            if (Equals(value, default(T)))
+                throw new BusiException("tenantId 不能为空");
+            return value;
         }
     }
 }

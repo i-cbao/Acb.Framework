@@ -87,13 +87,16 @@ namespace Acb.Demo.Business
             });
         }
 
-        public string[] GetSession()
+        public IDictionary<string, string> GetSession()
         {
-            return new[]
+            var dict = new Dictionary<string, string>
             {
-                _acbSession.GetUserId<string>(), _acbSession.GetTenantId<string>(), _acbSession.UserName,
-                _acbSession.Role
+                {"userId", _acbSession.GetUserId<string>()},
+                {"tenantId", _acbSession.GetTenantId<string>()},
+                {"userName", _acbSession.UserName},
+                {"userRole", _acbSession.Role}
             };
+            return dict;
         }
     }
 }

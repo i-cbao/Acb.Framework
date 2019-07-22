@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Threading;
 
 namespace Acb.WebApi
 {
@@ -114,6 +115,7 @@ namespace Acb.WebApi
         {
             if (string.IsNullOrWhiteSpace(ticket))
                 return default(TTicket);
+            var logger = LogManager.Logger(typeof(ClientTicketHelper));
             try
             {
                 var str = EncryptHelper.SymmetricDecrypt(ticket, EncryptHelper.SymmetricFormat.DES, TicketEncodeKey,
@@ -126,37 +128,39 @@ namespace Acb.WebApi
                     return default(TTicket);
                 var json = str.Substring(list[0].Length + 1);
                 var client = JsonHelper.Json<TTicket>(json);
-                if (string.Equals(list[0], client.Ticket, StringComparison.CurrentCultureIgnoreCase))
+                if (!string.Equals(list[0], client.Ticket, StringComparison.CurrentCultureIgnoreCase))
                 {
-                    if (AcbHttpContext.Current != null)
-                    {
-                        var principal = AcbHttpContext.Current.User;
-                        var claims = new List<Claim>();
-                        if (client.UserId != null)
-                        {
-                            claims.AddRange(new[]
-                            {
-                                new Claim(AcbClaimTypes.UserId, client.UserId?.ToString()),
-                                new Claim(AcbClaimTypes.UserName, client.Name),
-                                new Claim(AcbClaimTypes.Role, client.Role)
-                            });
-                        }
-                        if (client.TenantId != null)
-                            claims.Add(new Claim(AcbClaimTypes.TenantId, client.TenantId.ToString()));
-                        if (claims.Any())
-                        {
-                            var identity = new ClaimsIdentity(claims);
-                            principal.AddIdentity(identity);
-                        }
-                    }
-                    return client;
+                    logger.Warn($"client ticket not equal,{client.Ticket}:{list[0]}");
+                    return default(TTicket);
                 }
 
-                return default(TTicket);
+                var principal = AcbHttpContext.Current?.User ?? Thread.CurrentPrincipal as ClaimsPrincipal;
+                if (principal != null)
+                {
+                    var claims = new List<Claim>();
+                    if (client.UserId != null)
+                    {
+                        claims.AddRange(new[]
+                        {
+                            new Claim(AcbClaimTypes.UserId, client.UserId?.ToString()),
+                            new Claim(AcbClaimTypes.UserName, client.Name),
+                            new Claim(AcbClaimTypes.Role, client.Role)
+                        });
+                    }
+                    if (client.TenantId != null)
+                        claims.Add(new Claim(AcbClaimTypes.TenantId, client.TenantId.ToString()));
+                    if (claims.Any())
+                    {
+                        var identity = new ClaimsIdentity(claims);
+                        principal.AddIdentity(identity);
+                    }
+                }
+                return client;
+
             }
             catch (Exception ex)
             {
-                LogManager.Logger(typeof(ClientTicketHelper)).Error(ex.Message, ex);
+                logger.Error(ex.Message, ex);
                 return default(TTicket);
             }
         }

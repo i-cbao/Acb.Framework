@@ -18,7 +18,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 
@@ -58,7 +60,7 @@ namespace Acb.WebApi.Test.Controllers
 
         // GET api/values
         [HttpGet(), AllowAnonymous]
-        public DResults<string> Get(int code = 0)
+        public DResult<IDictionary<string, string>> Get(int code = 0, string tenant = null)
         {
             //var claims = new List<Claim>
             //{
@@ -69,10 +71,10 @@ namespace Acb.WebApi.Test.Controllers
             //var principal = Thread.CurrentPrincipal as ClaimsPrincipal;
             //principal?.AddIdentity(new ClaimsIdentity(claims));
             if (code == 0)
-                return Succ(_demoService.GetSession(), -1);
+                return Succ(_demoService.GetSession());
             using (_session.Use("test", "10002"))
             {
-                return Succ(_demoService.GetSession(), -1);
+                return Succ(_demoService.GetSession());
             }
 
             //return Succ(new[] { "value1", "value2" }, -1);

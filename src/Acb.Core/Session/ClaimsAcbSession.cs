@@ -1,14 +1,15 @@
 ﻿using Acb.Core.Dependency;
 using Acb.Core.Security;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Acb.Core.Session
 {
-    public class AcbSession : AcbSessionBase, ISingleDependency
+    public class ClaimsAcbSession : AcbSessionBase, ISingleDependency
     {
         private readonly IPrincipalAccessor _principalAccessor;
 
-        public AcbSession(IPrincipalAccessor principalAccessor)
+        public ClaimsAcbSession(IPrincipalAccessor principalAccessor)
         {
             _principalAccessor = principalAccessor;
         }
@@ -23,19 +24,19 @@ namespace Acb.Core.Session
 
         public override string Role => GetClaimValue(AcbClaimTypes.Role);
 
-        protected override object CurrentUserId => GetClaimValue(AcbClaimTypes.UserId);
-
-        protected override object CurrentTenantId
+        protected override object GetUserId()
         {
-            get
-            {
-                var tenantId = GetClaimValue(AcbClaimTypes.TenantId);
-                if (tenantId != null)
-                    return tenantId;
-                return CurrentIocManager.IsRegistered<ITenantResolver>()
-                    ? CurrentIocManager.Resolve<ITenantResolver>().ResolveTenantId()
-                    : null;
-            }
+            return GetClaimValue(AcbClaimTypes.UserId);
+        }
+
+        protected override object GetTenantId()
+        {
+            var tenantId = GetClaimValue(AcbClaimTypes.TenantId);
+            if (tenantId != null)
+                return tenantId;
+            return CurrentIocManager.IsRegistered<ITenantResolver>()
+                ? CurrentIocManager.Resolve<ITenantResolver>().ResolveTenantId()
+                : null;
         }
     }
 }

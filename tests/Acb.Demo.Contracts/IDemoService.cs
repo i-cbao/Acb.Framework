@@ -27,6 +27,6 @@ namespace Acb.Demo.Contracts
 
         Task<int> Update();
 
-        string[] GetSession();
+        IDictionary<string, string> GetSession();
     }
 }

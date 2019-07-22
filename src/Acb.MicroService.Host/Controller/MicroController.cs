@@ -34,6 +34,7 @@ namespace Acb.MicroService.Host.Controller
             var req = ControllerContext.HttpContext.Request;
             var resp = ControllerContext.HttpContext.Response;
 
+            //解析Claims
             var identity = new ClaimsIdentity();
             if (req.Headers.TryGetValue(AcbClaimTypes.HeaderUserId, out var userId))
                 identity.AddClaim(new Claim(AcbClaimTypes.UserId, userId));
@@ -44,6 +45,7 @@ namespace Acb.MicroService.Host.Controller
             if (req.Headers.TryGetValue(AcbClaimTypes.HeaderRole, out var role))
                 identity.AddClaim(new Claim(AcbClaimTypes.Role, role));
             HttpContext.User.AddIdentity(identity);
+
             await _serviceRunner.MicroTask(req, resp, contract, method);
         }
     }

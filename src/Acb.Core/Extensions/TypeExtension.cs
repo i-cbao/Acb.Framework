@@ -211,29 +211,31 @@ namespace Acb.Core.Extensions
             return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
 
-        /// <summary> 检查属性值变化 </summary>
+        /// <summary> 属性检测 </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="source">当前对象</param>
-        /// <param name="target">目标对象</param>
-        /// <param name="keyColumn">主键名称</param>
-        /// <param name="reset">是否重置</param>
-        /// <param name="setValue">是否更新Target属性值</param>
+        /// <param name="source">原对象(一般为数据库Entity)</param>
+        /// <param name="target">目标对象(一般为Dto)</param>
+        /// <param name="keyColumn">主键(不区分大小写)</param>
+        /// <param name="reset">是否重置(即target有属性，但是属性的值为默认值时，是否认为有更新)</param>
+        /// <param name="propAction">属性值更新操作(三个参数,SourcePropType,BeforeValue,AfterValue)</param>
         /// <returns></returns>
-        public static PropertyInfo[] CheckProps<T>(this T source, object target, string keyColumn = "id", bool reset = false, bool setValue = false)
+        public static PropertyInfo[] CheckProps<T>(this T source, object target, string keyColumn = "id",
+            bool reset = false, Action<PropertyInfo, object, object> propAction = null)
         {
             if (source == null || target == null)
                 return new PropertyInfo[] { };
             var sourceType = source.GetType();
             var targetType = target.GetType();
             var sourceProps = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var targetProps = targetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var list = new List<PropertyInfo>();
             foreach (var sourceProp in sourceProps)
             {
-                if (!string.IsNullOrWhiteSpace(keyColumn) &&
-                    sourceProp.Name.Equals(keyColumn, StringComparison.CurrentCultureIgnoreCase))
+                if (!string.IsNullOrWhiteSpace(keyColumn) && sourceProp.Name.EqualsIgnoreCase(keyColumn))
                     continue;
-                var targetProp = targetType.GetProperty(sourceProp.Name,
-                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                //var targetProp = targetType.GetProperty(sourceProp.Name,
+                //    BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+                var targetProp = targetProps.FirstOrDefault(t => t.Name.EqualsIgnoreCase(sourceProp.Name));
                 if (targetProp == null)
                     continue;
                 //获取默认值
@@ -245,17 +247,36 @@ namespace Acb.Core.Extensions
                 {
                     if (!reset || targetValue == defValue)
                         continue;
-                    if (setValue && targetProp.CanWrite) targetProp.SetValue(target, sourceValue);
+                    propAction?.Invoke(sourceProp, sourceValue, targetValue);
                     list.Add(sourceProp);
                 }
                 else if (!sourceValue.Equals(targetValue))
                 {
-                    if (setValue && targetProp.CanWrite) targetProp.SetValue(target, sourceValue);
+                    propAction?.Invoke(sourceProp, sourceValue, targetValue);
                     list.Add(sourceProp);
                 }
             }
 
             return list.ToArray();
+        }
+
+        /// <summary> 检查属性值变化 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source">原对象(一般为数据库Entity)</param>
+        /// <param name="target">目标对象(一般为Dto)</param>
+        /// <param name="keyColumn">主键(不区分大小写)</param>
+        /// <param name="reset">是否重置(即target有属性，但是属性的值为默认值时，是否认为有更新)</param>
+        /// <param name="setValue">是否更新Source属性值</param>
+        /// <returns></returns>
+        public static PropertyInfo[] CheckProps<T>(this T source, object target, string keyColumn = "id",
+            bool reset = false, bool setValue = false)
+        {
+            return source.CheckProps(target, keyColumn, reset, (prop, before, after) =>
+            {
+                if (!setValue || !prop.CanWrite)
+                    return;
+                prop.SetValue(source, after);
+            });
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Acb.Core.Helper;
+﻿using Acb.Core.Config;
+using Acb.Core.Helper;
 using System;
 using System.Collections.Specialized;
 using System.Globalization;
@@ -6,7 +7,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using Acb.Core.Config;
 
 namespace Acb.Core.Extensions
 {
@@ -443,6 +443,15 @@ namespace Acb.Core.Extensions
         {
             var env = name.Env(target);
             return string.IsNullOrWhiteSpace(env) ? def : env.CastTo(def);
+        }
+
+        /// <summary> 忽略大小写相等 </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
+        public static bool EqualsIgnoreCase(this string source, string target)
+        {
+            return string.Equals(source, target, StringComparison.CurrentCultureIgnoreCase);
         }
     }
 }

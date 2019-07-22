@@ -1,5 +1,6 @@
 ﻿using Acb.Core.Extensions;
 using System;
+using System.Collections.Generic;
 
 namespace Acb.Core.Session
 {
@@ -11,15 +12,15 @@ namespace Acb.Core.Session
 
         protected bool EnableTenancy => ConfigKey.Config(false);
 
-        public object UserId => _tempUserId ?? CurrentUserId;
+        public object UserId => _tempUserId ?? GetUserId();
 
-        public object TenantId => EnableTenancy ? _tempTenantId ?? CurrentTenantId : null;
+        public object TenantId => EnableTenancy ? _tempTenantId ?? GetTenantId() : null;
 
         public abstract string UserName { get; }
         public abstract string Role { get; }
 
-        protected abstract object CurrentUserId { get; }
-        protected abstract object CurrentTenantId { get; }
+        protected abstract object GetUserId();
+        protected abstract object GetTenantId();
 
         public TenancySides TenancySides => EnableTenancy && TenantId != null
             ? TenancySides.Tenant
