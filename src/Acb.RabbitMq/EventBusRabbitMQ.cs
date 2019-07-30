@@ -77,7 +77,13 @@ namespace Acb.RabbitMq
                 _connection.TryConnect();
             }
 
-            var opt = option as RabbitMqPublishOption ?? new RabbitMqPublishOption();
+            RabbitMqPublishOption opt;
+            if (option == null)
+                opt = new RabbitMqPublishOption();
+            else if (option is RabbitMqPublishOption rbOpt)
+                opt = rbOpt;
+            else
+                opt = new RabbitMqPublishOption { Delay = option.Delay, Durable = option.Durable, Headers = option.Headers };
 
             var policy = Policy.Handle<BrokerUnreachableException>()
                 .Or<SocketException>()

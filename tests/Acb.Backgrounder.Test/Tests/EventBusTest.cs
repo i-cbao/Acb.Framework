@@ -1,4 +1,6 @@
 ﻿using Acb.Core.EventBus;
+using Acb.Core.EventBus.Options;
+using Acb.Core.Timing;
 using Acb.Demo.Contracts.EventBus;
 using Acb.RabbitMq;
 using Acb.RabbitMq.Options;
@@ -78,16 +80,13 @@ namespace Acb.Backgrounder.Test.Tests
         public override void OnCommand(string cmd, IContainer provider)
         {
             var bus = provider.Resolve<IEventBus>();
-            bus.Publish(new UserEvent { Name = cmd }, new RabbitMqPublishOption
-            {
-                Delay = TimeSpan.FromSeconds(2)
-            });
+            bus.Publish(new UserEvent { Name = cmd }, TimeSpan.FromSeconds(5));
             //bus.Publish("icb_framework_simple_queue", cmd, 2 * 1000);
             Logger.Info($"Send Message:{cmd}");
             var sbus = provider.Resolve<IServiceProvider>().GetEventBus("spartner");
-            sbus.Publish(new TestEvent { Content = cmd }, new RabbitMqPublishOption
+            sbus.Publish(new TestEvent { Content = cmd }, new PublishOption
             {
-                Delay = TimeSpan.FromSeconds(10)
+                Delay = Clock.Now.AddSeconds(20) - Clock.Now
             });
             //var queue = provider.Resolve<IMessageQueue>();
             //queue.Send(cmd);

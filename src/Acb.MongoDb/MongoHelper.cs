@@ -17,7 +17,6 @@ namespace Acb.MongoDb
         private readonly string _prefix;
         private readonly MongoConfig _config;
 
-
         public MongoHelper(MongoConfig config = null, string prefix = "acb")
         {
             _prefix = prefix;
@@ -48,7 +47,7 @@ namespace Acb.MongoDb
 
         protected virtual string GetTypeName(MemberInfo type)
         {
-            var name = type.Name.ToUrlCase();
+            var name = type.PropName();
             return string.IsNullOrWhiteSpace(_prefix) ? name : $"{_prefix}_{name}";
         }
 

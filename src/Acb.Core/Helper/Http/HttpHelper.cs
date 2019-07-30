@@ -1,7 +1,10 @@
-﻿using Acb.Core.Exceptions;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Logging;
+using Acb.Core.Monitor;
 using Acb.Core.Serialize;
+using Acb.Core.Timing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -66,104 +69,138 @@ namespace Acb.Core.Helper.Http
         {
             if (string.IsNullOrWhiteSpace(request?.Url))
                 throw new BusiException("Http请求参数异常");
-            request.Encoding = request.Encoding ?? Encoding.UTF8;
-            request.Headers = request.Headers ?? new Dictionary<string, string>();
-
-            var url = request.Url;
-            if (request.Params != null)
+            var monitorData = new MonitorData(MonitorModules.HttpRequest)
             {
-                url += url.IndexOf('?') > 0 ? "&" : "?";
-                url += request.Params.ToDictionary().ToUrl(encoding: request.Encoding);
-            }
-
-            var uri = new Uri(url);
-
-            var req = new HttpRequestMessage(method, uri);
-            if (request.Headers != null)
+                Method = method.ToString()
+            };
+            try
             {
-                foreach (var key in request.Headers)
+                request.Encoding = request.Encoding ?? Encoding.UTF8;
+                request.Headers = request.Headers ?? new Dictionary<string, string>();
+
+                var url = request.Url;
+                if (request.Params != null)
                 {
-                    if (string.IsNullOrWhiteSpace(key.Value))
-                        continue;
-                    req.Headers.TryAddWithoutValidation(key.Key, key.Value);
+                    url += url.IndexOf('?') > 0 ? "&" : "?";
+                    url += request.Params.ToDictionary().ToUrl(encoding: request.Encoding);
                 }
-            }
 
-            if (request.Timeout.HasValue)
-            {
-                CreateHttpClient(request.Timeout);
-            }
-
-            HttpContent content = null;
-            if (request.Content != null)
-            {
-                content = request.Content;
-            }
-            else if (request.Data != null && method != HttpMethod.Get)
-            {
-                switch (request.BodyType)
+                var uri = new Uri(url);
+                monitorData.Url = uri.AbsoluteUri;
+                var req = new HttpRequestMessage(method, uri);
+                if (request.Headers != null)
                 {
-                    case HttpBodyType.Json:
-                        var json = request.Data is string
-                            ? request.Data.ToString()
-                            : JsonHelper.ToJson(request.Data);
-                        content = new StringContent(json, request.Encoding, "application/json");
-                        break;
-                    case HttpBodyType.Form:
-                        var str = string.Empty;
-                        if (request.Data != null)
-                        {
-                            var type = request.Data.GetType();
-                            if (type.IsSimpleType())
-                            {
-                                str = request.Data.ToString();
-                            }
-                            else
-                            {
-                                var dict = request.Data.ToDictionary();
-                                str = dict.ToUrl(true, request.Encoding);
-                            }
-                        }
-
-                        content = new ByteArrayContent(request.Encoding.GetBytes(str));
-                        content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-                        break;
-                    case HttpBodyType.Xml:
-                        var xml = request.Data is string
-                            ? request.Data.ToString()
-                            : request.Data.ToDictionary().ToXml();
-                        content = new StringContent(xml, request.Encoding, "text/xml");
-                        break;
-                    case HttpBodyType.File:
-                        if (request.Files != null && request.Files.Any())
-                        {
-                            var multiContent = new MultipartFormDataContent(DateTime.Now.Ticks.ToString("x"));
-                            foreach (var file in request.Files)
-                            {
-                                var stream = new MemoryStream();
-                                var buffer = new byte[checked((uint)Math.Min(4096, (int)file.Value.Length))];
-                                int bytesRead;
-                                while ((bytesRead = file.Value.Read(buffer, 0, buffer.Length)) != 0)
-                                    stream.Write(buffer, 0, bytesRead);
-                                multiContent.Add(new StreamContent(stream), file.Key, file.Value.Name);
-                            }
-
-                            content = multiContent;
-                        }
-
-                        break;
+                    foreach (var key in request.Headers)
+                    {
+                        if (string.IsNullOrWhiteSpace(key.Value))
+                            continue;
+                        req.Headers.TryAddWithoutValidation(key.Key, key.Value);
+                    }
                 }
-            }
 
-            if (content != null)
-                req.Content = content;
-            var formData = request.Data == null ? string.Empty : "->" + JsonHelper.ToJson(request.Data);
-            _logger.Debug($"HttpHelper：[{method}]{url}{formData}");
-            
-            var resp = await _client.SendAsync(req);
-            if (request.Timeout.HasValue)
-                CreateHttpClient();
-            return resp;
+                if (request.Timeout.HasValue)
+                {
+                    CreateHttpClient(request.Timeout);
+                }
+
+                HttpContent content = null;
+                if (request.Content != null)
+                {
+                    content = request.Content;
+                }
+                else if (request.Data != null && method != HttpMethod.Get)
+                {
+                    switch (request.BodyType)
+                    {
+                        case HttpBodyType.Json:
+                            var json = request.Data is string
+                                ? request.Data.ToString()
+                                : JsonHelper.ToJson(request.Data);
+                            content = new StringContent(json, request.Encoding, "application/json");
+                            break;
+                        case HttpBodyType.Form:
+                            var str = string.Empty;
+                            if (request.Data != null)
+                            {
+                                var type = request.Data.GetType();
+                                if (type.IsSimpleType())
+                                {
+                                    str = request.Data.ToString();
+                                }
+                                else
+                                {
+                                    var dict = request.Data.ToDictionary();
+                                    str = dict.ToUrl(true, request.Encoding);
+                                }
+                            }
+
+                            content = new ByteArrayContent(request.Encoding.GetBytes(str));
+                            content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+                            break;
+                        case HttpBodyType.Xml:
+                            var xml = request.Data is string
+                                ? request.Data.ToString()
+                                : request.Data.ToDictionary().ToXml();
+                            content = new StringContent(xml, request.Encoding, "text/xml");
+                            break;
+                        case HttpBodyType.File:
+                            if (request.Files != null && request.Files.Any())
+                            {
+                                var multiContent = new MultipartFormDataContent(DateTime.Now.Ticks.ToString("x"));
+                                foreach (var file in request.Files)
+                                {
+                                    var stream = new MemoryStream();
+                                    var buffer = new byte[checked((uint)Math.Min(4096, (int)file.Value.Length))];
+                                    int bytesRead;
+                                    while ((bytesRead = file.Value.Read(buffer, 0, buffer.Length)) != 0)
+                                        stream.Write(buffer, 0, bytesRead);
+                                    multiContent.Add(new StreamContent(stream), file.Key, file.Value.Name);
+                                }
+
+                                content = multiContent;
+                            }
+
+                            break;
+                    }
+                }
+
+                if (content != null)
+                    req.Content = content;
+                if (request.Data != null || req.Content != null)
+                {
+                    monitorData.Data = request.Data != null
+                        ? JsonHelper.ToJson(request.Data)
+                        : await req.Content.ReadAsStringAsync();
+                }
+
+                var resp = await _client.SendAsync(req);
+                if (request.Timeout.HasValue)
+                    CreateHttpClient();
+                monitorData.Code = (int)resp.StatusCode;
+                monitorData.Result = await resp.Content.ReadAsStringAsync();
+                if (req.Headers.TryGetValues("referer", out var from))
+                    monitorData.Referer = from?.FirstOrDefault();
+                return resp;
+            }
+            catch (Exception ex)
+            {
+                if (ex is BusiException busi)
+                {
+                    monitorData.Code = busi.Code;
+                    monitorData.Result = busi.Message;
+                }
+                else
+                {
+                    monitorData.Code = 500;
+                    monitorData.Result = $"ex:{ex.Message}";
+                }
+                throw;
+            }
+            finally
+            {
+                monitorData.CompleteTime = Clock.Now;
+                CurrentIocManager.Resolve<IServiceProvider>().Monitor(monitorData);
+            }
         }
 
         /// <summary> Get方法 </summary>

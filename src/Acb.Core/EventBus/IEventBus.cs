@@ -55,5 +55,24 @@ namespace Acb.Core.EventBus
             var key = @event.GetType().GetRouteKey();
             return eventBus.Publish(key, @event, option);
         }
+
+        /// <summary> 延时发布 </summary>
+        /// <param name="key">事件</param>
+        /// <param name="message"></param>
+        /// <param name="option"></param>
+        public static Task Publish(this IEventBus eventBus, string key, object message, TimeSpan delay)
+        {
+            return eventBus.Publish(key, message, new PublishOption { Delay = delay });
+        }
+
+        /// <summary> 发布 </summary>
+        /// <param name="eventBus"></param>
+        /// <param name="event">事件</param>
+        /// <param name="option"></param>
+        public static Task Publish(this IEventBus eventBus, DEvent @event, TimeSpan delay)
+        {
+            var key = @event.GetType().GetRouteKey();
+            return eventBus.Publish(key, @event, new PublishOption { Delay = delay });
+        }
     }
 }

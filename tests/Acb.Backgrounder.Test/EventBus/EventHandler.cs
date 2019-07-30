@@ -76,7 +76,7 @@ namespace Acb.Backgrounder.Test.EventBus
         {
             _logger.Info("icb_handler_test");
             _logger.Info(JsonHelper.ToJson(@event));
-            throw new Exception("test");
+            //throw new Exception("test");
             return Task.CompletedTask;
         }
     }

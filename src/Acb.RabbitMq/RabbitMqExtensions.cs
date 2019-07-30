@@ -60,7 +60,7 @@ namespace Acb.RabbitMq
             channel.QueueBind(delayQueue, exchange, delayQueue, null);
             if (prop == null)
                 prop = channel.CreateBasicProperties();
-            prop.Expiration = delay.TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+            prop.Expiration = ((long)delay.TotalMilliseconds).ToString();
             channel.BasicPublish(exchange, delayQueue, prop, body);
         }
     }

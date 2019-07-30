@@ -21,7 +21,7 @@ namespace Acb.WebApi.Filters
 
         public RecordFilter(string type = null)
         {
-            _type = string.IsNullOrWhiteSpace(type) ? "action" : type;
+            _type = string.IsNullOrWhiteSpace(type) ? MonitorModules.Action : type;
         }
 
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)

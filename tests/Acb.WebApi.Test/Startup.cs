@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using Acb.Core.Extensions;
+using Acb.Core.Monitor;
 
 namespace Acb.WebApi.Test
 {
@@ -26,7 +28,7 @@ namespace Acb.WebApi.Test
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
-            //services.AddMonitor(typeof(LoggerMonitor));
+            services.AddMonitor(typeof(LoggerMonitor));
             services.AddSignalR();
             //services.AddSingleton(provider =>
             //{

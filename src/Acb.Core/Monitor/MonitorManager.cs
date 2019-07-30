@@ -1,5 +1,4 @@
-﻿using Acb.Core.Extensions;
-using Acb.Core.Timing;
+﻿using Acb.Core.Timing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,6 @@ namespace Acb.Core.Monitor
     /// <summary> 监控管理 </summary>
     public class MonitorManager
     {
-        private const string EnableMonitorEnv = "ENABLE_MONITOR";
         private readonly IEnumerable<IMonitor> _monitors;
 
         public MonitorManager(IEnumerable<IMonitor> monitors)
@@ -22,8 +20,10 @@ namespace Acb.Core.Monitor
         {
             if (_monitors == null || !_monitors.Any())
                 return;
-            var enabled = "monitor".Config(EnableMonitorEnv.Env(false));
-            if (!enabled)
+            var config = MonitorConfig.Config();
+            if (!config.Enable)
+                return;
+            if (config.Modules.ContainsKey(data.Service) && !config.Modules[data.Service])
                 return;
             Task.Run(() =>
             {

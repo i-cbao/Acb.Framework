@@ -7,7 +7,8 @@ namespace Acb.Backgrounder.Test
     {
         private static void Main(string[] args)
         {
-            var tests = new CacheTest();
+            //var tests = new CacheTest();
+            var tests = new EventBusTest();
 
             Command += tests.OnCommand;
             MapServices += tests.OnMapServices;

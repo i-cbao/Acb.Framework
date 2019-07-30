@@ -4,6 +4,7 @@ using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using Acb.Core.Message;
 using Acb.Core.Monitor;
+using Acb.Core.Security;
 using Acb.Core.Timing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -35,7 +36,10 @@ namespace Acb.MicroService.Host
 
         private async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response)
         {
-            var monitorData = new MonitorData("micro_service");
+            var monitorData = new MonitorData(MonitorModules.MicroService)
+            {
+                Method = request.Method
+            };
             string requestBody = null;
             try
             {
@@ -44,7 +48,6 @@ namespace Acb.MicroService.Host
                 {
                     requestBody = stream.ReadToEnd();
                 }
-
                 var args = new List<object>();
                 JArray list = null;
                 if (!string.IsNullOrWhiteSpace(requestBody))
@@ -75,6 +78,7 @@ namespace Acb.MicroService.Host
 
                 var instance = _serviceProvider.GetService(m.DeclaringType); //CurrentIocManager.Resolve(m.DeclaringType);
                 var result = m.Invoke(instance, args.ToArray());
+                monitorData.Result = result.GetStringResult();
                 await WriteJsonAsync(response, result);
             }
             catch (Exception ex)
@@ -91,7 +95,7 @@ namespace Acb.MicroService.Host
                 monitorData.Url = Utils.RawUrl(request);
                 monitorData.Data = requestBody;
                 monitorData.CompleteTime = Clock.Now;
-                if (request.Headers.TryGetValue("referer", out var from))
+                if (request.Headers.TryGetValue(AcbClaimTypes.HeaderReferer, out var from))
                     monitorData.Referer = from;
                 _serviceProvider.Monitor(monitorData);
             }
@@ -185,7 +189,10 @@ namespace Acb.MicroService.Host
         private async Task Runner(HttpContext ctx, object instance, MethodBase m)
         {
             string requestBody = null;
-            var monitorData = new MonitorData("micro_service");
+            var monitorData = new MonitorData(MonitorModules.MicroService)
+            {
+                Method = ctx.Request.Method
+            };
             try
             {
                 var input = ctx.Request.Body;
@@ -193,7 +200,6 @@ namespace Acb.MicroService.Host
                 {
                     requestBody = stream.ReadToEnd();
                 }
-
                 var args = new List<object>();
                 JArray list = null;
                 if (!string.IsNullOrWhiteSpace(requestBody))
@@ -223,6 +229,7 @@ namespace Acb.MicroService.Host
                 }
 
                 var result = m.Invoke(instance, args.ToArray());
+                monitorData.Result = result.GetStringResult();
                 await WriteJsonAsync(ctx.Response, result);
             }
             catch (Exception ex)
@@ -239,7 +246,7 @@ namespace Acb.MicroService.Host
                 monitorData.Url = Utils.RawUrl(ctx.Request);
                 monitorData.Data = requestBody;
                 monitorData.CompleteTime = Clock.Now;
-                if (ctx.Request.Headers.TryGetValue("referer", out var from))
+                if (ctx.Request.Headers.TryGetValue(AcbClaimTypes.HeaderReferer, out var from))
                     monitorData.Referer = from;
                 _serviceProvider.Monitor(monitorData);
             }

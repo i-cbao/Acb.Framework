@@ -1,4 +1,5 @@
-﻿using Acb.Core.Domain.Entities;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,12 +7,13 @@ using System.Linq.Expressions;
 
 namespace Acb.Core.Domain.Repositories
 {
+    public interface IRepository : IDependency { }
     public interface IRepository<TEntity> : IRepository<TEntity, string>
         where TEntity : class, IEntity<string>
     { }
 
     /// <summary> 数据基础仓储接口 </summary>
-    public interface IRepository<TEntity, TKey>
+    public interface IRepository<TEntity, TKey> : IRepository
         where TEntity : class, IEntity<TKey>
     {
         IUnitOfWork UnitOfWork { get; }

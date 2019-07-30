@@ -216,6 +216,18 @@ namespace Acb.Core.Extensions
             throw new ArgumentNullException(error.MemberNames.FirstOrDefault(), error.ErrorMessage);
         }
 
+        public static string GetStringResult(this object value)
+        {
+            if (value == null) return string.Empty;
+            if (value.GetType().IsSimpleType())
+            {
+                if (value is DateTime date)
+                    return date.ToString("yyyy-MM-dd HH:mm:ss");
+                return value.ToString();
+            }
+            return JsonHelper.ToJson(value);
+        }
+
         private static readonly object ConsoleSync = new object();
 
         public static void Print(this IEnumerable<PrintItem> prints)
