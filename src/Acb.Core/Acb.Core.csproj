@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,9 +7,9 @@
     <Company>成都爱车保信息技术有限公司</Company>
     <Product>爱车保 - 基础核心类</Product>
     <Description>爱车保 - 基础核心类</Description>
-    <Version>1.6.7</Version>
+    <Version>1.6.8</Version>
     <PackageProjectUrl></PackageProjectUrl>
-    <RepositoryUrl>http://220.167.101.49:8092/handsome/framework.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/i-cbao/Acb.Framework.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Copyright />
     <Title>爱车保 - 基础核心类</Title>

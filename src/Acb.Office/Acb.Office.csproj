@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,8 +7,8 @@
     <Product>爱车保 - Office组件辅助类</Product>
     <Description>爱车保 - Office组件辅助类</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.6.3</Version>
-    <AssemblyVersion>1.6.3.0</AssemblyVersion>
+    <Version>1.6.5</Version>
+    <RepositoryUrl>https://github.com/i-cbao/Acb.Framework.git</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

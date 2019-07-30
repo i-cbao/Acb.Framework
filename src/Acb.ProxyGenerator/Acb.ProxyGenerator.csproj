@@ -1,7 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Company>成都爱车保信息技术有限公司</Company>
+    <Product>爱车保 - 代理生成项目</Product>
+    <Description>爱车保 - 代理生成项目</Description>
+    <Authors>icb@shay</Authors>
+    <Title>爱车保 - 代理生成项目</Title>
+    <Owners>成都爱车保信息技术有限公司</Owners>
+    <Copyright>爱车保 © 2018</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.6.5</Version>
+    <RepositoryUrl>https://github.com/i-cbao/Acb.Framework.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
