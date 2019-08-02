@@ -1,6 +1,7 @@
-﻿using Acb.Core;
-using Acb.Core.Extensions;
+﻿//using Acb.Core;
+//using Acb.Core.Extensions;
 using Acb.Office.Excel;
+using Microsoft.AspNetCore.Http;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.POIFS.FileSystem;
@@ -10,6 +11,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Acb.Office
 {
@@ -257,12 +259,12 @@ namespace Acb.Office
         }
 
         /// <summary> 导出Excel </summary>
+        /// <param name="context"></param>
         /// <param name="dataSet"></param>
         /// <param name="filename"></param>
-        public static async Task Export(DataSet dataSet, string filename = null)
+        public static async Task Export(this HttpContext context, DataSet dataSet, string filename = null)
         {
-            var context = AcbHttpContext.Current;
-            if (context == null)
+            if (context?.Response == null)
                 return;
             var resp = context.Response;
             filename = filename ?? dataSet.DataSetName;
@@ -273,7 +275,7 @@ namespace Acb.Office
             }
 
             var name = Path.GetFileNameWithoutExtension(filename);
-            filename = $"{name.UrlEncode()}{ext}";
+            filename = $"{HttpUtility.UrlEncode(name)}{ext}";
             //resp.Buffer = true;
             //resp.Charset = Encoding.UTF8.BodyName;
             resp.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
@@ -330,23 +332,24 @@ namespace Acb.Office
                     object value = null;
                     if (cell != null && !string.IsNullOrWhiteSpace(cell.ToString()))
                     {
-                        if (DateUtil.IsCellDateFormatted(cell))
-                            value = cell.DateCellValue;
-                        else
+                        //同理，没有数据的单元格都默认是null
+                        switch (cell.CellType)
                         {
-                            //同理，没有数据的单元格都默认是null
-                            switch (cell.CellType)
-                            {
-                                case CellType.String:
-                                    value = cell.StringCellValue;
-                                    break;
-                                case CellType.Boolean:
-                                    value = cell.BooleanCellValue;
-                                    break;
-                                case CellType.Numeric:
+                            case CellType.String:
+                                value = cell.StringCellValue;
+                                break;
+                            case CellType.Boolean:
+                                value = cell.BooleanCellValue;
+                                break;
+                            case CellType.Numeric:
+                                if (DateUtil.IsCellDateFormatted(cell))
+                                    value = cell.DateCellValue;
+                                else
                                     value = cell.NumericCellValue;
-                                    break;
-                            }
+                                break;
+                            default:
+                                value = cell.StringCellValue;
+                                break;
                         }
                     }
 

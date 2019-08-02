@@ -3,6 +3,7 @@ using Acb.Core.Data;
 using Acb.Core.Data.Adapters;
 using Acb.Core.Dependency;
 using Acb.Core.Domain;
+using Acb.Core.Domain.Entities;
 using Acb.Core.Extensions;
 using Acb.Core.Serialize;
 using Acb.Dapper.Domain;
@@ -15,7 +16,6 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Acb.Core.Domain.Entities;
 
 namespace Acb.Dapper
 {
@@ -542,14 +542,14 @@ namespace Acb.Dapper
 
         /// <summary> 转换DataTable </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="data"></param>
-        /// <param name="headerFormat"></param>
-        /// <param name="tableName"></param>
-        /// <param name="excepts"></param>
+        /// <param name="data">数据列表</param>
+        /// <param name="formatHeader">表头信息</param>
+        /// <param name="tableName">表名</param>
+        /// <param name="excepts">排除字段</param>
+        /// <param name="exceptNoHeader">排除没有声明header的属性，默认True</param>
         /// <returns></returns>
-        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> headerFormat = null,
-            string tableName = null, string[] excepts = null)
-            where T : IEntity
+        public static DataTable ToDataTable<T>(this IEnumerable<T> data, Func<string, string> formatHeader = null,
+            string tableName = null, string[] excepts = null, bool exceptNoHeader = true)
         {
             var type = GetInnerType<T>();
             tableName = string.IsNullOrWhiteSpace(tableName) ? type.PropName() : tableName;
@@ -557,30 +557,47 @@ namespace Acb.Dapper
             var props = Props(type);
             if (excepts != null && excepts.Any())
                 props = props.Where(t => !excepts.Contains(t.Name)).ToList();
+            var headers = new Dictionary<PropertyInfo, string>();
+            var getters = new GetterHelper<T>();
             foreach (var prop in props)
             {
                 string key;
-                if (headerFormat != null)
-                    key = headerFormat.Invoke(prop.Name);
+                if (formatHeader != null)
+                    key = formatHeader(prop.Name);
                 else
                 {
                     var desc = prop.GetCustomAttribute<DescriptionAttribute>();
-                    key = desc == null ? prop.Name : desc.Description;
+                    if (desc == null)
+                    {
+                        if (exceptNoHeader)
+                            continue;
+                        key = prop.Name;
+                    }
+                    else
+                    {
+                        key = desc.Description;
+                    }
                 }
 
+                headers.Add(prop, key);
+                getters.AddGetter(prop);
                 dt.Columns.Add(key, prop.PropertyType.GetUnNullableType());
+                dt.Columns[key].AllowDBNull = true;
             }
 
             foreach (var item in data)
             {
-                var values = new List<object>();
-                foreach (var prop in props)
+                var row = dt.NewRow();
+                foreach (var header in headers)
                 {
-                    values.Add(prop.GetValue(item));
+                    var value = getters.GetValue(item, header.Key) ?? DBNull.Value;
+                    row[header.Value] = value;
                 }
 
-                dt.Rows.Add(values.ToArray());
+                dt.Rows.Add(row);
             }
+
+            getters.Dispose();
 
             return dt;
         }

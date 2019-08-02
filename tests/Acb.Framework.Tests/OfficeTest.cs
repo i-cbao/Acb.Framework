@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Acb.Core.Data;
+using MongoDB.Bson;
 
 namespace Acb.Framework.Tests
 {
@@ -95,6 +96,20 @@ namespace Acb.Framework.Tests
                 }
             }
             ExcelHelper.CreateFile(new DataSet { Tables = { dt } }, "d://data.xls");
+        }
+
+        [TestMethod]
+        public void ReadTest()
+        {
+            const string path = "E:\\test.xls";
+            using (var stream = new FileStream(path, FileMode.Open))
+            {
+                var dt = ExcelHelper.ReadFirst(stream);
+                foreach (DataRow row in dt.Rows)
+                {
+                    Print(row.ItemArray);
+                }
+            }
         }
     }
 }

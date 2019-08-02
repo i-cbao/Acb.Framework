@@ -7,11 +7,10 @@ using Acb.Core.Logging;
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using Acb.Core.Domain.Repositories;
 
 namespace Acb.Dapper.Domain
 {
-    public abstract class DRepository : IRepository
+    public abstract class DRepository : IDependency
     {
         /// <summary> 数据库连接提供者 </summary>
         public IUnitOfWork UnitOfWork { get; }

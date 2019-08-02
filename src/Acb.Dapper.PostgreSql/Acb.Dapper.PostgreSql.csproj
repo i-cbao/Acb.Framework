@@ -8,6 +8,7 @@
     <Description>爱车保 - PostgreSql基础类</Description>
     <Version>1.6.5</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/i-cbao/Acb.Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/i-cbao/Acb.Framework.git</RepositoryUrl>
     <Title>爱车保 - PostgreSql基础类</Title>
     <Owners>成都爱车保信息技术有限公司</Owners>

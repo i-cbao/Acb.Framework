@@ -206,6 +206,9 @@ namespace Acb.Core.Extensions
             return $"{assName.Name}_{assName.Version}";
         }
 
+        /// <summary> 默认值 </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static object DefaultValue(this Type type)
         {
             return type.IsValueType ? Activator.CreateInstance(type) : null;

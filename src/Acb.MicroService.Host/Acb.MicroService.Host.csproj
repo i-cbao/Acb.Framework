@@ -6,6 +6,7 @@
     <Company>成都爱车保信息技术有限公司</Company>
     <Authors>icb@shay</Authors>
     <Version>1.6.9</Version>
+    <PackageProjectUrl>https://github.com/i-cbao/Acb.Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/i-cbao/Acb.Framework.git</RepositoryUrl>
     <Product>爱车保 - 微服务框架服务提供者</Product>
     <Description>爱车保 - 微服务框架服务提供者</Description>

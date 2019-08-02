@@ -11,6 +11,7 @@
     <Copyright>爱车保 © 2018</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>1.6.5</Version>
+    <PackageProjectUrl>https://github.com/i-cbao/Acb.Framework</PackageProjectUrl>
     <RepositoryUrl>https://github.com/i-cbao/Acb.Framework.git</RepositoryUrl>
   </PropertyGroup>
 

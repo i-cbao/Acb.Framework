@@ -1,11 +1,17 @@
 ﻿using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
+using Acb.Core.Helper;
+using Acb.Core.Tests;
+using Acb.Core.Timing;
+using Acb.Dapper;
 using Acb.Demo.Business.Domain.Entities;
+using Acb.Demo.Contracts.Dtos;
+using Acb.Demo.Contracts.Enums;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Acb.Core.Domain;
 
 namespace Acb.Framework.Tests
 {
@@ -87,6 +93,28 @@ namespace Acb.Framework.Tests
 
             var act = new Action(() => Console.WriteLine("shay"));
             await act;
+        }
+
+        [TestMethod]
+        public void DateTableTest()
+        {
+
+            var dto = new List<DemoDto>
+            {
+                new DemoDto
+                {
+                    Id = IdentityHelper.Guid32,
+                    Name = "shay",
+                    Demo = DemoEnums.Demo,
+                    Time = Clock.Now
+                }
+            };
+            var result = CodeTimer.Time("datatable", 200000, () =>
+            {
+                var dt = dto.ToDataTable();
+                var count = dt.Rows.Count;
+            });
+            Print(result.ToString());
         }
     }
 }
