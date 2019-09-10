@@ -16,6 +16,10 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Acb.Core.Message;
+using Acb.MicroService;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 
 namespace Acb.Framework.Tests
 {
@@ -23,6 +27,12 @@ namespace Acb.Framework.Tests
     public class HelperTest : DTest
     {
         private readonly ILogger _logger = LogManager.Logger<HelperTest>();
+
+        protected override void MapServices(IServiceCollection services)
+        {
+            services.AddJsonCodec();
+            base.MapServices(services);
+        }
 
         [TestMethod]
         public void Md5Test()
@@ -241,11 +251,20 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void CommandTest()
         {
-            Utils.ExecCommand(cmd =>
-            {
-                cmd("ping www.baidu.com");
-                cmd("ping www.i-cbao.com");
-            }, Print, 8000);
+            var codec = Resolve<IMessageCodec>();
+            var msg = codec.Encode("123456");
+            Print(msg);
+            var t = codec.Decode(msg, typeof(string));
+            Print(t);
+
+            //Print(IdentityHelper.Guid16);
+            //Print(IdentityHelper.Guid16);
+            //Print(IdentityHelper.Guid16);
+            //Utils.ExecCommand(cmd =>
+            //{
+            //    cmd("ping www.baidu.com");
+            //    cmd("ping www.i-cbao.com");
+            //}, Print, 8000);
         }
     }
 }

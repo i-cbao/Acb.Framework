@@ -41,6 +41,9 @@ namespace Acb.Core.Dependency
             return IocManager.Resolve(key, type);
         }
 
+        /// <summary> 是否已注册 </summary>
+        /// <param name="interfaceType"></param>
+        /// <returns></returns>
         public static bool IsRegisted(Type interfaceType)
         {
             return IocManager.IsRegistered(interfaceType);

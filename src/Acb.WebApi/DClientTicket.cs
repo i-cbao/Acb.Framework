@@ -108,6 +108,30 @@ namespace Acb.WebApi
                 TicketEncodeKey, TicketEncodeIv);
         }
 
+        public static void SetSession(this IClientTicket client)
+        {
+            if (client == null) return;
+            var principal = AcbHttpContext.Current?.User ?? Thread.CurrentPrincipal as ClaimsPrincipal;
+            if (principal == null) return;
+            var claims = new List<Claim>();
+            if (client.UserId != null)
+            {
+                claims.AddRange(new[]
+                {
+                    new Claim(AcbClaimTypes.UserId, client.UserId?.ToString()),
+                    new Claim(AcbClaimTypes.UserName, client.Name ?? string.Empty),
+                    new Claim(AcbClaimTypes.Role, client.Role ?? string.Empty)
+                });
+            }
+            if (client.TenantId != null)
+                claims.Add(new Claim(AcbClaimTypes.TenantId, client.TenantId.ToString()));
+            if (claims.Any())
+            {
+                var identity = new ClaimsIdentity(claims);
+                principal.AddIdentity(identity);
+            }
+        }
+
         /// <summary> 获取凭证信息 </summary>
         /// <param name="ticket"></param>
         /// <returns></returns>
@@ -133,28 +157,7 @@ namespace Acb.WebApi
                     logger.Warn($"client ticket not equal,{client.Ticket}:{list[0]}");
                     return default(TTicket);
                 }
-
-                var principal = AcbHttpContext.Current?.User ?? Thread.CurrentPrincipal as ClaimsPrincipal;
-                if (principal != null)
-                {
-                    var claims = new List<Claim>();
-                    if (client.UserId != null)
-                    {
-                        claims.AddRange(new[]
-                        {
-                            new Claim(AcbClaimTypes.UserId, client.UserId?.ToString()),
-                            new Claim(AcbClaimTypes.UserName, client.Name),
-                            new Claim(AcbClaimTypes.Role, client.Role)
-                        });
-                    }
-                    if (client.TenantId != null)
-                        claims.Add(new Claim(AcbClaimTypes.TenantId, client.TenantId.ToString()));
-                    if (claims.Any())
-                    {
-                        var identity = new ClaimsIdentity(claims);
-                        principal.AddIdentity(identity);
-                    }
-                }
+                client.SetSession();
                 return client;
 
             }

@@ -1,14 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Acb.Core.Config;
+using Acb.Core.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
-using Acb.Core.Config;
-using Acb.Core.Extensions;
 
 namespace Acb.MongoDb
 {
     public static class ContainBuilderExtension
     {
-        /// <summary> 使用RabbitMQ事件总线 </summary>
+        /// <summary> 使用MongoDB </summary>
         /// <param name="services"></param>
         /// <param name="configName"></param>
         /// <param name="database"></param>
@@ -33,7 +33,7 @@ namespace Acb.MongoDb
             return services;
         }
 
-        /// <summary> 使用RabbitMQ事件总线 </summary>
+        /// <summary> 使用MongoDB </summary>
         /// <param name="services"></param>
         /// <param name="configAction"></param>
         /// <param name="prefix"></param>

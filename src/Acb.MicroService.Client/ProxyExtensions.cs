@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
+using Acb.Core.Extensions;
 using Acb.Core.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,6 +25,11 @@ namespace Acb.MicroService.Client
         /// <returns></returns>
         public static IServiceCollection AddMicroClient(this IServiceCollection services, ITypeFinder finder = null)
         {
+            if (!services.IsRegisted<IServiceRouter>())
+            {
+                services.AddMicroRouter();
+            }
+
             finder = finder ?? new DefaultTypeFinder { AssemblyFinder = new DAssemblyFinder() };
             var serviceType = typeof(IMicroService);
             var types = finder.Find(t => serviceType.IsAssignableFrom(t) && t.IsInterface && t != serviceType);

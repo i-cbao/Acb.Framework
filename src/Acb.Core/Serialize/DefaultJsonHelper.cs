@@ -28,7 +28,7 @@ namespace Acb.Core.Serialize
         {
             var setting = LoadSetting(namingType, indented);
             if (props != null && props.Length > 0)
-                setting.ContractResolver = new JsonContractResolver(namingType, retain, props);
+                setting.ContractResolver = new JsonContractResolver(namingType, retain, null, props);
             return setting;
         }
 

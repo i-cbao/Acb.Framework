@@ -8,7 +8,12 @@ namespace Acb.Backgrounder.Test
         private static void Main(string[] args)
         {
             //var tests = new CacheTest();
-            var tests = new EventBusTest();
+            //var tests = new EventBusTest();
+            ConsoleTest tests;
+            if (args.Length > 0 && args[0] == "client")
+                tests = new TcpClientTest();
+            else
+                tests = new TcpSocketTest();
 
             Command += tests.OnCommand;
             MapServices += tests.OnMapServices;
@@ -16,6 +21,7 @@ namespace Acb.Backgrounder.Test
 
             UseServices += tests.OnUseServices;
             UseServiceProvider += tests.OnUseServiceProvider;
+            StopEvent += tests.OnShutdown;
             Start(args);
         }
     }

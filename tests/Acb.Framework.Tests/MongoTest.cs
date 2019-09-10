@@ -30,10 +30,6 @@ namespace Acb.Framework.Tests
 
     public class MTestRepository : MongoRepository<MTest>
     {
-        public MTestRepository(MongoHelper mongoHelper = null) : base(mongoHelper)
-        {
-        }
-
         public MTest QueryByName(string name)
         {
             var filter = Builders<MTest>.Filter.Eq(nameof(MTest.Name), name);

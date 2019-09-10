@@ -139,15 +139,16 @@ namespace Acb.MicroService.Client.Proxy
         {
             var resp = await respTask;
             var codec = CurrentIocManager.Resolve<IMessageCodec>();
+            var isGzip = resp.Content.Headers.ContentEncoding.Contains("gzip");
             if (resp.StatusCode == HttpStatusCode.OK)
             {
                 var data = await resp.Content.ReadAsByteArrayAsync();
-                return codec.Decode(data, returnType);
+                return codec.Decode(data, returnType, isGzip);
             }
             else
             {
                 var data = await resp.Content.ReadAsByteArrayAsync();
-                var result = codec.Decode<DResult>(data);
+                var result = codec.Decode<DResult>(data, compress: isGzip);
                 throw new BusiException(result.Message, result.Code);
             }
         }

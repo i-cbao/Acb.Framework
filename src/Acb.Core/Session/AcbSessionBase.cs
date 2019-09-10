@@ -1,6 +1,5 @@
 ﻿using Acb.Core.Extensions;
 using System;
-using System.Collections.Generic;
 
 namespace Acb.Core.Session
 {

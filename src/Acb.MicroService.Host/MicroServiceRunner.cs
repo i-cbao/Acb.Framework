@@ -105,6 +105,7 @@ namespace Acb.MicroService.Host
         {
             response.StatusCode = code;
             response.ContentType = "application/json";
+            response.Headers.Add("Content-Encoding", "gzip");
             if (data is Task task)
             {
                 await task;
@@ -121,7 +122,7 @@ namespace Acb.MicroService.Host
                 }
             }
 
-            var bytes = _messageCodec.Encode(data);
+            var bytes = _messageCodec.Encode(data, true);
             await response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 

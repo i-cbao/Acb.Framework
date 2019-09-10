@@ -41,12 +41,13 @@ namespace Acb.Dapper
         /// <param name="page"></param>
         /// <param name="size"></param>
         /// <param name="param"></param>
+        /// <param name="formatSql"></param>
         /// <returns></returns>
         public static async Task<PagedList<T>> PagedListAsync<T>(this IDbConnection conn, string sql, int page,
-            int size, object param = null)
+            int size, object param = null, bool formatSql = true)
         {
             SQL pageSql = sql;
-            return await pageSql.PagedListAsync<T>(conn, page, size, param);
+            return await pageSql.PagedListAsync<T>(conn, page, size, param, formatSql);
         }
 
         /// <summary> 插入单条数据,不支持有自增列 </summary>

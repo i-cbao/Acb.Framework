@@ -8,6 +8,15 @@ namespace Acb.Core.Extensions
 {
     public static class ServiceCollectionExtension
     {
+        public static bool IsRegisted<T>(this IServiceCollection services)
+        {
+            return services.IsRegisted(typeof(T));
+        }
+        public static bool IsRegisted(this IServiceCollection services, Type serviceType)
+        {
+            return services.Any(t => t.ServiceType == serviceType);
+        }
+
         /// <summary> 添加系统日志支持 </summary>
         /// <param name="services"></param>
         /// <returns></returns>

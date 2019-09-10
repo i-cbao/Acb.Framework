@@ -24,25 +24,47 @@ namespace Acb.MongoDb.Domain
             _mongoHelper = mongoHelper;
         }
 
+        /// <summary> 获取数据集合 </summary>
         protected IMongoCollection<T> Collection => _mongoHelper.Collection<T>();
 
+        /// <summary> 新增数据 </summary>
+        /// <param name="model"></param>
         public void Insert(T model)
         {
             Collection.InsertOne(model);
         }
 
+        /// <summary> 批量新增 </summary>
+        /// <param name="models"></param>
         public void InsertMany(IEnumerable<T> models)
         {
             Collection.InsertMany(models);
         }
 
-        public T QueryById(object id, string keyColumn = null)
+        /// <summary> 根据键查询 </summary>
+        /// <param name="value"></param>
+        /// <param name="keyColumn"></param>
+        /// <returns></returns>
+        public T QueryById(object value, string keyColumn = null)
         {
             keyColumn = string.IsNullOrWhiteSpace(keyColumn) ? "_id" : keyColumn;
             return Collection.Find(new BsonDocument
             {
-                {keyColumn, BsonValue.Create(id)}
+                {keyColumn, BsonValue.Create(value)}
             }).FirstOrDefault();
+        }
+
+        /// <summary> 删除数据 </summary>
+        /// <param name="value"></param>
+        /// <param name="keyColumn"></param>
+        public long Delete(object value, string keyColumn = null)
+        {
+            keyColumn = string.IsNullOrWhiteSpace(keyColumn) ? "_id" : keyColumn;
+            var result = Collection.DeleteOne(new BsonDocument
+            {
+                {keyColumn, BsonValue.Create(value)}
+            });
+            return result.DeletedCount;
         }
     }
 }

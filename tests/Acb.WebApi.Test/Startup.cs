@@ -1,4 +1,5 @@
-﻿using Acb.MicroService;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Monitor;
 using Acb.MicroService.Client;
 using Acb.RabbitMq;
 using Acb.WebApi.Test.Hubs;
@@ -9,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using Acb.Core.Extensions;
-using Acb.Core.Monitor;
 
 namespace Acb.WebApi.Test
 {
@@ -35,8 +34,8 @@ namespace Acb.WebApi.Test
             //    var finder = provider.GetService<ITypeFinder>();
             //    return ProxyService.Proxy<IDemoService>();
             //});
+            //services.AddMicroRouter();
             services.AddMicroClient();
-            services.AddMicroRouter();
             //IdentityServer4
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.AutoMapper;
 using Acb.Office;
 using Acb.WebApi.Test.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
@@ -85,7 +86,7 @@ namespace Acb.WebApi.Test.Controllers
         [HttpGet("hello")]//, AppTicket]
         public async Task<DResult<DemoDto>> Hello(VDemoInput input)
         {
-            var inputDto = Mapper.Map<DemoInputDto>(input);
+            var inputDto = input.MapTo<DemoInputDto>();
             var dto = await _demoService.Hello(IdentityHelper.Guid32, inputDto);
             return DResult.Succ(dto);
         }

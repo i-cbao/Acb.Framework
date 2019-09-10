@@ -142,7 +142,7 @@ namespace Acb.WebApi.Test.Controllers
             var dt = new DataTable("sheet");
             dt.Columns.Add("姓名", typeof(string));
             dt.Rows.Add("shay");
-            await ExcelHelper.Export(Response, new DataSet { Tables = { dt } }, "在口袋里的.xls");
+            await HttpContext.Export(new DataSet { Tables = { dt } }, "在口袋里的.xls");
         }
 
         [HttpPost("event/send")]

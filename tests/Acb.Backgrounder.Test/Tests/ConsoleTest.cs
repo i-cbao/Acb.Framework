@@ -23,5 +23,7 @@ namespace Acb.Backgrounder.Test.Tests
         public virtual void OnMapServices(ContainerBuilder builder) { }
 
         public virtual void OnCommand(string cmd, IContainer provider) { }
+
+        public virtual void OnShutdown() { }
     }
 }

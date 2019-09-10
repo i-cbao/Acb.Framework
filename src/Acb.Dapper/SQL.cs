@@ -141,15 +141,16 @@ namespace Acb.Dapper
         /// <param name="page"></param>
         /// <param name="size"></param>
         /// <param name="conn"></param>
+        /// <param name="formatSql"></param>
         /// <returns></returns>
-        public void Paged(int page, int size, IDbConnection conn)
+        public void Paged(int page, int size, IDbConnection conn, bool formatSql = true)
         {
             if (!IsSelect())
                 return;
             var sql = ToString();
             var columns = Columns(sql);
             var order = Order(sql);
-            sql = conn.PagedSql(sql, columns, order);
+            sql = conn.PagedSql(sql, columns, order, formatSql);
             if (page < 1) page = 1;
 
             _parameters.Add("skip", (page - 1) * size);
@@ -198,10 +199,11 @@ namespace Acb.Dapper
         /// <param name="size"></param>
         /// <param name="conn"></param>
         /// <param name="param"></param>
+        /// <param name="formatSql"></param>
         /// <returns></returns>
-        public PagedList<T> PagedList<T>(IDbConnection conn, int page, int size, object param = null)
+        public PagedList<T> PagedList<T>(IDbConnection conn, int page, int size, object param = null, bool formatSql = true)
         {
-            return PagedListAsync<T>(conn, page, size, param).SyncRun();
+            return PagedListAsync<T>(conn, page, size, param, formatSql).SyncRun();
         }
 
         /// <summary> 分页列表 </summary>
@@ -210,20 +212,21 @@ namespace Acb.Dapper
         /// <param name="size"></param>
         /// <param name="conn"></param>
         /// <param name="param"></param>
+        /// <param name="formatSql"></param>
         /// <returns></returns>
-        public async Task<PagedList<T>> PagedListAsync<T>(IDbConnection conn, int page, int size, object param = null)
+        public async Task<PagedList<T>> PagedListAsync<T>(IDbConnection conn, int page, int size, object param = null, bool formatSql = true)
         {
             if (!IsSelect())
                 return new PagedList<T>();
-            Paged(page, size, conn);
+            Paged(page, size, conn, formatSql);
             if (param != null)
                 _parameters.AddDynamicParams(param);
             var sql = ToString();
             using (var muli = await conn.QueryMultipleAsync(sql, _parameters))
             {
-                var list = await muli.ReadAsync<T>();
-                var count = await muli.ReadFirstOrDefaultAsync<long>();
-                return new PagedList<T>(list.ToArray(), page, size, (int)count);
+                var list = await muli.ReadAsync<T>() ?? new List<T>();
+                var count = await muli.ReadFirstOrDefaultAsync<long?>();
+                return new PagedList<T>(list.ToArray(), page, size, (int)(count ?? 0));
             }
         }
 

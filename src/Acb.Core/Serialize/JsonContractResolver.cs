@@ -9,22 +9,26 @@ namespace Acb.Core.Serialize
 {
     internal class JsonContractResolver : DefaultContractResolver
     {
+        private readonly IDictionary<string, string> _replaceProps;
         private readonly string[] _props;
         private readonly bool _retain;
         private readonly NamingType _camelCase;
 
-        public JsonContractResolver(NamingType camelCase)
+        public JsonContractResolver(NamingType camelCase, IDictionary<string, string> replaceProps = null)
         {
             _camelCase = camelCase;
+            _replaceProps = replaceProps;
         }
 
         /// <summary> 构造函数 </summary>
         /// <param name="camelCase">驼峰</param>
         /// <param name="retain">保留/排除：true为保留</param>
+        /// <param name="replaceProps">需替换的属性</param>
         /// <param name="props"></param>
         public JsonContractResolver(NamingType camelCase = NamingType.Normal, bool retain = true,
-            params string[] props)
+            IDictionary<string, string> replaceProps = null, params string[] props)
         {
+            _replaceProps = replaceProps;
             _camelCase = camelCase;
             _retain = retain;
             _props = props;
@@ -32,6 +36,8 @@ namespace Acb.Core.Serialize
 
         protected override string ResolvePropertyName(string propertyName)
         {
+            if (_replaceProps != null && _replaceProps.TryGetValue(propertyName, out var newName))
+                propertyName = newName;
             switch (_camelCase)
             {
                 case NamingType.CamelCase:

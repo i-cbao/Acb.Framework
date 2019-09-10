@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -48,6 +48,7 @@
     <ProjectReference Include="..\..\src\Acb.MongoDb\Acb.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Acb.Office\Acb.Office.csproj" />
     <ProjectReference Include="..\..\src\Acb.ProxyGenerator\Acb.ProxyGenerator.csproj" />
+    <ProjectReference Include="..\..\src\Acb.RabbitMq\Acb.RabbitMq.csproj" />
     <ProjectReference Include="..\..\src\Acb.Redis\Acb.Redis.csproj" />
     <ProjectReference Include="..\Acb.Demo.Business\Acb.Demo.Business.csproj" />
     <ProjectReference Include="..\Acb.Demo.Contracts\Acb.Demo.Contracts.csproj" />

@@ -63,14 +63,18 @@ namespace Acb.Core.Data
         /// <param name="sql"></param>
         /// <param name="columns"></param>
         /// <param name="order"></param>
+        /// <param name="fromatSql">格式化SQL</param>
         /// <returns></returns>
-        public static string PagedSql(this IDbConnection conn, string sql, string columns, string order)
+        public static string PagedSql(this IDbConnection conn, string sql, string columns, string order, bool fromatSql = true)
         {
             foreach (var lazyAdapter in Adapters.Values)
             {
                 var adapter = lazyAdapter.Value;
                 if (adapter.ConnectionType == conn.GetType())
-                    return adapter.FormatSql(adapter.PageSql(sql, columns, order));
+                {
+                    sql = adapter.PageSql(sql, columns, order);
+                    return fromatSql ? adapter.FormatSql(sql) : sql;
+                }
             }
 
             return sql;
