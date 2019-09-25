@@ -10,9 +10,16 @@ namespace Acb.WebApi.Filters
     /// <summary> 默认身份认证过滤器 </summary>
     public class DAuthorizeAttribute : ActionFilterAttribute
     {
+        private readonly string _scheme;
+
+        public DAuthorizeAttribute(string scheme = "acb")
+        {
+            _scheme = scheme;
+        }
+
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var ticket = context.HttpContext.Request.VerifyTicket<ClientTicket>();
+            var ticket = context.HttpContext.Request.VerifyTicket<ClientTicket>(_scheme);
 
             if (context.ActionDescriptor.FilterDescriptors.Any(t => t.Filter.GetType() == typeof(AllowAnonymousFilter)))
             {

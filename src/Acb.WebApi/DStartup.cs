@@ -75,7 +75,7 @@ namespace Acb.WebApi
                 {
                     options.IncludeXmlComments(file);
                 }
-
+                
                 options.CustomSchemaIds(t => t.FullName);
                 //添加Header验证
                 options.AddSecurityDefinition("acb", new ApiKeyScheme

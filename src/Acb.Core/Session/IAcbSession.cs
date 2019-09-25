@@ -73,7 +73,7 @@ namespace Acb.Core.Session
             return value;
         }
 
-        /// <summary> 获取必须的TenantId(没有将抛出异常) </summary>
+        /// <summary> 获取必须的TenantId(如果没有将抛出异常) </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="session"></param>
         /// <returns></returns>

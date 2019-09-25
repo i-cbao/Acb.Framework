@@ -24,7 +24,7 @@ namespace Acb.Framework.Logging
             return new RollingFileAppender
             {
                 Name = name,
-                File = "_logs\\",
+                File = "_logs/",
                 AppendToFile = true,
                 LockingModel = new FileAppender.MinimalLock(),
                 RollingStyle = RollingFileAppender.RollingMode.Date,
@@ -38,7 +38,7 @@ namespace Acb.Framework.Logging
 
         internal static IAppender DebugAppender()
         {
-            const string file = "yyyyMM\\\\dd'.log'";
+            const string file = "yyyyMM/dd'.log'";
             var appender = BaseAppender("rollingFile", file, NormalLayout);
             appender.ClearFilters();
 
@@ -54,7 +54,7 @@ namespace Acb.Framework.Logging
 
         internal static IAppender ErrorAppender()
         {
-            const string file = "yyyyMM\\\\dd'_error.log'";
+            const string file = "yyyyMM/dd'_error.log'";
             var appender = BaseAppender("errorRollingFile", file, ErrorLayout);
             appender.AddFilter(new LevelRangeFilter
             {

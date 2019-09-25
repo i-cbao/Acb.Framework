@@ -15,9 +15,9 @@ using Microsoft.Extensions.Logging;
 namespace Acb.Rpc.Tests
 {
     [TestClass]
-    public class UnitTest1
+    public class ClientTest
     {
-        public UnitTest1()
+        public ClientTest()
         {
             var services = new ServiceCollection();
             services.AddLogging(builder =>
@@ -30,6 +30,7 @@ namespace Acb.Rpc.Tests
             {
                 //config.ConsulToken = "fc243b3a62ecd334";
                 //config.Mode = ProductMode.Test;
+                //config.Mode = ProductMode.Prod
             });
             //×¢Èë´úÀíIOC
             //services.AddProxy<IVCodeContract>();

@@ -13,6 +13,7 @@ using Acb.RabbitMq.Options;
 using Acb.WebApi.Filters;
 using Acb.WebApi.Test.Hubs;
 using Acb.WebApi.Test.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -20,14 +21,13 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Acb.WebApi.Test.Controllers
 {
     /// <summary> 主页接口 </summary>
-    public class HomeController : BaseController
+    [Route("api/home")]
+    public partial class HomeController : BaseController
     {
         private readonly ILogger _logger;
         private readonly IRemoteLogger _remoteLogger;

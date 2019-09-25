@@ -246,9 +246,10 @@ namespace Acb.Core.Extensions
                 var sourceValue = sourceProp.GetValue(source).CastTo(targetProp.PropertyType);
                 var targetValue = targetProp.GetValue(target);
 
-                if (sourceValue == null || sourceValue.Equals(defValue))
+                //dto为默认值
+                if (targetValue == null || targetValue.Equals(defValue))
                 {
-                    if (!reset || targetValue == defValue)
+                    if (!reset || Equals(sourceValue, targetValue))
                         continue;
                     propAction?.Invoke(sourceProp, sourceValue, targetValue);
                     list.Add(sourceProp);

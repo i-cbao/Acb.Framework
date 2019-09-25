@@ -13,8 +13,8 @@ namespace Acb.MicroService.Host
     /// <summary> 微服务注册 </summary>
     public class MicroServiceRegister
     {
-        private const string HostEnvironmentName = "MICRO_SERVICE_HOST";
-        private const string PortEnvironmentName = "MICRO_SERVICE_PORT";
+        private const string HostEnvironmentName = "MICROSERVICE_HOST";
+        private const string PortEnvironmentName = "MICROSERVICE_PORT";
         private const string AutoDeregistEnvironmentName = "AUTO_DEREGIST";
         internal ConcurrentDictionary<string, MethodInfo> Methods { get; }
 
