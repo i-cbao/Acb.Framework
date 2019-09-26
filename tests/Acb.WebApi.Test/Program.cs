@@ -1,10 +1,12 @@
-﻿namespace Acb.WebApi.Test
+﻿using System.Threading.Tasks;
+
+namespace Acb.WebApi.Test
 {
     public class Program : DHost<Startup>
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Start(args);
+            await Start(args);
         }
     }
 }

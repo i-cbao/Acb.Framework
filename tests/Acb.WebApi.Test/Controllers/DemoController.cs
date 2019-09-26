@@ -1,4 +1,5 @@
-﻿using Acb.Core;
+﻿using Acb.AutoMapper;
+using Acb.Core;
 using Acb.Core.Dependency;
 using Acb.Core.EventBus;
 using Acb.Core.Helper;
@@ -7,17 +8,14 @@ using Acb.Demo.Contracts;
 using Acb.Demo.Contracts.Dtos;
 using Acb.Demo.Contracts.EventBus;
 using Acb.MicroService.Client;
+using Acb.Office;
+using Acb.WebApi.Test.Domain.Repositories;
 using Acb.WebApi.Test.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
-using Acb.AutoMapper;
-using Acb.Office;
-using Acb.WebApi.Test.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -41,7 +39,7 @@ namespace Acb.WebApi.Test.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpPost("import")]
-        public DResult<DataSet> Import(IFormFile file, IFormFile otherFile, string name)
+        public DResult Import(IFormFile file, IFormFile otherFile, string name)
         {
             using (var stream = file.OpenReadStream())
             {
@@ -54,7 +52,7 @@ namespace Acb.WebApi.Test.Controllers
         public async Task<IActionResult> Index()
         {
             var time = await _demoService.Now();
-            return Content(time.ToString("yyyy-MM-dd HH:mm:ss"));
+            return Content(time.ToString("yyyy-MM-dd HH:mm:ss"), "text/plain");
             //var list = new List<Dictionary<string, object>>();
             //for (int i = 0; i < 3; i++)
             //{
@@ -92,12 +90,12 @@ namespace Acb.WebApi.Test.Controllers
         }
 
         [HttpGet("token"), AllowAnonymous]
-        public async Task<IActionResult> Token()
+        public async Task<object> Token()
         {
             var ticket =
                 "lGn6zHw7xLIgvL1zIUE8W3/xf9LKgLY4TO9HsMfAaBmnZDDmPTIuInBm0W0toN9X5fRcoSm1tBSxPqyQRB45B1rLmoCANocrYoAU/fhk2fGRN2Yv6XG7Pu2EtATJhTOo3pkijgmq1T/0GLIWiLIA1F4+/ydMZv64suytHaw8xrCFzTgQML00GQ9CUS+OBVbnXbUoiiR3dSCgHFvNENR1+QfF9+c1oo/yoVE6Bk6WcnR1MFd0J9Zh08OYHDdcTgiv";
             var client = ticket.Client<DClientTicket<string>>();
-            return await Task.FromResult(Json(client));
+            return await Task.FromResult(client);
             //const string id = "70d8f270f4784d599b9425783bfdea67";
             //var t = await _accountContract.QueryById(id);
             //var logger = LogManager.Logger<DemoController>();

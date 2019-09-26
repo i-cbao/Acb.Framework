@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Acb.WebApi
 {
@@ -10,22 +13,26 @@ namespace Acb.WebApi
 
     public class DHost<TStart> where TStart : DStartup
     {
-        protected static event Action<IWebHostBuilder> Builder;
+        protected static event Action<IHostBuilder> Builder;
 
         /// <summary> 开启服务 </summary>
         /// <param name="args"></param>
-        public static void Start(string[] args)
+        public static async Task Start(string[] args)
         {
-            var builder = new WebHostBuilder()
-                .UseKestrel()
+            var builder = Host.CreateDefaultBuilder(args)
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<TStart>();
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseKestrel()
+                        .UseIISIntegration()
+                        .UseStartup<TStart>();
+                });
+
             Builder?.Invoke(builder);
-            using (var host = builder.Build())
-            {
-                host.Run();
-            }
+            var host = builder.Build();
+            await host.RunAsync();
         }
     }
 }

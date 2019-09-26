@@ -4,7 +4,6 @@ using Acb.FileServer.Helper;
 using Acb.FileServer.ViewModels;
 using Acb.WebApi;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;

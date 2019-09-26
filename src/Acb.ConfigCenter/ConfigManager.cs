@@ -2,14 +2,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using YamlDotNet.Serialization;
+using System.Text.Json;
 
 namespace Acb.ConfigCenter
 {
@@ -64,13 +63,14 @@ namespace Acb.ConfigCenter
             switch (_configExtension)
             {
                 case ".yml":
-                    var d = new Deserializer();
-                    using (var reader = new StringReader(content))
-                    {
-                        return d.Deserialize(reader);
-                    }
+                    //var d = new Deserializer();
+                    //using (var reader = new StringReader(content))
+                    //{
+                    //    return d.Deserialize(reader);
+                    //}
                 default:
-                    return JsonConvert.DeserializeObject(content);
+                    return JsonSerializer.Deserialize<object>(content);
+                    //return JsonConvert.DeserializeObject(content);
             }
         }
 
@@ -79,14 +79,15 @@ namespace Acb.ConfigCenter
             switch (_configExtension)
             {
                 case ".yml":
-                    var obj = JsonConvert.DeserializeObject<dynamic>(config);
-                    var builder = new SerializerBuilder();
-                    builder.JsonCompatible();
-                    var d = builder.Build();
-                    using (var writer = new StreamWriter(path, false))
-                    {
-                        d.Serialize(writer, obj);
-                    }
+                    ////var obj = JsonConvert.DeserializeObject<dynamic>(config);
+                    //var obj = JsonSerializer.Deserialize<dynamic>(config);
+                    //var builder = new SerializerBuilder();
+                    //builder.JsonCompatible();
+                    //var d = builder.Build();
+                    //using (var writer = new StreamWriter(path, false))
+                    //{
+                    //    d.Serialize(writer, obj);
+                    //}
                     break;
                 default:
                     File.WriteAllText(path, config, Encoding.UTF8);

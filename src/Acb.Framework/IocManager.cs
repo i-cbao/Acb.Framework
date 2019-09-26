@@ -8,17 +8,17 @@ namespace Acb.Framework
     {
         private readonly DBootstrap _bootstrap;
 
-        internal IContainer Current => _bootstrap.Container;
+        internal ILifetimeScope Current => _bootstrap.ContainerRoot;
 
         public IocManager(DBootstrap bootstrap)
         {
             _bootstrap = bootstrap;
         }
 
-        public void MapService(Action<ContainerBuilder> buidlerAction)
-        {
-            _bootstrap.ReBuild(buidlerAction);
-        }
+        //public void MapService(Action<ContainerBuilder> buidlerAction)
+        //{
+        //    _bootstrap.ReBuild(buidlerAction);
+        //}
 
         /// <summary> 获取Ioc注入实例 </summary>
         /// <typeparam name="T"></typeparam>

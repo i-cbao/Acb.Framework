@@ -15,12 +15,12 @@ namespace Acb.Framework
     {
         private bool _init;
 
-        public ContainerBuilder Builder { get; private set; }
+        public ContainerBuilder Builder { get; set; }
 
-        private IContainer _container;
+        public ILifetimeScope ContainerRoot { get; private set; }
 
         /// <summary> Ioc容器 </summary>
-        public IContainer Container => _container ?? (_container = Builder.Build());
+        private IContainer _container;
 
         /// <summary> Ioc构建事件 </summary>
         public event Action<ContainerBuilder> BuilderHandler;
@@ -30,6 +30,22 @@ namespace Acb.Framework
             var updater = new ContainerBuilder();
             builderAction.Invoke(updater);
             updater.Update(_container);
+        }
+
+        public IContainer CreateContainer()
+        {
+            _container = Builder.Build();
+            ContainerRoot = _container;
+            DatabaseInit();
+            ModulesInstaller();
+            return _container;
+        }
+
+        public void CreateContainer(ILifetimeScope root)
+        {
+            ContainerRoot = root;
+            DatabaseInit();
+            ModulesInstaller();
         }
 
         /// <summary> 初始化 </summary>
@@ -42,15 +58,12 @@ namespace Acb.Framework
             CacheInit();
             IocRegisters();
             BuilderHandler?.Invoke(Builder);
-            _container = Builder.Build();
-            DatabaseInit();
-            ModulesInstaller();
         }
 
         /// <summary> Ioc注册 </summary>
         public override void IocRegisters()
         {
-            Builder = new ContainerBuilder();
+            Builder = Builder ?? new ContainerBuilder();
             //注入程序集查找器
             var finder = new DAssemblyFinder();
             Builder.RegisterInstance(finder).As<IAssemblyFinder>().SingleInstance();

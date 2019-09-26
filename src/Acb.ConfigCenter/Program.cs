@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Acb.ConfigCenter
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .UseKestrel()
+            var host = new HostBuilder()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<Startup>()
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseKestrel().UseIISIntegration().UseStartup<Startup>();
+                })
                 .Build();
-            using (host)
-            {
-                host.Run();
-            }
+            await host.RunAsync();
         }
     }
 }

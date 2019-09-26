@@ -47,13 +47,14 @@ namespace Acb.Framework
                 MapServices(builder);
             };
             Bootstrap.Initialize();
-            var provider = new AutofacServiceProvider(Bootstrap.Container);
+            var container = Bootstrap.CreateContainer();
+            var provider = new AutofacServiceProvider(container);
             UseServices(provider);
         }
 
         protected T Resolve<T>()
         {
-            return Bootstrap.Container.Resolve<T>();
+            return Bootstrap.ContainerRoot.Resolve<T>();
         }
 
         /// <summary> 打印数据 </summary>

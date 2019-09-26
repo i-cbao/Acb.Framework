@@ -5,16 +5,17 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Acb.ConfigCenter.Filters
 {
     public class CAuthorizeAttribute : ActionFilterAttribute
     {
 
-
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (context.ActionDescriptor.FilterDescriptors.Any(t => t.Filter.GetType() == typeof(AllowAnonymousFilter)))
+            //if (context.ActionDescriptor.FilterDescriptors.Any(t => t.Filter.GetType() == typeof(AllowAnonymousFilter)))
+            if (context.ActionDescriptor.EndpointMetadata.Any(t => t is AllowAnonymousAttribute))
             {
                 base.OnActionExecuting(context);
                 return;

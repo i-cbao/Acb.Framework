@@ -32,8 +32,8 @@ namespace Acb.Framework.Logging
                 color = _logColors[level];
             }
 
-            prints.Add(new PrintItem($"[{level}]\t", color, false));
-            prints.Add(new PrintItem($"{Clock.Now:yyyy-MM-dd HH:mm:ss}\t{LoggerName}", ConsoleColor.DarkCyan));
+            prints.Add(new PrintItem($"[{level.ToString().ToLower()}]\t", color, false));
+            prints.Add(new PrintItem($"{Clock.Now:yyyy-MM-dd HH:mm:ss}\t{LoggerName}", ConsoleColor.DarkGray));
             if (message != null)
             {
                 var content = message.GetType().IsSimpleType()
@@ -44,7 +44,7 @@ namespace Acb.Framework.Logging
 
             if (exception != null)
             {
-                prints.Add(new PrintItem($"\t{exception.Format()}", ConsoleColor.Red));
+                prints.Add(new PrintItem($"\t{exception.Format()}"));
             }
 
             prints.Print();

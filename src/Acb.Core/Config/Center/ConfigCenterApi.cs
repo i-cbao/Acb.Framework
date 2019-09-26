@@ -77,6 +77,7 @@ namespace Acb.Core.Config.Center
                 new { account = _config.Account, password = _config.Password });
             if (string.IsNullOrWhiteSpace(content))
                 return;
+            //var json = JsonSerializer.Deserialize<dynamic>(content);
             var json = JsonConvert.DeserializeObject<dynamic>(content);
             if ((bool)json.ok)
                 _headers[AuthorizationKey] = $"acb {json.ticket}";

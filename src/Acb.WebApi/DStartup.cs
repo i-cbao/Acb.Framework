@@ -8,11 +8,14 @@ using Acb.WebApi.Filters;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -61,11 +64,11 @@ namespace Acb.WebApi
             _appName = string.IsNullOrWhiteSpace(_appName) ? assName.Name : _appName;
             services.AddSwaggerGen(options =>
             {
-                foreach (var docGroup in DocGroups())
+                foreach (var (key, value) in DocGroups())
                 {
-                    options.SwaggerDoc(docGroup.Key, new Info
+                    options.SwaggerDoc(key, new OpenApiInfo
                     {
-                        Title = docGroup.Value,
+                        Title = value,
                         Version = $"v{assName.Version}"
                     });
                 }
@@ -75,17 +78,18 @@ namespace Acb.WebApi
                 {
                     options.IncludeXmlComments(file);
                 }
-                
+
                 options.CustomSchemaIds(t => t.FullName);
                 //添加Header验证
-                options.AddSecurityDefinition("acb", new ApiKeyScheme
+                options.AddSecurityDefinition("acb", new OpenApiSecurityScheme
                 {
                     Description = "OAuth2授权(数据将在请求头中进行传输) 参数结构: \"Authorization: acb {token}\"",
-                    Name = "Authorization",//OAuth2默认的参数名称
-                    In = "header",
-                    Type = "apiKey"
+                    Name = "Authorization", //OAuth2默认的参数名称
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "acb"
                 });
-                options.OperationFilter<SwaggerFileUploadFilter>();
+                //options.OperationFilter<SwaggerFileUploadFilter>();
                 SwaggerGenOption(options);
             });
         }
@@ -97,10 +101,10 @@ namespace Acb.WebApi
             app.UseSwagger(SwaggerOption);
             app.UseSwaggerUI(options =>
             {
-                foreach (var docGroup in DocGroups())
+                foreach (var (key, value) in DocGroups())
                 {
                     options.SwaggerEndpoint(
-                        $"/swagger/{docGroup.Key}/swagger.json", docGroup.Value);
+                        $"/swagger/{key}/swagger.json", value);
                 }
                 SwaggerUiOption(options);
             });
@@ -109,7 +113,6 @@ namespace Acb.WebApi
 
         protected virtual void MapServices(ContainerBuilder builder)
         {
-
         }
 
         protected virtual void MapServices(IServiceCollection services)
@@ -122,69 +125,80 @@ namespace Acb.WebApi
 
         }
 
-        public virtual IServiceProvider ConfigureServices(IServiceCollection services)
+        public virtual void ConfigureServices(IServiceCollection services)
         {
             LogManager.AddAdapter(new ConsoleAdapter());
-
             AddSwagger(services);
 
+            services.AddRouting(options =>
+            {
+                options.LowercaseUrls = true;
+            });
+
             services
-                .AddMvc(options =>
+                .AddControllers(options =>
                 {
                     if (Consts.Mode != ProductMode.Dev)
                     {
                         options.Filters.Add<ActionTimingFilter>();
                     }
 
-                    //自定义异常捕获
                     options.Filters.Add<DExceptionFilter>();
                 })
-                .AddJsonOptions(opts =>
+                .AddNewtonsoftJson(options =>
                 {
-                    //json序列化处理
-                    opts.SerializerSettings.Converters.Add(new DateTimeConverter());
+                    options.SerializerSettings.Converters.Add(new DateTimeConverter());
                 })
                 .AddControllersAsServices();
-
+            //services.AddCors();
+            services.AddHealthChecks();
+            //services.AddHttpContextAccessor();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             MapServices(services);
-
-            Bootstrap.BuilderHandler += builder =>
-            {
-                builder.Populate(services);
-                MapServices(builder);
-            };
-            Bootstrap.Initialize();
-
-            return new AutofacServiceProvider(Bootstrap.Container);
         }
 
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public virtual void ConfigureContainer(ContainerBuilder builder)
         {
-            UseSwagger(app);
+            Bootstrap.Builder = builder;
+            Bootstrap.BuilderHandler += MapServices;
+            Bootstrap.Initialize();
+        }
+
+        protected virtual void ConfigRoute(IEndpointRouteBuilder builder)
+        {
+
+        }
+
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
             var provider = app.ApplicationServices;
+            var container = provider.GetAutofacRoot();
+            Bootstrap.CreateContainer(container);
+            UseSwagger(app);
             var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+
             AcbHttpContext.Configure(httpContextAccessor);
-            app.UseMvc(routes =>
+
+            app.UseRouting();
+
+            app.UseEndpoints(routeBuilder =>
             {
                 //普通路由
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
-                //区域路由
-                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
-
+                routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                ////区域路由
+                //routeBuilder.MapAreaControllerRoute("areaRoute", "", "{area:exists}/{controller}/{action=Index}/{id?}");
+                //健康检查
+                routeBuilder.MapHealthChecks("/healthz", new HealthCheckOptions());
                 //刷新配置
-                routes.MapGet("config/reload", async ctx =>
+                routeBuilder.MapGet("/config/reload", async ctx =>
                 {
                     ConfigHelper.Instance.Reload();
                     await ctx.Response.WriteAsync("ok");
                 });
+                ConfigRoute(routeBuilder);
             });
-            //app.UseForwardedHeaders(new ForwardedHeadersOptions
-            //{
-            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            //});
             UseServices(provider);
-            var liftscope = provider.GetService<IApplicationLifetime>();
+            var liftscope = provider.GetService<IHostApplicationLifetime>();
             liftscope.ApplicationStopping.Register(Bootstrap.Dispose);
         }
     }

@@ -3,11 +3,12 @@ using Acb.Core.Monitor;
 using Acb.MicroService.Client;
 using Acb.RabbitMq;
 using Acb.WebApi.Test.Hubs;
-using Acb.WebApi.Test.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 
@@ -24,8 +25,8 @@ namespace Acb.WebApi.Test
             services.AddRabbitMqEventBus("spartner");
             services.AddRabbitMqEventBus();
 
-            services.AddCors(opts =>
-                opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+            //services.AddCors(opts =>
+            //    opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
             services.AddMonitor(typeof(LoggerMonitor));
             services.AddSignalR();
@@ -37,13 +38,13 @@ namespace Acb.WebApi.Test
             //services.AddMicroRouter();
             services.AddMicroClient();
             //IdentityServer4
-            services.AddIdentityServer()
-                .AddDeveloperSigningCredential()
-                .AddInMemoryIdentityResources(OAuthData.GetIdentityResourceResources())
-                .AddInMemoryApiResources(OAuthData.GetApiResources())
-                .AddInMemoryClients(OAuthData.GetClients())
-                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
-                .AddProfileService<ProfileService>();
+            //services.AddIdentityServer()
+            //    .AddDeveloperSigningCredential()
+            //    .AddInMemoryIdentityResources(OAuthData.GetIdentityResourceResources())
+            //    .AddInMemoryApiResources(OAuthData.GetApiResources())
+            //    .AddInMemoryClients(OAuthData.GetClients())
+            //    .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+            //    .AddProfileService<ProfileService>();
             base.MapServices(services);
         }
 
@@ -65,23 +66,31 @@ namespace Acb.WebApi.Test
             };
         }
 
+        /// <summary> 路由信息 </summary>
+        /// <param name="builder"></param>
+        protected override void ConfigRoute(IEndpointRouteBuilder builder)
+        {
+            //区域路由
+            builder.MapAreaControllerRoute("adminRoute", "admin", "admin/{controller}/{action=Index}/{id?}");
+            builder.MapAreaControllerRoute("vehicleRoute", "vehicle", "vehicle/{controller}/{action=Index}/{id?}");
+            builder.MapHub<MessageHub>("/mhub");
+            base.ConfigRoute(builder);
+        }
+
         /// <summary> 配置应用 </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public override void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            app.UseCors("mhubs");
-            app.UseSignalR(route =>
-            {
-                route.MapHub<MessageHub>("/mhub");
-            });
-            app.UseWebSockets();
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseDeveloperExceptionPage();
+            //}
             app.UseStaticFiles();
-            app.UseIdentityServer();
+            //app.UseCors("mhubs");
+            //app.UseWebSockets();
+
+            //app.UseIdentityServer();
             base.Configure(app, env);
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Acb.Core.Exceptions;
 using Acb.Core.Timing;
-using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Linq;
 
@@ -19,13 +19,14 @@ namespace Acb.WebApi.Filters
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            var ticket = context.HttpContext.Request.VerifyTicket<ClientTicket>(_scheme);
 
-            if (context.ActionDescriptor.FilterDescriptors.Any(t => t.Filter.GetType() == typeof(AllowAnonymousFilter)))
+            if (context.ActionDescriptor.EndpointMetadata.Any(t => t is AllowAnonymousAttribute))
             {
                 base.OnActionExecuting(context);
                 return;
             }
+
+            var ticket = context.HttpContext.Request.VerifyTicket<ClientTicket>(_scheme);
 
             BaseValidate(ticket);
 

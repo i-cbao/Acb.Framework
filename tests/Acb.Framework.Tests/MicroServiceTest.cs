@@ -207,7 +207,7 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void JsonTest()
         {
-            var service = Bootstrap.Container.ResolveKeyed<IDemoService>("proxy"); //(IDemoService)ProxyService.Proxy(typeof(IDemoService));
+            var service = Bootstrap.ContainerRoot.ResolveKeyed<IDemoService>("proxy"); //(IDemoService)ProxyService.Proxy(typeof(IDemoService));
             Print(service.Areas("1").Result);
             //const string json = "[510100]";
             //var array = JsonConvert.DeserializeObject<JArray>(json);

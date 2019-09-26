@@ -41,19 +41,20 @@ namespace Acb.Framework
                 MapServices?.Invoke(b);
             };
             Bootstrap.Initialize();
+            var container = Bootstrap.CreateContainer();
             if (UseServiceProvider != null)
             {
-                var provider = new AutofacServiceProvider(Bootstrap.Container);
+                var provider = new AutofacServiceProvider(container);
                 UseServiceProvider.Invoke(provider);
             }
 
-            UseServices?.Invoke(Bootstrap.Container);
+            UseServices?.Invoke(container);
             while (true)
             {
                 var cmd = Console.ReadLine();
                 if (cmd == "exit")
                     break;
-                Command?.Invoke(cmd, Bootstrap.Container);
+                Command?.Invoke(cmd, container);
             }
             StopEvent?.Invoke();
             Bootstrap.Dispose();
