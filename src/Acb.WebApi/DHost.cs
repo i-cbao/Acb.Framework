@@ -25,7 +25,9 @@ namespace Acb.WebApi
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseKestrel()
+                        .UseKestrel(options =>
+                        {
+                        })
                         .UseIISIntegration()
                         .UseStartup<TStart>();
                 });

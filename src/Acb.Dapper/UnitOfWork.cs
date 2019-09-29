@@ -99,7 +99,7 @@ namespace Acb.Dapper
         {
             Transaction?.Commit();
             _logger.Debug($"{GetType().Name}[{Id}] Commit Transaction");
-            Dispose();
+            TransDispose();
         }
 
         /// <summary> 回滚事务 </summary>
@@ -107,22 +107,25 @@ namespace Acb.Dapper
         {
             Transaction?.Rollback();
             _logger.Debug($"{GetType().Name}[{Id}] Rollback Transaction");
+            TransDispose();
+        }
 
-            Dispose();
+        private void TransDispose()
+        {
+            if (Transaction == null) return;
+            _logger.Debug($"{GetType().Name}[{Id}] Dispose Transaction");
+            var conn = Transaction.Connection;
+            Transaction.Dispose();
+            if (conn.State == ConnectionState.Open)
+                conn.Close();
+            Transaction = null;
         }
 
         /// <summary> 资源释放 </summary>
         public void Dispose()
         {
             _logger.Debug($"{GetType().Name}[{Id}] Dispose UnitOfWork");
-            if (Transaction != null)
-            {
-                _logger.Debug($"{GetType().Name}[{Id}] Dispose Transaction");
-                Transaction.Dispose();
-                Transaction.Connection.Close();
-                Transaction = null;
-            }
-
+            TransDispose();
             if (_connections.Count > 0)
             {
                 foreach (var conn in _connections.Values)
@@ -130,7 +133,6 @@ namespace Acb.Dapper
                     conn.Value.Close();
                 }
             }
-
             _connections.Clear();
             if (_closeabel)
                 Connection.Close();

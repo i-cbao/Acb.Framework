@@ -180,6 +180,7 @@ namespace Acb.WebApi
             AcbHttpContext.Configure(httpContextAccessor);
 
             app.UseRouting();
+            app.UseCors("default");
 
             app.UseEndpoints(routeBuilder =>
             {
