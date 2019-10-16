@@ -20,5 +20,7 @@
         public int Port { get; set; }
         /// <summary> 自动注销服务 </summary>
         public bool AutoDeregist { get; set; }
+
+        public bool Gzip { get; set; }
     }
 }

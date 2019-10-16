@@ -19,7 +19,7 @@ namespace Acb.MicroService.Host
         internal ConcurrentDictionary<string, MethodInfo> Methods { get; }
 
         internal HashSet<Assembly> ServiceAssemblies { get; }
-        private static MicroServiceConfig _config;
+        internal MicroServiceConfig Config { get; private set; }
         private readonly IServiceRouter _serviceRouter;
         private readonly ITypeFinder _typeFinder;
         private readonly ILogger _logger;
@@ -62,18 +62,18 @@ namespace Acb.MicroService.Host
             }
         }
 
-        private static void LoadConfig()
+        private void LoadConfig()
         {
-            _config = Constants.MicroSreviceKey.Config<MicroServiceConfig>();
+            Config = Constants.MicroSreviceKey.Config<MicroServiceConfig>();
             var host = HostEnvironmentName.Env();
             var port = PortEnvironmentName.Env(0);
             if (!string.IsNullOrWhiteSpace(host))
-                _config.Host = host;
+                Config.Host = host;
             if (port > 0)
-                _config.Port = port;
+                Config.Port = port;
             var autoDeregist = AutoDeregistEnvironmentName.Env<bool?>(null);
             if (autoDeregist.HasValue)
-                _config.AutoDeregist = autoDeregist.Value;
+                Config.AutoDeregist = autoDeregist.Value;
         }
 
 
@@ -83,16 +83,16 @@ namespace Acb.MicroService.Host
             InitServices();
             LoadConfig();
             var asses = ServiceAssemblies;
-            if (asses == null || asses.IsNullOrEmpty() || string.IsNullOrWhiteSpace(_config?.Host) || _config?.Port <= 0)
+            if (asses == null || asses.IsNullOrEmpty() || string.IsNullOrWhiteSpace(Config?.Host) || Config?.Port <= 0)
                 return;
-            _logger.Info($"regist service {_config.Host}:{_config.Port}");
-            _serviceRouter.Regist(asses, new ServiceAddress(_config.Host, _config.Port));
+            _logger.Info($"regist service {Config.Host}:{Config.Port},gzip:{Config.Gzip}");
+            _serviceRouter.Regist(asses, new ServiceAddress(Config.Host, Config.Port));
         }
 
         /// <summary> 取消注册 </summary>
         public void Deregist()
         {
-            if (_config.AutoDeregist)
+            if (Config.AutoDeregist)
                 _serviceRouter.Deregist();
         }
     }

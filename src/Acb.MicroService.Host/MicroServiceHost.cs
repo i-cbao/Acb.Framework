@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Acb.MicroService.Host
 {
@@ -12,10 +15,10 @@ namespace Acb.MicroService.Host
     /// <summary> 微服务主机 </summary>
     public class MicroServiceHost<TStartup> where TStartup : MicroServiceStartup
     {
-        protected static event Action<IWebHostBuilder> Builder;
+        protected static event Action<IHostBuilder> Builder;
         /// <summary> 开启服务 </summary>
         /// <param name="args"></param>
-        public static void Start(string[] args)
+        public static async Task Start(string[] args)
         {
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", true, true)
@@ -23,17 +26,19 @@ namespace Acb.MicroService.Host
                 .AddEnvironmentVariables("ASPNETCORE_")
                 .Build();
 
-            var builder = new WebHostBuilder()
-                .UseConfiguration(config)
-                .UseKestrel(opt => opt.ConfigureEndpoints())
+            var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<TStartup>();
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseKestrel(options => { options.ConfigureEndpoints(); })
+                        .UseIISIntegration()
+                        .UseStartup<TStartup>();
+                });
             Builder?.Invoke(builder);
-            using (var host = builder.Build())
-            {
-                host.Run();
-            }
+            var host = builder.Build();
+            await host.RunAsync();
         }
     }
 }

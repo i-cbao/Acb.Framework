@@ -67,7 +67,7 @@ namespace Acb.Core.Extensions
             var taskType = task.GetType().GetTypeInfo();
             if (!taskType.IsGenericType) return result;
             var prop = taskType.GetProperty("Result");
-            return prop != null ? (Task<object>)prop.GetValue(task) : (Task<object>)result;
+            return prop?.GetValue(task);
         }
 
         public static TaskAwaiter GetAwaiter(this Action action)

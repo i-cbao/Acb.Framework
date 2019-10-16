@@ -6,6 +6,7 @@ using Acb.Core.Message;
 using Acb.Core.Monitor;
 using Acb.Core.Security;
 using Acb.Core.Timing;
+using Acb.MicroService.Host.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
@@ -34,7 +35,7 @@ namespace Acb.MicroService.Host
             _serviceProvider = serviceProvider;
         }
 
-        private async Task RunMethod(MethodBase m, HttpRequest request, HttpResponse response)
+        private async Task RunMethod(MethodInfo method, HttpRequest request, HttpResponse response)
         {
             var monitorData = new MonitorData(MonitorModules.MicroService)
             {
@@ -53,7 +54,7 @@ namespace Acb.MicroService.Host
                 if (!string.IsNullOrWhiteSpace(requestBody))
                     list = JsonConvert.DeserializeObject<JArray>(requestBody);
                 var i = 0;
-                foreach (var parameter in m.GetParameters())
+                foreach (var parameter in method.GetParameters())
                 {
                     if (list != null && list.Count > i)
                     {
@@ -76,10 +77,18 @@ namespace Acb.MicroService.Host
                     i++;
                 }
 
-                var instance = _serviceProvider.GetService(m.DeclaringType); //CurrentIocManager.Resolve(m.DeclaringType);
-                var result = m.Invoke(instance, args.ToArray());
-                monitorData.Result = result.GetStringResult();
-                await WriteJsonAsync(response, result);
+                var instance = _serviceProvider.GetService(method.DeclaringType);
+                var fastInvoke = FastInvoke.GetMethodInvoker(method);
+                if (method.ReturnType.IsTaskOrVoid())
+                    fastInvoke(instance, args.ToArray());
+                else
+                {
+                    var result = fastInvoke(instance, args.ToArray());
+                    var data = await result.TaskResult();
+                    monitorData.Result = data.GetStringResult();
+                    await WriteJsonAsync(response, data);
+                }
+
             }
             catch (Exception ex)
             {
@@ -105,7 +114,8 @@ namespace Acb.MicroService.Host
         {
             response.StatusCode = code;
             response.ContentType = "application/json";
-            response.Headers.Add("Content-Encoding", "gzip");
+            if (_serviceRegister.Config.Gzip)
+                response.Headers.Add("Content-Encoding", "gzip");
             if (data is Task task)
             {
                 await task;
@@ -122,7 +132,7 @@ namespace Acb.MicroService.Host
                 }
             }
 
-            var bytes = _messageCodec.Encode(data, true);
+            var bytes = _messageCodec.Encode(data, _serviceRegister.Config.Gzip);
             await response.Body.WriteAsync(bytes, 0, bytes.Length);
         }
 
@@ -145,8 +155,7 @@ namespace Acb.MicroService.Host
         public Task MicroTask(HttpRequest req, HttpResponse resp, string path)
         {
             var key = path.ToLower();
-            var register = CurrentIocManager.Resolve<MicroServiceRegister>();
-            if (!register.Methods.TryGetValue(key, out var m))
+            if (!_serviceRegister.Methods.TryGetValue(key, out var m))
             {
                 return WriteJsonAsync(resp, DResult.Error($"{path} not found"), (int)HttpStatusCode.NotFound);
             }

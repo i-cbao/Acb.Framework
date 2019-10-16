@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Acb.Core.Extensions
 {
@@ -75,6 +76,21 @@ namespace Acb.Core.Extensions
             var actualType = type.GetUnNullableType();
             return SimpleTypes.Contains(actualType);
         }
+
+        /// <summary> 是否是Task OR Void </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsTaskOrVoid(this Type type)
+        {
+            var currentType = type;
+            if (typeof(Task<>).IsGenericAssignableFrom(type))
+            {
+                currentType = type.GenericTypeArguments[0];
+            }
+
+            return currentType == typeof(void) || currentType == typeof(Task);
+        }
+
 
         /// <summary>
         /// 获取成员元数据的Description特性描述信息

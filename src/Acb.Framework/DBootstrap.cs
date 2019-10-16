@@ -11,7 +11,7 @@ using System.Linq;
 namespace Acb.Framework
 {
     /// <summary> 启动器 </summary>
-    public class DBootstrap : Bootstrap
+    public class DBootstrap : AbstractBootstrap
     {
         private bool _init;
 
@@ -61,7 +61,7 @@ namespace Acb.Framework
         }
 
         /// <summary> Ioc注册 </summary>
-        public override void IocRegisters()
+        protected override void IocRegisters()
         {
             Builder = Builder ?? new ContainerBuilder();
             //注入程序集查找器
@@ -92,17 +92,17 @@ namespace Acb.Framework
             Builder.RegisterInstance(IocManager).AsSelf().As<IIocManager>().SingleInstance();
         }
 
-        public override void CacheInit()
+        protected override void CacheInit()
         {
             CacheManager.SetProvider(CacheLevel.First, new RuntimeMemoryCacheProvider());
         }
 
-        public override void LoggerInit()
+        protected override void LoggerInit()
         {
             LogManager.AddAdapter(new Log4NetAdapter());
         }
 
-        public override void DatabaseInit()
+        protected override void DatabaseInit()
         {
         }
     }

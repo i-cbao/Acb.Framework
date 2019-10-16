@@ -44,7 +44,7 @@ namespace Acb.Framework.Tests
 
         public MongoTest()
         {
-            LogManager.LogLevel(LogLevel.Info);
+            LogManager.SetLogLevel(LogLevel.Info);
         }
 
         protected override void MapServices(IServiceCollection services)

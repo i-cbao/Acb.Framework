@@ -188,7 +188,7 @@ namespace Acb.Framework.Tests
                 Print(html);
             }).Wait();
 
-            LogManager.LogLevel(LogLevel.Off);
+            LogManager.SetLogLevel(LogLevel.Off);
             var resul2 = CodeTimer.Time("WebRequest", 20, async () =>
             {
                 var html = await PostAsync(url, data);

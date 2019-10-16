@@ -13,11 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_config_cache\**" />
     <Compile Remove="_logs\**" />
     <Content Remove="C:\Users\shay\.nuget\packages\rdkafka.internal.librdkafka\0.9.1\build\..\runtimes\win7-x64\native\**" />
     <Content Remove="C:\Users\shay\.nuget\packages\rdkafka.internal.librdkafka\0.9.1\build\..\runtimes\win7-x86\native\**" />
+    <Content Remove="_config_cache\**" />
     <Content Remove="_logs\**" />
+    <EmbeddedResource Remove="_config_cache\**" />
     <EmbeddedResource Remove="_logs\**" />
+    <None Remove="_config_cache\**" />
     <None Remove="_logs\**" />
   </ItemGroup>
 
@@ -52,6 +56,6 @@
     </Content>
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="http://json.schemastore.org/bundleconfig" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 
 </Project>

@@ -1,5 +1,4 @@
 ﻿using Acb.Core.Extensions;
-using Acb.Core.Logging;
 using Acb.Core.Serialize;
 using Acb.Framework.Logging;
 using Autofac;
@@ -32,13 +31,13 @@ namespace Acb.Framework
         /// <summary> 默认构造函数 </summary>
         protected DTest()
         {
-            LogManager.AddAdapter(new ConsoleAdapter());
             Init();
         }
 
         private void Init()
         {
             var services = new ServiceCollection();
+            services.AddSystemLogging();
             MapServices(services);
             Bootstrap = new DBootstrap();
             Bootstrap.BuilderHandler += builder =>

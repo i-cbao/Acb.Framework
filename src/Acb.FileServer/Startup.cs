@@ -3,22 +3,22 @@ using Acb.WebApi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.IO;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace Acb.FileServer
 {
     public class Startup : DStartup
     {
-        public override IServiceProvider ConfigureServices(IServiceCollection services)
+        protected override void MapServices(IServiceCollection services)
         {
             services.AddSingleton<DirectoryHelper>();
-            return base.ConfigureServices(services);
+            base.MapServices(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public override void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public override void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {

@@ -1,6 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Config;
-using Acb.Core.Logging;
+using Acb.Core.Extensions;
 using Acb.Core.Timing;
 using Acb.Framework;
 using Acb.Framework.Logging;
@@ -58,8 +58,6 @@ namespace Acb.WebApi
 
         private void AddSwagger(IServiceCollection services)
         {
-            if (Consts.Mode == ProductMode.Prod)
-                return;
             var assName = Assembly.GetExecutingAssembly().GetName();
             _appName = string.IsNullOrWhiteSpace(_appName) ? assName.Name : _appName;
             services.AddSwaggerGen(options =>
@@ -83,12 +81,14 @@ namespace Acb.WebApi
                 //添加Header验证
                 options.AddSecurityDefinition("acb", new OpenApiSecurityScheme
                 {
-                    Description = "OAuth2授权(数据将在请求头中进行传输) 参数结构: \"Authorization: acb {token}\"",
+                    Description = "授权(数据将在请求头中进行传输) 参数结构: \"Authorization: acb {token}\"",
                     Name = "Authorization", //OAuth2默认的参数名称
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "acb"
                 });
+                //options.DescribeAllEnumsAsStrings();
+                //options.DescribeStringEnumsInCamelCase();
                 //options.OperationFilter<SwaggerFileUploadFilter>();
                 SwaggerGenOption(options);
             });
@@ -96,8 +96,6 @@ namespace Acb.WebApi
 
         private void UseSwagger(IApplicationBuilder app)
         {
-            if (Consts.Mode == ProductMode.Prod)
-                return;
             app.UseSwagger(SwaggerOption);
             app.UseSwaggerUI(options =>
             {
@@ -127,8 +125,9 @@ namespace Acb.WebApi
 
         public virtual void ConfigureServices(IServiceCollection services)
         {
-            LogManager.AddAdapter(new ConsoleAdapter());
-            AddSwagger(services);
+            services.AddSystemLogging();
+            if ("swagger".Config(false) || Consts.Mode != ProductMode.Prod)
+                AddSwagger(services);
 
             services.AddRouting(options =>
             {
@@ -150,9 +149,7 @@ namespace Acb.WebApi
                     options.SerializerSettings.Converters.Add(new DateTimeConverter());
                 })
                 .AddControllersAsServices();
-            //services.AddCors();
             services.AddHealthChecks();
-            //services.AddHttpContextAccessor();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             MapServices(services);
         }
@@ -174,7 +171,8 @@ namespace Acb.WebApi
             var provider = app.ApplicationServices;
             var container = provider.GetAutofacRoot();
             Bootstrap.CreateContainer(container);
-            UseSwagger(app);
+            if ("swagger".Config(false) || Consts.Mode != ProductMode.Prod)
+                UseSwagger(app);
             var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
 
             AcbHttpContext.Configure(httpContextAccessor);

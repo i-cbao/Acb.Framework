@@ -18,19 +18,19 @@ namespace Acb.Core.Logging
         /// <summary> 日志适配器集合 </summary>
         private static readonly ConcurrentDictionary<ILoggerAdapter, LogLevel> LoggerAdapters;
 
-        private static LogLevel _logLevel;
+        public static LogLevel Level { get; private set; }
 
         /// <summary> 静态构造 </summary>
         static LogManager()
         {
             LoggerDictionary = new ConcurrentDictionary<string, Lazy<Logger>>();
             LoggerAdapters = new ConcurrentDictionary<ILoggerAdapter, LogLevel>();
-            LogLevel();
+            SetLogLevel();
         }
 
         /// <summary> 设置日志登记 </summary>
         /// <param name="level">为空时重置</param>
-        public static void LogLevel(LogLevel? level = null)
+        public static void SetLogLevel(LogLevel? level = null)
         {
             LogLevel logLevel;
             if (level.HasValue)
@@ -42,12 +42,12 @@ namespace Acb.Core.Logging
                     mode = ConfigLevel.Config<string>();
                 logLevel = mode.CastTo(Logging.LogLevel.Info);
             }
-            if (_logLevel == logLevel) return;
-            _logLevel = logLevel;
+            if (Level == logLevel) return;
+            Level = logLevel;
             foreach (var adapter in LoggerAdapters)
             {
                 //if (adapter.Value == Logging.LogLevel.Off || !IsEnableLevel(adapter.Value))
-                LoggerAdapters[adapter.Key] = _logLevel;
+                LoggerAdapters[adapter.Key] = Level;
             }
         }
 
@@ -57,7 +57,7 @@ namespace Acb.Core.Logging
         /// <returns></returns>
         private static bool IsEnableLevel(LogLevel level, LogLevel? targetLevel = null)
         {
-            targetLevel = targetLevel ?? _logLevel;
+            targetLevel = targetLevel ?? Level;
             if (targetLevel == Logging.LogLevel.All) return true;
             if (targetLevel == Logging.LogLevel.Off) return false;
             return level >= targetLevel;
@@ -72,7 +72,7 @@ namespace Acb.Core.Logging
                 return;
             }
 
-            LoggerAdapters.TryAdd(adapter, _logLevel);
+            LoggerAdapters.TryAdd(adapter, Level);
         }
 
         /// <summary> 添加适配器 </summary>
@@ -81,7 +81,7 @@ namespace Acb.Core.Logging
         public static void AddAdapter(ILoggerAdapter adapter, LogLevel level)
         {
             if (!IsEnableLevel(level))
-                level = _logLevel;
+                level = Level;
 
             if (LoggerAdapters.ContainsKey(adapter))
             {

@@ -121,8 +121,8 @@ namespace Acb.MicroService.Client.Proxy
                 headers.Add(AcbClaimTypes.HeaderUserId, session.GetUserId<string>());
             if (session.TenantId != null)
                 headers.Add(AcbClaimTypes.HeaderTenantId, session.GetTenantId<string>());
-            headers.Add(AcbClaimTypes.HeaderUserName, session.UserName);
-            headers.Add(AcbClaimTypes.HeaderRole, session.Role);
+            headers.Add(AcbClaimTypes.HeaderUserName, session.UserName.UrlEncode());
+            headers.Add(AcbClaimTypes.HeaderRole, session.Role.UrlEncode());
 
             return await HttpHelper.Instance.RequestAsync(HttpMethod.Post, new HttpRequest(url)
             {

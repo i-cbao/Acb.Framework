@@ -1,13 +1,14 @@
-﻿using Acb.Core.Security;
+﻿using Acb.Core.Extensions;
+using Acb.Core.Security;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Acb.MicroService.Host.Controller
+namespace Acb.MicroService.Host.Controllers
 {
     /// <summary> 微服务控制器 </summary>
     [Route("micro")]
-    public class MicroController : Microsoft.AspNetCore.Mvc.Controller
+    public class MicroController : Controller
     {
         private readonly MicroServiceRunner _serviceRunner;
 
@@ -21,7 +22,7 @@ namespace Acb.MicroService.Host.Controller
         [HttpGet]
         public async Task Index()
         {
-            await _serviceRunner.Methods(ControllerContext.HttpContext);
+            await _serviceRunner.Methods(HttpContext);
         }
 
         /// <summary> 微服务调用入口 </summary>
@@ -31,8 +32,8 @@ namespace Acb.MicroService.Host.Controller
         [HttpPost("{contract}/{method}")]
         public async Task Index(string contract, string method)
         {
-            var req = ControllerContext.HttpContext.Request;
-            var resp = ControllerContext.HttpContext.Response;
+            var req = HttpContext.Request;
+            var resp = HttpContext.Response;
 
             //解析Claims
             var identity = new ClaimsIdentity();
@@ -41,9 +42,9 @@ namespace Acb.MicroService.Host.Controller
             if (req.Headers.TryGetValue(AcbClaimTypes.HeaderTenantId, out var tenantId))
                 identity.AddClaim(new Claim(AcbClaimTypes.TenantId, tenantId));
             if (req.Headers.TryGetValue(AcbClaimTypes.HeaderUserName, out var userName))
-                identity.AddClaim(new Claim(AcbClaimTypes.UserName, userName));
+                identity.AddClaim(new Claim(AcbClaimTypes.UserName, userName.ToString().UrlDecode()));
             if (req.Headers.TryGetValue(AcbClaimTypes.HeaderRole, out var role))
-                identity.AddClaim(new Claim(AcbClaimTypes.Role, role));
+                identity.AddClaim(new Claim(AcbClaimTypes.Role, role.ToString().UrlDecode()));
             HttpContext.User.AddIdentity(identity);
 
             await _serviceRunner.MicroTask(req, resp, contract, method);

@@ -68,7 +68,7 @@ namespace Acb.Framework.Tests
             var dt = ExcelHelper.ReadFirst(xls);
             var rows = dt.Rows.Count;
             Print(rows);
-            LogManager.LogLevel(LogLevel.Off);
+            LogManager.SetLogLevel(LogLevel.Off);
             var page = (int)Math.Ceiling(rows / (float)size);
             for (var i = 0; i < page; i++)
             {

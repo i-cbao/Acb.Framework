@@ -1,17 +1,19 @@
 ﻿using Acb.Core;
 using Acb.Core.Config;
-using Acb.Core.Logging;
+using Acb.Core.Extensions;
 using Acb.Framework;
 using Acb.Framework.Logging;
 using Acb.MicroService.Host.Filters;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 
@@ -43,15 +45,18 @@ namespace Acb.MicroService.Host
         /// <summary> 配置服务 </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        public virtual IServiceProvider ConfigureServices(IServiceCollection services)
+        public virtual void ConfigureServices(IServiceCollection services)
         {
-            LogManager.AddAdapter(new ConsoleAdapter());
-
-            services.AddMvc(options =>
+            services.AddSystemLogging();
+            services.AddRouting(options => options.LowercaseUrls = true);
+            services.AddControllers(options =>
             {
                 //自定义异常捕获
                 options.Filters.Add<DExceptionFilter>();
             }).AddControllersAsServices();
+
+            services.AddHealthChecks();
+
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             services.AddSingleton<MicroServiceRegister>();
@@ -64,42 +69,49 @@ namespace Acb.MicroService.Host
             services.AddMicroRouter();
 
             MapServices(services);
-
-            _bootstrap.BuilderHandler += builder =>
-            {
-                builder.Populate(services);
-                MapServices(builder);
-            };
-            _bootstrap.Initialize();
-            return new AutofacServiceProvider(_bootstrap.Container);
         }
 
+        public virtual void ConfigureContainer(ContainerBuilder builder)
+        {
+            _bootstrap.Builder = builder;
+            _bootstrap.BuilderHandler += MapServices;
+            _bootstrap.Initialize();
+        }
+
+        protected virtual void ConfigRoute(IEndpointRouteBuilder builder)
+        {
+
+        }
 
         /// <summary> 配置应用 </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="applicationLifetime"></param>
-        public virtual void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
-            IApplicationLifetime applicationLifetime)
+        public virtual void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory,
+            IHostApplicationLifetime applicationLifetime)
         {
             var provider = app.ApplicationServices;
+            var container = provider.GetAutofacRoot();
+            _bootstrap.CreateContainer(container);
             var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
             AcbHttpContext.Configure(httpContextAccessor);
-            app.UseMvc(routes =>
+            app.UseRouting();
+            app.UseEndpoints(routeBuilder =>
             {
-                //健康检测
-                routes.MapGet("healthy", async ctx => await ctx.Response.WriteAsync("ok"));
-                //重新加载配置
-                routes.MapGet("reload", async ctx =>
+                //普通路由
+                routeBuilder.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                ////区域路由
+                //routeBuilder.MapAreaControllerRoute("areaRoute", "", "{area:exists}/{controller}/{action=Index}/{id?}");
+                //健康检查
+                routeBuilder.MapHealthChecks("/healthz", new HealthCheckOptions());
+                //刷新配置
+                routeBuilder.MapGet("/config/reload", async ctx =>
                 {
                     ConfigHelper.Instance.Reload();
                     await ctx.Response.WriteAsync("ok");
                 });
-                //普通路由
-                routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
-                //区域路由
-                routes.MapRoute("areaRoute", "{area:exists}/{controller}/{action=Index}/{id?}");
+                ConfigRoute(routeBuilder);
             });
             provider.GetService<MicroServiceRegister>().Regist();
             UseServices(provider);

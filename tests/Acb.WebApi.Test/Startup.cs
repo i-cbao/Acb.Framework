@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 
@@ -25,17 +26,11 @@ namespace Acb.WebApi.Test
             services.AddRabbitMqEventBus("spartner");
             services.AddRabbitMqEventBus();
 
-            //services.AddCors(opts =>
-            //    opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+            services.AddCors(opts =>
+                opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
             services.AddMonitor(typeof(LoggerMonitor));
             services.AddSignalR();
-            //services.AddSingleton(provider =>
-            //{
-            //    var finder = provider.GetService<ITypeFinder>();
-            //    return ProxyService.Proxy<IDemoService>();
-            //});
-            //services.AddMicroRouter();
             services.AddMicroClient();
             //IdentityServer4
             //services.AddIdentityServer()
@@ -66,6 +61,11 @@ namespace Acb.WebApi.Test
             };
         }
 
+        protected override void SwaggerUiOption(SwaggerUIOptions options)
+        {
+            base.SwaggerUiOption(options);
+        }
+
         /// <summary> 路由信息 </summary>
         /// <param name="builder"></param>
         protected override void ConfigRoute(IEndpointRouteBuilder builder)
@@ -87,7 +87,7 @@ namespace Acb.WebApi.Test
             //    app.UseDeveloperExceptionPage();
             //}
             app.UseStaticFiles();
-            //app.UseCors("mhubs");
+            app.UseCors("mhubs");
             //app.UseWebSockets();
 
             //app.UseIdentityServer();

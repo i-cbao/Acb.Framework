@@ -1,5 +1,4 @@
-﻿using Acb.Core.Logging;
-using Acb.Core.Monitor;
+﻿using Acb.Core.Monitor;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -15,20 +14,6 @@ namespace Acb.Core.Extensions
         public static bool IsRegisted(this IServiceCollection services, Type serviceType)
         {
             return services.Any(t => t.ServiceType == serviceType);
-        }
-
-        /// <summary> 添加系统日志支持 </summary>
-        /// <param name="services"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddSystemLogging(this IServiceCollection services)
-        {
-            services.AddSingleton(provider =>
-            {
-                var adapter = new DefaultLoggerAdapter(provider);
-                LogManager.AddAdapter(adapter);
-                return adapter;
-            });
-            return services;
         }
 
         public static IServiceCollection AddMonitor(this IServiceCollection services, params Type[] monitorTypes)

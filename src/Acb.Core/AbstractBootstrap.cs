@@ -4,7 +4,7 @@ using Acb.Core.Modules;
 namespace Acb.Core
 {
     /// <summary> 启动基类 </summary>
-    public abstract class Bootstrap : IBootstrap
+    public abstract class AbstractBootstrap : IBootstrap
     {
         /// <summary> 初始化 </summary>
         public abstract void Initialize();
@@ -16,22 +16,22 @@ namespace Acb.Core
         public IIocManager IocManager { get; protected set; }
 
         /// <summary> 注册依赖 </summary>
-        public abstract void IocRegisters();
+        protected abstract void IocRegisters();
 
         /// <summary> 初始化各个模块 </summary>
-        public void ModulesInstaller()
+        protected void ModulesInstaller()
         {
             IocManager?.Resolve<IModuleManager>().InitializeModules();
         }
 
         /// <summary> 缓存初始化 </summary>
-        public abstract void CacheInit();
+        protected abstract void CacheInit();
 
         /// <summary> 日志初始化 </summary>
-        public abstract void LoggerInit();
+        protected abstract void LoggerInit();
 
         /// <summary> 数据库初始化 </summary>
-        public abstract void DatabaseInit();
+        protected abstract void DatabaseInit();
 
         /// <summary> 释放资源 </summary>
         public virtual void Dispose()

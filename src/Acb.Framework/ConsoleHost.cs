@@ -4,6 +4,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Acb.Core.Extensions;
 
 namespace Acb.Framework
 {
@@ -31,9 +32,9 @@ namespace Acb.Framework
         /// <param name="args"></param>
         public static void Start(string[] args)
         {
-            LogManager.AddAdapter(new ConsoleAdapter());
             Bootstrap = new DBootstrap();
             var services = new ServiceCollection();
+            services.AddSystemLogging();
             MapServiceCollection?.Invoke(services);
             Bootstrap.BuilderHandler += b =>
             {

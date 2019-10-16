@@ -1,5 +1,5 @@
-﻿using Acb.Core.Extensions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Acb.Core.Dependency;
+using Acb.Core.Extensions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -15,7 +15,34 @@ namespace Acb.Core.Logging
             _logger = logger;
         }
 
-        private static Microsoft.Extensions.Logging.LogLevel Convert(LogLevel level)
+        protected override void WriteInternal(LogLevel level, object message, Exception exception)
+        {
+            var msg = message.GetType().IsSimpleType() ? message.ToString() : JsonConvert.SerializeObject(message);
+
+            _logger.Log(level.Convert(), exception, msg);
+        }
+
+        public override bool IsTraceEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Trace);
+        public override bool IsDebugEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug);
+        public override bool IsInfoEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information);
+        public override bool IsWarnEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning);
+        public override bool IsErrorEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Error);
+        public override bool IsFatalEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Critical);
+    }
+
+    public class DefaultLoggerAdapter : LoggerAdapterBase
+    {
+        protected override ILog CreateLogger(string name)
+        {
+            var factory = CurrentIocManager.Resolve<ILoggerFactory>();
+            var logger = factory.CreateLogger(name);
+            return new DefaultLogger(logger);
+        }
+    }
+
+    public static class SystemLoggerExtensions
+    {
+        public static Microsoft.Extensions.Logging.LogLevel Convert(this LogLevel level)
         {
             switch (level)
             {
@@ -34,35 +61,6 @@ namespace Acb.Core.Logging
             }
 
             return Microsoft.Extensions.Logging.LogLevel.None;
-        }
-        protected override void WriteInternal(LogLevel level, object message, Exception exception)
-        {
-            var msg = message.GetType().IsSimpleType() ? message.ToString() : JsonConvert.SerializeObject(message);
-
-            _logger.Log(Convert(level), exception, msg);
-        }
-
-        public override bool IsTraceEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Trace);
-        public override bool IsDebugEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Debug);
-        public override bool IsInfoEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Information);
-        public override bool IsWarnEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Warning);
-        public override bool IsErrorEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Error);
-        public override bool IsFatalEnabled => _logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Critical);
-    }
-
-    public class DefaultLoggerAdapter : LoggerAdapterBase
-    {
-        private readonly IServiceProvider _provider;
-        public DefaultLoggerAdapter(IServiceProvider provider)
-        {
-            _provider = provider;
-        }
-
-        protected override ILog CreateLogger(string name)
-        {
-            var loggerFactory = _provider.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger(name);
-            return new DefaultLogger(logger);
         }
     }
 }

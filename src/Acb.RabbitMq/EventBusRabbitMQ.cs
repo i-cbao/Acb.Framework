@@ -11,6 +11,7 @@ using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -29,12 +30,20 @@ namespace Acb.RabbitMq
         private string _queueName;
         private const string DelayTimesKey = "delay_times";
 
-        public EventBusRabbitMq(IRabbitMqConnection connection, ISubscribeManager subsManager, IMessageCodec messageCodec)
+        private readonly TimeSpan[] _retryTimes = new[]
+        {
+            TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10),
+            TimeSpan.FromHours(1), TimeSpan.FromHours(2), TimeSpan.FromHours(6), TimeSpan.FromHours(12)
+        };
+
+        public EventBusRabbitMq(IRabbitMqConnection connection, ISubscribeManager subsManager, IMessageCodec messageCodec, TimeSpan[] retryTimes = null)
             : base(subsManager, messageCodec, connection.Name)
         {
             _connection =
                 connection ?? throw new ArgumentNullException(nameof(connection));
             _brokerName = connection.Broker;
+            if (retryTimes != null && retryTimes.Any())
+                _retryTimes = retryTimes;
             _logger = LogManager.Logger<EventBusRabbitMq>();
             SubscriptionManager.OnEventRemoved += SubsManager_OnEventRemoved;
         }
@@ -144,7 +153,7 @@ namespace Acb.RabbitMq
         /// <param name="ea"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        private async Task ReceiveMessage(string queue, BasicDeliverEventArgs ea, RabbitMqSubscribeOption option)
+        private async Task ReceiveMessage(string queue, BasicDeliverEventArgs ea, SubscribeOption option)
         {
             try
             {
@@ -162,14 +171,15 @@ namespace Acb.RabbitMq
                     return;
                 }
                 _logger.Error(ex.Message, ex);
-
-                if (!option.EnableRetry)
+                var retryTimes = option.Times ?? _retryTimes;
+                if (!option.EnableRetry || retryTimes == null || !retryTimes.Any())
                 {
                     _consumerChannel.BasicNack(ea.DeliveryTag, false, false);
                     return;
                 }
 
-                var maxTime = option.Times.Length;
+
+                var maxTime = retryTimes.Length;
 
                 var times = 0;
                 if (ea.BasicProperties.Headers != null &&
@@ -188,7 +198,7 @@ namespace Acb.RabbitMq
 
                 //延时入列
                 times++;
-                var delay = option.Times[times - 1];
+                var delay = retryTimes[times - 1];
                 _consumerChannel.BasicAck(ea.DeliveryTag, false);
 
                 if (!_connection.IsConnected)
