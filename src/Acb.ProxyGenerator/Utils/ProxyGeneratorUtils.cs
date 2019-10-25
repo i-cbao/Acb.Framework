@@ -68,7 +68,7 @@ namespace Acb.ProxyGenerator.Utils
             }
         }
 
-        internal Type CreateClassProxy(Type serviceType, Type implType, Type[] additionalInterfaces, IProxyValidator aspectValidator)
+        internal Type CreateClassProxy(Type serviceType, Type implType, Type[] additionalInterfaces, IProxyValidator proxyValidator)
         {
             if (!serviceType.GetTypeInfo().IsVisible() || !serviceType.GetTypeInfo().IsClass)
             {
@@ -82,9 +82,9 @@ namespace Acb.ProxyGenerator.Utils
             lock (_lock)
             {
                 var name = _proxyNameUtils.GetProxyTypeName(serviceType, implType);
-                if (!_definedTypes.TryGetValue(name, out Type type))
+                if (!_definedTypes.TryGetValue(name, out var type))
                 {
-                    type = CreateClassProxyInternal(name, serviceType, implType, additionalInterfaces, aspectValidator);
+                    type = CreateClassProxyInternal(name, serviceType, implType, additionalInterfaces, proxyValidator);
                     _definedTypes[name] = type;
                 }
                 return type;
@@ -140,13 +140,13 @@ namespace Acb.ProxyGenerator.Utils
             return typeDesc.Compile();
         }
 
-        private Type CreateClassProxyInternal(string name, Type serviceType, Type implType, Type[] additionalInterfaces, IProxyValidator aspectValidator)
+        private Type CreateClassProxyInternal(string name, Type serviceType, Type implType, Type[] additionalInterfaces, IProxyValidator proxyValidator)
         {
             var interfaces = additionalInterfaces.Distinct().ToArray();
 
             var typeDesc = TypeBuilderUtils.DefineType(_moduleBuilder, name, serviceType, implType, interfaces);
 
-            typeDesc.Properties[typeof(IProxyValidator).Name] = aspectValidator;
+            typeDesc.Properties[typeof(IProxyValidator).Name] = proxyValidator;
 
             //define constructor
             ConstructorBuilderUtils.DefineClassProxyConstructors(serviceType, implType, typeDesc);
@@ -166,15 +166,13 @@ namespace Acb.ProxyGenerator.Utils
 
             private string GetProxyTypeIndex(string className, Type serviceType, Type implementationType)
             {
-                ProxyNameIndex nameIndex;
-                if (!_indexs.TryGetValue(className, out nameIndex))
+                if (!_indexs.TryGetValue(className, out var nameIndex))
                 {
                     nameIndex = new ProxyNameIndex();
                     _indexs[className] = nameIndex;
                 }
                 var key = Tuple.Create(serviceType, implementationType);
-                string index;
-                if (!_indexMaps.TryGetValue(key, out index))
+                if (!_indexMaps.TryGetValue(key, out var index))
                 {
                     var tempIndex = nameIndex.GenIndex();
                     index = tempIndex == 0 ? string.Empty : tempIndex.ToString();
@@ -248,22 +246,22 @@ namespace Acb.ProxyGenerator.Utils
         {
             internal static void DefineInterfaceImplConstructor(TypeBuilder typeBuilder)
             {
-                var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, MethodUtils.ObjectCtor.CallingConvention, Type.EmptyTypes);
+                var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, MethodUtils.CtorObject.CallingConvention, Type.EmptyTypes);
                 var ilGen = constructorBuilder.GetILGenerator();
                 ilGen.EmitThis();
-                ilGen.Emit(OpCodes.Call, MethodUtils.ObjectCtor);
+                ilGen.Emit(OpCodes.Call, MethodUtils.CtorObject);
                 ilGen.Emit(OpCodes.Ret);
             }
 
             internal static void DefineInterfaceProxyConstructor(Type interfaceType, Type implType, TypeDesc typeDesc)
             {
-                var constructorBuilder = typeDesc.Builder.DefineConstructor(MethodAttributes.Public, MethodUtils.ObjectCtor.CallingConvention, new Type[] { typeof(IProxyActivatorFactory) });
+                var constructorBuilder = typeDesc.Builder.DefineConstructor(MethodAttributes.Public, MethodUtils.CtorObject.CallingConvention, new Type[] { typeof(IProxyActivatorFactory) });
 
                 constructorBuilder.DefineParameter(1, ParameterAttributes.None, FieldBuilderUtils.ActivatorFactory);
 
                 var ilGen = constructorBuilder.GetILGenerator();
                 ilGen.EmitThis();
-                ilGen.Emit(OpCodes.Call, MethodUtils.ObjectCtor);
+                ilGen.Emit(OpCodes.Call, MethodUtils.CtorObject);
 
                 ilGen.EmitThis();
                 ilGen.EmitLoadArg(1);
@@ -278,14 +276,14 @@ namespace Acb.ProxyGenerator.Utils
 
             internal static void DefineInterfaceProxyConstructor(Type interfaceType, TypeDesc typeDesc)
             {
-                var constructorBuilder = typeDesc.Builder.DefineConstructor(MethodAttributes.Public, MethodUtils.ObjectCtor.CallingConvention, new Type[] { typeof(IProxyActivatorFactory), interfaceType });
+                var constructorBuilder = typeDesc.Builder.DefineConstructor(MethodAttributes.Public, MethodUtils.CtorObject.CallingConvention, new Type[] { typeof(IProxyActivatorFactory), interfaceType });
 
                 constructorBuilder.DefineParameter(1, ParameterAttributes.None, FieldBuilderUtils.ActivatorFactory);
                 constructorBuilder.DefineParameter(2, ParameterAttributes.None, FieldBuilderUtils.Target);
 
                 var ilGen = constructorBuilder.GetILGenerator();
                 ilGen.EmitThis();
-                ilGen.Emit(OpCodes.Call, MethodUtils.ObjectCtor);
+                ilGen.Emit(OpCodes.Call, MethodUtils.CtorObject);
 
                 ilGen.EmitThis();
                 ilGen.EmitLoadArg(1);
@@ -559,12 +557,12 @@ namespace Acb.ProxyGenerator.Utils
 
                     EmitInitializeMetaData(ilGen);
 
-                    ilGen.Emit(OpCodes.Newobj, MethodUtils.AspectActivatorContextCtor);
+                    ilGen.Emit(OpCodes.Newobj, MethodUtils.CtorActivatorContext);
                     ilGen.Emit(OpCodes.Stloc, activatorContext);
 
                     ilGen.EmitThis();
                     ilGen.Emit(OpCodes.Ldfld, typeDesc.Fields[FieldBuilderUtils.ActivatorFactory]);
-                    ilGen.Emit(OpCodes.Callvirt, MethodUtils.CreateAspectActivator);
+                    ilGen.Emit(OpCodes.Callvirt, MethodUtils.MProxyActivator);
                     ilGen.Emit(OpCodes.Ldloc, activatorContext);
 
                     EmitReturnVaule(ilGen);
@@ -660,26 +658,26 @@ namespace Acb.ProxyGenerator.Utils
                 {
                     if (method.ReturnType == typeof(void))
                     {
-                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.AspectActivatorInvoke.MakeGenericMethod(typeof(object)));
+                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.MProxyInvoke.MakeGenericMethod(typeof(object)));
                         ilGen.Emit(OpCodes.Pop);
                     }
                     else if (method.ReturnType == typeof(Task))
                     {
-                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.AspectActivatorInvokeTask.MakeGenericMethod(typeof(object)));
+                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.MProxyInvokeTask.MakeGenericMethod(typeof(object)));
                     }
                     else if (method.IsReturnTask())
                     {
                         var returnType = method.ReturnType.GetTypeInfo().GetGenericArguments().Single();
-                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.AspectActivatorInvokeTask.MakeGenericMethod(returnType));
+                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.MProxyInvokeTask.MakeGenericMethod(returnType));
                     }
                     else if (method.IsReturnValueTask())
                     {
                         var returnType = method.ReturnType.GetTypeInfo().GetGenericArguments().Single();
-                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.AspectActivatorInvokeValueTask.MakeGenericMethod(returnType));
+                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.MProxyInvokeValueTask.MakeGenericMethod(returnType));
                     }
                     else
                     {
-                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.AspectActivatorInvoke.MakeGenericMethod(method.ReturnType));
+                        ilGen.Emit(OpCodes.Callvirt, MethodUtils.MProxyInvoke.MakeGenericMethod(method.ReturnType));
                     }
                 }
             }

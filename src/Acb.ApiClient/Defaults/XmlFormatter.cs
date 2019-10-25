@@ -39,7 +39,7 @@ namespace Acb.ApiClient.Defaults
 
                 stream.Position = 0;
                 var reader = new StreamReader(stream, encoding);
-                return reader.ReadToEnd();
+                return reader.ReadToEndAsync().GetAwaiter().GetResult();
             }
         }
 

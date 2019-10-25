@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
@@ -29,7 +28,7 @@ namespace Acb.WebApi.Test
             services.AddCors(opts =>
                 opts.AddPolicy("mhubs", policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-            services.AddMonitor(typeof(LoggerMonitor));
+            services.AddMonitor(new[] { typeof(LoggerMonitor) });
             services.AddSignalR();
             services.AddMicroClient();
             //IdentityServer4

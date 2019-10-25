@@ -1,5 +1,4 @@
 ﻿using Acb.Core.Serialize;
-using Acb.ProxyGenerator;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

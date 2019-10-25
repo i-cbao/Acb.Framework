@@ -7,6 +7,8 @@ namespace Acb.Core.Extensions
 {
     public static class ServiceCollectionExtension
     {
+        private static Func<MonitorData, bool> _monitorFilter;
+
         public static bool IsRegisted<T>(this IServiceCollection services)
         {
             return services.IsRegisted(typeof(T));
@@ -16,11 +18,13 @@ namespace Acb.Core.Extensions
             return services.Any(t => t.ServiceType == serviceType);
         }
 
-        public static IServiceCollection AddMonitor(this IServiceCollection services, params Type[] monitorTypes)
+        public static IServiceCollection AddMonitor(this IServiceCollection services, Type[] types,
+            Func<MonitorData, bool> filter = null)
         {
-            if (monitorTypes != null && monitorTypes.Any())
+            _monitorFilter = filter;
+            if (types != null && types.Any())
             {
-                foreach (var monitorType in monitorTypes)
+                foreach (var monitorType in types)
                 {
                     services.AddScoped(typeof(IMonitor), monitorType);
                 }
@@ -32,6 +36,8 @@ namespace Acb.Core.Extensions
 
         public static void Monitor(this IServiceProvider provider, MonitorData data)
         {
+            if (_monitorFilter == null || !_monitorFilter(data))
+                return;
             var manager = provider.GetService<MonitorManager>();
             manager?.Record(data);
         }

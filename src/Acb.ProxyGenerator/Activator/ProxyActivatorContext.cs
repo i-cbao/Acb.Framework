@@ -2,6 +2,7 @@
 
 namespace Acb.ProxyGenerator.Activator
 {
+    /// <summary> 代理执行器上下文 </summary>
     public struct ProxyActivatorContext
     {
         public MethodInfo ServiceMethod { get; }

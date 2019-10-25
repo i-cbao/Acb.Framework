@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Acb.ProxyGenerator.Utils;
+using Acb.ProxyGenerator.Validator;
+using AspectCore.Extensions.Reflection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Acb.ProxyGenerator.Utils;
-using Acb.ProxyGenerator.Validator;
-using AspectCore.Extensions.Reflection;
 
 namespace Acb.ProxyGenerator.Impl
 {
@@ -74,7 +74,7 @@ namespace Acb.ProxyGenerator.Impl
                     continue;
                 }
                 if (!hashSet.Contains(interfaceType))
-                {      
+                {
                     if (interfaceType.GetTypeInfo().ContainsGenericParameters && type.GetTypeInfo().ContainsGenericParameters)
                     {
                         if (!hashSet.Contains(interfaceType.GetGenericTypeDefinition()))

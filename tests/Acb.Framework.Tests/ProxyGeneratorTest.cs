@@ -30,7 +30,7 @@ namespace Acb.Framework.Tests
         public void Test()
         {
             var factory = Resolve<IProxyGenerator>();
-            var service = factory.CreateInterfaceProxy<ITestService>(new TestService());
+            var service = factory.CreateInterfaceProxy<ITestService>();
             var word = service.Hello("shay");
             Print(word);
         }

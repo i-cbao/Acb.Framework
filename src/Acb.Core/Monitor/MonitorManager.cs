@@ -16,7 +16,7 @@ namespace Acb.Core.Monitor
             _monitors = monitors;
         }
 
-        public void Record(MonitorData data)
+        internal void Record(MonitorData data)
         {
             if (_monitors == null || !_monitors.Any())
                 return;

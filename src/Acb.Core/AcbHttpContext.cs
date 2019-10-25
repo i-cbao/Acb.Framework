@@ -113,7 +113,7 @@ namespace Acb.Core
 
                 using (var stream = new StreamReader(Body))
                 {
-                    return stream.ReadToEnd();
+                    return stream.ReadToEndAsync().SyncRun();
                 }
             }
 

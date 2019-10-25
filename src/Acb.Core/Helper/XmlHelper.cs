@@ -53,7 +53,7 @@ namespace Acb.Core.Helper
                 stream.Position = 0;
                 using (var reader = new StreamReader(stream, encoding))
                 {
-                    return reader.ReadToEnd();
+                    return reader.ReadToEndAsync().SyncRun();
                 }
             }
         }

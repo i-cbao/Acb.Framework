@@ -1,4 +1,5 @@
 ﻿using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Monitor;
 using Acb.Core.Timing;
 using Microsoft.AspNetCore.Http;
@@ -57,7 +58,7 @@ namespace Acb.WebApi.Filters
                         ms.Position = 0;
                         using (var stream = new StreamReader(ms))
                         {
-                            dto.Data = stream.ReadToEnd();
+                            dto.Data = await stream.ReadToEndAsync();
                         }
                     }
                 }
@@ -106,8 +107,7 @@ namespace Acb.WebApi.Filters
                             break;
                     }
                 }
-
-                manager.Record(dto);
+                context.HttpContext.RequestServices.Monitor(dto);
             }
             else
             {
@@ -120,9 +120,8 @@ namespace Acb.WebApi.Filters
         /// <param name="context"></param>
         public void OnException(ExceptionContext context)
         {
-            var manager = context.HttpContext.RequestServices.GetService<MonitorManager>();
             MonitorData dto;
-            if (manager == null || !context.HttpContext.Items.TryGetValue(ItemKey, out var value) ||
+            if (!context.HttpContext.Items.TryGetValue(ItemKey, out var value) ||
                 (dto = value as MonitorData) == null)
                 return;
             dto.Code = (int)HttpStatusCode.InternalServerError;
@@ -137,8 +136,7 @@ namespace Acb.WebApi.Filters
 
                 dto.Result = context.Exception.Message;
             }
-
-            manager.Record(dto);
+            context.HttpContext.RequestServices.Monitor(dto);
         }
     }
 }

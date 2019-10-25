@@ -41,7 +41,7 @@ namespace Acb.Framework.Tests
             //services.AddProtoBufferCodec();
             services.AddMicroRouter();
             //services.AddMicroClient();
-            services.AddMonitor(typeof(LoggerMonitor), typeof(AcbMonitor));
+            services.AddMonitor(new[] { typeof(LoggerMonitor), typeof(AcbMonitor) });
             base.MapServices(services);
         }
 

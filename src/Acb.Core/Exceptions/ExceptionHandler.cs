@@ -61,7 +61,7 @@ namespace Acb.Core.Exceptions
                             {
                                 using (var stream = new StreamReader(input))
                                 {
-                                    msg.Form = stream.ReadToEnd();
+                                    msg.Form = stream.ReadToEndAsync().GetAwaiter().GetResult();
                                 }
                             }
                         }

@@ -1,27 +1,25 @@
-﻿using System;
+﻿using Acb.ProxyGenerator.Activator;
+using AspectCore.Extensions.Reflection;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Acb.ProxyGenerator.Activator;
-using Acb.ProxyGenerator.Activator.Impl;
-using AspectCore.Extensions.Reflection;
 
 namespace Acb.ProxyGenerator.Utils
 {
     internal static class MethodUtils
     {
+        internal static readonly MethodInfo MProxyActivator = GetMethod<IProxyActivatorFactory>(nameof(IProxyActivatorFactory.Create));
 
-        internal static readonly MethodInfo CreateAspectActivator = GetMethod<IProxyActivatorFactory>(nameof(IProxyActivatorFactory.Create));
+        internal static readonly MethodInfo MProxyInvoke = GetMethod<IProxyActivator>(nameof(IProxyActivator.Invoke));
 
-        internal static readonly MethodInfo AspectActivatorInvoke = GetMethod<IProxyActivator>(nameof(IProxyActivator.Invoke));
+        internal static readonly MethodInfo MProxyInvokeTask = GetMethod<IProxyActivator>(nameof(IProxyActivator.InvokeTask));
 
-        internal static readonly MethodInfo AspectActivatorInvokeTask = GetMethod<IProxyActivator>(nameof(IProxyActivator.InvokeTask));
+        internal static readonly MethodInfo MProxyInvokeValueTask = GetMethod<IProxyActivator>(nameof(IProxyActivator.InvokeValueTask));
 
-        internal static readonly MethodInfo AspectActivatorInvokeValueTask = GetMethod<IProxyActivator>(nameof(IProxyActivator.InvokeValueTask));
+        internal static readonly ConstructorInfo CtorActivatorContext = typeof(ProxyActivatorContext).GetTypeInfo().DeclaredConstructors.First();
 
-        internal static readonly ConstructorInfo AspectActivatorContextCtor = typeof(ProxyActivatorContext).GetTypeInfo().DeclaredConstructors.First();
-
-        internal static readonly ConstructorInfo ObjectCtor = typeof(object).GetTypeInfo().DeclaredConstructors.Single();
+        internal static readonly ConstructorInfo CtorObject = typeof(object).GetTypeInfo().DeclaredConstructors.Single();
 
         internal static readonly MethodInfo GetParameters = typeof(ProxyActivatorContext).GetTypeInfo().GetMethod("get_Parameters");
 

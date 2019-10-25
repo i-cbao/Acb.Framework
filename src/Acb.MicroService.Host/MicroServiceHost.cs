@@ -1,6 +1,5 @@
 ﻿using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
@@ -20,11 +19,11 @@ namespace Acb.MicroService.Host
         /// <param name="args"></param>
         public static async Task Start(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", true, true)
-                .AddCommandLine(args)
-                .AddEnvironmentVariables("ASPNETCORE_")
-                .Build();
+            //var config = new ConfigurationBuilder()
+            //    .AddJsonFile("appsettings.json", true, true)
+            //    .AddCommandLine(args)
+            //    .AddEnvironmentVariables("ASPNETCORE_")
+            //    .Build();
 
             var builder = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .UseContentRoot(Directory.GetCurrentDirectory())
@@ -32,7 +31,7 @@ namespace Acb.MicroService.Host
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseKestrel(options => { options.ConfigureEndpoints(); })
+                        .UseKestrel()
                         .UseIISIntegration()
                         .UseStartup<TStartup>();
                 });

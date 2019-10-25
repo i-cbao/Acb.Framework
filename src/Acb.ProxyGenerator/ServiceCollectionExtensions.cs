@@ -1,10 +1,9 @@
-﻿using Acb.ProxyGenerator.Impl;
+﻿using Acb.ProxyGenerator.Activator;
+using Acb.ProxyGenerator.Impl;
 using Acb.ProxyGenerator.Validator;
 using Acb.ProxyGenerator.Validator.Impl;
-using AspectCore.Extensions.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
-using Acb.ProxyGenerator.Activator;
 
 namespace Acb.ProxyGenerator
 {
@@ -23,7 +22,9 @@ namespace Acb.ProxyGenerator
 
         public static object FastInvoke(this MethodInfo method, object instance, params object[] parameters)
         {
-            return method.GetReflector().Invoke(instance, parameters);
+            var fastInvoke = ProxyGenerator.FastInvoke.GetMethodInvoker(method);
+            return fastInvoke(instance, parameters);
+            //return method.GetReflector().Invoke(instance, parameters);
         }
     }
 }

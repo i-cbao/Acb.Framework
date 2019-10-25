@@ -20,7 +20,7 @@ namespace Acb.Demo.MicroService
 
             //services.AddMessagePackCodec();
             //services.AddRedisEventBus();
-            services.AddMonitor(typeof(LoggerMonitor), typeof(AcbMonitor));
+            services.AddMonitor(new[] { typeof(LoggerMonitor), typeof(AcbMonitor) });
             base.MapServices(services);
         }
 

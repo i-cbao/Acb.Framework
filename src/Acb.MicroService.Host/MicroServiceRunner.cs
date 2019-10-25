@@ -47,7 +47,7 @@ namespace Acb.MicroService.Host
                 var input = request.Body;
                 using (var stream = new StreamReader(input))
                 {
-                    requestBody = stream.ReadToEnd();
+                    requestBody = await stream.ReadToEndAsync();
                 }
                 var args = new List<object>();
                 JArray list = null;
@@ -208,7 +208,7 @@ namespace Acb.MicroService.Host
                 var input = ctx.Request.Body;
                 using (var stream = new StreamReader(input))
                 {
-                    requestBody = stream.ReadToEnd();
+                    requestBody = await stream.ReadToEndAsync();
                 }
                 var args = new List<object>();
                 JArray list = null;

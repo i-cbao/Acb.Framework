@@ -43,11 +43,11 @@ namespace Acb.Payment.Helper
             request.Method = "GET";
             request.ContentType = "application/x-www-form-urlencoded;charset=utf-8";
 
-            using (WebResponse response = request.GetResponse())
+            using (var response = request.GetResponse())
             {
-                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+                using (var reader = new StreamReader(response.GetResponseStream()))
                 {
-                    return reader.ReadToEnd().Trim();
+                    return reader.ReadToEndAsync().SyncRun().Trim();
                 }
             }
         }
@@ -91,7 +91,7 @@ namespace Acb.Payment.Helper
             {
                 using (StreamReader reader = new StreamReader(response.GetResponseStream()))
                 {
-                    return reader.ReadToEnd().Trim();
+                    return reader.ReadToEndAsync().SyncRun().Trim();
                 }
             }
         }

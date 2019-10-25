@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Acb.MicroService.Host
         public static void ConfigureEndpoints(this KestrelServerOptions options)
         {
             var configuration = options.ApplicationServices.GetRequiredService<IConfiguration>();
-            var environment = options.ApplicationServices.GetRequiredService<IHostingEnvironment>();
+            var environment = options.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
 
             var endpoints = configuration.GetSection("httpserver:ports")
                 .GetChildren()
@@ -60,11 +61,10 @@ namespace Acb.MicroService.Host
             }
         }
 
-        private static X509Certificate2 LoadCertificate(EndpointConfiguration config, IHostingEnvironment environment)
+        private static X509Certificate2 LoadCertificate(EndpointConfiguration config, IWebHostEnvironment environment)
         {
             if (config.StoreName != null && config.StoreLocation != null)
             {
-
                 //new X509Store(config.StoreName, Enum.Parse<StoreLocation>(config.StoreLocation))
                 using (var store = new X509Store(config.StoreName.CastTo(StoreName.Root),
                     config.StoreLocation.CastTo(StoreLocation.CurrentUser)))

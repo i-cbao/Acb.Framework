@@ -1,5 +1,6 @@
 ﻿using Acb.Core;
 using Acb.Core.Exceptions;
+using Acb.Core.Extensions;
 using Acb.Core.Logging;
 using Acb.Payment.Interfaces;
 using Acb.Payment.Notify.Events;
@@ -114,10 +115,11 @@ namespace Acb.Payment.Notify
             {
                 if (IsXmlData)
                 {
-                    var reader = new StreamReader(AcbHttpContext.Body);
-                    var xmlData = reader.ReadToEnd();
-                    reader.Dispose();
-                    gatewayData.FromXml(xmlData);
+                    using (var reader = new StreamReader(AcbHttpContext.Body))
+                    {
+                        var xmlData = reader.ReadToEndAsync().SyncRun();
+                        gatewayData.FromXml(xmlData);
+                    }
                 }
                 else
                 {
