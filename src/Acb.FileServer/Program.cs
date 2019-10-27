@@ -1,12 +1,13 @@
-﻿using Acb.WebApi;
+﻿using System.Threading.Tasks;
+using Acb.WebApi;
 
 namespace Acb.FileServer
 {
     public class Program : DHost<Startup>
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Start(args);
+            await Start(args);
         }
     }
 }

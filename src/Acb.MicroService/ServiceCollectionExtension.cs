@@ -49,7 +49,7 @@ namespace Acb.MicroService
             return services;
         }
 
-        /// <summary> 使用ProtoBufffer编解码器 </summary>
+        /// <summary> 使用ProtoBuffer编解码器 </summary>
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddProtoBufferCodec(this IServiceCollection services)
@@ -110,7 +110,7 @@ namespace Acb.MicroService
             return services;
         }
 
-        internal static async Task<QueryResult<CatalogService[]>> Service(this ConsulClient client, string name,
+        internal static async Task<QueryResult<CatalogService[]>> Services(this ConsulClient client, string name,
             object[] tags, CancellationToken ct = default(CancellationToken))
         {
             var url = new Uri(client.Config.Address, $"/v1/catalog/service/{name}").AbsoluteUri;

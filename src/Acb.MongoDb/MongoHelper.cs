@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Acb.Core.Serialize;
 
 namespace Acb.MongoDb
 {
@@ -48,7 +49,7 @@ namespace Acb.MongoDb
 
         protected virtual string GetTypeName(MemberInfo type)
         {
-            var name = type.PropName();
+            var name = type.PropName(NamingType.UrlCase);
             return string.IsNullOrWhiteSpace(_prefix) ? name : $"{_prefix}_{name}";
         }
 

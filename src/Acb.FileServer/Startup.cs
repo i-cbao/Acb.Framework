@@ -30,7 +30,7 @@ namespace Acb.FileServer
                 FileProvider = new PhysicalFileProvider(
                     Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot"))
             });
-            app.UseCors(b => b.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin().AllowCredentials());
+            //app.UseCors(b => b.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
             base.Configure(app, env);
         }
     }
