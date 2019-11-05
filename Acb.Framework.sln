@@ -87,6 +87,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.PureClient.Test", "Acb.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Acb.Rpc.Tests", "tests\Acb.Rpc.Tests\Acb.Rpc.Tests.csproj", "{F9986D38-0790-4103-8B56-90052FF01705}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Acb.MicroService.GRpc", "src\Acb.MicroService.GRpc\Acb.MicroService.GRpc.csproj", "{65C7F7BA-D4E8-4525-A878-26F39AB8F4D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -237,6 +239,10 @@ Global
 		{F9986D38-0790-4103-8B56-90052FF01705}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9986D38-0790-4103-8B56-90052FF01705}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9986D38-0790-4103-8B56-90052FF01705}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65C7F7BA-D4E8-4525-A878-26F39AB8F4D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65C7F7BA-D4E8-4525-A878-26F39AB8F4D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65C7F7BA-D4E8-4525-A878-26F39AB8F4D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65C7F7BA-D4E8-4525-A878-26F39AB8F4D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -278,6 +284,7 @@ Global
 		{CC6C52A1-158A-46CA-898C-1E9D9292C685} = {51887478-4531-490B-A79B-7F8BBD3D966A}
 		{606231A4-F8DA-4566-9FE7-CFDA9526E35F} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
 		{F9986D38-0790-4103-8B56-90052FF01705} = {9EA65AE7-A503-4CB7-BABC-A72C554DC966}
+		{65C7F7BA-D4E8-4525-A878-26F39AB8F4D2} = {51887478-4531-490B-A79B-7F8BBD3D966A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89E6AF7A-5434-4188-87CF-6877A2A272E8}

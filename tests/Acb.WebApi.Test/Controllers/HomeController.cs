@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Acb.Core.Domain.Dtos;
 
 namespace Acb.WebApi.Test.Controllers
 {
@@ -72,7 +73,11 @@ namespace Acb.WebApi.Test.Controllers
             //principal?.AddIdentity(new ClaimsIdentity(claims));
             if (code == 0)
                 return Succ(_demoService.GetSession());
-            using (_session.Use("test", "10002"))
+            using (_session.Use(new SessionDto
+            {
+                UserId = "test",
+                TenantId = "10002"
+            }))
             {
                 return Succ(_demoService.GetSession());
             }

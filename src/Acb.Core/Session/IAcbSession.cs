@@ -1,6 +1,7 @@
 ﻿using Acb.Core.Exceptions;
 using Acb.Core.Extensions;
 using System;
+using Acb.Core.Domain.Dtos;
 
 namespace Acb.Core.Session
 {
@@ -33,10 +34,9 @@ namespace Acb.Core.Session
         TenancySides TenancySides { get; }
 
         /// <summary> 使用租户 </summary>
-        /// <param name="userId"></param>
-        /// <param name="tenantId"></param>
+        /// <param name="session"></param>
         /// <returns></returns>
-        IDisposable Use(object userId, object tenantId);
+        IDisposable Use(SessionDto session);
     }
 
     public static class AcbSessionExtensions
@@ -61,7 +61,7 @@ namespace Acb.Core.Session
             return session.TenantId.CastTo(def);
         }
 
-        /// <summary> 获取必须的UserId(没有将抛出异常) </summary>
+        /// <summary> 获取必须的UserId(如果没有将抛出异常) </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="session"></param>
         /// <returns></returns>
@@ -84,5 +84,22 @@ namespace Acb.Core.Session
                 throw new BusiException("tenantId 不能为空");
             return value;
         }
+
+        /// <summary> 是否是租客 </summary>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        public static bool IsTenant(this IAcbSession session)
+        {
+            return session.TenantId != null;
+        }
+
+        /// <summary> 是否是匿名访问 </summary>
+        /// <param name="session"></param>
+        /// <returns></returns>
+        public static bool IsGuest(this IAcbSession session)
+        {
+            return session.UserId == null || string.IsNullOrWhiteSpace(session.GetUserId<string>());
+        }
+
     }
 }

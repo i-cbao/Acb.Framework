@@ -19,15 +19,22 @@ namespace Acb.Core.Session
             return string.IsNullOrWhiteSpace(claim?.Value) ? null : claim.Value;
         }
 
-        public override string UserName => GetClaimValue(AcbClaimTypes.UserName);
+        /// <summary> 用户名 </summary>
+        public override string UserName =>
+            TempSession != null ? TempSession.UserName : GetClaimValue(AcbClaimTypes.UserName);
 
-        public override string Role => GetClaimValue(AcbClaimTypes.Role);
+        /// <summary> 用户角色 </summary>
+        public override string Role => TempSession != null ? TempSession.Role : GetClaimValue(AcbClaimTypes.Role);
 
+        /// <summary> 用户ID </summary>
+        /// <returns></returns>
         protected override object GetUserId()
         {
             return GetClaimValue(AcbClaimTypes.UserId);
         }
 
+        /// <summary> 租户ID </summary>
+        /// <returns></returns>
         protected override object GetTenantId()
         {
             var tenantId = GetClaimValue(AcbClaimTypes.TenantId);
