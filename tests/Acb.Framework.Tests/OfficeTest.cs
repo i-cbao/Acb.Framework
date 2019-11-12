@@ -44,7 +44,7 @@ namespace Acb.Framework.Tests
                 //var dt = conn.Query<DataTable>($"select {columns} from `t_areas` where `parent_code`=@code",
                 //    new { code = "510700" });
                 //Print(dt);
-                var list = conn.Query<TAreas>($"select `city_code` as `Id` from `t_areas` where `parent_code`=@code",
+                var list = conn.Query<TAreas>($"select `city_code` as `Id`,`city_name` as CityName,`deep`, `parent_code` as ParentCode from `t_areas` where `parent_code`=@code",
                     new { code = "510700" });
                 var names = new Dictionary<string, string>
                 {
@@ -101,10 +101,10 @@ namespace Acb.Framework.Tests
         [TestMethod]
         public void ReadTest()
         {
-            const string path = "E:\\test.xls";
+            const string path = "E:\\test.xlsx";
             using (var stream = new FileStream(path, FileMode.Open))
             {
-                var dt = ExcelHelper.ReadFirst(stream);
+                var dt = ExcelHelper.ReadFirst(stream, xlsx: true);
                 foreach (DataRow row in dt.Rows)
                 {
                     Print(row.ItemArray);

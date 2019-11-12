@@ -6,6 +6,7 @@ using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.POIFS.FileSystem;
 using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
 using System;
 using System.Data;
 using System.IO;
@@ -120,6 +121,7 @@ namespace Acb.Office
             font.FontName = "微软雅黑";
             return font;
         }
+
         #region 创建Excel
 
         /// <summary>
@@ -137,12 +139,17 @@ namespace Acb.Office
 
         /// <summary> 创建原生Workbook </summary>
         /// <param name="dataSet"></param>
+        /// <param name="xlsx"></param>
         /// <returns></returns>
-        public static IWorkbook Create(DataSet dataSet)
+        public static IWorkbook Create(DataSet dataSet, bool xlsx = false)
         {
             if (dataSet == null || dataSet.Tables.Count == 0)
                 return null;
-            IWorkbook wb = new HSSFWorkbook();
+            IWorkbook wb;
+            if (xlsx)
+                wb = new XSSFWorkbook();
+            else
+                wb = new HSSFWorkbook();
 
             var headerStyle = GetCellStyle(wb, XlsStyle.Header);
             var style = GetCellStyle(wb, XlsStyle.Default);
@@ -199,21 +206,22 @@ namespace Acb.Office
         }
 
 
-        public static async Task<IWorkbook> CreateAsync(DataSet dataSet)
+        public static async Task<IWorkbook> CreateAsync(DataSet dataSet, bool xlsx = false)
         {
-            return await Task.FromResult(Create(dataSet));
+            return await Task.FromResult(Create(dataSet, xlsx));
         }
 
         /// <summary> 创建Excel </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="dataSet"></param>
         /// <param name="streamAction"></param>
+        /// <param name="xlsx"></param>
         /// <returns></returns>
-        public static T Create<T>(DataSet dataSet, Func<MemoryStream, T> streamAction)
+        public static T Create<T>(DataSet dataSet, Func<MemoryStream, T> streamAction, bool xlsx = false)
         {
             if (streamAction == null)
                 return default(T);
-            var wb = Create(dataSet);
+            var wb = Create(dataSet, xlsx);
             if (wb == null) return default(T);
             using (var ms = new MemoryStream())
             {
@@ -223,20 +231,21 @@ namespace Acb.Office
             }
         }
 
-        public static void Create(DataSet dataSet, Action<MemoryStream> streamAction)
+        public static void Create(DataSet dataSet, Action<MemoryStream> streamAction, bool xlsx = false)
         {
             Create(dataSet, ms =>
             {
                 streamAction(ms);
-            });
+                return true;
+            }, xlsx);
         }
 
         /// <summary> 创建Excel </summary>
         /// <param name="dataSet"></param>
         /// <returns></returns>
-        public static byte[] CreateBytes(DataSet dataSet)
+        public static byte[] CreateBytes(DataSet dataSet, bool xlsx = false)
         {
-            return Create(dataSet, ms => ms?.ToArray() ?? new byte[] { });
+            return Create(dataSet, ms => ms?.ToArray() ?? new byte[] { }, xlsx);
         }
 
         /// <summary> 创建Excel文件 </summary>
@@ -250,9 +259,10 @@ namespace Acb.Office
             var ext = Path.GetExtension(filePath);
             if (string.IsNullOrWhiteSpace(ext))
                 return;
+
             using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
-                var t = CreateBytes(dataSet);
+                var t = CreateBytes(dataSet, ext == ".xlsx");
                 fs.Write(t, 0, t.Length);
                 fs.Flush();
             }
@@ -274,6 +284,8 @@ namespace Acb.Office
                 ext = ".xls";
             }
 
+            var xlsx = ext == ".xlsx";
+
             var name = Path.GetFileNameWithoutExtension(filename);
             filename = $"{HttpUtility.UrlEncode(name)}{ext}";
             //resp.Buffer = true;
@@ -281,7 +293,7 @@ namespace Acb.Office
             resp.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");
             resp.Headers.Add("Content-Disposition", $"attachment;filename={filename}");
             resp.ContentType = "application/vnd.ms-excel; charset=UTF-8";
-            var wb = await CreateAsync(dataSet);
+            var wb = await CreateAsync(dataSet, xlsx);
             wb.Write(resp.Body);
             wb.Close();
         }
@@ -363,10 +375,15 @@ namespace Acb.Office
         /// <summary> 读取Excel到DataSet </summary>
         /// <param name="excelStream"></param>
         /// <param name="hasColumnHeader"></param>
+        /// <param name="xlsx"></param>
         /// <returns></returns>
-        public static DataSet Read(Stream excelStream, bool hasColumnHeader = true)
+        public static DataSet Read(Stream excelStream, bool hasColumnHeader = true, bool xlsx = false)
         {
-            var wb = new HSSFWorkbook(new POIFSFileSystem(excelStream));
+            IWorkbook wb;
+            if (xlsx)
+                wb = new XSSFWorkbook(excelStream);
+            else
+                wb = new HSSFWorkbook(new POIFSFileSystem(excelStream));
             var ds = new DataSet();
             for (var i = 0; i < wb.NumberOfSheets; i++)
             {
@@ -384,19 +401,25 @@ namespace Acb.Office
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 return null;
+            var xlsx = Path.GetExtension(filePath) == ".xlsx";
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                return Read(fs, hasColumnHeader);
+                return Read(fs, hasColumnHeader, xlsx);
             }
         }
 
         /// <summary> 读取第一个表格 </summary>
         /// <param name="excelStream"></param>
         /// <param name="hasColumnHeader"></param>
+        /// <param name="xlsx"></param>
         /// <returns></returns>
-        public static DataTable ReadFirst(Stream excelStream, bool hasColumnHeader = true)
+        public static DataTable ReadFirst(Stream excelStream, bool hasColumnHeader = true, bool xlsx = false)
         {
-            var wb = new HSSFWorkbook(new POIFSFileSystem(excelStream));
+            IWorkbook wb;
+            if (xlsx)
+                wb = new XSSFWorkbook(excelStream);
+            else
+                wb = new HSSFWorkbook(new POIFSFileSystem(excelStream));
             if (wb.NumberOfSheets == 0)
                 return null;
             return ReadTable(wb.GetSheetAt(0), hasColumnHeader);
@@ -410,9 +433,10 @@ namespace Acb.Office
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
                 return null;
+            var xlsx = Path.GetExtension(filePath) == ".xlsx";
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                return ReadFirst(fs, hasColumnHeader);
+                return ReadFirst(fs, hasColumnHeader, xlsx);
             }
         }
 

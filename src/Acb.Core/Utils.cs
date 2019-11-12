@@ -1,8 +1,10 @@
 ﻿using Acb.Core.Extensions;
 using Acb.Core.Helper;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -215,6 +217,20 @@ namespace Acb.Core
 
                 sIn?.Close();
                 pro?.Close();
+            }
+        }
+
+        public static bool HasProp(dynamic source, string name)
+        {
+            if (source == null) return false;
+            switch (source)
+            {
+                case ExpandoObject _:
+                    return ((IDictionary<string, object>)source).ContainsKey(name);
+                case JObject obj:
+                    return obj.Property(name) != null;
+                default:
+                    return source.GetType().GetProperty(name) != null;
             }
         }
     }
