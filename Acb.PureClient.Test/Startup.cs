@@ -35,7 +35,7 @@ namespace Acb.PureClient.Test
             services.AddProxy<IVCodeContract>();
             services.AddProxy<IFchContract>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

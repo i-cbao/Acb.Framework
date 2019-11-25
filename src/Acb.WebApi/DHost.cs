@@ -20,7 +20,7 @@ namespace Acb.WebApi
         public static async Task Start(string[] args)
         {
             var builder = Host.CreateDefaultBuilder(args)
-                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

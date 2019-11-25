@@ -1,6 +1,5 @@
 ﻿using Acb.Core;
 using Acb.Core.Domain;
-using Acb.Core.Logging;
 using Acb.Core.Session;
 using Acb.Core.Timing;
 using Acb.Demo.Business.Domain;
@@ -10,13 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DService = Acb.Core.Domain.DService;
 
 namespace Acb.Demo.Business
 {
     public class DemoService : DService, IDemoService
     {
-        private readonly ILogger _logger = LogManager.Logger<DemoService>();
         public AreaRepository AreaRepository { private get; set; }
         public AnotherAreaRepository AnotherAreaRepository { private get; set; }
 
@@ -24,13 +21,14 @@ namespace Acb.Demo.Business
 
         public DemoService(IAcbSession acbSession)
         {
+            var repo = Resolve<AreaRepository>();
             _acbSession = acbSession;
-            _logger.Debug($"{GetType().Name} Create");
+            Logger.Debug($"{GetType().Name} Create");
         }
 
         public Task<DateTime> Now()
         {
-            _logger.Debug(Clock.Now);
+            Logger.Debug(Clock.Now);
             return Task.FromResult(Clock.Now);
         }
 
@@ -68,12 +66,12 @@ namespace Acb.Demo.Business
 
         public void Load(string id)
         {
-            _logger.Info($"load:{id}");
+            Logger.Info($"load:{id}");
         }
 
         public Task LoadAsync()
         {
-            _logger.Info("loadasync");
+            Logger.Info("loadasync");
             return Task.CompletedTask;
         }
 
